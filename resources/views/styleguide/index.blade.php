@@ -181,25 +181,43 @@ SVG);
             <div class="mt-8 grid gap-5 md:grid-cols-2" data-rise-group>
                 <div class="card on-dark flex flex-wrap items-end gap-8 border-cypress bg-evergreen text-champagne">
                     @foreach ([96, 64, 48, 32, 24] as $size)
-                        <div class="flex flex-col items-center gap-2"><x-mark :size="$size" /><span class="font-mono text-xs text-champagne/70">{{ $size }}px</span></div>
+                        <div class="flex flex-col items-center gap-2"><x-brand.mark :size="$size" /><span class="font-mono text-xs text-champagne/70">{{ $size }}px</span></div>
                     @endforeach
                 </div>
                 <div class="card flex flex-wrap items-end gap-8">
                     @foreach ([96, 64, 48, 32, 24] as $size)
-                        <div class="flex flex-col items-center gap-2"><x-mark :size="$size" tone="light" /><span class="font-mono text-xs text-ash">{{ $size }}px</span></div>
+                        <div class="flex flex-col items-center gap-2"><x-brand.mark :size="$size" tone="evergreen" /><span class="font-mono text-xs text-ash">{{ $size }}px</span></div>
                     @endforeach
                 </div>
             </div>
             <div class="mt-5 grid gap-5 md:grid-cols-2" data-rise-group>
-                <div class="card on-dark flex flex-col items-center border-cypress bg-evergreen text-center text-champagne">
-                    <p class="t-label self-start text-brass">Stacked lockup</p>
-                    <x-mark :size="64" />
-                    <p class="font-display text-2xl leading-tight">Professor<br>Mohamed Osman Khidir</p>
+                <div class="card on-dark flex flex-col items-center gap-6 border-cypress bg-evergreen text-center text-champagne">
+                    <p class="t-label self-start text-brass">Stacked lockup · tone ivory</p>
+                    <x-brand.lockup variant="stacked" />
+                </div>
+                <div class="card flex flex-col items-center gap-6 text-center">
+                    <p class="t-label self-start text-bronze">Stacked lockup · tone evergreen</p>
+                    <x-brand.lockup variant="stacked" tone="evergreen" />
                 </div>
                 <div class="card on-dark flex items-center gap-3 border-cypress bg-evergreen text-champagne">
-                    <x-mark :size="36" />
-                    <span class="font-display text-xl leading-none">Professor <span class="block">Mohamed Osman Khidir</span></span>
+                    <x-brand.lockup variant="horizontal" />
                     <p class="t-label ml-auto text-brass">Horizontal lockup</p>
+                </div>
+                <div class="card flex items-center gap-3">
+                    <x-brand.lockup variant="horizontal" tone="evergreen" />
+                    <p class="t-label ml-auto text-bronze">Horizontal lockup</p>
+                </div>
+            </div>
+            <div class="mt-5 grid gap-5 md:grid-cols-2" data-rise-group>
+                <div class="card card-ivory">
+                    <p class="t-label text-bronze">&lt;x-section-header&gt; and &lt;x-empty-state&gt;</p>
+                    <x-section-header class="mt-6" label="Chapter One — Early Years" title="A childhood among books" level="3">Optional intro text sits in the slot.</x-section-header>
+                    <x-empty-state message="Nothing has been published here yet." />
+                </div>
+                <div class="card on-dark border-cypress bg-evergreen text-champagne">
+                    <p class="t-label text-brass">On evergreen · tone ivory</p>
+                    <x-section-header class="mt-6" label="Chapter Two — Khartoum" title="The first lectures" level="3" tone="ivory">Brass label and champagne intro on dark.</x-section-header>
+                    <x-empty-state message="No tributes have been approved yet." tone="ivory" />
                 </div>
             </div>
         </section>

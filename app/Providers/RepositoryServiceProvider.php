@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Repositories\Contracts\BrandTokenRepositoryInterface;
+use App\Repositories\Contracts\SectionRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\Eloquent\ConstantBrandTokenRepository;
+use App\Repositories\Eloquent\ConstantSectionRepository;
 use App\Repositories\Eloquent\EloquentUserRepository;
 use Illuminate\Support\ServiceProvider;
 
@@ -20,5 +22,6 @@ class RepositoryServiceProvider extends ServiceProvider
     public array $bindings = [
         UserRepositoryInterface::class => EloquentUserRepository::class,
         BrandTokenRepositoryInterface::class => ConstantBrandTokenRepository::class,
+        SectionRepositoryInterface::class => ConstantSectionRepository::class,
     ];
 }

@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'Dashboard' }} · Admin · {{ config('app.name') }}</title>
+    <x-brand.favicons />
     <x-fonts />
     @vite(['resources/css/app.css', 'resources/js/admin.js'])
     @livewireStyles
@@ -17,7 +18,7 @@
     <header class="on-dark bg-evergreen text-champagne">
         <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
             <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2">
-                <x-mark :size="28" />
+                <x-brand.mark :size="32" decorative />
                 <span class="t-label text-brass">Admin</span>
             </a>
             <div class="flex items-center gap-4 text-sm">

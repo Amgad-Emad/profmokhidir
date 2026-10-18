@@ -7,7 +7,7 @@
                 &ldquo;Knowledge is the light we pass on.&rdquo;
             </p>
             <div class="flex flex-wrap gap-4">
-                <a href="{{ url('/') }}" class="btn-pill-filled">About Prof. Mokhidir</a>
+                <a href="{{ route('about') }}" class="btn-pill-filled">About Prof. Mokhidir</a>
                 <a href="{{ route('login') }}" class="btn-pill-outline">Sign in</a>
             </div>
         </div>

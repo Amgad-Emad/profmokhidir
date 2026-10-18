@@ -1,0 +1,26 @@
+{
+    "name": "Professor Mohamed Osman Khidir",
+    "short_name": "Prof. Khidir",
+    "description": "Academic profile of Professor Mohamed Osman Khidir.",
+    "start_url": "/",
+    "display": "browser",
+    "background_color": "#13221C",
+    "theme_color": "#13221C",
+    "icons": [
+        {
+            "src": "/favicon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml"
+        },
+        {
+            "src": "/favicon-32.png",
+            "sizes": "32x32",
+            "type": "image/png"
+        },
+        {
+            "src": "/apple-touch-icon.png",
+            "sizes": "180x180",
+            "type": "image/png"
+        }
+    ]
+}
