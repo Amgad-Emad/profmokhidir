@@ -5,8 +5,10 @@
 @source '../../storage/framework/views/*.php';
 
 /*
- | Brand tokens — the only colours, fonts and type sizes allowed in the UI.
- | See CLAUDE.md "Brand (follow exactly)".
+ | Brand design system — see CLAUDE.md "Brand (follow exactly)".
+ | Colours mirror app/Constants/Brand.php one-to-one. Tailwind's default
+ | palette is removed so only brand colours (plus white, black, transparent
+ | and current) can be used.
  */
 @theme {
     --color-*: initial;
@@ -19,69 +21,96 @@
     --color-stone: #d3d1c5;
     --color-ash: #575a55;
     --color-bronze: #6f5a34;
+    --color-white: #ffffff;
+    --color-black: #000000;
     --color-transparent: transparent;
     --color-current: currentColor;
 
+    --font-*: initial;
     --font-display: 'Cormorant Garamond', 'Cormorant', Georgia, 'Times New Roman', serif;
     --font-sans: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
+    /* Desktop sizes of the type scale, available as text-* utilities. */
     --text-display: 6rem; /* 96px */
     --text-display--line-height: 1;
-    --text-display--font-weight: 300;
     --text-heading: 3rem; /* 48px */
     --text-heading--line-height: 1.1;
-    --text-heading--font-weight: 300;
-    --text-quote: 2rem; /* 32px italic */
+    --text-quote: 2rem; /* 32px */
     --text-quote--line-height: 1.3;
-    --text-quote--font-weight: 300;
     --text-body: 1.125rem; /* 18px */
-    --text-body--line-height: 1.6;
-    --text-label: 0.75rem; /* 12px uppercase, 0.3em tracking */
+    --text-body--line-height: 1.7;
+    --text-label: 0.75rem; /* 12px */
     --text-label--line-height: 1.4;
     --text-label--letter-spacing: 0.3em;
 
+    --tracking-label: 0.3em;
+
     --radius-card: 4px;
 
+    /* Motion: unhurried, scroll-linked, nothing bounces. */
     --ease-rise: cubic-bezier(0.16, 1, 0.3, 1);
-    --animate-rise: rise 1200ms var(--ease-rise) both;
-
-    @keyframes rise {
-        from {
-            opacity: 0;
-            transform: translateY(40px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
+    --duration-rise: 1200ms;
+    --duration-rule: 1600ms;
+    --duration-stagger: 120ms;
+    --distance-rise: 40px;
 }
 
+/* ------------------------------------------------------------------ base */
 @layer base {
     html {
-        @apply bg-ivory text-evergreen font-sans font-light antialiased;
+        @apply bg-ivory font-sans font-light text-evergreen antialiased;
+        -webkit-text-size-adjust: 100%;
     }
 
     body {
-        @apply min-h-screen text-body;
+        @apply min-h-screen bg-ivory text-evergreen;
+        font-size: var(--text-body);
+        line-height: var(--text-body--line-height);
     }
 
     h1,
     h2,
     h3,
-    .font-display {
+    h4,
+    blockquote {
         @apply font-display font-light;
     }
 
-    /* Visible focus: brass on dark surfaces, bronze on light. */
+    a {
+        text-decoration: none;
+        text-underline-offset: 0.2em;
+        text-decoration-thickness: 1px;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    ::selection {
+        background-color: var(--color-linen);
+        color: var(--color-evergreen);
+    }
+
+    /* Visible focus: bronze on light surfaces, brass on evergreen surfaces. */
     :focus-visible {
-        @apply outline-2 outline-offset-2 outline-bronze;
+        outline: 2px solid var(--color-bronze);
+        outline-offset: 3px;
+        border-radius: 2px;
     }
 
     .on-dark :focus-visible,
-    .on-dark:focus-visible {
-        @apply outline-brass;
+    .on-dark:focus-visible,
+    .bg-evergreen :focus-visible,
+    .bg-evergreen:focus-visible,
+    .bg-cypress :focus-visible,
+    .bg-cypress:focus-visible {
+        outline-color: var(--color-brass);
+    }
+
+    img,
+    video {
+        @apply h-auto max-w-full;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -89,27 +118,182 @@
         *::before,
         *::after {
             animation-duration: 0.01ms !important;
-            animation-delay: 0ms !important;
+            animation-iteration-count: 1 !important;
             transition-duration: 0.01ms !important;
             scroll-behavior: auto !important;
         }
     }
 }
 
-@utility label {
-    @apply text-label uppercase tracking-[0.3em] font-normal;
+/* ------------------------------------------------------------ components */
+@layer components {
+    /* Type scale. Display and heading scale fluidly; the rest are fixed. */
+    .t-display {
+        font-family: var(--font-display);
+        font-weight: 300;
+        font-size: clamp(3.25rem, 2rem + 5.5vw, 6rem); /* 52px -> 96px */
+        line-height: 1;
+        letter-spacing: -0.01em;
+    }
+
+    .t-heading {
+        font-family: var(--font-display);
+        font-weight: 300;
+        font-size: clamp(2.125rem, 1.5rem + 2.75vw, 3rem); /* 34px -> 48px */
+        line-height: 1.1;
+    }
+
+    .t-quote {
+        font-family: var(--font-display);
+        font-weight: 300;
+        font-style: italic;
+        font-size: 2rem; /* 32px */
+        line-height: 1.3;
+    }
+
+    .t-body {
+        font-family: var(--font-sans);
+        font-weight: 300;
+        font-size: 1.125rem; /* 18px */
+        line-height: 1.7;
+    }
+
+    .t-label {
+        font-family: var(--font-sans);
+        font-weight: 500;
+        font-size: 0.75rem; /* 12px */
+        line-height: 1.4;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+    }
+
+    /* Buttons: pill shaped, ivory filled or outline in the current colour. */
+    .btn-pill-filled,
+    .btn-pill-outline {
+        @apply inline-flex items-center justify-center gap-2 rounded-full px-7 py-3 font-sans text-base font-medium leading-none no-underline;
+        min-height: 2.75rem; /* 44px touch target */
+        transition:
+            background-color 300ms var(--ease-rise),
+            color 300ms var(--ease-rise),
+            border-color 300ms var(--ease-rise);
+    }
+
+    .btn-pill-filled:hover,
+    .btn-pill-outline:hover {
+        text-decoration: none;
+    }
+
+    .btn-pill-filled {
+        background-color: var(--color-ivory);
+        color: var(--color-evergreen);
+    }
+
+    .btn-pill-filled:hover {
+        background-color: var(--color-linen);
+    }
+
+    .btn-pill-outline {
+        border: 1px solid currentColor;
+        color: currentColor;
+        background-color: transparent;
+    }
+
+    .btn-pill-outline:hover {
+        background-color: color-mix(in srgb, currentColor 8%, transparent);
+    }
+
+    /* Cards: 4px radius, linen or ivory surface, stone hairline. */
+    .card {
+        border-radius: var(--radius-card);
+        border: 1px solid var(--color-stone);
+        background-color: var(--color-linen);
+        color: var(--color-evergreen);
+        @apply p-6 sm:p-8;
+    }
+
+    .card-ivory {
+        background-color: var(--color-ivory);
+    }
+
+    /* Thin brass rule. Add data-rule to draw it in when scrolled into view. */
+    .rule-brass {
+        display: block;
+        width: 100%;
+        height: 1px;
+        border: 0;
+        margin: 0;
+        background-color: var(--color-brass);
+    }
+
+    /* Soft radial brass glow: the only permitted gradient. Evergreen backgrounds only. */
+    .glow-brass {
+        background-color: var(--color-evergreen);
+        background-image: radial-gradient(
+            ellipse 70% 55% at 50% 0%,
+            color-mix(in srgb, var(--color-brass) 22%, transparent) 0%,
+            transparent 70%
+        );
+        background-repeat: no-repeat;
+    }
+
+    /* Fixed glassy evergreen header. */
+    .glass-header {
+        background-color: color-mix(in srgb, var(--color-evergreen) 82%, transparent);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+    }
+
+    /* Photography. Portraits: warm monochrome (grey, then ~12% ivory warmth). */
+    .photo-portrait {
+        filter: grayscale(1) sepia(0.12) brightness(1.03) contrast(0.97);
+    }
+
+    /* Archive photos: evergreen-to-ivory duotone via the SVG filter in <x-duotone-filter />. */
+    .photo-archive {
+        filter: url('#duotone-archive');
+    }
+
+    /* Mark: solid evergreen disc with ivory MK below 32px (handled by <x-mark />). */
 }
 
-@utility glass-header {
-    background-color: color-mix(in srgb, var(--color-evergreen) 82%, transparent);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-}
+/* ------------------------------------------------------------------ motion */
+/*
+ | Scroll-linked reveals driven by resources/js/motion.js, which only toggles
+ | classes; all timing lives here. The hidden start state applies only when
+ | scripting is enabled and motion is not reduced, so content is never hidden
+ | without JavaScript or for users who prefer reduced motion.
+ */
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+    [data-rise],
+    [data-rise-group] > * {
+        opacity: 0;
+        transform: translateY(var(--distance-rise));
+        transition:
+            opacity var(--duration-rise) var(--ease-rise),
+            transform var(--duration-rise) var(--ease-rise);
+        transition-delay: var(--rise-delay, 0ms);
+        will-change: opacity, transform;
+    }
 
-@utility brass-glow {
-    background-image: radial-gradient(
-        ellipse at 50% 0%,
-        color-mix(in srgb, var(--color-brass) 18%, transparent) 0%,
-        transparent 60%
-    );
+    [data-rise].is-visible,
+    [data-rise-group] > .is-visible,
+    [data-rise-group].is-visible > * {
+        opacity: 1;
+        transform: none;
+    }
+
+    [data-rule] {
+        transform: scaleX(0);
+        transform-origin: left center;
+        transition: transform var(--duration-rule) ease-in-out;
+    }
+
+    [data-rule].is-drawn {
+        transform: scaleX(1);
+    }
+
+    [data-scroll-scale] {
+        transform-origin: center top;
+        will-change: transform, opacity;
+    }
 }

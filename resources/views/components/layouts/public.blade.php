@@ -5,10 +5,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ isset($title) ? $title.' · ' : '' }}{{ config('app.name') }}</title>
-    @fonts
+    <x-fonts />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-ivory text-evergreen">
+    <x-duotone-filter />
     <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-ivory focus:px-5 focus:py-2 focus:text-evergreen">Skip to content</a>
 
     <header class="glass-header on-dark fixed inset-x-0 top-0 z-40 text-champagne">
@@ -31,7 +32,7 @@
                 <x-mark :size="32" />
                 <span class="font-display text-lg leading-none">Professor Mohamed Osman Khidir</span>
             </div>
-            <p class="label text-brass">&copy; {{ date('Y') }} profmokhidir.com</p>
+            <p class="t-label text-brass">&copy; {{ date('Y') }} profmokhidir.com</p>
         </div>
     </footer>
 </body>

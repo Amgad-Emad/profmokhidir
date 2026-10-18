@@ -1,0 +1,251 @@
+@php
+    use App\Constants\Brand;
+    use App\Constants\Motion;
+    use App\Constants\Typography;
+
+    // Colourful sample scene so the photo treatments visibly change it (no external image needed).
+    $sample = base64_encode(<<<'SVG'
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5aa0e6"/><stop offset="1" stop-color="#d9ecff"/></linearGradient></defs><rect width="400" height="300" fill="url(#s)"/><circle cx="320" cy="70" r="36" fill="#f4b942"/><path d="M0 210 Q100 150 200 200 T400 190 V300 H0Z" fill="#4e8c3a"/><path d="M0 250 Q140 200 400 240 V300 H0Z" fill="#2f6b2a"/><rect x="70" y="170" width="90" height="70" fill="#e8dcc0"/><path d="M60 172 L115 125 L170 172Z" fill="#b5443a"/><rect x="100" y="200" width="22" height="40" fill="#6a4a2e"/><rect x="128" y="192" width="18" height="18" fill="#9ad0f0"/></svg>
+SVG);
+    $sampleSrc = 'data:image/svg+xml;base64,'.$sample;
+    $ratio = fn (array $c): string => number_format($c['ratio'], 2).':1 '.($c['normal'] ? 'AA' : ($c['large'] ? 'AA large' : 'fail'));
+@endphp
+<x-layouts.public title="Style guide">
+    {{-- Hero: scroll-scale + staggered rise + glow --}}
+    <section class="glow-brass on-dark bg-evergreen text-champagne">
+        <div class="mx-auto flex max-w-7xl flex-col items-start gap-8 px-4 py-28 sm:px-6 lg:py-36" data-rise-group data-scroll-scale>
+            <p class="t-label text-brass">Design system · local only</p>
+            <h1 class="t-display">Style guide</h1>
+            <p class="t-quote max-w-2xl">&ldquo;Knowledge is the light we pass on.&rdquo;</p>
+            <p class="t-body max-w-2xl">Every colour, type style, button, card, rule, image treatment and motion pattern in one place. This page is served only in the local environment.</p>
+            <nav aria-label="Sections" class="flex flex-wrap gap-3">
+                @foreach (['colours' => 'Colours', 'type' => 'Type', 'buttons' => 'Buttons', 'cards' => 'Cards', 'rules' => 'Rules', 'mark' => 'Mark', 'photos' => 'Photos', 'motion' => 'Motion'] as $id => $label)
+                    <a href="#{{ $id }}" class="btn-pill-outline">{{ $label }}</a>
+                @endforeach
+            </nav>
+        </div>
+    </section>
+
+    <div class="mx-auto max-w-7xl px-4 sm:px-6">
+
+        {{-- Colours --}}
+        <section id="colours" class="py-20" aria-labelledby="colours-title">
+            <hr class="rule-brass mb-10" data-rule>
+            <p class="t-label text-bronze" data-rise>01 · Colours</p>
+            <h2 id="colours-title" class="t-heading mt-3" data-rise>Nine colours, nothing else</h2>
+            <p class="t-body mt-4 max-w-2xl text-ash" data-rise>Tailwind's palette is removed; only these tokens compile. Contrast is WCAG 2.2 (AA needs 4.5:1 for text, 3:1 for large text and UI).</p>
+            <ul class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3" data-rise-group>
+                @foreach ($colours as $colour)
+                    <li class="card card-ivory flex flex-col gap-4 !p-0 overflow-hidden">
+                        <div class="h-28 w-full" style="background-color: var(--color-{{ $colour['name'] }})"></div>
+                        <div class="px-6 pb-6">
+                            <div class="flex items-baseline justify-between gap-3">
+                                <h3 class="font-display text-2xl capitalize">{{ $colour['name'] }}</h3>
+                                <code class="font-mono text-sm text-ash">{{ $colour['hex'] }}</code>
+                            </div>
+                            <p class="t-label mt-2 text-bronze">{{ $colour['role'] }}</p>
+                            <p class="mt-3 text-sm leading-relaxed text-ash">{{ $colour['usage'] }}</p>
+                            <dl class="mt-4 grid grid-cols-2 gap-2 font-mono text-xs text-ash">
+                                <div><dt class="t-label !tracking-[0.2em]">On ivory</dt><dd class="mt-1">{{ $ratio($colour['onIvory']) }}</dd></div>
+                                <div><dt class="t-label !tracking-[0.2em]">On evergreen</dt><dd class="mt-1">{{ $ratio($colour['onEvergreen']) }}</dd></div>
+                            </dl>
+                        </div>
+                    </li>
+                @endforeach
+            </ul>
+            <div class="mt-8 grid gap-5 sm:grid-cols-4" data-rise-group>
+                <div class="card card-ivory"><p class="t-label text-bronze">Evergreen</p><p class="font-display text-4xl">{{ Brand::EVERGREEN_SHARE }}%</p></div>
+                <div class="card card-ivory"><p class="t-label text-bronze">Ivory</p><p class="font-display text-4xl">{{ Brand::IVORY_SHARE }}%</p></div>
+                <div class="card card-ivory"><p class="t-label text-bronze">Cypress</p><p class="font-display text-4xl">{{ Brand::CYPRESS_SHARE }}%</p></div>
+                <div class="card card-ivory"><p class="t-label text-bronze">Brass</p><p class="font-display text-4xl">{{ Brand::BRASS_SHARE }}%</p></div>
+            </div>
+        </section>
+
+        {{-- Type --}}
+        <section id="type" class="py-20" aria-labelledby="type-title">
+            <hr class="rule-brass mb-10" data-rule>
+            <p class="t-label text-bronze" data-rise>02 · Type</p>
+            <h2 id="type-title" class="t-heading mt-3" data-rise>Type scale</h2>
+            <dl class="mt-8 grid gap-4 sm:grid-cols-3" data-rise-group>
+                @foreach ($fonts as $token => $font)
+                    <div class="card">
+                        <dt class="t-label text-bronze">font-{{ $token }}</dt>
+                        <dd class="mt-2 text-2xl {{ ['display' => 'font-display', 'sans' => 'font-sans', 'mono' => 'font-mono'][$token] }}">{{ $font['family'] }}</dd>
+                        <dd class="mt-1 font-mono text-xs text-ash">{{ implode(' · ', $font['weights']) }}{{ $font['italic'] ? ' · italic' : '' }}</dd>
+                        <dd class="mt-3 text-sm text-ash">{{ $font['use'] }}</dd>
+                    </div>
+                @endforeach
+            </dl>
+            <div class="mt-12 space-y-12">
+                @foreach ($typeScale as $token => $style)
+                    <div class="grid gap-4 border-b border-stone pb-10 md:grid-cols-[12rem_1fr]" data-rise>
+                        <div>
+                            <p class="t-label text-bronze">.{{ $style['class'] }}</p>
+                            <p class="mt-2 font-mono text-xs leading-relaxed text-ash">
+                                {{ $style['size'] }}px{{ $style['mobile'] !== $style['size'] ? ' → '.$style['mobile'].'px mobile' : '' }}<br>
+                                {{ $style['font'] }} {{ $style['weight'] }}{{ $style['italic'] ? ' italic' : '' }}<br>
+                                leading {{ $style['lineHeight'] }}{{ $style['tracking'] ? ' · tracking '.$style['tracking'] : '' }}{{ $style['uppercase'] ? ' · uppercase' : '' }}
+                            </p>
+                        </div>
+                        <p class="{{ $style['class'] }} {{ $token === 'label' ? 'text-bronze' : '' }}">{{ $style['sample'] }}</p>
+                    </div>
+                @endforeach
+            </div>
+            <div class="mt-10 grid gap-5 md:grid-cols-2" data-rise-group>
+                <div class="card">
+                    <p class="t-label text-bronze">Links, focus and selection on light</p>
+                    <p class="t-body mt-3">Links <a href="#type">underline on hover</a>. Tab to a <button type="button" class="btn-pill-outline ml-1">control</button> to see the bronze focus ring. Select this text to see the linen highlight.</p>
+                </div>
+                <div class="card on-dark border-cypress bg-evergreen text-champagne">
+                    <p class="t-label text-brass">Links, focus and selection on dark</p>
+                    <p class="t-body mt-3">Links <a href="#type">underline on hover</a>. Tab to a <button type="button" class="btn-pill-outline ml-1">control</button> to see the brass focus ring. Monospace is for <code class="font-mono text-sm">technical specs</code> only.</p>
+                </div>
+            </div>
+        </section>
+
+        {{-- Buttons --}}
+        <section id="buttons" class="py-20" aria-labelledby="buttons-title">
+            <hr class="rule-brass mb-10" data-rule>
+            <p class="t-label text-bronze" data-rise>03 · Buttons</p>
+            <h2 id="buttons-title" class="t-heading mt-3" data-rise>Pill buttons</h2>
+            <div class="mt-8 grid gap-5 md:grid-cols-2" data-rise-group>
+                <div class="card">
+                    <p class="t-label text-bronze">On ivory / linen</p>
+                    <div class="mt-5 flex flex-wrap gap-4">
+                        <button type="button" class="btn-pill-filled border border-stone">.btn-pill-filled</button>
+                        <button type="button" class="btn-pill-outline">.btn-pill-outline</button>
+                        <a href="#buttons" class="btn-pill-outline">As a link</a>
+                    </div>
+                    <p class="mt-4 text-sm text-ash">The outline button borders in the current text colour, so it inherits evergreen here.</p>
+                </div>
+                <div class="card on-dark border-cypress bg-evergreen text-champagne">
+                    <p class="t-label text-brass">On evergreen</p>
+                    <div class="mt-5 flex flex-wrap gap-4">
+                        <button type="button" class="btn-pill-filled">.btn-pill-filled</button>
+                        <button type="button" class="btn-pill-outline">.btn-pill-outline</button>
+                        <a href="#buttons" class="btn-pill-outline">As a link</a>
+                    </div>
+                    <p class="mt-4 text-sm text-champagne/80">Ivory fill with evergreen text; outline in champagne.</p>
+                </div>
+            </div>
+        </section>
+
+        {{-- Cards --}}
+        <section id="cards" class="py-20" aria-labelledby="cards-title">
+            <hr class="rule-brass mb-10" data-rule>
+            <p class="t-label text-bronze" data-rise>04 · Cards</p>
+            <h2 id="cards-title" class="t-heading mt-3" data-rise>Cards</h2>
+            <div class="mt-8 grid gap-5 md:grid-cols-3" data-rise-group>
+                <article class="card">
+                    <p class="t-label text-bronze">.card · linen</p>
+                    <h3 class="mt-3 font-display text-3xl">Publication</h3>
+                    <p class="mt-2 text-sm text-ash">Journal article · 1998</p>
+                    <p class="t-body mt-4">4px radius, stone hairline, linen surface. Only populated fields render.</p>
+                </article>
+                <article class="card card-ivory">
+                    <p class="t-label text-bronze">.card.card-ivory</p>
+                    <h3 class="mt-3 font-display text-3xl">Award</h3>
+                    <p class="mt-2 text-sm text-ash">Ministry of Higher Education · 2004</p>
+                    <p class="t-body mt-4">Ivory variant for use on linen backgrounds such as the admin area.</p>
+                </article>
+                <article class="card flex flex-col items-center justify-center text-center">
+                    <p class="t-label text-bronze">Empty state</p>
+                    <p class="mt-4 font-display text-2xl italic">Nothing has been published here yet.</p>
+                </article>
+            </div>
+        </section>
+
+        {{-- Rules and glow --}}
+        <section id="rules" class="py-20" aria-labelledby="rules-title">
+            <hr class="rule-brass mb-10" data-rule>
+            <p class="t-label text-bronze" data-rise>05 · Rules and glow</p>
+            <h2 id="rules-title" class="t-heading mt-3" data-rise>Brass rules and the glow</h2>
+            <div class="mt-8 space-y-6" data-rise>
+                <p class="t-label text-bronze">.rule-brass (static)</p>
+                <hr class="rule-brass">
+                <p class="t-label text-bronze">.rule-brass[data-rule] (draws in over {{ Motion::RULE_DURATION_MS }}ms when in view)</p>
+                <hr class="rule-brass" data-rule>
+            </div>
+            <div class="glow-brass on-dark mt-10 rounded-card px-6 py-20 text-center text-champagne" data-rise>
+                <p class="t-label text-brass">.glow-brass</p>
+                <p class="t-quote mx-auto mt-4 max-w-xl">&ldquo;His lessons continue in every student he taught.&rdquo;</p>
+                <p class="mt-4 text-sm text-champagne/80">The only gradient permitted: a soft brass radial glow on evergreen.</p>
+            </div>
+        </section>
+
+        {{-- Mark --}}
+        <section id="mark" class="py-20" aria-labelledby="mark-title">
+            <hr class="rule-brass mb-10" data-rule>
+            <p class="t-label text-bronze" data-rise>06 · Mark</p>
+            <h2 id="mark-title" class="t-heading mt-3" data-rise>The MK mark</h2>
+            <div class="mt-8 grid gap-5 md:grid-cols-2" data-rise-group>
+                <div class="card on-dark flex flex-wrap items-end gap-8 border-cypress bg-evergreen text-champagne">
+                    @foreach ([96, 64, 48, 32, 24] as $size)
+                        <div class="flex flex-col items-center gap-2"><x-mark :size="$size" /><span class="font-mono text-xs text-champagne/70">{{ $size }}px</span></div>
+                    @endforeach
+                </div>
+                <div class="card flex flex-wrap items-end gap-8">
+                    @foreach ([96, 64, 48, 32, 24] as $size)
+                        <div class="flex flex-col items-center gap-2"><x-mark :size="$size" tone="light" /><span class="font-mono text-xs text-ash">{{ $size }}px</span></div>
+                    @endforeach
+                </div>
+            </div>
+            <div class="mt-5 grid gap-5 md:grid-cols-2" data-rise-group>
+                <div class="card on-dark flex flex-col items-center border-cypress bg-evergreen text-center text-champagne">
+                    <p class="t-label self-start text-brass">Stacked lockup</p>
+                    <x-mark :size="64" />
+                    <p class="font-display text-2xl leading-tight">Professor<br>Mohamed Osman Khidir</p>
+                </div>
+                <div class="card on-dark flex items-center gap-3 border-cypress bg-evergreen text-champagne">
+                    <x-mark :size="36" />
+                    <span class="font-display text-xl leading-none">Professor <span class="block">Mohamed Osman Khidir</span></span>
+                    <p class="t-label ml-auto text-brass">Horizontal lockup</p>
+                </div>
+            </div>
+        </section>
+
+        {{-- Photos --}}
+        <section id="photos" class="py-20" aria-labelledby="photos-title">
+            <hr class="rule-brass mb-10" data-rule>
+            <p class="t-label text-bronze" data-rise>07 · Photography</p>
+            <h2 id="photos-title" class="t-heading mt-3" data-rise>Image treatments</h2>
+            <div class="mt-8 grid gap-5 md:grid-cols-3" data-rise-group>
+                <figure>
+                    <img src="{{ $sampleSrc }}" alt="Sample scene, untreated" class="w-full rounded-card" width="400" height="300" loading="lazy">
+                    <figcaption class="t-label mt-3 text-bronze">Untreated · reference</figcaption>
+                </figure>
+                <figure>
+                    <img src="{{ $sampleSrc }}" alt="Sample scene in warm monochrome" class="photo-portrait w-full rounded-card" width="400" height="300" loading="lazy">
+                    <figcaption class="t-label mt-3 text-bronze">.photo-portrait · Khartoum, 1974</figcaption>
+                </figure>
+                <figure>
+                    <img src="{{ $sampleSrc }}" alt="Sample scene in evergreen-to-ivory duotone" class="photo-archive w-full rounded-card" width="400" height="300" loading="lazy">
+                    <figcaption class="t-label mt-3 text-bronze">.photo-archive · Omdurman, 1962</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        {{-- Motion --}}
+        <section id="motion" class="py-20" aria-labelledby="motion-title">
+            <hr class="rule-brass mb-10" data-rule>
+            <p class="t-label text-bronze" data-rise>08 · Motion</p>
+            <h2 id="motion-title" class="t-heading mt-3" data-rise>Unhurried and scroll-linked</h2>
+            <p class="t-body mt-4 max-w-2xl text-ash" data-rise>Everything on this page already uses these patterns. Reload and scroll to watch them; turn on "reduce motion" in your OS to see content appear instantly instead.</p>
+            <dl class="mt-8 grid gap-5 md:grid-cols-2" data-rise-group>
+                @foreach ($motion as $behaviour)
+                    <div class="card">
+                        <dt class="font-mono text-sm text-bronze">[{{ $behaviour['attribute'] }}]</dt>
+                        <dd class="t-body mt-2">{{ $behaviour['summary'] }}</dd>
+                    </div>
+                @endforeach
+            </dl>
+            <div class="mt-10 grid gap-4 sm:grid-cols-3" data-rise-group>
+                @foreach (['One', 'Two', 'Three', 'Four', 'Five', 'Six'] as $n)
+                    <div class="card card-ivory text-center"><p class="font-display text-3xl">{{ $n }}</p><p class="t-label mt-1 text-bronze">staggered {{ Motion::STAGGER_MS }}ms</p></div>
+                @endforeach
+            </div>
+            <p class="t-label mt-16 text-bronze">Google Fonts request</p>
+            <code class="mt-2 block break-all font-mono text-xs text-ash">{{ Typography::GOOGLE_FONTS_URL }}</code>
+        </section>
+    </div>
+</x-layouts.public>

@@ -6,18 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'Dashboard' }} · Admin · {{ config('app.name') }}</title>
-    @fonts
+    <x-fonts />
     @vite(['resources/css/app.css', 'resources/js/admin.js'])
     @livewireStyles
 </head>
 <body class="min-h-screen bg-linen text-evergreen">
+    <x-duotone-filter />
     <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-ivory focus:px-5 focus:py-2">Skip to content</a>
 
     <header class="on-dark bg-evergreen text-champagne">
         <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
             <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2">
                 <x-mark :size="28" />
-                <span class="label text-brass">Admin</span>
+                <span class="t-label text-brass">Admin</span>
             </a>
             <div class="flex items-center gap-4 text-sm">
                 <span>{{ auth()->user()->name }}</span>

@@ -5,10 +5,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $title ?? 'Sign in' }} · {{ config('app.name') }}</title>
-    @fonts
+    <x-fonts />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="brass-glow on-dark min-h-screen bg-evergreen text-champagne">
+<body class="glow-brass on-dark min-h-screen bg-evergreen text-champagne">
     <main class="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-4 py-16 sm:px-6">
         <div class="mb-10 flex flex-col items-center text-center">
             <x-mark :size="64" />
