@@ -1,16 +1,23 @@
 <?php
 
 use App\Constants\Sections;
+use App\Http\Controllers\AboutController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SectionPlaceholderController;
 use App\Http\Controllers\StyleguideController;
 use App\Http\Middleware\EnsureLocalEnvironment;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'welcome')->name('home');
+Route::get('/', HomeController::class)->name('home');
 
-// One placeholder page per public section, named after the section, until its
+// Sections with their own controller. Each keeps the route name from Sections::definitions().
+$sections = Sections::definitions();
+
+Route::get($sections[Sections::ABOUT]['path'], AboutController::class)->name($sections[Sections::ABOUT]['route']);
+
+// One placeholder page per remaining public section, named after the section, until its
 // own controller exists. Detail routes nest under the same name (e.g. publications.show).
-foreach (Sections::definitions() as $key => $section) {
+foreach (array_diff_key($sections, array_flip([Sections::ABOUT])) as $key => $section) {
     Route::get($section['path'], SectionPlaceholderController::class)
         ->defaults('section', $key)
         ->name($section['route']);

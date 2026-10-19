@@ -9,11 +9,16 @@ use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 /**
- * Every public section has a placeholder page on the shared layout, so the navigation works end to end.
+ * Every public section without its own controller yet has a placeholder page on
+ * the shared layout, so the navigation works end to end. Sections with a real
+ * page (About) are covered by their own feature tests.
  */
 class SectionRoutesTest extends TestCase
 {
     use RefreshDatabase;
+
+    /** Sections that have their own controller and view. */
+    private const array BUILT = [Sections::ABOUT];
 
     /**
      * @return iterable<string, array{string}>
@@ -25,9 +30,21 @@ class SectionRoutesTest extends TestCase
         }
     }
 
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function placeholderSections(): iterable
+    {
+        foreach (Sections::all() as $key) {
+            if (! in_array($key, self::BUILT, true)) {
+                yield $key => [$key];
+            }
+        }
+    }
+
     #[Test]
-    #[DataProvider('sections')]
-    public function each_section_page_renders_its_title_and_empty_state(string $key): void
+    #[DataProvider('placeholderSections')]
+    public function each_placeholder_section_page_renders_its_title_and_empty_state(string $key): void
     {
         $section = Sections::definitions()[$key];
 

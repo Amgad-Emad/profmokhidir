@@ -62,6 +62,27 @@ final class Sections
     }
 
     /**
+     * Sections linked from the row of quiet cards at the foot of the home page:
+     * everything the home chapters (Life, Work, Tributes) do not already cover.
+     *
+     * @return list<string>
+     */
+    public static function homeRow(): array
+    {
+        return [self::VIDEOS, self::PICTURES, self::TEACHING, self::COMMENTARY, self::COMMUNITY];
+    }
+
+    /**
+     * Sections the About page links on to.
+     *
+     * @return list<string>
+     */
+    public static function aboutLinks(): array
+    {
+        return [self::CV, self::PUBLICATIONS, self::AWARDS];
+    }
+
+    /**
      * key => label (navigation), title (page heading), path, route name, placement, summary.
      *
      * @return array<string, array{label: string, title: string, path: string, route: string, placement: string, summary: string}>

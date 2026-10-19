@@ -415,6 +415,104 @@
     .menu-open {
         overflow: hidden;
     }
+
+    /* Quiet link cards (home section row, About "continue reading"). */
+    .section-card {
+        transition:
+            border-color 300ms var(--ease-rise),
+            background-color 300ms var(--ease-rise);
+    }
+
+    .section-card:hover,
+    .section-card:focus-visible {
+        border-color: var(--color-brass);
+        background-color: var(--color-ivory);
+    }
+
+    /* Hero portrait: a 4px-radius frame with a cypress hairline. */
+    .hero__portrait .photo__frame {
+        border: 1px solid var(--color-cypress);
+    }
+
+    /*
+     | Biography prose (editor HTML reduced by App\Support\RichText): body copy at a
+     | ~68ch measure, Cormorant headings, and the blockquote in the quote style.
+     */
+    .prose-bio {
+        font-family: var(--font-sans);
+        font-weight: 300;
+        font-size: 1.125rem; /* 18px */
+        line-height: 1.7;
+        color: var(--color-evergreen);
+    }
+
+    .prose-bio > * + * {
+        margin-top: 1.25em;
+    }
+
+    .prose-bio h2,
+    .prose-bio h3,
+    .prose-bio h4 {
+        font-family: var(--font-display);
+        font-weight: 300;
+        line-height: 1.15;
+        margin-top: 2em;
+    }
+
+    .prose-bio h2 {
+        font-size: clamp(1.75rem, 1.25rem + 1.5vw, 2.25rem);
+    }
+
+    .prose-bio h3 {
+        font-size: clamp(1.5rem, 1.125rem + 1vw, 1.75rem);
+    }
+
+    .prose-bio h4 {
+        font-size: 1.375rem;
+    }
+
+    .prose-bio blockquote {
+        font-family: var(--font-display);
+        font-weight: 300;
+        font-style: italic;
+        font-size: 2rem; /* 32px, the quote style */
+        line-height: 1.3;
+        margin-top: 2em;
+        margin-bottom: 2em;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--color-brass);
+    }
+
+    .prose-bio blockquote p + p {
+        margin-top: 0.75em;
+    }
+
+    .prose-bio ul,
+    .prose-bio ol {
+        padding-left: 1.5em;
+    }
+
+    .prose-bio ul {
+        list-style: disc;
+    }
+
+    .prose-bio ol {
+        list-style: decimal;
+    }
+
+    .prose-bio li + li {
+        margin-top: 0.5em;
+    }
+
+    .prose-bio a {
+        color: var(--color-evergreen);
+        text-decoration: underline;
+        text-decoration-color: var(--color-brass);
+    }
+
+    .prose-bio strong {
+        font-weight: 500;
+    }
 }
 
 /* Alpine: hide x-cloak elements until Alpine has initialised. */
