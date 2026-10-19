@@ -3,6 +3,7 @@
 use App\Constants\AdminNavigation;
 use App\Constants\ContentTypes;
 use App\Constants\Permissions;
+use App\Constants\RateLimits;
 use App\Constants\Roles;
 use App\Constants\Sections;
 use App\Http\Controllers\AboutController;
@@ -10,7 +11,9 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PlaceholderController;
 use App\Http\Controllers\AwardController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CommentaryController;
+use App\Http\Controllers\CommunityController;
 use App\Http\Controllers\CvController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OtherItemController;
@@ -21,6 +24,7 @@ use App\Http\Controllers\StyleguideController;
 use App\Http\Controllers\TeachingMaterialController;
 use App\Http\Controllers\TributeController;
 use App\Http\Controllers\VideoController;
+use App\Http\Middleware\EnsureCommunityMember;
 use App\Http\Middleware\EnsureLocalEnvironment;
 use App\Livewire\Admin\Albums\Form as AlbumForm;
 use App\Livewire\Admin\Albums\Index as AlbumIndex;
@@ -28,6 +32,8 @@ use App\Livewire\Admin\Awards\Form as AwardForm;
 use App\Livewire\Admin\Awards\Index as AwardIndex;
 use App\Livewire\Admin\Commentaries\Form as CommentaryForm;
 use App\Livewire\Admin\Commentaries\Index as CommentaryIndex;
+use App\Livewire\Admin\Community\Applications as CommunityApplications;
+use App\Livewire\Admin\Community\Reports as ChatReports;
 use App\Livewire\Admin\CvEntries\Form as CvEntryForm;
 use App\Livewire\Admin\CvEntries\Index as CvEntryIndex;
 use App\Livewire\Admin\Media\Library as MediaLibrary;
@@ -41,6 +47,7 @@ use App\Livewire\Admin\TeachingMaterials\Index as TeachingMaterialIndex;
 use App\Livewire\Admin\Tributes\Moderate as TributeModeration;
 use App\Livewire\Admin\Videos\Form as VideoForm;
 use App\Livewire\Admin\Videos\Index as VideoIndex;
+use App\Livewire\Community\Chat\Room as ChatRoom;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
@@ -76,7 +83,23 @@ Route::get($sections[Sections::TRIBUTES]['path'].'/new', [TributeController::cla
 Route::post($sections[Sections::TRIBUTES]['path'], [TributeController::class, 'store'])->name($sections[Sections::TRIBUTES]['route'].'.store');
 Route::get($sections[Sections::TRIBUTES]['path'].'/thank-you', [TributeController::class, 'thanks'])->name($sections[Sections::TRIBUTES]['route'].'.thanks');
 
-$built = [Sections::ABOUT, Sections::CV, Sections::PUBLICATIONS, Sections::AWARDS, Sections::VIDEOS, Sections::PICTURES, Sections::TEACHING, Sections::COMMENTARY, Sections::OTHER, Sections::TRIBUTES];
+// Scientific Community: public page with the application form, then the members-only
+// chat (Livewire). The chat routes check membership on every request, including
+// Livewire updates (EnsureCommunityMember is also a persistent Livewire middleware).
+Route::get($sections[Sections::COMMUNITY]['path'], [CommunityController::class, 'index'])->name($sections[Sections::COMMUNITY]['route']);
+Route::post($sections[Sections::COMMUNITY]['path'].'/apply', [CommunityController::class, 'store'])
+    ->middleware('throttle:'.RateLimits::COMMUNITY_SIGNUP)
+    ->name($sections[Sections::COMMUNITY]['route'].'.apply');
+
+Route::middleware(['auth', 'verified', EnsureCommunityMember::ALIAS])
+    ->prefix($sections[Sections::COMMUNITY]['path'].'/chat')
+    ->name($sections[Sections::COMMUNITY]['route'].'.chat')
+    ->group(function () {
+        Route::get('/', ChatController::class);
+        Route::get('/{channel:slug}', ChatRoom::class)->name('.channel');
+    });
+
+$built = [Sections::ABOUT, Sections::CV, Sections::PUBLICATIONS, Sections::AWARDS, Sections::VIDEOS, Sections::PICTURES, Sections::TEACHING, Sections::COMMENTARY, Sections::COMMUNITY, Sections::OTHER, Sections::TRIBUTES];
 
 // One placeholder page per remaining public section, named after the section, until its
 // own controller exists.
@@ -140,6 +163,18 @@ Route::middleware(['auth', 'verified', 'role:'.implode('|', Roles::staff()), 'tw
         Route::get(AdminNavigation::get(AdminNavigation::TRIBUTES)['path'], TributeModeration::class)
             ->middleware('permission:'.Permissions::MODERATE_TRIBUTES)
             ->name(substr(AdminNavigation::routeFor(AdminNavigation::TRIBUTES), strlen(AdminNavigation::ROUTE_PREFIX)));
+
+        // Community: the approval queue and member list share one screen; chat reports have their own.
+        Route::middleware('permission:'.Permissions::MANAGE_COMMUNITY)->group(function () {
+            Route::get(AdminNavigation::get(AdminNavigation::APPLICATIONS)['path'], CommunityApplications::class)
+                ->name(substr(AdminNavigation::routeFor(AdminNavigation::APPLICATIONS), strlen(AdminNavigation::ROUTE_PREFIX)));
+            Route::get(AdminNavigation::get(AdminNavigation::MEMBERS)['path'], CommunityApplications::class)
+                ->name(substr(AdminNavigation::routeFor(AdminNavigation::MEMBERS), strlen(AdminNavigation::ROUTE_PREFIX)));
+        });
+
+        Route::get(AdminNavigation::get(AdminNavigation::CHAT_REPORTS)['path'], ChatReports::class)
+            ->middleware('permission:'.Permissions::MODERATE_CHAT)
+            ->name(substr(AdminNavigation::routeFor(AdminNavigation::CHAT_REPORTS), strlen(AdminNavigation::ROUTE_PREFIX)));
 
         // One placeholder page per remaining dashboard section until its own screens exist.
         foreach (AdminNavigation::placeholders() as $key => $item) {

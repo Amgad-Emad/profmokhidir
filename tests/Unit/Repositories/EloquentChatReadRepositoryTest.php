@@ -4,6 +4,7 @@ namespace Tests\Unit\Repositories;
 
 use App\Models\ChatChannel;
 use App\Models\ChatMessage;
+use App\Models\ChatRead;
 use App\Models\User;
 use App\Repositories\Contracts\ChatReadRepositoryInterface;
 use App\Repositories\Eloquent\EloquentChatReadRepository;
@@ -51,5 +52,23 @@ class EloquentChatReadRepositoryTest extends TestCase
         $this->assertSame($second->id, $this->repository->forUser($channel->id, $user->id)->last_read_message_id);
 
         $this->assertSame(1, $this->repository->all()->count());
+    }
+
+    #[Test]
+    public function mark_read_is_monotonic_under_out_of_order_updates_and_lists_cursors_per_channel(): void
+    {
+        $channel = ChatChannel::factory()->create();
+        $other = ChatChannel::factory()->create();
+        $user = User::factory()->member()->create();
+        $messages = ChatMessage::factory()->count(3)->create(['channel_id' => $channel->id, 'user_id' => $user->id]);
+        $elsewhere = ChatMessage::factory()->create(['channel_id' => $other->id, 'user_id' => $user->id]);
+
+        $this->repository->markRead($channel->id, $user->id, $messages[2]->id);
+        $this->repository->markRead($channel->id, $user->id, $messages[0]->id);
+        $this->repository->markRead($other->id, $user->id, $elsewhere->id);
+
+        $this->assertSame($messages[2]->id, $this->repository->forUser($channel->id, $user->id)->last_read_message_id);
+        $this->assertSame([$channel->id => $messages[2]->id, $other->id => $elsewhere->id], $this->repository->lastReadIdsFor($user->id));
+        $this->assertSame(2, ChatRead::query()->where('user_id', $user->id)->count());
     }
 }

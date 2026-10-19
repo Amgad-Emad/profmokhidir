@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Constants\CommunityStatus;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Services\ChatService;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -37,8 +36,18 @@ class ChatSeeder extends Seeder
             [$members[0], '[Placeholder] Has anyone kept copies of the AGR 301 problem sets?'],
         ];
 
+        $sent = [];
+
         foreach ($messages as [$author, $body]) {
-            $chat->send($channel, $author, $body, (string) Str::uuid());
+            $sent[] = $chat->send($channel, $author, $body, (string) Str::uuid());
+        }
+
+        // One open report so the moderation queue has something to show.
+        $reported = $sent[3] ?? null;
+        $reporter = $members->first(fn ($member): bool => (int) $member->getKey() !== (int) $reported?->user_id);
+
+        if ($reported !== null && $reporter !== null) {
+            $chat->report($reported, $reporter, '[Placeholder] Example report so the moderation queue is not empty.');
         }
     }
 }

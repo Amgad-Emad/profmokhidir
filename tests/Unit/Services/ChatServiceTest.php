@@ -3,6 +3,7 @@
 namespace Tests\Unit\Services;
 
 use App\Constants\AuditAction;
+use App\Constants\CommunityStatus;
 use App\Exceptions\ChatMessageConflictException;
 use App\Models\ChatChannel;
 use App\Models\ChatMessage;
@@ -10,6 +11,7 @@ use App\Models\User;
 use App\Services\ChatService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
@@ -242,5 +244,99 @@ class ChatServiceTest extends TestCase
 
         $this->expectException(AuthorizationException::class);
         $this->service->report($message, User::factory()->applicant()->create());
+    }
+
+    #[Test]
+    public function reporting_is_audited_and_own_messages_cannot_be_reported(): void
+    {
+        $message = $this->service->send($this->channel, $this->member, 'x', (string) Str::uuid());
+        $reporter = User::factory()->member()->create();
+
+        $report = $this->service->report($message, $reporter, str_repeat('r', 600));
+
+        $this->assertSame(500, mb_strlen($report->reason));
+        $this->assertDatabaseHas('audit_logs', ['user_id' => $reporter->id, 'action' => AuditAction::CHAT_MESSAGE_REPORTED, 'subject_id' => $message->id]);
+
+        $this->expectException(AuthorizationException::class);
+        $this->service->report($message, $this->member, 'me');
+    }
+
+    #[Test]
+    public function moderators_delete_a_reported_message_and_every_report_about_it_is_resolved(): void
+    {
+        $message = $this->service->send($this->channel, $this->member, 'spam', (string) Str::uuid());
+        $first = $this->service->report($message, User::factory()->member()->create(), 'spam');
+        $second = $this->service->report($message, User::factory()->member()->create(), 'spam again');
+        $admin = User::factory()->admin()->create();
+
+        $resolved = $this->service->deleteReportedMessage($first, $admin);
+
+        $this->assertTrue($resolved->isResolved());
+        $this->assertTrue($second->fresh()->isResolved());
+        $this->assertSoftDeleted('chat_messages', ['id' => $message->id]);
+        $this->assertSame(0, $this->service->countOpenReports());
+        $this->assertSame(1, $this->service->paginateReports(false)->total() >= 1 ? 1 : 0);
+    }
+
+    #[Test]
+    public function moderators_suspend_the_author_from_a_report(): void
+    {
+        Notification::fake();
+        $message = $this->service->send($this->channel, $this->member, 'rude', (string) Str::uuid());
+        $report = $this->service->report($message, User::factory()->member()->create(), 'rude');
+        $admin = User::factory()->admin()->create();
+
+        $resolved = $this->service->suspendReportedAuthor($report, $admin, 'Be kind.');
+
+        $this->assertTrue($resolved->isResolved());
+        $this->assertSame(CommunityStatus::Suspended, $this->member->fresh()->community_status);
+        $this->assertSame('Be kind.', $this->member->fresh()->review_note);
+        $this->assertFalse($this->member->fresh()->canAccessChat());
+
+        // Suspending an already suspended author just resolves the report.
+        $again = $this->service->report($message, User::factory()->member()->create(), 'still rude');
+        $this->assertTrue($this->service->suspendReportedAuthor($again, $admin)->isResolved());
+    }
+
+    #[Test]
+    public function only_moderators_act_on_reports(): void
+    {
+        $message = $this->service->send($this->channel, $this->member, 'x', (string) Str::uuid());
+        $report = $this->service->report($message, User::factory()->member()->create());
+
+        try {
+            $this->service->deleteReportedMessage($report, $this->member);
+            $this->fail('Members must not act on reports.');
+        } catch (AuthorizationException) {
+        }
+
+        $this->expectException(AuthorizationException::class);
+        $this->service->suspendReportedAuthor($report, $this->member);
+    }
+
+    #[Test]
+    public function initial_state_and_older_pages_describe_the_channel_for_the_browser(): void
+    {
+        $ids = [];
+        foreach (range(1, 3) as $i) {
+            $ids[] = $this->service->send($this->channel, $this->member, "m{$i}", (string) Str::uuid())->id;
+        }
+        $viewer = User::factory()->member()->create();
+        $this->service->markRead($this->channel, $viewer, $ids[0]);
+
+        $state = $this->service->initialState($this->channel, $viewer);
+
+        $this->assertSame($ids, array_column($state['messages'], 'id'));
+        $this->assertSame(end($ids), $state['cursor']);
+        $this->assertSame($ids[0], $state['lastRead']);
+        $this->assertFalse($state['hasOlder']);
+        $this->assertSame([['id' => $this->channel->id, 'current' => true]], array_map(fn (array $c): array => ['id' => $c['id'], 'current' => $c['current']], $state['channels']));
+
+        $older = $this->service->older($this->channel, $viewer, $ids[1]);
+        $this->assertSame([$ids[0]], array_column($older['messages'], 'id'));
+        $this->assertFalse($older['hasOlder']);
+
+        $this->assertNull($this->service->findMessage(999));
+        $this->assertTrue($this->service->firstChannel()->is($this->channel));
     }
 }

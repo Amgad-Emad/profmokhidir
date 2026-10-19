@@ -6,9 +6,11 @@ use App\Models\ChatChannel;
 use App\Models\ChatMessage;
 use App\Models\User;
 use App\Repositories\Contracts\ChatMessageRepositoryInterface;
+use App\Repositories\Contracts\ChatReadRepositoryInterface;
 use App\Repositories\Eloquent\EloquentChatMessageRepository;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -99,7 +101,9 @@ class EloquentChatMessageRepositoryTest extends TestCase
         $deleted->delete();
         ChatMessage::factory()->create(); // other channel
 
-        $this->assertSame(array_slice($ids, 1), $this->repository->afterId($this->channel->id, $ids[0])->pluck('id')->all());
+        // Deleted messages stay in the stream (as placeholders) but are not counted as unread.
+        $this->assertSame([...array_slice($ids, 1), $deleted->id], $this->repository->afterId($this->channel->id, $ids[0])->pluck('id')->all());
+        $this->assertTrue($this->repository->afterId($this->channel->id, $ids[0])->last()->trashed());
         $this->assertSame([$ids[1], $ids[2]], $this->repository->afterId($this->channel->id, $ids[0], 2)->pluck('id')->all());
         $this->assertSame(3, $this->repository->countAfter($this->channel->id, $ids[0]));
         $this->assertSame(4, $this->repository->countAfter($this->channel->id, 0));
@@ -144,5 +148,86 @@ class EloquentChatMessageRepositoryTest extends TestCase
             'channel_id' => $this->channel->id,
             'user_id' => $this->author->id,
         ], $attributes));
+    }
+
+    #[Test]
+    public function first_or_create_by_client_uuid_inserts_once_and_then_returns_the_existing_row(): void
+    {
+        $uuid = (string) Str::uuid();
+
+        [$created, $wasCreated] = $this->repository->firstOrCreateByClientUuid($this->author->id, $uuid, ['channel_id' => $this->channel->id, 'body' => 'first', 'version' => 1]);
+        [$again, $wasCreatedAgain] = $this->repository->firstOrCreateByClientUuid($this->author->id, $uuid, ['channel_id' => $this->channel->id, 'body' => 'second', 'version' => 1]);
+
+        $this->assertTrue($wasCreated);
+        $this->assertFalse($wasCreatedAgain);
+        $this->assertSame($created->id, $again->id);
+        $this->assertSame('first', $again->body);
+        $this->assertTrue($created->relationLoaded('user'));
+        $this->assertSame(1, ChatMessage::query()->count());
+
+        $created->delete();
+        [$deleted, $wasCreatedThird] = $this->repository->firstOrCreateByClientUuid($this->author->id, $uuid, ['channel_id' => $this->channel->id, 'body' => 'third', 'version' => 1]);
+        $this->assertFalse($wasCreatedThird);
+        $this->assertTrue($deleted->trashed());
+    }
+
+    #[Test]
+    public function changed_since_returns_edited_and_deleted_messages_up_to_the_cursor_only(): void
+    {
+        Carbon::setTestNow('2026-10-19 10:00:00');
+        $untouched = $this->message(['body' => 'same']);
+        $edited = $this->message(['body' => 'before']);
+        $deleted = $this->message();
+        $later = $this->message();
+        $since = now()->addSecond();
+
+        Carbon::setTestNow('2026-10-19 10:00:05');
+        $this->repository->updateBodyIfVersion($edited, 'after', 1);
+        $deleted->delete();
+        $this->repository->updateBodyIfVersion($later, 'after the cursor', 1);
+        ChatMessage::factory()->edited()->create(); // other channel
+
+        $changed = $this->repository->changedSince($this->channel->id, $since, $deleted->id);
+
+        $this->assertSame([$edited->id, $deleted->id], $changed->pluck('id')->all());
+        $this->assertSame('after', $changed->first()->body);
+        $this->assertTrue($changed->last()->trashed());
+        $this->assertTrue($changed->every(fn (ChatMessage $message): bool => $message->relationLoaded('user')));
+        $this->assertCount(0, $this->repository->changedSince($this->channel->id, now()->addMinute(), $later->id));
+        $this->assertCount(1, $this->repository->changedSince($this->channel->id, $since, $deleted->id, 1));
+
+        Carbon::setTestNow();
+    }
+
+    #[Test]
+    public function update_body_if_version_refuses_deleted_messages(): void
+    {
+        $message = $this->message(['body' => 'x']);
+        $message->delete();
+
+        $this->assertFalse($this->repository->updateBodyIfVersion($message, 'y', 1));
+        $this->assertSame('x', ChatMessage::withTrashed()->find($message->id)->body);
+    }
+
+    #[Test]
+    public function unread_counts_and_count_before_cover_every_channel_and_skip_deleted_rows(): void
+    {
+        $reader = User::factory()->member()->create();
+        $other = ChatChannel::factory()->create();
+        $first = $this->message();
+        $this->message();
+        $gone = $this->message();
+        $gone->delete();
+        ChatMessage::factory()->create(['channel_id' => $other->id, 'user_id' => $this->author->id]);
+
+        $this->assertSame([$this->channel->id => 2, $other->id => 1], $this->repository->unreadCountsFor($reader->id));
+
+        $this->app->make(ChatReadRepositoryInterface::class)->markRead($this->channel->id, $reader->id, $first->id);
+        $this->assertSame([$this->channel->id => 1, $other->id => 1], $this->repository->unreadCountsFor($reader->id));
+
+        $this->assertSame(2, $this->repository->countBefore($this->channel->id, $gone->id));
+        $this->assertSame(0, $this->repository->countBefore($this->channel->id, $first->id));
+        $this->assertTrue($this->repository->findWithTrashed($gone->id)->trashed());
+        $this->assertNull($this->repository->findWithTrashed(999));
     }
 }

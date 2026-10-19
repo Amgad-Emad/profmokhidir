@@ -24,6 +24,10 @@ final class AuditAction
 
     public const string COMMUNITY_SUSPENDED = 'community.suspended';
 
+    public const string COMMUNITY_REINSTATED = 'community.reinstated';
+
+    public const string COMMUNITY_REMOVED = 'community.removed';
+
     public const string ROLE_ASSIGNED = 'role.assigned';
 
     public const string ROLE_REMOVED = 'role.removed';
@@ -52,6 +56,8 @@ final class AuditAction
 
     public const string CHAT_MESSAGE_DELETED = 'chat.message_deleted';
 
+    public const string CHAT_MESSAGE_REPORTED = 'chat.message_reported';
+
     public const string CHAT_REPORT_RESOLVED = 'chat.report_resolved';
 
     public const string ADMIN_LOGIN = 'auth.admin_login';
@@ -64,10 +70,11 @@ final class AuditAction
         return [
             self::TRIBUTE_APPROVED, self::TRIBUTE_REJECTED, self::TRIBUTE_DELETED,
             self::COMMUNITY_APPLIED, self::COMMUNITY_APPROVED, self::COMMUNITY_REJECTED, self::COMMUNITY_SUSPENDED,
+            self::COMMUNITY_REINSTATED, self::COMMUNITY_REMOVED,
             self::ROLE_ASSIGNED, self::ROLE_REMOVED, self::ROLES_SYNCED, self::USER_DELETED,
             self::CONTENT_CREATED, self::CONTENT_RESTORED, self::CONTENT_PUBLISHED, self::CONTENT_UNPUBLISHED, self::CONTENT_DELETED,
             self::TRIBUTE_EDITED, self::MEDIA_UPLOADED, self::MEDIA_UPDATED, self::MEDIA_DELETED,
-            self::CHAT_MESSAGE_DELETED, self::CHAT_REPORT_RESOLVED, self::ADMIN_LOGIN,
+            self::CHAT_MESSAGE_DELETED, self::CHAT_MESSAGE_REPORTED, self::CHAT_REPORT_RESOLVED, self::ADMIN_LOGIN,
         ];
     }
 
@@ -86,6 +93,8 @@ final class AuditAction
             self::COMMUNITY_APPROVED => 'approved a community application',
             self::COMMUNITY_REJECTED => 'rejected a community application',
             self::COMMUNITY_SUSPENDED => 'suspended a community member',
+            self::COMMUNITY_REINSTATED => 'reinstated a community member',
+            self::COMMUNITY_REMOVED => 'removed a community member',
             self::ROLE_ASSIGNED => 'assigned a role',
             self::ROLE_REMOVED => 'removed a role',
             self::ROLES_SYNCED => 'changed roles',
@@ -100,6 +109,7 @@ final class AuditAction
             self::MEDIA_UPDATED => 'updated image details',
             self::MEDIA_DELETED => 'deleted a file',
             self::CHAT_MESSAGE_DELETED => 'deleted a chat message',
+            self::CHAT_MESSAGE_REPORTED => 'reported a chat message',
             self::CHAT_REPORT_RESOLVED => 'resolved a chat report',
             self::ADMIN_LOGIN => 'signed in',
         ];

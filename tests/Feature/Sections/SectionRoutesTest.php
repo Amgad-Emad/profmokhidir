@@ -20,7 +20,7 @@ class SectionRoutesTest extends TestCase
     /** Sections that have their own controller and view. */
     private const array BUILT = [
         Sections::ABOUT, Sections::CV, Sections::PUBLICATIONS, Sections::AWARDS, Sections::VIDEOS,
-        Sections::PICTURES, Sections::TEACHING, Sections::COMMENTARY, Sections::OTHER, Sections::TRIBUTES,
+        Sections::PICTURES, Sections::TEACHING, Sections::COMMENTARY, Sections::COMMUNITY, Sections::OTHER, Sections::TRIBUTES,
     ];
 
     /**

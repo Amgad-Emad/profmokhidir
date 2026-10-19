@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Constants\ChatSettings;
 use Database\Factories\ChatMessageFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -20,7 +21,7 @@ class ChatMessage extends Model
     /** @use HasFactory<ChatMessageFactory> */
     use HasFactory, SoftDeletes;
 
-    public const int BODY_MAX_LENGTH = 4000;
+    public const int BODY_MAX_LENGTH = ChatSettings::BODY_MAX_LENGTH;
 
     /**
      * @return array<string, string>

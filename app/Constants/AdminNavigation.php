@@ -99,7 +99,7 @@ final class AdminNavigation
             self::VIDEOS => self::item('Videos', self::GROUP_MEDIA, 'media.videos', 'media/videos', Permissions::MANAGE_CONTENT),
             self::ALBUMS => self::item('Pictures & albums', self::GROUP_MEDIA, 'media.albums', 'media/albums', Permissions::MANAGE_CONTENT),
             self::MEDIA_LIBRARY => self::item('Media library', self::GROUP_MEDIA, 'media.library', 'media/library', Permissions::MANAGE_CONTENT),
-            self::APPLICATIONS => self::item('Applications', self::GROUP_COMMUNITY, 'community.applications', 'community/applications', Permissions::MANAGE_COMMUNITY),
+            self::APPLICATIONS => self::item('Applications', self::GROUP_COMMUNITY, 'community.applications', 'community', Permissions::MANAGE_COMMUNITY),
             self::MEMBERS => self::item('Members', self::GROUP_COMMUNITY, 'community.members', 'community/members', Permissions::MANAGE_COMMUNITY),
             self::CHAT_REPORTS => self::item('Chat reports', self::GROUP_COMMUNITY, 'community.reports', 'community/reports', Permissions::MODERATE_CHAT),
             self::TRIBUTES => self::item('Review tributes', self::GROUP_TRIBUTES, 'tributes.index', 'tributes', Permissions::MODERATE_TRIBUTES),
@@ -161,6 +161,7 @@ final class AdminNavigation
         return [
             self::PROFILE, self::CV, self::PUBLICATIONS, self::AWARDS, self::COMMENTARY, self::TEACHING, self::OTHER,
             self::VIDEOS, self::ALBUMS, self::MEDIA_LIBRARY, self::TRIBUTES,
+            self::APPLICATIONS, self::MEMBERS, self::CHAT_REPORTS,
         ];
     }
 

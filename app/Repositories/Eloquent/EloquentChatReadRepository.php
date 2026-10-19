@@ -24,14 +24,40 @@ class EloquentChatReadRepository extends BaseEloquentRepository implements ChatR
 
     public function markRead(int $channelId, int $userId, int $messageId): ChatRead
     {
-        $read = $this->query()->firstOrNew(['channel_id' => $channelId, 'user_id' => $userId]);
+        $now = now();
 
-        if ($read->last_read_message_id === null || $messageId > (int) $read->last_read_message_id) {
-            $read->last_read_message_id = $messageId;
-        }
+        // Create the row if it is missing (ignored when another request got there first)...
+        $this->query()->toBase()->insertOrIgnore([
+            'channel_id' => $channelId,
+            'user_id' => $userId,
+            'last_read_message_id' => null,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
 
-        $read->save();
+        // ...then move the cursor forward only. GREATEST keeps it monotonic even
+        // when two tabs report different positions at the same moment.
+        $this->query()
+            ->where('channel_id', $channelId)
+            ->where('user_id', $userId)
+            ->update([
+                'last_read_message_id' => $this->model->getConnection()->raw(
+                    sprintf('GREATEST(COALESCE(last_read_message_id, 0), %d)', max(0, $messageId))
+                ),
+                'updated_at' => $now,
+            ]);
+
+        /** @var ChatRead $read */
+        $read = $this->forUser($channelId, $userId);
 
         return $read;
+    }
+
+    public function lastReadIdsFor(int $userId): array
+    {
+        return $this->query()->where('user_id', $userId)
+            ->pluck('last_read_message_id', 'channel_id')
+            ->map(fn ($id): int => (int) $id)
+            ->all();
     }
 }

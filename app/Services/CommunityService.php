@@ -9,21 +9,48 @@ use App\Constants\CommunityStatus;
 use App\Constants\Roles;
 use App\Exceptions\CommunityApplicationException;
 use App\Models\User;
+use App\Notifications\CommunityApplicationReviewed;
 use App\Repositories\Contracts\UserRepositoryInterface;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
- * Scientific Community applications. Approval grants the member role; rejection
- * and suspension remove it. Every decision is audited.
+ * Scientific Community applications and membership. Signing up creates an
+ * applicant; approval grants the member role; rejection, suspension and
+ * removal take it away. Every decision is audited and the applicant is told
+ * by email.
  */
 class CommunityService
 {
     public function __construct(
         private readonly UserRepositoryInterface $users,
+        private readonly UserService $userService,
         private readonly RoleService $roles,
         private readonly AuditLogService $audit,
     ) {}
+
+    /**
+     * Public signup: create the account as an applicant, record the
+     * application and send the email-verification link.
+     *
+     * @param  array{name: string, email: string, password: string, affiliation?: ?string, academic_field?: ?string, reason_for_joining?: ?string}  $data
+     */
+    public function register(array $data): User
+    {
+        $user = $this->userService->create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => $data['password'],
+            'role' => Roles::APPLICANT,
+        ]);
+
+        $user = $this->apply($user, $data);
+
+        event(new Registered($user));
+
+        return $user;
+    }
 
     /**
      * @param  array{affiliation?: ?string, academic_field?: ?string, reason_for_joining?: ?string}  $data
@@ -46,7 +73,7 @@ class CommunityService
             'review_note' => null,
         ]);
 
-        if (! $user->canAccessAdmin() && ! $user->isMember()) {
+        if (! $user->canAccessAdmin() && ! $user->isMember() && ! $user->hasRole(Roles::APPLICANT)) {
             $this->roles->assign($user, Roles::APPLICANT, $user);
         }
 
@@ -62,16 +89,10 @@ class CommunityService
         ]);
 
         $applicant = $this->review($applicant, $actor, CommunityStatus::Approved, $note);
-
-        if ($applicant->hasRole(Roles::APPLICANT)) {
-            $this->roles->remove($applicant, Roles::APPLICANT, $actor);
-        }
-
-        if (! $applicant->isMember()) {
-            $this->roles->assign($applicant, Roles::MEMBER, $actor);
-        }
+        $this->grantMembership($applicant, $actor);
 
         $this->audit->record($actor, AuditAction::COMMUNITY_APPROVED, $applicant, array_filter(['note' => $note]));
+        $applicant->notify(new CommunityApplicationReviewed(CommunityStatus::Approved, $this->clean($note)));
 
         return $applicant->refresh();
     }
@@ -85,10 +106,14 @@ class CommunityService
         $applicant = $this->review($applicant, $actor, CommunityStatus::Rejected, $note);
 
         $this->audit->record($actor, AuditAction::COMMUNITY_REJECTED, $applicant, array_filter(['note' => $note]));
+        $applicant->notify(new CommunityApplicationReviewed(CommunityStatus::Rejected, $this->clean($note)));
 
         return $applicant->refresh();
     }
 
+    /**
+     * Take the member role away; the next chat request is refused.
+     */
     public function suspend(User $member, User $actor, ?string $note = null): User
     {
         $this->guardTransition($member->community_status, CommunityStatus::Suspended, [
@@ -102,6 +127,50 @@ class CommunityService
         }
 
         $this->audit->record($actor, AuditAction::COMMUNITY_SUSPENDED, $member, array_filter(['note' => $note]));
+        $member->notify(new CommunityApplicationReviewed(CommunityStatus::Suspended, $this->clean($note)));
+
+        return $member->refresh();
+    }
+
+    /**
+     * Give a suspended member their access back.
+     */
+    public function reinstate(User $member, User $actor, ?string $note = null): User
+    {
+        $this->guardTransition($member->community_status, CommunityStatus::Approved, [
+            CommunityStatus::Suspended,
+        ]);
+
+        $member = $this->review($member, $actor, CommunityStatus::Approved, $note);
+        $this->grantMembership($member, $actor);
+
+        $this->audit->record($actor, AuditAction::COMMUNITY_REINSTATED, $member, array_filter(['note' => $note]));
+        $member->notify(new CommunityApplicationReviewed(CommunityStatus::Approved, $this->clean($note)));
+
+        return $member->refresh();
+    }
+
+    /**
+     * End a membership: the account stays (so their messages keep their
+     * author) but every community role goes and the status returns to "not
+     * applied". They may apply again.
+     */
+    public function remove(User $member, User $actor, ?string $note = null): User
+    {
+        $this->guardTransition($member->community_status, CommunityStatus::None, [
+            CommunityStatus::Approved, CommunityStatus::Suspended, CommunityStatus::Rejected, CommunityStatus::Pending,
+        ]);
+
+        $member = $this->review($member, $actor, CommunityStatus::None, $note);
+
+        foreach ([Roles::MEMBER, Roles::APPLICANT] as $role) {
+            if ($member->hasRole($role)) {
+                $this->roles->remove($member, $role, $actor);
+            }
+        }
+
+        $this->audit->record($actor, AuditAction::COMMUNITY_REMOVED, $member, array_filter(['note' => $note]));
+        $member->notify(new CommunityApplicationReviewed(CommunityStatus::None, $this->clean($note)));
 
         return $member->refresh();
     }
@@ -119,12 +188,22 @@ class CommunityService
         return $this->users->countByCommunityStatus(CommunityStatus::Pending);
     }
 
+    public function countByStatus(CommunityStatus $status): int
+    {
+        return $this->users->countByCommunityStatus($status);
+    }
+
     /**
      * @return Collection<int, User>
      */
     public function members(): Collection
     {
         return $this->users->withCommunityStatus(CommunityStatus::Approved);
+    }
+
+    public function find(int $id): ?User
+    {
+        return $this->users->find($id);
     }
 
     /**
@@ -135,6 +214,17 @@ class CommunityService
         $statusEnum = $status !== null && $status !== '' ? CommunityStatus::from($status) : null;
 
         return $this->users->paginateByCommunityStatus($statusEnum, $perPage);
+    }
+
+    private function grantMembership(User $user, User $actor): void
+    {
+        if ($user->hasRole(Roles::APPLICANT)) {
+            $this->roles->remove($user, Roles::APPLICANT, $actor);
+        }
+
+        if (! $user->isMember()) {
+            $this->roles->assign($user, Roles::MEMBER, $actor);
+        }
     }
 
     private function review(User $user, User $actor, CommunityStatus $status, ?string $note): User

@@ -11,8 +11,15 @@ use RuntimeException;
  */
 class ChatMessageConflictException extends RuntimeException
 {
+    public const string MESSAGE = 'This message was changed elsewhere, reload it.';
+
     public static function forVersion(int $expected): self
     {
-        return new self(sprintf('The message was changed by someone else (expected version %d).', $expected));
+        $exception = new self(self::MESSAGE);
+        $exception->expectedVersion = $expected;
+
+        return $exception;
     }
+
+    public int $expectedVersion = 0;
 }

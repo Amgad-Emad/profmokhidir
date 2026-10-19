@@ -1,0 +1,314 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Livewire\Community\Chat;
+
+use App\Constants\ChatSettings;
+use App\Constants\CommunityCopy;
+use App\Exceptions\ChatMessageConflictException;
+use App\Exceptions\ChatMessageRemovedException;
+use App\Exceptions\ChatRateLimitException;
+use App\Http\Requests\ChatMessageRequest;
+use App\Http\Requests\ChatReportRequest;
+use App\Models\ChatChannel;
+use App\Models\ChatMessage;
+use App\Models\User;
+use App\Services\ChatService;
+use App\Services\CommunityPageService;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
+use InvalidArgumentException;
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
+use Livewire\Component;
+
+/**
+ * One chat channel. The component is a thin transport: every action
+ * authorises (policy), validates (Form Request rules), calls ChatService and
+ * returns plain data for the chat script, which renders the conversation.
+ * Reliability rules (id ordering, cursors, idempotent sends, locking) live in
+ * the service and repositories, not here.
+ */
+#[Layout('components.layouts.chat')]
+class Room extends Component
+{
+    use AuthorizesRequests;
+
+    public const string ERROR_ACCESS = 'access';
+
+    public const string ERROR_RATE_LIMIT = 'rate_limit';
+
+    public const string ERROR_CONFLICT = 'conflict';
+
+    public const string ERROR_REMOVED = 'removed';
+
+    public const string ERROR_INVALID = 'invalid';
+
+    #[Locked]
+    public int $channelId;
+
+    #[Locked]
+    public string $channelSlug;
+
+    #[Locked]
+    public string $channelName;
+
+    /** Set when the member's access was taken away mid-session. */
+    public bool $accessRevoked = false;
+
+    /** @var array<string, mixed> */
+    public array $initial = [];
+
+    public function mount(ChatChannel $channel): void
+    {
+        $this->authorize('view', $channel);
+
+        $this->channelId = (int) $channel->getKey();
+        $this->channelSlug = $channel->slug;
+        $this->channelName = $channel->name;
+
+        try {
+            $this->initial = $this->chat()->initialState($channel, $this->viewer());
+        } catch (AuthorizationException) {
+            $this->accessRevoked = true;
+        }
+    }
+
+    /**
+     * Poll: everything after the cursor plus edits and deletions since the last check.
+     *
+     * @return array<string, mixed>
+     */
+    public function sync(int $cursor = 0, ?string $since = null): array
+    {
+        return $this->guarded(function () use ($cursor, $since): array {
+            $channel = $this->channel();
+            $this->authorize('view', $channel);
+
+            return ['ok' => true] + $this->chat()->sync($channel, $this->viewer(), max(0, $cursor), $since);
+        });
+    }
+
+    /**
+     * Send, then fetch from the cursor so the sender's own message and anything
+     * that arrived just before it both show.
+     *
+     * @return array<string, mixed>
+     */
+    public function send(string $body, string $clientUuid, int $cursor = 0, ?string $since = null): array
+    {
+        return $this->guarded(function () use ($body, $clientUuid, $cursor, $since): array {
+            $this->authorize('create', ChatMessage::class);
+            $this->validateAgainst(new ChatMessageRequest, ['body' => $body, 'client_uuid' => $clientUuid]);
+
+            $channel = $this->channel();
+            $message = $this->chat()->send($channel, $this->viewer(), $body, $clientUuid);
+
+            return [
+                'ok' => true,
+                'message' => $this->chat()->present($message, $this->viewer()),
+                'sync' => $this->chat()->sync($channel, $this->viewer(), max(0, $cursor), $since),
+            ];
+        });
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function loadOlder(int $beforeId): array
+    {
+        return $this->guarded(function () use ($beforeId): array {
+            $channel = $this->channel();
+            $this->authorize('view', $channel);
+
+            return ['ok' => true] + $this->chat()->older($channel, $this->viewer(), $beforeId);
+        });
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function edit(int $messageId, string $body, int $version): array
+    {
+        return $this->guarded(function () use ($messageId, $body, $version): array {
+            $message = $this->message($messageId);
+            $this->authorize('update', $message);
+            $this->validateAgainst(new ChatMessageRequest, ['body' => $body, 'client_uuid' => $message->client_uuid, 'version' => $version]);
+
+            $edited = $this->chat()->edit($message, $this->viewer(), $body, $version);
+
+            return ['ok' => true, 'message' => $this->chat()->present($edited, $this->viewer())];
+        });
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function remove(int $messageId): array
+    {
+        return $this->guarded(function () use ($messageId): array {
+            $message = $this->message($messageId);
+            $this->authorize('delete', $message);
+
+            $this->chat()->delete($message, $this->viewer());
+
+            return ['ok' => true, 'message' => $this->chat()->present($this->message($messageId), $this->viewer())];
+        });
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function report(int $messageId, string $reason): array
+    {
+        return $this->guarded(function () use ($messageId, $reason): array {
+            $message = $this->message($messageId);
+            $this->authorize('report', $message);
+            $this->validateAgainst(new ChatReportRequest, ['reason' => $reason]);
+
+            $this->chat()->report($message, $this->viewer(), $reason);
+
+            return ['ok' => true, 'notice' => 'Thank you. An administrator will look at this message.'];
+        });
+    }
+
+    /**
+     * The current state of one message, for a client that was told its copy is stale.
+     *
+     * @return array<string, mixed>
+     */
+    public function reload(int $messageId): array
+    {
+        return $this->guarded(function () use ($messageId): array {
+            $message = $this->message($messageId);
+            $this->authorize('view', $message);
+
+            return ['ok' => true, 'message' => $this->chat()->present($message, $this->viewer())];
+        });
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function markRead(int $messageId): array
+    {
+        return $this->guarded(function () use ($messageId): array {
+            $channel = $this->channel();
+            $this->authorize('view', $channel);
+
+            $this->chat()->markRead($channel, $this->viewer(), max(0, $messageId));
+
+            return ['ok' => true];
+        });
+    }
+
+    public function render(): View
+    {
+        return view('livewire.community.chat.room', [
+            'config' => ChatSettings::clientConfig(),
+            'communityUrl' => route(CommunityPageService::ROUTE_INDEX),
+            'suspendedHeading' => CommunityCopy::SUSPENDED_HEADING,
+            'suspendedMessage' => CommunityCopy::SUSPENDED,
+            'chatIntro' => CommunityCopy::CHAT_INTRO,
+            'canModerate' => ! $this->accessRevoked && $this->chat()->canModerate($this->viewer()),
+        ])->title($this->channelName.' · Community chat');
+    }
+
+    /**
+     * Run an action and turn every expected failure into data the script can
+     * show, so the member never sees a blank 500. Losing access is the one
+     * failure that also changes the page: it switches to the suspension notice.
+     *
+     * @param  callable(): array<string, mixed>  $action
+     * @return array<string, mixed>
+     */
+    private function guarded(callable $action): array
+    {
+        if ($this->accessRevoked) {
+            return $this->failure(self::ERROR_ACCESS, CommunityCopy::SUSPENDED);
+        }
+
+        try {
+            return $action();
+        } catch (AuthorizationException $exception) {
+            if (! $this->viewer()->canAccessChat()) {
+                $this->accessRevoked = true;
+
+                return $this->failure(self::ERROR_ACCESS, CommunityCopy::SUSPENDED);
+            }
+
+            return $this->failure(self::ERROR_ACCESS, $exception->getMessage() ?: 'You may not do that.');
+        } catch (ChatRateLimitException $exception) {
+            return $this->failure(self::ERROR_RATE_LIMIT, $exception->getMessage(), ['retry_after' => $exception->retryAfter]);
+        } catch (ChatMessageConflictException $exception) {
+            return $this->failure(self::ERROR_CONFLICT, $exception->getMessage());
+        } catch (ChatMessageRemovedException $exception) {
+            return $this->failure(self::ERROR_REMOVED, $exception->getMessage());
+        } catch (ValidationException $exception) {
+            return $this->failure(self::ERROR_INVALID, (string) collect($exception->errors())->flatten()->first());
+        } catch (InvalidArgumentException $exception) {
+            return $this->failure(self::ERROR_INVALID, $exception->getMessage());
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $extra
+     * @return array<string, mixed>
+     */
+    private function failure(string $code, string $message, array $extra = []): array
+    {
+        return ['ok' => false, 'error' => $code, 'message' => $message] + $extra;
+    }
+
+    /**
+     * Apply a Form Request's rules to action arguments.
+     *
+     * @param  array<string, mixed>  $data
+     *
+     * @throws ValidationException
+     */
+    private function validateAgainst(FormRequest $request, array $data): void
+    {
+        Validator::make($data, $request->rules(), $request->messages(), $request->attributes())->validate();
+    }
+
+    private function channel(): ChatChannel
+    {
+        $channel = $this->chat()->findChannel($this->channelSlug);
+
+        if ($channel === null || (int) $channel->getKey() !== $this->channelId) {
+            abort(404);
+        }
+
+        return $channel;
+    }
+
+    private function message(int $id): ChatMessage
+    {
+        $message = $this->chat()->findMessage($id);
+
+        if ($message === null || (int) $message->channel_id !== $this->channelId) {
+            throw ChatMessageRemovedException::make();
+        }
+
+        return $message;
+    }
+
+    private function viewer(): User
+    {
+        /** @var User $user */
+        $user = auth()->user();
+
+        return $user;
+    }
+
+    private function chat(): ChatService
+    {
+        return app(ChatService::class);
+    }
+}
