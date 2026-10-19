@@ -4,6 +4,8 @@
 @source '../../vendor/laravel/fortify/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
+@import './media.css';
+
 /*
  | Brand design system — see CLAUDE.md "Brand (follow exactly)".
  | Colours mirror app/Constants/Brand.php one-to-one. Tailwind's default

@@ -10,6 +10,7 @@ use App\Constants\MediaTreatment;
 use App\Models\Album;
 use App\Models\TeachingMaterial;
 use App\Models\User;
+use App\Models\Video;
 use App\Services\MediaService;
 use App\Support\PlaceholderImage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -54,6 +55,24 @@ class MediaServiceTest extends TestCase
         $this->assertSame('portrait', $media->getCustomProperty(MediaProperties::TREATMENT));
         $this->assertTrue($media->getCustomProperty(MediaProperties::IS_COVER));
         Storage::disk(Disks::PUBLIC)->assertExists($media->getPathRelativeToRoot());
+    }
+
+    #[Test]
+    public function attach_records_the_pixel_size_of_images_only(): void
+    {
+        $album = Album::factory()->create();
+
+        $image = $this->service->attach($album, PlaceholderImage::grey(96, 64), MediaCollections::PHOTOS);
+        $this->assertSame(96, $image->getCustomProperty(MediaProperties::WIDTH));
+        $this->assertSame(64, $image->getCustomProperty(MediaProperties::HEIGHT));
+
+        $upload = $this->service->attach($album, UploadedFile::fake()->image('photo.jpg', 120, 80), MediaCollections::PHOTOS);
+        $this->assertSame(120, $upload->getCustomProperty(MediaProperties::WIDTH));
+        $this->assertSame(80, $upload->getCustomProperty(MediaProperties::HEIGHT));
+
+        $file = $this->service->attach(Video::factory()->create(), UploadedFile::fake()->create('talk.mp4', 10, 'video/mp4'), MediaCollections::VIDEO);
+        $this->assertNull($file->getCustomProperty(MediaProperties::WIDTH));
+        $this->assertNull($file->getCustomProperty(MediaProperties::HEIGHT));
     }
 
     #[Test]

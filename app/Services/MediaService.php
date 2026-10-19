@@ -31,7 +31,9 @@ class MediaService
      */
     public function attach(HasMedia $model, string|UploadedFile $file, string $collection, array $properties = [], ?string $disk = null, bool $preserveOriginal = false): Media
     {
-        return $this->media->attach($model, $file, $collection, $this->normaliseProperties($properties), $disk, $preserveOriginal);
+        $properties = $this->normaliseProperties($properties) + $this->dimensions($file);
+
+        return $this->media->attach($model, $file, $collection, $properties, $disk, $preserveOriginal);
     }
 
     /**
@@ -105,6 +107,29 @@ class MediaService
     }
 
     /**
+     * Pixel size of an image upload, so the public site can reserve its space
+     * before it loads. Empty for anything that is not an image.
+     *
+     * @return array<string, int>
+     */
+    private function dimensions(string|UploadedFile $file): array
+    {
+        $path = $file instanceof UploadedFile ? $file->getRealPath() : $file;
+
+        if (! is_string($path) || $path === '' || ! is_file($path)) {
+            return [];
+        }
+
+        $size = @getimagesize($path);
+
+        if (! is_array($size) || (int) $size[0] <= 0 || (int) $size[1] <= 0) {
+            return [];
+        }
+
+        return [MediaProperties::WIDTH => (int) $size[0], MediaProperties::HEIGHT => (int) $size[1]];
+    }
+
+    /**
      * Keep only known property keys and validate the treatment.
      *
      * @param  array<string, mixed>  $properties
@@ -127,7 +152,7 @@ class MediaService
                 }
             }
 
-            if ($key === MediaProperties::YEAR && $value !== null) {
+            if (in_array($key, [MediaProperties::YEAR, MediaProperties::WIDTH, MediaProperties::HEIGHT], true) && $value !== null) {
                 $value = (int) $value;
             }
 

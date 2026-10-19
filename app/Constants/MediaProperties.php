@@ -27,6 +27,11 @@ final class MediaProperties
     /** Album photos: true marks the cover. */
     public const string IS_COVER = 'is_cover';
 
+    /** Pixel size of the original image, recorded at upload so <img> can reserve its space. */
+    public const string WIDTH = 'width';
+
+    public const string HEIGHT = 'height';
+
     /**
      * @return list<string>
      */
@@ -35,6 +40,7 @@ final class MediaProperties
         return [
             self::ALT_TEXT, self::CAPTION, self::PLACE, self::YEAR,
             self::CREDIT, self::PERMISSIONS_NOTE, self::TREATMENT, self::IS_COVER,
+            self::WIDTH, self::HEIGHT,
         ];
     }
 

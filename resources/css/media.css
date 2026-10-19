@@ -1,0 +1,235 @@
+/*
+ | Videos and Pictures: media cards, the video facade and the album lightbox.
+ | Imported by app.css; uses only the brand tokens defined there.
+ */
+@layer components {
+    /* Cards in the video and album grids: image, label line, title, text. */
+    .media-card__media {
+        display: block;
+        border-radius: var(--radius-card);
+        text-decoration: none;
+    }
+
+    .media-card__placeholder {
+        width: 100%;
+    }
+
+    /* Gallery photos: the frame is a link the lightbox takes over. */
+    .photo__link {
+        display: block;
+        text-decoration: none;
+    }
+
+    /* Hosted video facade: our own poster with a play control over it. */
+    .video-facade__play {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        color: var(--color-ivory);
+        text-decoration: none;
+        background-color: color-mix(in srgb, var(--color-evergreen) 24%, transparent);
+        transition: background-color 300ms var(--ease-rise);
+    }
+
+    .video-facade__play:hover,
+    .video-facade__play:focus-visible {
+        text-decoration: none;
+        background-color: color-mix(in srgb, var(--color-evergreen) 44%, transparent);
+    }
+
+    .video-facade__ring {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 5rem;
+        height: 5rem;
+        border-radius: 9999px;
+        border: 1px solid var(--color-brass);
+        background-color: color-mix(in srgb, var(--color-evergreen) 60%, transparent);
+        color: var(--color-ivory);
+    }
+
+    .video-facade__ring svg {
+        width: 1.75rem;
+        height: 1.75rem;
+        margin-left: 0.2rem;
+    }
+
+    /* Lightbox: a full-screen evergreen <dialog>. */
+    .lightbox {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100dvh;
+        max-width: none;
+        max-height: none;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background-color: color-mix(in srgb, var(--color-evergreen) 96%, transparent);
+        color: var(--color-ivory);
+    }
+
+    .lightbox::backdrop {
+        background-color: color-mix(in srgb, var(--color-evergreen) 60%, transparent);
+    }
+
+    .lightbox[open] {
+        display: flex;
+    }
+
+    .lightbox__inner {
+        position: relative;
+        display: flex;
+        width: 100%;
+        height: 100%;
+        flex-direction: column;
+        padding: 1rem;
+    }
+
+    @media (min-width: 640px) {
+        .lightbox__inner {
+            padding: 1.5rem 2rem;
+        }
+    }
+
+    .lightbox__bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        min-height: 2.75rem;
+    }
+
+    .lightbox__control {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        min-height: 2.75rem;
+        padding: 0 0.5rem;
+        color: var(--color-champagne);
+        background: transparent;
+        border: 0;
+        cursor: pointer;
+    }
+
+    .lightbox__control:hover {
+        color: var(--color-ivory);
+    }
+
+    .lightbox__figure {
+        display: flex;
+        flex: 1;
+        min-height: 0;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1.25rem;
+        margin: 0;
+        padding: 0 3rem;
+    }
+
+    .lightbox__frame {
+        display: flex;
+        flex: 0 1 auto;
+        min-height: 0;
+        width: 100%;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Tall enough for the bar and caption to stay in view; the caption sits just below the image. */
+    .lightbox__image {
+        display: block;
+        width: auto;
+        height: auto;
+        max-width: 100%;
+        max-height: calc(100dvh - 11rem);
+        object-fit: contain;
+        opacity: 0;
+        transition: opacity 400ms var(--ease-rise);
+    }
+
+    .lightbox__image.is-loaded {
+        opacity: 1;
+    }
+
+    .lightbox__caption {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.35rem;
+        max-width: 68ch;
+        text-align: center;
+    }
+
+    .lightbox__arrow {
+        position: absolute;
+        top: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.75rem;
+        height: 2.75rem;
+        transform: translateY(-50%);
+        border-radius: 9999px;
+        border: 1px solid var(--color-brass);
+        background-color: color-mix(in srgb, var(--color-evergreen) 70%, transparent);
+        color: var(--color-ivory);
+        cursor: pointer;
+        transition: background-color 300ms var(--ease-rise);
+    }
+
+    .lightbox__arrow:hover {
+        background-color: var(--color-cypress);
+    }
+
+    .lightbox__arrow svg {
+        width: 0.75rem;
+        height: 0.75rem;
+    }
+
+    .lightbox__arrow--prev {
+        left: 0.5rem;
+    }
+
+    .lightbox__arrow--next {
+        right: 0.5rem;
+    }
+
+    @media (min-width: 640px) {
+        .lightbox__arrow--prev {
+            left: 1.5rem;
+        }
+
+        .lightbox__arrow--next {
+            right: 1.5rem;
+        }
+    }
+
+    /* Page scrolling is locked while the lightbox is open. */
+    .lightbox-open {
+        overflow: hidden;
+    }
+}
+
+/* The dialog itself fades in; it never scales or slides. */
+@media (prefers-reduced-motion: no-preference) {
+    .lightbox[open] {
+        animation: lightbox-fade 400ms var(--ease-rise);
+    }
+
+    @keyframes lightbox-fade {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+}

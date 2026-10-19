@@ -7,11 +7,13 @@ use App\Http\Controllers\CommentaryController;
 use App\Http\Controllers\CvController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OtherItemController;
+use App\Http\Controllers\PictureController;
 use App\Http\Controllers\PublicationController;
 use App\Http\Controllers\SectionPlaceholderController;
 use App\Http\Controllers\StyleguideController;
 use App\Http\Controllers\TeachingMaterialController;
 use App\Http\Controllers\TributeController;
+use App\Http\Controllers\VideoController;
 use App\Http\Middleware\EnsureLocalEnvironment;
 use Illuminate\Support\Facades\Route;
 
@@ -25,6 +27,12 @@ Route::get($sections[Sections::ABOUT]['path'], AboutController::class)->name($se
 Route::get($sections[Sections::CV]['path'], CvController::class)->name($sections[Sections::CV]['route']);
 Route::get($sections[Sections::PUBLICATIONS]['path'], PublicationController::class)->name($sections[Sections::PUBLICATIONS]['route']);
 Route::get($sections[Sections::AWARDS]['path'], AwardController::class)->name($sections[Sections::AWARDS]['route']);
+
+Route::get($sections[Sections::VIDEOS]['path'], [VideoController::class, 'index'])->name($sections[Sections::VIDEOS]['route']);
+Route::get($sections[Sections::VIDEOS]['path'].'/{slug}', [VideoController::class, 'show'])->name($sections[Sections::VIDEOS]['route'].'.show');
+
+Route::get($sections[Sections::PICTURES]['path'], [PictureController::class, 'index'])->name($sections[Sections::PICTURES]['route']);
+Route::get($sections[Sections::PICTURES]['path'].'/{album}', [PictureController::class, 'show'])->name($sections[Sections::PICTURES]['route'].'.show');
 
 Route::get($sections[Sections::TEACHING]['path'], [TeachingMaterialController::class, 'index'])->name($sections[Sections::TEACHING]['route']);
 Route::get($sections[Sections::TEACHING]['path'].'/{material}/download', [TeachingMaterialController::class, 'download'])
@@ -42,7 +50,7 @@ Route::get($sections[Sections::TRIBUTES]['path'].'/new', [TributeController::cla
 Route::post($sections[Sections::TRIBUTES]['path'], [TributeController::class, 'store'])->name($sections[Sections::TRIBUTES]['route'].'.store');
 Route::get($sections[Sections::TRIBUTES]['path'].'/thank-you', [TributeController::class, 'thanks'])->name($sections[Sections::TRIBUTES]['route'].'.thanks');
 
-$built = [Sections::ABOUT, Sections::CV, Sections::PUBLICATIONS, Sections::AWARDS, Sections::TEACHING, Sections::COMMENTARY, Sections::OTHER, Sections::TRIBUTES];
+$built = [Sections::ABOUT, Sections::CV, Sections::PUBLICATIONS, Sections::AWARDS, Sections::VIDEOS, Sections::PICTURES, Sections::TEACHING, Sections::COMMENTARY, Sections::OTHER, Sections::TRIBUTES];
 
 // One placeholder page per remaining public section, named after the section, until its
 // own controller exists.

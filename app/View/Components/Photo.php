@@ -4,18 +4,19 @@ declare(strict_types=1);
 
 namespace App\View\Components;
 
-use App\Constants\MediaConversions;
 use App\Constants\MediaProperties;
-use App\Constants\MediaTreatment;
+use App\Support\ResponsiveImage;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
  * A brand photograph: responsive WebP sources from the media conversions, the
- * treatment class (warm monochrome portrait or evergreen duotone archive) and a
+ * treatment class (warm monochrome portrait or evergreen duotone archive), the
+ * recorded width/height so the frame is reserved before the image loads, and a
  * place/year caption in the label style. `tone` is the caption ink: "ivory" on
- * evergreen surfaces (brass), "evergreen" on ivory surfaces (bronze).
+ * evergreen surfaces (brass), "evergreen" on ivory surfaces (bronze). With
+ * `lightbox`, the frame becomes a link the gallery lightbox picks up.
  */
 class Photo extends Component
 {
@@ -31,20 +32,31 @@ class Photo extends Component
 
     public ?string $placeYear;
 
+    public ?int $width = null;
+
+    public ?int $height = null;
+
     public function __construct(
         public Media $media,
         public string $tone = 'evergreen',
         public string $sizes = '100vw',
         public string $loading = 'lazy',
         public bool $showCaption = false,
+        public bool $captioned = true,
+        public bool $lightbox = false,
         public ?string $aspect = null,
     ) {
-        $this->src = $this->largestUrl();
-        $this->srcset = $this->srcset();
+        $this->src = ResponsiveImage::largestUrl($media);
+        $this->srcset = ResponsiveImage::srcset($media);
         $this->alt = (string) ($media->getCustomProperty(MediaProperties::ALT_TEXT) ?? '');
-        $this->treatmentClass = $this->treatmentClass();
-        $this->caption = $this->text(MediaProperties::CAPTION);
-        $this->placeYear = $this->placeYear();
+        $this->treatmentClass = ResponsiveImage::treatmentClass($media);
+        $this->caption = ResponsiveImage::text($media, MediaProperties::CAPTION);
+        $this->placeYear = ResponsiveImage::placeYear($media);
+
+        if (($dimensions = ResponsiveImage::dimensions($media)) !== null) {
+            [$this->width, $this->height] = $dimensions;
+            $this->aspect ??= $this->width.' / '.$this->height;
+        }
     }
 
     public function onDark(): bool
@@ -54,66 +66,11 @@ class Photo extends Component
 
     public function hasCaption(): bool
     {
-        return $this->placeYear !== null || ($this->showCaption && $this->caption !== null);
+        return $this->captioned && ($this->placeYear !== null || ($this->showCaption && $this->caption !== null));
     }
 
     public function render(): View
     {
         return view('components.photo');
-    }
-
-    /**
-     * Largest generated conversion, falling back to the original upload.
-     */
-    private function largestUrl(): string
-    {
-        foreach (array_reverse(MediaConversions::names()) as $name) {
-            if ($this->media->hasGeneratedConversion($name)) {
-                return $this->media->getUrl($name);
-            }
-        }
-
-        return $this->media->getUrl();
-    }
-
-    private function srcset(): ?string
-    {
-        $sources = [];
-
-        foreach (MediaConversions::widths() as $name => $width) {
-            if ($this->media->hasGeneratedConversion($name)) {
-                $sources[] = $this->media->getUrl($name).' '.$width.'w';
-            }
-        }
-
-        return $sources === [] ? null : implode(', ', $sources);
-    }
-
-    private function treatmentClass(): string
-    {
-        $treatment = MediaTreatment::tryFrom((string) $this->media->getCustomProperty(MediaProperties::TREATMENT));
-
-        return match ($treatment) {
-            MediaTreatment::Archive => 'photo-archive',
-            default => 'photo-portrait',
-        };
-    }
-
-    private function placeYear(): ?string
-    {
-        $parts = array_filter([$this->text(MediaProperties::PLACE), $this->text(MediaProperties::YEAR)]);
-
-        return $parts === [] ? null : implode(', ', $parts);
-    }
-
-    private function text(string $property): ?string
-    {
-        $value = $this->media->getCustomProperty($property);
-
-        if ($value === null || trim((string) $value) === '') {
-            return null;
-        }
-
-        return trim((string) $value);
     }
 }

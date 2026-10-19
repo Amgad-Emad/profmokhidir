@@ -112,6 +112,44 @@ class PhotoTest extends TestCase
         $this->assertStringContainsString('Omdurman, 1962', $html);
     }
 
+    #[Test]
+    public function the_recorded_size_reserves_the_frame_and_captions_can_be_switched_off(): void
+    {
+        $media = $this->portrait([MediaProperties::ALT_TEXT => 'Portrait', MediaProperties::PLACE => 'Khartoum', MediaProperties::YEAR => 1998]);
+        $html = Blade::render('<x-photo :media="$media" />', ['media' => $media]);
+
+        $this->assertStringContainsString('style="aspect-ratio: 64 / 64"', $html);
+        $this->assertStringContainsString('width="64" height="64"', $html);
+
+        $html = Blade::render('<x-photo :media="$media" aspect="4 / 5" :captioned="false" />', ['media' => $media]);
+
+        $this->assertStringContainsString('style="aspect-ratio: 4 / 5"', $html);
+        $this->assertStringNotContainsString('<figcaption', $html);
+        $this->assertStringNotContainsString('Khartoum', $html);
+    }
+
+    #[Test]
+    public function a_lightbox_photo_wraps_the_frame_in_a_link_carrying_its_data(): void
+    {
+        $media = $this->portrait([
+            MediaProperties::ALT_TEXT => 'Portrait "of" him', MediaProperties::CAPTION => 'In his office', MediaProperties::PLACE => 'Khartoum', MediaProperties::YEAR => 1998,
+        ]);
+        $html = Blade::render('<x-photo :media="$media" :lightbox="true" />', ['media' => $media]);
+
+        $this->assertMatchesRegularExpression('/<a\s+href="'.preg_quote($media->getUrl(MediaConversions::LARGE), '/').'"\s+class="photo__link block rounded-card"\s+data-lightbox-item/', $html);
+        $this->assertStringContainsString('data-lightbox-src="'.$media->getUrl(MediaConversions::LARGE).'"', $html);
+        $this->assertStringContainsString('data-lightbox-srcset="'.$media->getUrl(MediaConversions::SMALL).' 480w', $html);
+        $this->assertStringContainsString('data-lightbox-alt="Portrait &quot;of&quot; him"', $html);
+        $this->assertStringContainsString('data-lightbox-treatment="photo-portrait"', $html);
+        $this->assertStringContainsString('data-lightbox-caption="In his office"', $html);
+        $this->assertStringContainsString('data-lightbox-meta="Khartoum, 1998"', $html);
+        $this->assertStringContainsString('data-lightbox-width="64" data-lightbox-height="64"', $html);
+        $this->assertStringContainsString('<span class="sr-only">View larger</span>', $html);
+        $this->assertMatchesRegularExpression('/<\/a>\s*<figcaption/', $html);
+
+        $this->assertStringNotContainsString('data-lightbox', Blade::render('<x-photo :media="$media" />', ['media' => $media]));
+    }
+
     /**
      * @param  array<string, mixed>  $properties
      */
