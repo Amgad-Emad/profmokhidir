@@ -36,14 +36,18 @@ class TeachingPageServiceTest extends TestCase
         $this->assertSame(['A Course', 'B Course'], array_keys($guest['courses']));
         $this->assertTrue($guest['hasAny']);
         $this->assertFalse($guest['canSeeMembers']);
-        $this->assertSame([$members->id => false, $public->id => true], $guest['downloadable']);
+        $downloadable = $guest['downloadable'];
+        ksort($downloadable);
+        $this->assertSame([$public->id => true, $members->id => false], $downloadable);
         $this->assertSame(route('community'), $guest['communityUrl']);
         $this->assertSame(route('teaching'), $guest['clearUrl']);
 
         $member = $this->service->data(User::factory()->member()->create());
 
         $this->assertTrue($member['canSeeMembers']);
-        $this->assertSame([$members->id => true, $public->id => true], $member['downloadable']);
+        $downloadable = $member['downloadable'];
+        ksort($downloadable);
+        $this->assertSame([$public->id => true, $members->id => true], $downloadable);
     }
 
     #[Test]

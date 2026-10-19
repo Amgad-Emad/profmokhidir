@@ -11,7 +11,7 @@
                 <p class="t-body max-w-xl text-champagne">{{ $copy['line'] }}</p>
                 <div class="flex flex-wrap gap-4">
                     <a href="{{ route('about') }}" class="btn-pill-filled">{{ $copy['readStory'] }}</a>
-                    <a href="{{ route('tributes') }}" class="btn-pill-outline">{{ $copy['leaveTribute'] }}</a>
+                    <a href="{{ route('tributes.create') }}" class="btn-pill-outline">{{ $copy['leaveTribute'] }}</a>
                 </div>
             </div>
 
@@ -115,7 +115,7 @@
             @endif
             <div class="mt-10 flex flex-wrap gap-4" data-rise-group>
                 <a href="{{ route('tributes') }}" class="btn-pill-filled">All tributes</a>
-                <a href="{{ route('tributes') }}" class="btn-pill-outline">{{ $copy['leaveTribute'] }}</a>
+                <a href="{{ route('tributes.create') }}" class="btn-pill-outline">{{ $copy['leaveTribute'] }}</a>
             </div>
         </div>
     </section>

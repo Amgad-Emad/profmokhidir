@@ -68,6 +68,7 @@ class EloquentUserRepositoryTest extends TestCase
 
         $this->assertSame(1, $this->repository->countByRole(Roles::ADMIN));
         $this->assertCount(2, $this->repository->withRole(Roles::EDITOR));
+        $this->assertCount(0, $this->repository->withRole('no-such-role'));
         $this->assertSame(3, $this->repository->paginateByRole(Roles::MEMBER)->total());
         $this->assertSame(7, $this->repository->paginate()->total());
         $this->assertSame(7, $this->repository->paginateByRole()->total());

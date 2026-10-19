@@ -20,11 +20,20 @@ final class Taglines
 
     public const string LEAVE_TRIBUTE = 'Leave a tribute';
 
+    public const string TRIBUTES_LABEL = 'Remembering';
+
+    public const string TRIBUTES_HEADING = 'He taught us how to ask the right questions.';
+
+    public const string TRIBUTE_THANKS = 'Thank you. Your tribute will appear once it has been reviewed.';
+
     /**
      * @return list<string>
      */
     public static function all(): array
     {
-        return [self::HERO_LABEL, self::HERO_LINE, self::HOME_QUOTE, self::READ_STORY, self::LEAVE_TRIBUTE];
+        return [
+            self::HERO_LABEL, self::HERO_LINE, self::HOME_QUOTE, self::READ_STORY, self::LEAVE_TRIBUTE,
+            self::TRIBUTES_LABEL, self::TRIBUTES_HEADING, self::TRIBUTE_THANKS,
+        ];
     }
 }

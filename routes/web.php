@@ -11,6 +11,7 @@ use App\Http\Controllers\PublicationController;
 use App\Http\Controllers\SectionPlaceholderController;
 use App\Http\Controllers\StyleguideController;
 use App\Http\Controllers\TeachingMaterialController;
+use App\Http\Controllers\TributeController;
 use App\Http\Middleware\EnsureLocalEnvironment;
 use Illuminate\Support\Facades\Route;
 
@@ -36,7 +37,12 @@ Route::get($sections[Sections::COMMENTARY]['path'].'/{slug}', [CommentaryControl
 Route::get($sections[Sections::OTHER]['path'], [OtherItemController::class, 'index'])->name($sections[Sections::OTHER]['route']);
 Route::get($sections[Sections::OTHER]['path'].'/{slug}', [OtherItemController::class, 'show'])->name($sections[Sections::OTHER]['route'].'.show');
 
-$built = [Sections::ABOUT, Sections::CV, Sections::PUBLICATIONS, Sections::AWARDS, Sections::TEACHING, Sections::COMMENTARY, Sections::OTHER];
+Route::get($sections[Sections::TRIBUTES]['path'], [TributeController::class, 'index'])->name($sections[Sections::TRIBUTES]['route']);
+Route::get($sections[Sections::TRIBUTES]['path'].'/new', [TributeController::class, 'create'])->name($sections[Sections::TRIBUTES]['route'].'.create');
+Route::post($sections[Sections::TRIBUTES]['path'], [TributeController::class, 'store'])->name($sections[Sections::TRIBUTES]['route'].'.store');
+Route::get($sections[Sections::TRIBUTES]['path'].'/thank-you', [TributeController::class, 'thanks'])->name($sections[Sections::TRIBUTES]['route'].'.thanks');
+
+$built = [Sections::ABOUT, Sections::CV, Sections::PUBLICATIONS, Sections::AWARDS, Sections::TEACHING, Sections::COMMENTARY, Sections::OTHER, Sections::TRIBUTES];
 
 // One placeholder page per remaining public section, named after the section, until its
 // own controller exists.

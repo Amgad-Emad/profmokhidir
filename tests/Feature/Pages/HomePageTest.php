@@ -35,7 +35,7 @@ class HomePageTest extends TestCase
             ->assertSeeInOrder(['glow-brass', 't-label text-brass', e(Taglines::HERO_LABEL), 't-display', 'Professor', 'Mohamed Osman Khidir', e(Taglines::HERO_LINE)], false)
             ->assertSee('min-h-[calc(100svh-5rem)]', false)
             ->assertSee('<a href="'.route('about').'" class="btn-pill-filled">'.e(Taglines::READ_STORY).'</a>', false)
-            ->assertSee('<a href="'.route('tributes').'" class="btn-pill-outline">'.e(Taglines::LEAVE_TRIBUTE).'</a>', false)
+            ->assertSee('<a href="'.route('tributes.create').'" class="btn-pill-outline">'.e(Taglines::LEAVE_TRIBUTE).'</a>', false)
             ->assertDontSee('livewire', false)
             ->assertDontSee('aria-current="page"', false);
 

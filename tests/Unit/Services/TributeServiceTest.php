@@ -4,15 +4,19 @@ namespace Tests\Unit\Services;
 
 use App\Constants\AuditAction;
 use App\Constants\CacheKeys;
+use App\Constants\Roles;
 use App\Constants\TributeRelationship;
 use App\Constants\TributeStatus;
 use App\Exceptions\TributeLimitReachedException;
 use App\Models\AuditLog;
 use App\Models\Tribute;
 use App\Models\User;
+use App\Notifications\TributeAwaitingReview;
+use App\Services\RoleService;
 use App\Services\TributeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Notification;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -27,6 +31,41 @@ class TributeServiceTest extends TestCase
         parent::setUp();
 
         $this->service = $this->app->make(TributeService::class);
+    }
+
+    #[Test]
+    public function submit_notifies_every_admin_and_editor_once_and_nobody_else(): void
+    {
+        Notification::fake();
+
+        $admin = User::factory()->admin()->create(['name' => 'Zed']);
+        $editor = User::factory()->editor()->create(['name' => 'Amy']);
+        $both = User::factory()->admin()->create(['name' => 'Both']);
+        app(RoleService::class)->assign($both, Roles::EDITOR);
+        $member = User::factory()->member()->create();
+        $applicant = User::factory()->applicant()->create();
+
+        $this->assertSame(['Amy', 'Both', 'Zed'], $this->service->moderators()->pluck('name')->all());
+
+        $tribute = $this->service->submit(['name' => 'A', 'relationship' => TributeRelationship::Friend, 'message' => 'Hello'], '203.0.113.9');
+
+        Notification::assertSentTo([$admin, $editor, $both], TributeAwaitingReview::class, fn (TributeAwaitingReview $n): bool => $n->tribute->is($tribute));
+        Notification::assertNotSentTo([$member, $applicant], TributeAwaitingReview::class);
+        Notification::assertCount(3);
+    }
+
+    #[Test]
+    public function paginate_approved_lists_only_approved_tributes_in_display_order(): void
+    {
+        Tribute::factory()->approved()->create(['name' => 'B', 'sort_order' => 2]);
+        Tribute::factory()->approved()->create(['name' => 'A', 'sort_order' => 1]);
+        Tribute::factory()->pending()->create(['name' => 'P']);
+
+        $page = $this->service->paginateApproved(1);
+
+        $this->assertSame(['A'], $page->pluck('name')->all());
+        $this->assertSame(2, $page->total());
+        $this->assertSame(1, $page->perPage());
     }
 
     #[Test]

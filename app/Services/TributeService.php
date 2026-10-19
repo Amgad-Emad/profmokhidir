@@ -6,19 +6,24 @@ namespace App\Services;
 
 use App\Constants\AuditAction;
 use App\Constants\CacheKeys;
+use App\Constants\Roles;
 use App\Constants\TributeRelationship;
 use App\Constants\TributeStatus;
 use App\Exceptions\TributeLimitReachedException;
 use App\Models\Tribute;
 use App\Models\User;
+use App\Notifications\TributeAwaitingReview;
 use App\Repositories\Contracts\TributeRepositoryInterface;
+use App\Repositories\Contracts\UserRepositoryInterface;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Notification;
 
 /**
  * Visitor tributes: submitted as pending, shown only once an admin or editor
- * approves them. Approvals and rejections are audited.
+ * approves them. Every submission emails the moderators (admins and editors).
+ * Approvals and rejections are audited.
  *
  * @extends AbstractContentService<Tribute>
  */
@@ -29,8 +34,12 @@ class TributeService extends AbstractContentService
 
     public const int SUBMISSION_WINDOW_MINUTES = 60;
 
-    public function __construct(TributeRepositoryInterface $tributes, AuditLogService $audit, CacheRepository $cache)
-    {
+    public function __construct(
+        TributeRepositoryInterface $tributes,
+        AuditLogService $audit,
+        CacheRepository $cache,
+        private readonly UserRepositoryInterface $users,
+    ) {
         parent::__construct($tributes, $audit, $cache);
     }
 
@@ -45,7 +54,8 @@ class TributeService extends AbstractContentService
     }
 
     /**
-     * Public submission. The visitor's IP is stored only as a keyed hash.
+     * Public submission. The visitor's IP is stored only as a keyed hash, and the
+     * moderators are told by email that a tribute is waiting.
      *
      * @param  array{name: string, relationship: string|TributeRelationship, message: string, location?: ?string, email?: ?string}  $data
      */
@@ -72,7 +82,25 @@ class TributeService extends AbstractContentService
             'sort_order' => 0,
         ]);
 
+        Notification::send($this->moderators(), new TributeAwaitingReview($tribute));
+
         return $tribute;
+    }
+
+    /**
+     * Users who moderate tributes: every admin and editor, each once.
+     *
+     * @return Collection<int, User>
+     */
+    public function moderators(): Collection
+    {
+        $moderators = new Collection;
+
+        foreach (Roles::staff() as $role) {
+            $moderators = $moderators->merge($this->users->withRole($role));
+        }
+
+        return $moderators->unique('id')->sortBy('name')->values();
     }
 
     public function approve(Tribute $tribute, User $actor): Tribute
@@ -128,6 +156,16 @@ class TributeService extends AbstractContentService
     public function approved(): Collection
     {
         return $this->published();
+    }
+
+    /**
+     * Approved tributes for the public page, a page at a time, in display order.
+     *
+     * @return LengthAwarePaginator<int, Tribute>
+     */
+    public function paginateApproved(int $perPage): LengthAwarePaginator
+    {
+        return $this->repository->paginatePublished($perPage);
     }
 
     /**

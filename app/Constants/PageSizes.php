@@ -12,4 +12,6 @@ final class PageSizes
     public const int PUBLICATIONS = 20;
 
     public const int COMMENTARIES = 12;
+
+    public const int TRIBUTES = 24;
 }

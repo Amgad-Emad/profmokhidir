@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Spatie\Permission\Exceptions\RoleDoesNotExist;
 
 /**
  * @extends BaseEloquentRepository<User>
@@ -27,7 +28,11 @@ class EloquentUserRepository extends BaseEloquentRepository implements UserRepos
 
     public function withRole(string $role): Collection
     {
-        return $this->query()->role($role)->with('roles')->orderBy('name')->get();
+        try {
+            return $this->query()->role($role)->with('roles')->orderBy('name')->get();
+        } catch (RoleDoesNotExist) {
+            return new Collection;
+        }
     }
 
     public function paginateByRole(?string $role = null, int $perPage = 15): LengthAwarePaginator
