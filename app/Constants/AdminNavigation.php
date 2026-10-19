@@ -1,0 +1,171 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Constants;
+
+/**
+ * The admin sidebar: groups in display order, each with its items. Every item
+ * names the route it links to and the permission required to see it, so the
+ * sidebar, the placeholder routes and the "Needs attention" queue links are all
+ * derived from this one definition.
+ */
+final class AdminNavigation
+{
+    public const string GROUP_CONTENT = 'content';
+
+    public const string GROUP_MEDIA = 'media';
+
+    public const string GROUP_COMMUNITY = 'community';
+
+    public const string GROUP_TRIBUTES = 'tributes';
+
+    public const string GROUP_SETTINGS = 'settings';
+
+    /** Route name of the dashboard home. */
+    public const string DASHBOARD_ROUTE = 'admin.dashboard';
+
+    /** Route name of the account page (name, email, password, two-factor). */
+    public const string ACCOUNT_ROUTE = 'account.show';
+
+    /** Route name prefix of every admin route. */
+    public const string ROUTE_PREFIX = 'admin.';
+
+    // Item keys, so queues can be referenced by name.
+    public const string PROFILE = 'profile';
+
+    public const string CV = 'cv';
+
+    public const string PUBLICATIONS = 'publications';
+
+    public const string AWARDS = 'awards';
+
+    public const string VIDEOS = 'videos';
+
+    public const string COMMENTARY = 'commentary';
+
+    public const string TEACHING = 'teaching';
+
+    public const string OTHER = 'other';
+
+    public const string ALBUMS = 'albums';
+
+    public const string APPLICATIONS = 'applications';
+
+    public const string MEMBERS = 'members';
+
+    public const string CHAT_REPORTS = 'chat-reports';
+
+    public const string TRIBUTES = 'tributes';
+
+    public const string USERS = 'users';
+
+    public const string ACCOUNT = 'account';
+
+    /**
+     * Group key => heading label, in sidebar order.
+     *
+     * @return array<string, string>
+     */
+    public static function groups(): array
+    {
+        return [
+            self::GROUP_CONTENT => 'Content',
+            self::GROUP_MEDIA => 'Media',
+            self::GROUP_COMMUNITY => 'Community',
+            self::GROUP_TRIBUTES => 'Tributes',
+            self::GROUP_SETTINGS => 'Settings',
+        ];
+    }
+
+    /**
+     * Item key => label, group, route name, path (relative to /admin, or absolute
+     * when the page lives outside the dashboard) and the permission required.
+     *
+     * @return array<string, array{label: string, group: string, route: string, path: string, permission: string}>
+     */
+    public static function items(): array
+    {
+        return [
+            self::PROFILE => self::item('About & profile', self::GROUP_CONTENT, 'content.profile', 'content/profile', Permissions::MANAGE_CONTENT),
+            self::CV => self::item('CV entries', self::GROUP_CONTENT, 'content.cv', 'content/cv', Permissions::MANAGE_CONTENT),
+            self::PUBLICATIONS => self::item('Publications', self::GROUP_CONTENT, 'content.publications', 'content/publications', Permissions::MANAGE_CONTENT),
+            self::AWARDS => self::item('Awards', self::GROUP_CONTENT, 'content.awards', 'content/awards', Permissions::MANAGE_CONTENT),
+            self::COMMENTARY => self::item('Commentary', self::GROUP_CONTENT, 'content.commentary', 'content/commentary', Permissions::MANAGE_CONTENT),
+            self::TEACHING => self::item('Teaching materials', self::GROUP_CONTENT, 'content.teaching', 'content/teaching', Permissions::MANAGE_CONTENT),
+            self::OTHER => self::item('Other information', self::GROUP_CONTENT, 'content.other', 'content/other', Permissions::MANAGE_CONTENT),
+            self::VIDEOS => self::item('Videos', self::GROUP_MEDIA, 'media.videos', 'media/videos', Permissions::MANAGE_CONTENT),
+            self::ALBUMS => self::item('Pictures & albums', self::GROUP_MEDIA, 'media.albums', 'media/albums', Permissions::MANAGE_CONTENT),
+            self::APPLICATIONS => self::item('Applications', self::GROUP_COMMUNITY, 'community.applications', 'community/applications', Permissions::MANAGE_COMMUNITY),
+            self::MEMBERS => self::item('Members', self::GROUP_COMMUNITY, 'community.members', 'community/members', Permissions::MANAGE_COMMUNITY),
+            self::CHAT_REPORTS => self::item('Chat reports', self::GROUP_COMMUNITY, 'community.reports', 'community/reports', Permissions::MODERATE_CHAT),
+            self::TRIBUTES => self::item('Review tributes', self::GROUP_TRIBUTES, 'tributes.index', 'tributes', Permissions::MODERATE_TRIBUTES),
+            self::USERS => self::item('Users & roles', self::GROUP_SETTINGS, 'settings.users', 'settings/users', Permissions::MANAGE_USERS),
+            self::ACCOUNT => self::item('Your account', self::GROUP_SETTINGS, self::ACCOUNT_ROUTE, '/account', Permissions::ACCESS_ADMIN),
+        ];
+    }
+
+    /**
+     * @return array{label: string, group: string, route: string, path: string, permission: string}
+     */
+    public static function item(string $label, string $group, string $route, string $path, string $permission): array
+    {
+        return [
+            'label' => $label,
+            'group' => $group,
+            'route' => str_starts_with($route, self::ROUTE_PREFIX) || $route === self::ACCOUNT_ROUTE ? $route : self::ROUTE_PREFIX.$route,
+            'path' => $path,
+            'permission' => $permission,
+        ];
+    }
+
+    /**
+     * @return array{label: string, group: string, route: string, path: string, permission: string}
+     */
+    public static function get(string $key): array
+    {
+        $items = self::items();
+
+        if (! array_key_exists($key, $items)) {
+            throw new \InvalidArgumentException(sprintf('Unknown admin navigation item "%s".', $key));
+        }
+
+        return $items[$key];
+    }
+
+    public static function routeFor(string $key): string
+    {
+        return self::get($key)['route'];
+    }
+
+    /**
+     * Items of one group, in order.
+     *
+     * @return array<string, array{label: string, group: string, route: string, path: string, permission: string}>
+     */
+    public static function itemsIn(string $group): array
+    {
+        return array_filter(self::items(), fn (array $item): bool => $item['group'] === $group);
+    }
+
+    /**
+     * Items whose page lives under /admin and has no controller of its own yet.
+     * Each gets a placeholder route until it is built.
+     *
+     * @return array<string, array{label: string, group: string, route: string, path: string, permission: string}>
+     */
+    public static function placeholders(): array
+    {
+        return array_filter(self::items(), fn (array $item): bool => ! str_starts_with($item['path'], '/'));
+    }
+
+    public static function isValidGroup(string $group): bool
+    {
+        return array_key_exists($group, self::groups());
+    }
+
+    public static function isValid(string $key): bool
+    {
+        return array_key_exists($key, self::items());
+    }
+}

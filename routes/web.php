@@ -1,7 +1,12 @@
 <?php
 
+use App\Constants\AdminNavigation;
+use App\Constants\Roles;
 use App\Constants\Sections;
 use App\Http\Controllers\AboutController;
+use App\Http\Controllers\AccountController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\PlaceholderController;
 use App\Http\Controllers\AwardController;
 use App\Http\Controllers\CommentaryController;
 use App\Http\Controllers\CvController;
@@ -65,9 +70,25 @@ Route::get('/styleguide', StyleguideController::class)
     ->middleware(EnsureLocalEnvironment::class)
     ->name('styleguide');
 
-Route::middleware(['auth', 'verified', 'can:access-admin'])
+// Signed-in users (any role) manage their own name, email, password and two-factor here.
+Route::get('/account', [AccountController::class, 'show'])
+    ->middleware(['auth', 'verified'])
+    ->name(AdminNavigation::ACCOUNT_ROUTE);
+
+// Admin dashboard: staff roles only (Spatie role middleware), email verified, and
+// admins must have confirmed two-factor authentication. Permissions are checked
+// per page (Spatie permission middleware) and per action (Policies).
+Route::middleware(['auth', 'verified', 'role:'.implode('|', Roles::staff()), 'two-factor'])
     ->prefix('admin')
-    ->name('admin.')
+    ->name(AdminNavigation::ROUTE_PREFIX)
     ->group(function () {
-        Route::view('/', 'admin.dashboard')->name('dashboard');
+        Route::get('/', DashboardController::class)->name('dashboard');
+
+        // One placeholder page per dashboard section until its own screens exist.
+        foreach (AdminNavigation::placeholders() as $key => $item) {
+            Route::get($item['path'], PlaceholderController::class)
+                ->middleware('permission:'.$item['permission'])
+                ->defaults('item', $key)
+                ->name(substr($item['route'], strlen(AdminNavigation::ROUTE_PREFIX)));
+        }
     });

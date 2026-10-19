@@ -8,6 +8,7 @@ use App\Constants\AuditAction;
 use App\Constants\Roles;
 use App\Models\User;
 use App\Repositories\Contracts\UserRepositoryInterface;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use InvalidArgumentException;
@@ -54,6 +55,36 @@ class UserService
         }
 
         return $this->users->update($user, $data);
+    }
+
+    /**
+     * Change the user's own name and email. A new email address must be verified
+     * again before the account can be used.
+     */
+    public function updateProfile(User $user, string $name, string $email): User
+    {
+        $email = mb_strtolower(trim($email));
+        $emailChanged = $email !== $user->email;
+
+        if ($emailChanged && $user instanceof MustVerifyEmail) {
+            $user = $this->users->markEmailUnverified($user);
+        }
+
+        $user = $this->users->update($user, ['name' => trim($name), 'email' => $email]);
+
+        if ($emailChanged && $user instanceof MustVerifyEmail) {
+            $user->sendEmailVerificationNotification();
+        }
+
+        return $user;
+    }
+
+    /**
+     * Set a new password (hashed by the model cast).
+     */
+    public function updatePassword(User $user, string $password): User
+    {
+        return $this->users->update($user, ['password' => $password]);
     }
 
     public function assignRole(User $user, string $role, ?User $actor = null): User

@@ -26,6 +26,13 @@ class EloquentUserRepository extends BaseEloquentRepository implements UserRepos
         return $this->query()->where('email', mb_strtolower(trim($email)))->first();
     }
 
+    public function markEmailUnverified(User $user): User
+    {
+        $user->forceFill(['email_verified_at' => null])->save();
+
+        return $user->refresh();
+    }
+
     public function withRole(string $role): Collection
     {
         try {

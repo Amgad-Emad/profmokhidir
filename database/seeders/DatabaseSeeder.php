@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
             OtherItemSeeder::class,
             TributeSeeder::class,
             ChatSeeder::class,
+            AuditLogSeeder::class,
         ]);
     }
 }

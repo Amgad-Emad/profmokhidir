@@ -17,6 +17,11 @@ interface UserRepositoryInterface extends BaseRepositoryInterface
     public function findByEmail(string $email): ?User;
 
     /**
+     * Clear the verification timestamp (after an email change).
+     */
+    public function markEmailUnverified(User $user): User;
+
+    /**
      * Users holding the given Spatie role.
      *
      * @return Collection<int, User>

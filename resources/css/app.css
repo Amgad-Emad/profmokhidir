@@ -645,6 +645,37 @@
     }
 }
 
+/* Admin sidebar links: champagne on evergreen, the active item carries a brass rule. */
+.admin-nav-link {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    border-left: 2px solid transparent;
+    font-size: 0.9375rem;
+    font-weight: 300;
+    line-height: 1.5;
+    color: var(--color-champagne);
+    text-decoration: none;
+    transition: color 300ms var(--ease-rise), border-color 300ms var(--ease-rise);
+}
+
+.admin-nav-link:hover {
+    color: var(--color-ivory);
+    text-decoration: none;
+}
+
+.admin-nav-link--active {
+    border-left-color: var(--color-brass);
+    color: var(--color-ivory);
+    font-weight: 400;
+}
+
+/* Fortify's QR code SVG scales to its box. */
+.qr-code svg {
+    display: block;
+    width: 12rem;
+    height: 12rem;
+}
+
 /* Alpine: hide x-cloak elements until Alpine has initialised. */
 [x-cloak] {
     display: none !important;

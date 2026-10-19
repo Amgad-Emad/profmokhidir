@@ -8,8 +8,11 @@ use App\Models\User;
 use App\Repositories\Contracts\RoleRepositoryInterface;
 use App\Services\RoleService;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Laravel\Fortify\Contracts\TwoFactorAuthenticationProvider;
+use Laravel\Fortify\RecoveryCode;
 
 /**
  * @extends Factory<User>
@@ -60,9 +63,45 @@ class UserFactory extends Factory
         });
     }
 
+    /**
+     * An administrator. Admin accounts must use two-factor authentication, so
+     * the state comes with a confirmed TOTP secret; chain withoutTwoFactor()
+     * to test the enforcement itself.
+     */
     public function admin(): static
     {
-        return $this->withRole(Roles::ADMIN);
+        return $this->withRole(Roles::ADMIN)->withTwoFactor();
+    }
+
+    /**
+     * A confirmed TOTP secret with recovery codes.
+     */
+    public function withTwoFactor(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'two_factor_secret' => encrypt(app(TwoFactorAuthenticationProvider::class)->generateSecretKey()),
+            'two_factor_recovery_codes' => encrypt(json_encode(Collection::times(8, fn () => RecoveryCode::generate())->all())),
+            'two_factor_confirmed_at' => now(),
+        ]);
+    }
+
+    /**
+     * Two-factor enabled but not yet confirmed with a code.
+     */
+    public function withPendingTwoFactor(): static
+    {
+        return $this->withTwoFactor()->state(fn (array $attributes) => [
+            'two_factor_confirmed_at' => null,
+        ]);
+    }
+
+    public function withoutTwoFactor(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'two_factor_secret' => null,
+            'two_factor_recovery_codes' => null,
+            'two_factor_confirmed_at' => null,
+        ]);
     }
 
     public function editor(): static

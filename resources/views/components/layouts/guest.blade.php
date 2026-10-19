@@ -1,35 +1,43 @@
-{{-- Auth pages (Fortify). Plain Blade, no Livewire. --}}
+{{--
+    Auth pages (Fortify) and other signed-out screens: ivory page, the stacked lockup above
+    a centred linen card. Plain Blade + Alpine, no Livewire.
+--}}
+@props(['title' => 'Sign in', 'intro' => null])
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $title ?? 'Sign in' }} · {{ config('app.name') }}</title>
+    <title>{{ $title }} · {{ config('app.name') }}</title>
     <x-brand.favicons />
     <x-fonts />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="glow-brass on-dark min-h-screen bg-evergreen text-champagne">
-    <main class="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-4 py-16 sm:px-6">
-        <div class="mb-10 flex flex-col items-center text-center">
-            <x-brand.mark :size="64" />
-            <p class="font-display text-2xl leading-tight">Professor<br>Mohamed Osman Khidir</p>
+<body class="min-h-screen bg-ivory text-evergreen">
+    <main id="main" class="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-4 py-16 sm:px-6">
+        <div class="mb-10 flex justify-center">
+            <x-brand.lockup variant="stacked" tone="evergreen" :href="route('home')" />
         </div>
 
-        <section class="rounded-card bg-ivory p-8 text-evergreen shadow-sm" aria-labelledby="page-title">
-            <h1 id="page-title" class="text-heading leading-tight">{{ $title ?? 'Sign in' }}</h1>
-            @isset($intro)
-                <p class="mt-3 text-ash">{{ $intro }}</p>
-            @endisset
+        <section class="auth-card rounded-card border border-stone bg-linen p-8 sm:p-10" aria-labelledby="page-title">
+            <h1 id="page-title" class="font-display text-4xl font-light leading-tight">{{ $title }}</h1>
+            @if ($intro)
+                <p class="mt-3 text-base font-light text-ash">{{ $intro }}</p>
+            @endif
 
             @if (session('status'))
-                <p class="mt-4 rounded-card border border-stone bg-linen px-4 py-3 text-sm" role="status">{{ session('status') }}</p>
+                @php $statusMessage = \App\Constants\AuthStatus::message(session('status')) ?? session('status'); @endphp
+                <x-alert :tone="\App\Constants\AuthStatus::isValid(session('status')) ? \App\Constants\AuthStatus::tone(session('status')) : \App\Constants\StatusTone::Cypress" class="mt-6">{{ $statusMessage }}</x-alert>
             @endif
 
             <div class="mt-8">
                 {{ $slot }}
             </div>
         </section>
+
+        <p class="mt-8 text-center text-sm font-light text-ash">
+            <a href="{{ route('home') }}" class="text-bronze underline-offset-4 hover:underline">Back to the website</a>
+        </p>
     </main>
 </body>
 </html>

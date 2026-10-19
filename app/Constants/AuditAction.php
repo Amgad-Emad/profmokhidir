@@ -60,6 +60,40 @@ final class AuditAction
         ];
     }
 
+    /**
+     * Human-readable description of each action, for the activity feed.
+     *
+     * @return array<string, string>
+     */
+    public static function labels(): array
+    {
+        return [
+            self::TRIBUTE_APPROVED => 'approved a tribute',
+            self::TRIBUTE_REJECTED => 'rejected a tribute',
+            self::TRIBUTE_DELETED => 'deleted a tribute',
+            self::COMMUNITY_APPLIED => 'applied to join the community',
+            self::COMMUNITY_APPROVED => 'approved a community application',
+            self::COMMUNITY_REJECTED => 'rejected a community application',
+            self::COMMUNITY_SUSPENDED => 'suspended a community member',
+            self::ROLE_ASSIGNED => 'assigned a role',
+            self::ROLE_REMOVED => 'removed a role',
+            self::ROLES_SYNCED => 'changed roles',
+            self::USER_DELETED => 'deleted a user',
+            self::CONTENT_PUBLISHED => 'published content',
+            self::CONTENT_UNPUBLISHED => 'unpublished content',
+            self::CONTENT_DELETED => 'deleted content',
+            self::MEDIA_DELETED => 'deleted a file',
+            self::CHAT_MESSAGE_DELETED => 'deleted a chat message',
+            self::CHAT_REPORT_RESOLVED => 'resolved a chat report',
+            self::ADMIN_LOGIN => 'signed in',
+        ];
+    }
+
+    public static function label(string $action): string
+    {
+        return self::labels()[$action] ?? str_replace(['.', '_'], ' ', $action);
+    }
+
     public static function isValid(string $action): bool
     {
         return in_array($action, self::all(), true);

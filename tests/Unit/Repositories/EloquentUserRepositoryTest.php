@@ -99,4 +99,15 @@ class EloquentUserRepositoryTest extends TestCase
 
         $this->repository->published();
     }
+
+    #[Test]
+    public function mark_email_unverified_clears_the_timestamp(): void
+    {
+        $user = User::factory()->create();
+
+        $user = $this->repository->markEmailUnverified($user);
+
+        $this->assertNull($user->email_verified_at);
+        $this->assertNull($user->fresh()->email_verified_at);
+    }
 }

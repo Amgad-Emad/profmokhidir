@@ -24,7 +24,7 @@ class LoginTest extends TestCase
     #[Test]
     public function staff_can_log_in_and_land_on_the_admin_dashboard(): void
     {
-        $user = User::factory()->admin()->create(['password' => 'secret-password']);
+        $user = User::factory()->editor()->create(['password' => 'secret-password']);
 
         $this->post(route('login'), [
             'email' => $user->email,
