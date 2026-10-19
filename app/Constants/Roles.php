@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace App\Constants;
 
 /**
- * User roles. Community applicants are tracked separately via CommunityStatus;
- * a user only becomes a MEMBER once an admin approves their application.
+ * Role names registered with spatie/laravel-permission. A user becomes a MEMBER
+ * only once an admin approves their community application (see CommunityStatus);
+ * until then they are an APPLICANT.
  */
 final class Roles
 {
@@ -16,14 +17,16 @@ final class Roles
 
     public const string MEMBER = 'member';
 
-    public const string DEFAULT = self::MEMBER;
+    public const string APPLICANT = 'applicant';
+
+    public const string DEFAULT = self::APPLICANT;
 
     /**
      * @return list<string>
      */
     public static function all(): array
     {
-        return [self::ADMIN, self::EDITOR, self::MEMBER];
+        return [self::ADMIN, self::EDITOR, self::MEMBER, self::APPLICANT];
     }
 
     /**
@@ -45,6 +48,7 @@ final class Roles
             self::ADMIN => 'Administrator',
             self::EDITOR => 'Editor',
             self::MEMBER => 'Community member',
+            self::APPLICANT => 'Applicant',
         ];
     }
 

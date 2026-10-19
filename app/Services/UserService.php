@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Constants\AuditAction;
 use App\Constants\Roles;
 use App\Models\User;
 use App\Repositories\Contracts\UserRepositoryInterface;
@@ -13,24 +14,32 @@ use InvalidArgumentException;
 
 class UserService
 {
-    public function __construct(private readonly UserRepositoryInterface $users) {}
+    public function __construct(
+        private readonly UserRepositoryInterface $users,
+        private readonly RoleService $roles,
+        private readonly AuditLogService $audit,
+    ) {}
 
     /**
-     * Create a user. The password is hashed by the model cast; the role defaults to MEMBER.
+     * Create a user and give them a Spatie role (APPLICANT unless told otherwise).
+     * The password is hashed by the model cast.
      *
      * @param  array{name: string, email: string, password: string, role?: string}  $data
      */
-    public function create(array $data): User
+    public function create(array $data, ?User $actor = null): User
     {
         $role = $data['role'] ?? Roles::DEFAULT;
         $this->guardRole($role);
 
-        return $this->users->create([
-            'name' => $data['name'],
+        $user = $this->users->create([
+            'name' => trim($data['name']),
             'email' => mb_strtolower(trim($data['email'])),
             'password' => $data['password'],
-            'role' => $role,
         ]);
+
+        $this->roles->assign($user, $role, $actor);
+
+        return $user;
     }
 
     /**
@@ -38,9 +47,7 @@ class UserService
      */
     public function update(User $user, array $data): User
     {
-        if (array_key_exists('role', $data)) {
-            $this->guardRole((string) $data['role']);
-        }
+        unset($data['role'], $data['roles']);
 
         if (array_key_exists('email', $data)) {
             $data['email'] = mb_strtolower(trim((string) $data['email']));
@@ -49,15 +56,39 @@ class UserService
         return $this->users->update($user, $data);
     }
 
-    public function assignRole(User $user, string $role): User
+    public function assignRole(User $user, string $role, ?User $actor = null): User
     {
         $this->guardRole($role);
 
-        return $this->users->update($user, ['role' => $role]);
+        return $this->roles->assign($user, $role, $actor);
     }
 
-    public function delete(User $user): bool
+    public function removeRole(User $user, string $role, ?User $actor = null): User
     {
+        $this->guardRole($role);
+
+        return $this->roles->remove($user, $role, $actor);
+    }
+
+    /**
+     * @param  list<string>  $roles
+     */
+    public function syncRoles(User $user, array $roles, ?User $actor = null): User
+    {
+        foreach ($roles as $role) {
+            $this->guardRole($role);
+        }
+
+        return $this->roles->sync($user, $roles, $actor);
+    }
+
+    public function delete(User $user, ?User $actor = null): bool
+    {
+        $this->audit->record($actor, AuditAction::USER_DELETED, null, [
+            'user_id' => $user->getKey(),
+            'email' => $user->email,
+        ]);
+
         return $this->users->delete($user);
     }
 
@@ -67,12 +98,15 @@ class UserService
     }
 
     /**
+     * Admins and editors, by name.
+     *
      * @return Collection<int, User>
      */
     public function staff(): Collection
     {
         return $this->users->withRole(Roles::ADMIN)
             ->merge($this->users->withRole(Roles::EDITOR))
+            ->unique('id')
             ->sortBy('name')
             ->values();
     }

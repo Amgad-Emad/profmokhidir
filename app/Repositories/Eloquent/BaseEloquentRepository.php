@@ -21,7 +21,7 @@ abstract class BaseEloquentRepository implements BaseRepositoryInterface
     /**
      * Column used to order published listings when the model has one.
      */
-    protected string $orderColumn = 'display_order';
+    protected string $orderColumn = 'sort_order';
 
     /**
      * @param  TModel  $model

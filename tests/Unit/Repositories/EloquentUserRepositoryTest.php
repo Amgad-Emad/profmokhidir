@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Repositories;
 
+use App\Constants\CommunityStatus;
 use App\Constants\Roles;
 use App\Models\User;
 use App\Repositories\Contracts\UserRepositoryInterface;
@@ -34,7 +35,7 @@ class EloquentUserRepositoryTest extends TestCase
     public function it_runs_against_the_testing_database(): void
     {
         $this->assertSame('mysql', config('database.default'));
-        $this->assertSame('profmokhidir_testing', config('database.connections.mysql.database'));
+        $this->assertStringStartsWith('profmokhidir_testing', config('database.connections.mysql.database'));
     }
 
     #[Test]
@@ -44,11 +45,11 @@ class EloquentUserRepositoryTest extends TestCase
             'name' => 'Grace Hopper',
             'email' => 'grace@example.com',
             'password' => 'secret-password',
-            'role' => Roles::EDITOR,
         ]);
 
         $this->assertSame($user->id, $this->repository->find($user->id)?->id);
         $this->assertSame($user->id, $this->repository->findByEmail('GRACE@example.com')?->id);
+        $this->assertSame(CommunityStatus::None, $user->fresh()->community_status);
 
         $updated = $this->repository->update($user->id, ['name' => 'Rear Admiral Hopper']);
         $this->assertSame('Rear Admiral Hopper', $updated->name);
@@ -58,16 +59,36 @@ class EloquentUserRepositoryTest extends TestCase
     }
 
     #[Test]
-    public function it_filters_and_counts_by_role(): void
+    public function it_filters_and_counts_by_spatie_role(): void
     {
         User::factory()->admin()->create();
         User::factory()->editor()->count(2)->create();
         User::factory()->member()->count(3)->create();
+        User::factory()->create(); // no role
 
         $this->assertSame(1, $this->repository->countByRole(Roles::ADMIN));
         $this->assertCount(2, $this->repository->withRole(Roles::EDITOR));
         $this->assertSame(3, $this->repository->paginateByRole(Roles::MEMBER)->total());
-        $this->assertSame(6, $this->repository->paginate()->total());
+        $this->assertSame(7, $this->repository->paginate()->total());
+        $this->assertSame(7, $this->repository->paginateByRole()->total());
+
+        $editors = $this->repository->withRole(Roles::EDITOR);
+        $this->assertTrue($editors->first()->relationLoaded('roles'));
+        $this->assertTrue($editors->every(fn (User $user): bool => $user->hasRole(Roles::EDITOR)));
+    }
+
+    #[Test]
+    public function it_filters_and_counts_by_community_status(): void
+    {
+        User::factory()->member()->count(2)->create();
+        User::factory()->applicant()->count(3)->create();
+        User::factory()->rejectedApplicant()->create();
+
+        $this->assertCount(2, $this->repository->withCommunityStatus(CommunityStatus::Approved));
+        $this->assertSame(3, $this->repository->countByCommunityStatus(CommunityStatus::Pending));
+        $this->assertSame(1, $this->repository->countByCommunityStatus(CommunityStatus::Rejected));
+        $this->assertSame(3, $this->repository->paginateByCommunityStatus(CommunityStatus::Pending)->total());
+        $this->assertSame(6, $this->repository->paginateByCommunityStatus()->total());
     }
 
     #[Test]

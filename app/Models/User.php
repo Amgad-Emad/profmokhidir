@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Constants\CommunityStatus;
 use App\Constants\Roles;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -10,20 +11,29 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password', 'role'])]
+/**
+ * Roles come from spatie/laravel-permission (HasRoles); community membership
+ * state lives in community_status.
+ */
+#[Fillable([
+    'name', 'email', 'password',
+    'community_status', 'affiliation', 'academic_field', 'reason_for_joining',
+    'reviewed_by', 'reviewed_at', 'review_note',
+])]
 #[Hidden(['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'])]
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable;
+    use HasFactory, HasRoles, Notifiable, TwoFactorAuthenticatable;
 
     /**
-     * Get the attributes that should be cast.
-     *
      * @return array<string, string>
      */
     protected function casts(): array
@@ -32,21 +42,33 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
+            'community_status' => CommunityStatus::class,
+            'reviewed_at' => 'datetime',
         ];
+    }
+
+    public function reviewer(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'reviewed_by');
+    }
+
+    public function chatMessages(): HasMany
+    {
+        return $this->hasMany(ChatMessage::class);
+    }
+
+    public function auditLogs(): HasMany
+    {
+        return $this->hasMany(AuditLog::class);
     }
 
     /**
      * @param  Builder<User>  $query
      */
     #[Scope]
-    protected function role(Builder $query, string $role): void
+    protected function communityStatus(Builder $query, CommunityStatus $status): void
     {
-        $query->where('role', $role);
-    }
-
-    public function hasRole(string $role): bool
-    {
-        return $this->role === $role;
+        $query->where('community_status', $status->value);
     }
 
     public function isAdmin(): bool
@@ -59,11 +81,52 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasRole(Roles::EDITOR);
     }
 
+    public function isMember(): bool
+    {
+        return $this->hasRole(Roles::MEMBER);
+    }
+
     /**
      * Admins and editors may use the admin dashboard.
      */
     public function canAccessAdmin(): bool
     {
-        return in_array($this->role, Roles::staff(), true);
+        return $this->hasAnyRole(Roles::staff());
+    }
+
+    /**
+     * Only approved members (and admins, who moderate) may use the community chat.
+     * Checked server side on every chat request.
+     */
+    public function canAccessChat(): bool
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        return $this->isMember() && $this->community_status->canChat();
+    }
+
+    /**
+     * The user's most privileged role name, for display.
+     */
+    public function primaryRole(): ?string
+    {
+        $names = $this->getRoleNames();
+
+        foreach (Roles::all() as $role) {
+            if ($names->contains($role)) {
+                return $role;
+            }
+        }
+
+        return null;
+    }
+
+    public function primaryRoleLabel(): string
+    {
+        $role = $this->primaryRole();
+
+        return $role === null ? 'User' : (Roles::labels()[$role] ?? $role);
     }
 }

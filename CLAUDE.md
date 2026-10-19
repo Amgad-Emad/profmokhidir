@@ -3,6 +3,7 @@
 Laravel 13 application served locally by Laravel Valet at https://profmokhidir.test.
 Stack: Laravel 13, Blade, Laravel Fortify (own Blade views in resources/views/auth, no starter kit),
 Livewire 4, Alpine.js, Tailwind CSS v4 via Vite, MySQL 8 (`profmokhidir` dev / `profmokhidir_testing` tests), PHPUnit.
+Roles and permissions use spatie/laravel-permission; all media uses spatie/laravel-medialibrary. Access media and roles only through repositories and services.
 Check composer.json and package.json for exact versions and use APIs that match them.
 
 ## Product
@@ -59,10 +60,12 @@ Tagline voice examples: "Teacher, scholar and mentor. A life devoted to knowledg
 - Use Form Requests for validation, Policies for authorisation, Eloquent scopes for published content.
 
 ## Architecture (always, for every feature)
+- Roles and permissions use spatie/laravel-permission; all media uses spatie/laravel-medialibrary. Access media and roles only through repositories and services (RoleRepository/RoleService and MediaRepository/MediaService): no HasRoles or addMedia() calls in controllers, Livewire components, views or seeders. Role and permission names live in app/Constants/Roles and app/Constants/Permissions; policies check permissions, never role names. Media is attached through named collections (app/Constants/MediaCollections) with the custom properties in app/Constants/MediaProperties (alt_text, caption, place, year, credit, permissions_note, treatment); images get queued responsive WebP conversions at 480/960/1600 (app/Constants/MediaConversions). Public content uses the `public` disk, members-only teaching files the `private` disk (app/Constants/Disks).
 - app/Constants: one final class per concept holding fixed values (e.g. Roles, ContentStatus, CommunityStatus, PublicationType, TributeStatus, CacheKeys). Never hardcode these strings elsewhere; use backed PHP enums inside app/Constants where a value set needs casting.
 - app/Repositories: all database access goes through repositories. Each has an interface in app/Repositories/Contracts and an Eloquent implementation in app/Repositories/Eloquent, bound in a RepositoryServiceProvider. Controllers and Livewire components never query models directly.
 - app/Services: business logic (publishing, approvals, uploads, notifications, audit logging) lives in services that depend on repository interfaces. Controllers and Livewire components stay thin: validate (Form Request), authorise (Policy), call a service, return a view or response.
 - Every model has a factory (with useful states such as published(), draft(), pending(), approved()) and a seeder, registered in DatabaseSeeder. No feature is done without both.
 - Tests: unit tests in tests/Unit for every service and repository; feature tests in tests/Feature for every route, Livewire component and permission rule. Tests always run against the separate MySQL testing database `profmokhidir_testing` (configured in phpunit.xml and .env.testing), never the development database, using RefreshDatabase.
 - Definition of done for any step: constants, repository (interface + implementation + binding), service, factory, seeder and tests exist for what was built, and `php artisan test` passes.
+- Always create files with the artisan generators, never by hand: php artisan make:migration (and make:migration add_x_to_y_table --table=y for changes), make:model Name -mfs, make:factory, make:seeder, make:controller, make:request, make:policy --model=, make:middleware, make:notification, make:mail, make:job, make:event, make:listener, make:rule, make:enum, make:interface, make:class, make:provider, make:livewire, make:test and make:test --unit. Then fill in the generated file. Never edit a migration that has already run; add a new migration for every schema change.
 - Do not commit or push; the owner reviews and commits.

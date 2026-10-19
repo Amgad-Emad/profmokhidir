@@ -4,28 +4,29 @@ declare(strict_types=1);
 
 namespace App\Constants;
 
+use App\Constants\Concerns\HasValues;
+
 /**
  * Publication status shared by every public content type.
  * Models expose it through a `status` column and a `published()` scope.
  */
-final class ContentStatus
+enum ContentStatus: string
 {
-    public const string DRAFT = 'draft';
+    use HasValues;
 
-    public const string PUBLISHED = 'published';
+    case Draft = 'draft';
+    case Published = 'published';
 
-    public const string DEFAULT = self::DRAFT;
-
-    /**
-     * @return list<string>
-     */
-    public static function all(): array
+    public static function default(): self
     {
-        return [self::DRAFT, self::PUBLISHED];
+        return self::Draft;
     }
 
-    public static function isValid(string $status): bool
+    public function label(): string
     {
-        return in_array($status, self::all(), true);
+        return match ($this) {
+            self::Draft => 'Draft',
+            self::Published => 'Published',
+        };
     }
 }

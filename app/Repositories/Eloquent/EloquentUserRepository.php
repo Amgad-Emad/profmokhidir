@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories\Eloquent;
 
+use App\Constants\CommunityStatus;
 use App\Models\User;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -26,13 +27,14 @@ class EloquentUserRepository extends BaseEloquentRepository implements UserRepos
 
     public function withRole(string $role): Collection
     {
-        return $this->query()->role($role)->orderBy('name')->get();
+        return $this->query()->role($role)->with('roles')->orderBy('name')->get();
     }
 
     public function paginateByRole(?string $role = null, int $perPage = 15): LengthAwarePaginator
     {
         return $this->query()
             ->when($role !== null, fn ($query) => $query->role($role))
+            ->with('roles')
             ->orderBy('name')
             ->paginate($perPage);
     }
@@ -40,5 +42,24 @@ class EloquentUserRepository extends BaseEloquentRepository implements UserRepos
     public function countByRole(string $role): int
     {
         return $this->query()->role($role)->count();
+    }
+
+    public function withCommunityStatus(CommunityStatus $status): Collection
+    {
+        return $this->query()->communityStatus($status)->with('roles')->orderBy('name')->get();
+    }
+
+    public function countByCommunityStatus(CommunityStatus $status): int
+    {
+        return $this->query()->communityStatus($status)->count();
+    }
+
+    public function paginateByCommunityStatus(?CommunityStatus $status = null, int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->query()
+            ->when($status !== null, fn ($query) => $query->communityStatus($status))
+            ->with('roles')
+            ->orderByDesc('id')
+            ->paginate($perPage);
     }
 }

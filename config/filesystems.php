@@ -38,6 +38,16 @@ return [
             'report' => false,
         ],
 
+        // Members-only files (teaching materials). Never symlinked; served through a controller.
+        'private' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/media'),
+            'visibility' => 'private',
+            'serve' => false,
+            'throw' => false,
+            'report' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
