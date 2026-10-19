@@ -57,6 +57,26 @@ class OtherItemService extends AbstractContentService
     }
 
     /**
+     * Published items grouped by category, categories alphabetical with
+     * uncategorised items last under an empty key.
+     *
+     * @return array<string, Collection<int, OtherItem>>
+     */
+    public function publishedByCategory(): array
+    {
+        $grouped = $this->published()
+            ->groupBy(fn (OtherItem $item): string => trim((string) $item->category))
+            ->sortKeys();
+
+        if ($grouped->has('')) {
+            $uncategorised = $grouped->pull('');
+            $grouped->put('', $uncategorised);
+        }
+
+        return $grouped->map(fn ($items) => $items->values())->all();
+    }
+
+    /**
      * @return list<string>
      */
     public function categories(): array

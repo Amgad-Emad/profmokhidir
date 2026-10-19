@@ -47,6 +47,14 @@ class CommentaryService extends AbstractContentService
     }
 
     /**
+     * @return array{previous: Commentary|null, next: Commentary|null}
+     */
+    public function neighbours(Commentary $commentary): array
+    {
+        return $this->commentaries()->neighbours($commentary);
+    }
+
+    /**
      * @return list<string>
      */
     public function tags(): array

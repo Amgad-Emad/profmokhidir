@@ -79,4 +79,16 @@ class CommentaryServiceTest extends TestCase
         $this->assertTrue($this->service->findPublishedBySlug('on-teaching')->is($published));
         $this->assertNull($this->service->findPublishedBySlug('draft'));
     }
+
+    #[Test]
+    public function neighbours_delegate_to_the_repository(): void
+    {
+        $first = Commentary::factory()->published()->create(['sort_order' => 1]);
+        $second = Commentary::factory()->published()->create(['sort_order' => 2]);
+
+        $neighbours = $this->service->neighbours($second);
+
+        $this->assertTrue($neighbours['previous']->is($first));
+        $this->assertNull($neighbours['next']);
+    }
 }

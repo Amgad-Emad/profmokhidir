@@ -81,4 +81,21 @@ class OtherItemServiceTest extends TestCase
         $this->assertTrue($this->service->findPublishedBySlug('item')->is($published));
         $this->assertNull($this->service->findPublishedBySlug('draft'));
     }
+
+    #[Test]
+    public function published_by_category_sorts_categories_and_puts_uncategorised_last(): void
+    {
+        OtherItem::factory()->published()->create(['category' => null, 'sort_order' => 1]);
+        OtherItem::factory()->published()->category('Press')->create(['sort_order' => 2]);
+        OtherItem::factory()->published()->category('Archive')->create(['sort_order' => 3]);
+        OtherItem::factory()->published()->category('Press')->create(['sort_order' => 4]);
+        OtherItem::factory()->draft()->category('Archive')->create();
+
+        $grouped = $this->service->publishedByCategory();
+
+        $this->assertSame(['Archive', 'Press', ''], array_keys($grouped));
+        $this->assertCount(1, $grouped['Archive']);
+        $this->assertCount(2, $grouped['Press']);
+        $this->assertCount(1, $grouped['']);
+    }
 }

@@ -11,14 +11,17 @@ use Tests\TestCase;
 /**
  * Every public section without its own controller yet has a placeholder page on
  * the shared layout, so the navigation works end to end. Sections with a real
- * page (About) are covered by their own feature tests.
+ * page are covered by their own feature tests in tests/Feature/Pages.
  */
 class SectionRoutesTest extends TestCase
 {
     use RefreshDatabase;
 
     /** Sections that have their own controller and view. */
-    private const array BUILT = [Sections::ABOUT];
+    private const array BUILT = [
+        Sections::ABOUT, Sections::CV, Sections::PUBLICATIONS, Sections::AWARDS,
+        Sections::TEACHING, Sections::COMMENTARY, Sections::OTHER,
+    ];
 
     /**
      * @return iterable<string, array{string}>

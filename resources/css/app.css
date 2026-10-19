@@ -429,13 +429,117 @@
         background-color: var(--color-ivory);
     }
 
+    /* Links in metadata: file and external links ("Download · PDF · 2.1 MB", "Source · example.org"). */
+    .link-meta {
+        @apply inline-flex items-center gap-1 font-sans text-base font-medium text-evergreen;
+        text-decoration: underline;
+        text-decoration-color: var(--color-brass);
+        text-underline-offset: 0.2em;
+        transition: text-decoration-color 300ms var(--ease-rise);
+    }
+
+    .link-meta:hover,
+    .link-meta:focus-visible {
+        text-decoration-color: var(--color-evergreen);
+    }
+
+    /* Filter and pagination pills: outline by default, evergreen filled when current. */
+    .filter-pill {
+        @apply inline-flex min-h-11 items-center justify-center rounded-full border border-stone bg-transparent px-4 font-sans text-sm font-medium text-evergreen no-underline;
+        transition:
+            background-color 300ms var(--ease-rise),
+            border-color 300ms var(--ease-rise),
+            color 300ms var(--ease-rise);
+    }
+
+    .filter-pill:hover,
+    .filter-pill:focus-visible {
+        border-color: var(--color-evergreen);
+        text-decoration: none;
+    }
+
+    .filter-pill[aria-current] {
+        background-color: var(--color-evergreen);
+        border-color: var(--color-evergreen);
+        color: var(--color-ivory);
+    }
+
+    .filter-pill.is-disabled {
+        color: var(--color-ash);
+        border-color: var(--color-linen);
+    }
+
+    /* Selects in filter forms: quiet, pill shaped, evergreen text on ivory. */
+    .filter-select {
+        @apply min-h-11 w-full rounded-full border border-stone bg-ivory px-4 pr-10 font-sans text-sm font-medium text-evergreen;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10' fill='none' stroke='%2313221c' stroke-width='1'%3E%3Cpath d='M1 3.5 5 7.5 9 3.5'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 0.625rem;
+    }
+
+    /* Awards timeline: a brass hairline down the left with a small brass marker per entry. */
+    .timeline {
+        position: relative;
+        border-left: 1px solid var(--color-brass);
+    }
+
+    .timeline__item {
+        position: relative;
+        padding-left: 2rem;
+    }
+
+    .timeline__item::before {
+        content: '';
+        position: absolute;
+        left: -4px;
+        top: 0.45rem;
+        width: 7px;
+        height: 7px;
+        border-radius: 9999px;
+        background-color: var(--color-brass);
+    }
+
+    @media (min-width: 640px) {
+        .timeline__item {
+            padding-left: 3rem;
+        }
+    }
+
+    /* Citation disclosure on the publications list. */
+    .cite summary {
+        cursor: pointer;
+        list-style: none;
+    }
+
+    .cite summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .cite summary::after {
+        content: '+';
+        margin-left: 0.5rem;
+        color: var(--color-bronze);
+    }
+
+    .cite[open] summary::after {
+        content: '−';
+    }
+
+    .cite__text {
+        @apply mt-4 rounded-card border border-stone bg-ivory p-5 font-sans text-base font-light leading-relaxed text-evergreen;
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+
     /* Hero portrait: a 4px-radius frame with a cypress hairline. */
     .hero__portrait .photo__frame {
         border: 1px solid var(--color-cypress);
     }
 
     /*
-     | Biography prose (editor HTML reduced by App\Support\RichText): body copy at a
+     | Reading prose for the biography and commentary (editor HTML reduced by App\Support\RichText): body copy at a
      | ~68ch measure, Cormorant headings, and the blockquote in the quote style.
      */
     .prose-bio {

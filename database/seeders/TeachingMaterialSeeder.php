@@ -5,21 +5,26 @@ namespace Database\Seeders;
 use App\Constants\TeachingAccess;
 use App\Constants\TeachingMaterialType;
 use App\Models\TeachingMaterial;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Services\TeachingMaterialService;
+use App\Support\PlaceholderDocument;
 use Illuminate\Database\Seeder;
 
+/**
+ * Placeholder materials with a one-page placeholder PDF each, attached through
+ * the service so members-only files land on the private disk.
+ */
 class TeachingMaterialSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
-    public function run(): void
+    public function run(TeachingMaterialService $materials): void
     {
         if (TeachingMaterial::query()->exists()) {
             return;
         }
 
-        $materials = [
+        $rows = [
             ['AGR 205 Principles of Agronomy', 'Course outline', TeachingMaterialType::Syllabus, 'Syllabus 2004/05', TeachingAccess::Public],
             ['AGR 205 Principles of Agronomy', 'Crop growth and development', TeachingMaterialType::Slides, 'Lecture 3 slides', TeachingAccess::Public],
             ['AGR 205 Principles of Agronomy', 'Field practical: seed rate trials', TeachingMaterialType::Exercise, 'Practical 2', TeachingAccess::Members],
@@ -30,8 +35,8 @@ class TeachingMaterialSeeder extends Seeder
             ['AGR 412 Soil Fertility', 'Past examination papers', TeachingMaterialType::Other, 'Exam archive', TeachingAccess::Members],
         ];
 
-        foreach ($materials as $index => [$course, $topic, $type, $title, $access]) {
-            TeachingMaterial::factory()->published()->create([
+        foreach ($rows as $index => [$course, $topic, $type, $title, $access]) {
+            $material = $materials->create([
                 'title' => '[Placeholder] '.$title,
                 'course' => $course,
                 'topic' => $topic,
@@ -39,10 +44,15 @@ class TeachingMaterialSeeder extends Seeder
                 'description' => '[Placeholder] Description of this material, to be replaced with approved text.',
                 'version' => 'v1.0',
                 'material_date' => now()->subYears(15 + $index)->toDateString(),
-                'external_url' => null,
+                'external_url' => $index === 4 ? 'https://example.com/placeholder-reading-list' : null,
                 'access' => $access,
+                'status' => 'published',
                 'sort_order' => $index + 1,
             ]);
+
+            if ($index !== 4) {
+                $materials->attachFile($material, PlaceholderDocument::pdf('[Placeholder] '.$title));
+            }
         }
     }
 }

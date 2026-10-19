@@ -66,4 +66,26 @@ class EloquentCommentaryRepositoryTest extends TestCase
 
         $this->assertSame(['education', 'policy', 'sudan'], $this->repository->publishedTags());
     }
+
+    #[Test]
+    public function neighbours_follow_listing_order_and_skip_drafts(): void
+    {
+        $first = Commentary::factory()->published()->create(['sort_order' => 1, 'date' => '2022-01-01']);
+        $second = Commentary::factory()->published()->create(['sort_order' => 2, 'date' => '2021-06-01']);
+        Commentary::factory()->draft()->create(['sort_order' => 3, 'date' => '2021-03-01']);
+        $third = Commentary::factory()->published()->create(['sort_order' => 4, 'date' => '2020-01-01']);
+        $draft = Commentary::factory()->draft()->create(['sort_order' => 5]);
+
+        $middle = $this->repository->neighbours($second);
+        $this->assertTrue($middle['previous']->is($first));
+        $this->assertTrue($middle['next']->is($third));
+
+        $this->assertNull($this->repository->neighbours($first)['previous']);
+        $this->assertTrue($this->repository->neighbours($first)['next']->is($second));
+
+        $this->assertTrue($this->repository->neighbours($third)['previous']->is($second));
+        $this->assertNull($this->repository->neighbours($third)['next']);
+
+        $this->assertSame(['previous' => null, 'next' => null], $this->repository->neighbours($draft));
+    }
 }

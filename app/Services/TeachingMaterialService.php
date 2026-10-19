@@ -37,12 +37,13 @@ class TeachingMaterialService extends AbstractContentService
 
     protected function cacheKeys(): array
     {
-        return [CacheKeys::TEACHING_MATERIALS, CacheKeys::TEACHING_MATERIALS.'.members'];
+        return [CacheKeys::TEACHING_MATERIALS, CacheKeys::TEACHING_MATERIALS.'.public', CacheKeys::TEACHING_MATERIALS.'.members'];
     }
 
     /**
-     * Published materials the visitor may see: members-only ones only for
-     * approved members and staff.
+     * Published materials whose file the visitor may download: members-only ones
+     * only for approved members and staff. The public listing uses published()
+     * instead, so members-only items appear with a note rather than a file.
      *
      * @return Collection<int, TeachingMaterial>
      */
@@ -55,7 +56,7 @@ class TeachingMaterialService extends AbstractContentService
             return $this->remember(CacheKeys::TEACHING_MATERIALS.'.members', fn (): Collection => $repository->publishedWithAccess(TeachingAccess::Public, TeachingAccess::Members));
         }
 
-        return $this->remember(CacheKeys::TEACHING_MATERIALS, fn (): Collection => $repository->publishedWithAccess(TeachingAccess::Public));
+        return $this->remember(CacheKeys::TEACHING_MATERIALS.'.public', fn (): Collection => $repository->publishedWithAccess(TeachingAccess::Public));
     }
 
     public function canSeeMembersMaterials(?User $viewer): bool

@@ -51,7 +51,7 @@ class NavigationServiceTest extends TestCase
             $this->assertFalse($item['active']);
         }
 
-        $this->assertSame(url('/other-information'), $this->navigation->section(Sections::OTHER)['url']);
+        $this->assertSame(url('/other'), $this->navigation->section(Sections::OTHER)['url']);
     }
 
     #[Test]

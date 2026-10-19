@@ -46,6 +46,24 @@ class EloquentCommentaryRepository extends BaseContentRepository implements Comm
             ->withQueryString();
     }
 
+    public function neighbours(Commentary $commentary): array
+    {
+        $ids = $this->publishedQuery()->pluck('id')->map(fn ($id): int => (int) $id)->values();
+        $position = $ids->search((int) $commentary->getKey());
+
+        if ($position === false) {
+            return ['previous' => null, 'next' => null];
+        }
+
+        $previousId = $position > 0 ? $ids->get($position - 1) : null;
+        $nextId = $ids->get($position + 1);
+
+        return [
+            'previous' => $previousId === null ? null : $this->publishedQuery()->find($previousId),
+            'next' => $nextId === null ? null : $this->publishedQuery()->find($nextId),
+        ];
+    }
+
     public function publishedTags(): array
     {
         $tags = $this->query()->published()->whereNotNull('tags')->pluck('tags')

@@ -61,14 +61,20 @@ class TeachingMaterialServiceTest extends TestCase
         TeachingMaterial::factory()->published()->membersOnly()->create();
 
         $this->service->publishedFor(null);
-        $this->assertTrue(Cache::has(CacheKeys::TEACHING_MATERIALS));
+        $this->assertTrue(Cache::has(CacheKeys::TEACHING_MATERIALS.'.public'));
         $this->assertFalse(Cache::has(CacheKeys::TEACHING_MATERIALS.'.members'));
+
+        $this->service->published();
+        $this->assertTrue(Cache::has(CacheKeys::TEACHING_MATERIALS));
+        $this->assertCount(1, $this->service->published());
+        $this->assertCount(0, $this->service->publishedFor(null));
 
         $this->service->publishedFor(User::factory()->member()->create());
         $this->assertTrue(Cache::has(CacheKeys::TEACHING_MATERIALS.'.members'));
 
         $this->service->create(['title' => 'New', 'type' => 'notes']);
         $this->assertFalse(Cache::has(CacheKeys::TEACHING_MATERIALS));
+        $this->assertFalse(Cache::has(CacheKeys::TEACHING_MATERIALS.'.public'));
         $this->assertFalse(Cache::has(CacheKeys::TEACHING_MATERIALS.'.members'));
     }
 

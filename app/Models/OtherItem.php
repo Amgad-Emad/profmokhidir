@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -51,6 +52,19 @@ class OtherItem extends Model implements HasMedia
     public function registerMediaConversions(?Media $media = null): void
     {
         $this->registerResponsiveWebpConversions($media, [MediaCollections::MEDIA], responsive: true);
+    }
+
+    /**
+     * An item has its own page when it carries a body and no destination link.
+     */
+    public function hasDetail(): bool
+    {
+        return filled($this->body) && blank($this->destination_url);
+    }
+
+    public function typeLabel(): ?string
+    {
+        return filled($this->item_type) ? Str::headline((string) $this->item_type) : null;
     }
 
     /**

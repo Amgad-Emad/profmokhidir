@@ -24,6 +24,14 @@ interface CommentaryRepositoryInterface extends ContentRepositoryInterface
     public function paginatePublishedTagged(?string $tag = null, int $perPage = 10): LengthAwarePaginator;
 
     /**
+     * The published commentaries either side of the given one in listing order:
+     * `previous` is the one listed before it (newer), `next` the one after (older).
+     *
+     * @return array{previous: Commentary|null, next: Commentary|null}
+     */
+    public function neighbours(Commentary $commentary): array;
+
+    /**
      * Distinct tags across published commentaries, alphabetical.
      *
      * @return list<string>

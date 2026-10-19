@@ -100,6 +100,17 @@ class DatabaseSeederTest extends TestCase
         }
 
         $this->assertSame(0, Publication::query()->get()->filter(fn (Publication $p): bool => $p->file() !== null)->count());
+
+        $materials = TeachingMaterial::query()->get();
+        $this->assertSame(7, $materials->filter(fn (TeachingMaterial $m): bool => $m->file() !== null)->count());
+        $this->assertSame(1, $materials->filter(fn (TeachingMaterial $m): bool => filled($m->external_url))->count());
+
+        foreach ($materials as $material) {
+            if ($material->file() !== null) {
+                $this->assertSame($material->fileDisk(), $material->file()->disk, "teaching material {$material->id} is on the wrong disk");
+                $this->assertGreaterThan(0, $material->file()->size);
+            }
+        }
     }
 
     private function assertPlaceholderMarkers(): void

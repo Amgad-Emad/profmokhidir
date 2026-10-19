@@ -165,7 +165,7 @@ final class Sections
             self::OTHER => [
                 'label' => 'Other Information',
                 'title' => 'Other Information',
-                'path' => '/other-information',
+                'path' => '/other',
                 'route' => 'other',
                 'placement' => self::PLACEMENT_FOOTER,
                 'summary' => 'Further notes and resources that do not belong to another section.',
