@@ -1,5 +1,2 @@
-{{-- Brand typefaces from Google Fonts. Preconnect first, then the stylesheet with display=swap. --}}
-@foreach (\App\Constants\Typography::preconnects() as $origin)
-    <link rel="preconnect" href="{{ $origin['href'] }}"{!! $origin['crossorigin'] ? ' crossorigin' : '' !!}>
-@endforeach
-<link rel="stylesheet" href="{{ \App\Constants\Typography::GOOGLE_FONTS_URL }}">
+{{-- Brand typefaces, self-hosted from public/fonts (see resources/css/fonts.css). The display face is preloaded; nothing is fetched from a third party. --}}
+<link rel="preload" href="{{ asset(\App\Constants\Typography::path(\App\Constants\Typography::PRELOAD_FILE)) }}" as="font" type="font/woff2" crossorigin>

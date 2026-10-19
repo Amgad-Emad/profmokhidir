@@ -107,8 +107,10 @@ class PublicLayoutTest extends TestCase
         $this->assertCount(11, $links[1]);
         $this->assertContains('Other Information', $links[1]);
 
+        preg_match('/<body[^>]*>(.*?)<\/body>/s', $this->html, $body);
+
         foreach (['facebook', 'twitter', 'x.com', 'linkedin', 'instagram', 'gtag', 'analytics', 'fbq('] as $widget) {
-            $this->assertStringNotContainsStringIgnoringCase($widget, $this->html, "No {$widget} widget or tracker");
+            $this->assertStringNotContainsStringIgnoringCase($widget, $body[1], "No {$widget} widget or tracker");
         }
     }
 

@@ -52,6 +52,6 @@ class StyleguideRouteTest extends TestCase
             ->assertOk()
             ->assertDontSee('livewire', false)
             ->assertSee('id="duotone-archive"', false)
-            ->assertSee(e(Typography::GOOGLE_FONTS_URL), false);
+            ->assertSee(Typography::path(Typography::FILE_SANS), false);
     }
 }

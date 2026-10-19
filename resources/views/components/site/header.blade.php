@@ -2,7 +2,7 @@
 <header class="site-header fixed inset-x-0 top-0 z-40" x-data="siteMenu" @keydown.escape.window="open && close()" @resize.window="onResize()">
     <div class="glass-header on-dark text-champagne">
         <div class="mx-auto flex h-20 max-w-7xl items-center justify-between gap-6 px-4 sm:px-6">
-            <x-brand.lockup variant="horizontal" :href="route('home')" class="shrink-0" />
+            <x-brand.lockup variant="horizontal" label-tone="champagne" :href="route('home')" class="shrink-0" />
 
             <nav class="hidden lg:block" aria-label="Primary">
                 <ul class="flex items-center gap-6">

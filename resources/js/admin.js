@@ -40,7 +40,12 @@ document.addEventListener('alpine:init', () => {
                 ],
                 content: this.$wire.get(field) || '',
                 editorProps: {
-                    attributes: { role: 'textbox', 'aria-multiline': 'true', class: 'rich-text__editable' },
+                    attributes: {
+                        role: 'textbox',
+                        'aria-multiline': 'true',
+                        'aria-labelledby': this.$refs.editor.dataset.labelId,
+                        class: 'rich-text__editable',
+                    },
                 },
                 onUpdate: ({ editor }) => {
                     const html = editor.isEmpty ? '' : editor.getHTML();

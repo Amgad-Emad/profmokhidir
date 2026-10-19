@@ -4,6 +4,7 @@ use App\Constants\AdminNavigation;
 use App\Constants\ContentTypes;
 use App\Constants\Permissions;
 use App\Constants\RateLimits;
+use App\Constants\Seo;
 use App\Constants\Roles;
 use App\Constants\Sections;
 use App\Http\Controllers\AboutController;
@@ -19,7 +20,9 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OtherItemController;
 use App\Http\Controllers\PictureController;
 use App\Http\Controllers\PublicationController;
+use App\Http\Controllers\RobotsController;
 use App\Http\Controllers\SectionPlaceholderController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\StyleguideController;
 use App\Http\Controllers\TeachingMaterialController;
 use App\Http\Controllers\TributeController;
@@ -51,6 +54,10 @@ use App\Livewire\Community\Chat\Room as ChatRoom;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
+
+// Crawlers: the sitemap of published content and the robots rules (no static files, so both follow APP_URL).
+Route::get(Seo::SITEMAP_PATH, SitemapController::class)->name(Seo::SITEMAP_ROUTE);
+Route::get(Seo::ROBOTS_PATH, RobotsController::class)->name(Seo::ROBOTS_ROUTE);
 
 // Sections with their own controller. Each keeps the route name from Sections::definitions();
 // detail routes nest under the same name (e.g. commentary.show).

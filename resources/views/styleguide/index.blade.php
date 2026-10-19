@@ -262,8 +262,12 @@ SVG);
                     <div class="card card-ivory text-center"><p class="font-display text-3xl">{{ $n }}</p><p class="t-label mt-1 text-bronze">staggered {{ Motion::STAGGER_MS }}ms</p></div>
                 @endforeach
             </div>
-            <p class="t-label mt-16 text-bronze">Google Fonts request</p>
-            <code class="mt-2 block break-all font-mono text-xs text-ash">{{ Typography::GOOGLE_FONTS_URL }}</code>
+            <p class="t-label mt-16 text-bronze">Self-hosted font files</p>
+            <ul class="mt-2 flex flex-col gap-1">
+                @foreach (Typography::files() as $file)
+                    <li><code class="block break-all font-mono text-xs text-ash">{{ Typography::path($file['file']) }} · {{ $file['family'] }} {{ $file['style'] }} {{ $file['weight'] }}</code></li>
+                @endforeach
+            </ul>
         </section>
     </div>
 </x-layouts.public>

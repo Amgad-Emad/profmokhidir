@@ -1,4 +1,4 @@
-<x-layouts.public :title="$commentary->title" :description="$commentary->summary">
+<x-layouts.public :title="$commentary->title" :description="$commentary->summary" :type="\App\Constants\Seo::OG_TYPE_ARTICLE">
     <article class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28" aria-labelledby="section-title">
         <div class="mx-auto max-w-[68ch]">
             <x-section-header :label="$section['label']" :title="$commentary->title" level="1" id="section-title" />

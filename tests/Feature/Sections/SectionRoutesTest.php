@@ -45,9 +45,26 @@ class SectionRoutesTest extends TestCase
         }
     }
 
+    /**
+     * Every section now has its own page, so the provider is empty; PHPUnit treats
+     * an empty data provider as an error, so the loop lives inside the test and the
+     * test is skipped until a new section is added.
+     */
     #[Test]
-    #[DataProvider('placeholderSections')]
-    public function each_placeholder_section_page_renders_its_title_and_empty_state(string $key): void
+    public function each_placeholder_section_page_renders_its_title_and_empty_state(): void
+    {
+        $keys = array_map(fn (array $arguments): string => $arguments[0], iterator_to_array(self::placeholderSections()));
+
+        if ($keys === []) {
+            $this->markTestSkipped('No placeholder sections remain.');
+        }
+
+        foreach ($keys as $key) {
+            $this->assertPlaceholderPage($key);
+        }
+    }
+
+    private function assertPlaceholderPage(string $key): void
     {
         $section = Sections::definitions()[$key];
 

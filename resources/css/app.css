@@ -4,6 +4,7 @@
 @source '../../vendor/laravel/fortify/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
+@import './fonts.css';
 @import './media.css';
 
 /*
@@ -63,6 +64,8 @@
     html {
         @apply bg-ivory font-sans font-light text-evergreen antialiased;
         -webkit-text-size-adjust: 100%;
+        /* Anchored and focused targets land below the fixed 5rem header (WCAG 2.4.11 focus not obscured). */
+        scroll-padding-top: 6.5rem;
     }
 
     body {
@@ -857,6 +860,13 @@
 .rich-text__editable {
     outline: none;
     min-height: 14rem;
+}
+
+/* The editable itself shows the focus ring (the wrapper's border also turns bronze). */
+.rich-text__editable:focus-visible {
+    outline: 2px solid var(--color-bronze);
+    outline-offset: -2px;
+    border-radius: var(--radius-card);
 }
 
 .rich-text__editable p.is-editor-empty:first-child::before {

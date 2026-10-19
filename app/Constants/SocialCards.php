@@ -21,11 +21,17 @@ final class SocialCards
     /** Shown in label style along the foot of the card. */
     public const string DOMAIN = 'profmokhidir.com';
 
+    /** The card every page shares unless a section has its own. */
+    public const string SITE = 'images/social/site.png';
+
     /** Card key => path under public/. */
     public const string TRIBUTES = 'images/social/tributes.png';
 
     /** Ring diameter of the mark on the card, in pixels. */
     public const int MARK_SIZE_PX = 96;
+
+    /** Key of the shared card in all(). */
+    public const string KEY_SITE = 'site';
 
     /** Fonts used to draw the cards, relative to resources/fonts. */
     public const string FONT_DISPLAY_ITALIC = 'CormorantGaramond-LightItalic.ttf';
@@ -39,11 +45,19 @@ final class SocialCards
      */
     public static function all(): array
     {
-        return [Sections::TRIBUTES => self::TRIBUTES];
+        return [self::KEY_SITE => self::SITE, Sections::TRIBUTES => self::TRIBUTES];
     }
 
     public static function for(string $section): ?string
     {
         return self::all()[$section] ?? null;
+    }
+
+    /**
+     * The card for a section, or the shared site card.
+     */
+    public static function forOrDefault(?string $section): string
+    {
+        return $section === null ? self::SITE : (self::for($section) ?? self::SITE);
     }
 }

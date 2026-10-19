@@ -78,7 +78,8 @@ class AboutPageTest extends TestCase
 
         $response
             ->assertSee('<p>Safe.</p>alert(1)<p>Also safe.</p>', false)
-            ->assertDontSee('<script', false)
+            ->assertDontSee('<script>', false)
+            ->assertDontSee('alert(1)</script>', false)
             ->assertDontSee('onclick', false)
             ->assertDontSee('<figure', false)
             ->assertDontSee('id="expertise-title"', false)

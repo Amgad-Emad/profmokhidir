@@ -1,4 +1,4 @@
-<x-layouts.public :title="$section['title']" :description="$section['summary']">
+<x-layouts.public :title="$section['title']" :description="$description" :schema="$schema" :type="\App\Constants\Seo::OG_TYPE_PROFILE">
     <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28" aria-labelledby="section-title">
         <x-section-header :label="$section['label']" :title="$section['title']" level="1" id="section-title" />
 

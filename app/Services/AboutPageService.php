@@ -19,6 +19,7 @@ class AboutPageService
     public function __construct(
         private readonly ProfileService $profiles,
         private readonly NavigationService $navigation,
+        private readonly SeoService $seo,
     ) {}
 
     /**
@@ -30,17 +31,21 @@ class AboutPageService
      *     expertise: list<string>,
      *     facts: list<array{label: string, value: string}>,
      *     contact: array{email: string|null, note: string|null},
-     *     links: list<array{key: string, label: string, title: string, url: string, route: string, placement: string, summary: string, active: bool}>
+     *     links: list<array{key: string, label: string, title: string, url: string, route: string, placement: string, summary: string, active: bool}>,
+     *     description: string|null,
+     *     schema: array<string, mixed>|null
      * }
      */
     public function data(): array
     {
         $profile = $this->profiles->get();
+        $section = $this->navigation->section(Sections::ABOUT, Sections::ABOUT);
+        $portrait = $profile?->portrait();
 
         return [
-            'section' => $this->navigation->section(Sections::ABOUT, Sections::ABOUT),
+            'section' => $section,
             'profile' => $profile,
-            'portrait' => $profile?->portrait(),
+            'portrait' => $portrait,
             'bio' => RichText::sanitise($profile?->full_bio),
             'expertise' => $this->expertise($profile),
             'facts' => $this->facts($profile),
@@ -49,6 +54,8 @@ class AboutPageService
                 'note' => filled($profile?->contact_note) ? $profile->contact_note : null,
             ],
             'links' => $this->links(),
+            'description' => $this->seo->description($profile?->short_bio, $section['summary']),
+            'schema' => $profile === null ? null : $this->seo->person($profile, $portrait, $section['url']),
         ];
     }
 

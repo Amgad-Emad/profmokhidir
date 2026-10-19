@@ -23,3 +23,17 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# Built assets carry a content hash in their name (public/build) and the brand
+# fonts are versioned by file; both may be cached for a year. Everything else
+# is left to the application.
+<IfModule mod_headers.c>
+    <FilesMatch "\.(css|js|woff2)$">
+        <If "%{REQUEST_URI} =~ m#^/(build|fonts)/#">
+            Header set Cache-Control "public, max-age=31536000, immutable"
+        </If>
+    </FilesMatch>
+    <FilesMatch "\.(png|svg|ico|webp|jpe?g|webmanifest)$">
+        Header set Cache-Control "public, max-age=604800"
+    </FilesMatch>
+</IfModule>

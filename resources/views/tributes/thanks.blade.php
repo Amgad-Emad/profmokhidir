@@ -1,4 +1,4 @@
-<x-layouts.public title="Thank you" :description="$message">
+<x-layouts.public title="Thank you" :description="$message" :noindex="true">
     <section class="glow-brass on-dark bg-evergreen text-champagne" aria-labelledby="section-title">
         <div class="mx-auto flex min-h-[calc(100svh-5rem)] max-w-3xl flex-col justify-center px-4 py-24 sm:px-6 lg:py-32">
             <p class="t-label text-brass" data-rise>{{ $section['label'] }}</p>

@@ -17,12 +17,17 @@ class GenerateSocialCardsTest extends TestCase
 
         try {
             $this->artisan('brand:social-cards', ['--output' => $directory])
+                ->expectsOutputToContain('site card written to')
                 ->expectsOutputToContain('tributes card written to')
                 ->assertSuccessful();
 
-            $this->assertSame([Sections::TRIBUTES => 'images/social/tributes.png'], SocialCards::all());
+            $this->assertSame([SocialCards::KEY_SITE => 'images/social/site.png', Sections::TRIBUTES => 'images/social/tributes.png'], SocialCards::all());
             $this->assertSame(SocialCards::TRIBUTES, SocialCards::for(Sections::TRIBUTES));
             $this->assertNull(SocialCards::for(Sections::ABOUT));
+            $this->assertSame(SocialCards::SITE, SocialCards::forOrDefault(Sections::ABOUT));
+            $this->assertSame(SocialCards::SITE, SocialCards::forOrDefault(null));
+            $this->assertSame(SocialCards::TRIBUTES, SocialCards::forOrDefault(Sections::TRIBUTES));
+            $this->assertFileExists($directory.'/'.SocialCards::SITE);
 
             $path = $directory.'/'.SocialCards::TRIBUTES;
             $this->assertFileExists($path);

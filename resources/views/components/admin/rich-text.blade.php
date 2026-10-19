@@ -31,7 +31,7 @@
                 <button type="button" x-on:click="unsetLink()">Remove</button>
             </div>
         </div>
-        <div id="{{ $id }}-editor" x-ref="editor" class="rich-text__content prose-bio" aria-labelledby="{{ $id }}-label" aria-multiline="true"></div>
+        <div id="{{ $id }}-editor" x-ref="editor" class="rich-text__content prose-bio" data-label-id="{{ $id }}-label"></div>
     </div>
     <noscript>
         <textarea id="{{ $id }}" rows="12" wire:model.blur="{{ $name }}" class="mt-2 block w-full rounded-card border border-stone bg-ivory px-4 py-3 font-mono text-sm text-evergreen"></textarea>

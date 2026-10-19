@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Constants;
 
 /**
- * Brand typefaces and type scale. Sizes are the desktop values from the brand
- * guide; the CSS classes scale display and heading sizes down fluidly on small screens.
+ * Brand typefaces and type scale. The faces are self-hosted WOFF2 files (no
+ * request leaves the site before the visitor acts). Sizes are the desktop values
+ * from the brand guide; the CSS classes scale display and heading sizes down
+ * fluidly on small screens.
  */
 final class Typography
 {
@@ -16,23 +18,43 @@ final class Typography
 
     public const string MONO_FAMILY = 'JetBrains Mono';
 
-    public const string GOOGLE_FONTS_URL = 'https://fonts.googleapis.com/css2'
-        .'?family=Cormorant+Garamond:ital,wght@0,300;1,300'
-        .'&family=Hanken+Grotesk:wght@300;400;500'
-        .'&family=JetBrains+Mono:wght@400'
-        .'&display=swap';
+    /** Self-hosted WOFF2 files under public/fonts (latin subset, from Google Fonts). */
+    public const string FONTS_DIRECTORY = 'fonts';
+
+    public const string FILE_DISPLAY = 'cormorant-garamond-light.woff2';
+
+    public const string FILE_DISPLAY_ITALIC = 'cormorant-garamond-light-italic.woff2';
+
+    public const string FILE_SANS = 'hanken-grotesk.woff2';
+
+    public const string FILE_MONO = 'jetbrains-mono.woff2';
+
+    /** The one file worth preloading: the display face draws the first heading. */
+    public const string PRELOAD_FILE = self::FILE_DISPLAY;
 
     /**
-     * Origins to preconnect to before the font stylesheet is requested.
+     * Font files served from public/fonts, as the @font-face rules in
+     * resources/css/fonts.css declare them. Weights are a range for the
+     * variable files and a single value otherwise.
      *
-     * @return list<array{href: string, crossorigin: bool}>
+     * @return list<array{file: string, family: string, style: string, weight: string}>
      */
-    public static function preconnects(): array
+    public static function files(): array
     {
         return [
-            ['href' => 'https://fonts.googleapis.com', 'crossorigin' => false],
-            ['href' => 'https://fonts.gstatic.com', 'crossorigin' => true],
+            ['file' => self::FILE_DISPLAY, 'family' => self::DISPLAY_FAMILY, 'style' => 'normal', 'weight' => '300'],
+            ['file' => self::FILE_DISPLAY_ITALIC, 'family' => self::DISPLAY_FAMILY, 'style' => 'italic', 'weight' => '300'],
+            ['file' => self::FILE_SANS, 'family' => self::SANS_FAMILY, 'style' => 'normal', 'weight' => '300 500'],
+            ['file' => self::FILE_MONO, 'family' => self::MONO_FAMILY, 'style' => 'normal', 'weight' => '400'],
         ];
+    }
+
+    /**
+     * Public path of a font file, relative to the document root.
+     */
+    public static function path(string $file): string
+    {
+        return self::FONTS_DIRECTORY.'/'.$file;
     }
 
     /**

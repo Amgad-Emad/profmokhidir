@@ -22,6 +22,7 @@ class PublicationsPageService
     public function __construct(
         private readonly PublicationService $publications,
         private readonly NavigationService $navigation,
+        private readonly SeoService $seo,
     ) {}
 
     /**
@@ -34,7 +35,8 @@ class PublicationsPageService
      *     active: array{type: PublicationType|null, year: int|null},
      *     isFiltered: bool,
      *     clearUrl: string,
-     *     allTypesUrl: string
+     *     allTypesUrl: string,
+     *     schema: list<array<string, mixed>>|null
      * }
      */
     public function data(?string $type = null, ?int $year = null): array
@@ -55,6 +57,7 @@ class PublicationsPageService
             'isFiltered' => $activeType !== null || $activeYear !== null,
             'clearUrl' => $this->url(),
             'allTypesUrl' => $this->url(null, $activeYear),
+            'schema' => $this->seo->scholarlyArticles($paginator->items(), $this->url()),
         ];
     }
 

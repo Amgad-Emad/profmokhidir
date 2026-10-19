@@ -16,21 +16,36 @@ class BrandLayoutTest extends TestCase
     use RefreshDatabase;
 
     #[Test]
-    public function public_pages_preconnect_and_load_google_fonts_with_swap(): void
+    public function public_pages_preload_the_self_hosted_display_font_and_request_no_third_party(): void
     {
         $response = $this->get(route('home'))->assertOk();
 
         $response
-            ->assertSee('<link rel="preconnect" href="https://fonts.googleapis.com">', false)
-            ->assertSee('<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>', false)
-            ->assertSee('<link rel="stylesheet" href="'.e(Typography::GOOGLE_FONTS_URL).'">', false)
-            ->assertSee('display=swap', false)
-            ->assertSee('Cormorant+Garamond:ital,wght@0,300;1,300', false)
-            ->assertSee('Hanken+Grotesk:wght@300;400;500', false)
-            ->assertSee('JetBrains+Mono', false);
+            ->assertSee('<link rel="preload" href="'.asset(Typography::path(Typography::PRELOAD_FILE)).'" as="font" type="font/woff2" crossorigin>', false)
+            ->assertDontSee('fonts.googleapis.com', false)
+            ->assertDontSee('fonts.gstatic.com', false);
 
         $this->assertSame(1, substr_count($response->getContent(), 'id="duotone-archive"'), 'Duotone filter is defined exactly once');
-        $this->assertSame(1, substr_count($response->getContent(), 'fonts.googleapis.com/css2'), 'Font stylesheet is requested once');
+        $this->assertSame(1, substr_count($response->getContent(), 'rel="preload" href="'.asset(Typography::path(Typography::PRELOAD_FILE))), 'Display font is preloaded once');
+    }
+
+    #[Test]
+    public function every_font_file_exists_and_is_declared_with_swap_in_the_stylesheet(): void
+    {
+        $css = file_get_contents(resource_path('css/fonts.css'));
+
+        foreach (Typography::files() as $font) {
+            $path = public_path(Typography::path($font['file']));
+            $this->assertFileExists($path);
+            $this->assertSame('wOF2', file_get_contents($path, false, null, 0, 4), $font['file'].' is WOFF2');
+            $this->assertStringContainsString("url('/".Typography::path($font['file'])."') format('woff2')", $css);
+            $this->assertStringContainsString("font-family: '".$font['family']."'", $css);
+            $this->assertStringContainsString('font-weight: '.$font['weight'].';', $css);
+        }
+
+        $this->assertSame(count(Typography::files()), substr_count($css, '@font-face'));
+        $this->assertSame(count(Typography::files()), substr_count($css, 'font-display: swap'));
+        $this->assertStringContainsString('unicode-range: U+0000-00FF', $css, 'Latin subset only');
     }
 
     #[Test]
@@ -48,14 +63,16 @@ class BrandLayoutTest extends TestCase
     #[Test]
     public function guest_and_admin_layouts_load_the_same_fonts(): void
     {
+        $preload = '<link rel="preload" href="'.asset(Typography::path(Typography::PRELOAD_FILE)).'" as="font" type="font/woff2" crossorigin>';
+
         $this->get(route('login'))
             ->assertOk()
-            ->assertSee(e(Typography::GOOGLE_FONTS_URL), false);
+            ->assertSee($preload, false);
 
         $this->actingAs(User::factory()->admin()->create())
             ->get(route('admin.dashboard'))
             ->assertOk()
-            ->assertSee(e(Typography::GOOGLE_FONTS_URL), false)
+            ->assertSee($preload, false)
             ->assertSee('id="duotone-archive"', false);
     }
 }
