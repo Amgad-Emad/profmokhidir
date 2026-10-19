@@ -8,6 +8,7 @@ use App\Constants\CacheKeys;
 use App\Models\Commentary;
 use App\Repositories\Contracts\CommentaryRepositoryInterface;
 use App\Services\Concerns\GeneratesSlugs;
+use App\Support\RichText;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
@@ -64,6 +65,10 @@ class CommentaryService extends AbstractContentService
 
     protected function prepare(array $data, $existing): array
     {
+        if (array_key_exists('body', $data)) {
+            $data['body'] = RichText::sanitise(is_string($data['body']) ? $data['body'] : null) ?: null;
+        }
+
         if (array_key_exists('tags', $data)) {
             $data['tags'] = $this->normaliseTags($data['tags']);
         }

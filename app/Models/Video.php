@@ -11,6 +11,7 @@ use Database\Factories\VideoFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -25,7 +26,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 class Video extends Model implements HasMedia
 {
     /** @use HasFactory<VideoFactory> */
-    use HasFactory, HasResponsiveImages, InteractsWithMedia, Publishable;
+    use HasFactory, HasResponsiveImages, InteractsWithMedia, Publishable, SoftDeletes;
 
     protected string $orderDateColumn = 'date';
 

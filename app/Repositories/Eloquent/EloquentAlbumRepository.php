@@ -14,6 +14,8 @@ class EloquentAlbumRepository extends BaseContentRepository implements AlbumRepo
 {
     protected array $searchColumns = ['title', 'description'];
 
+    protected array $sortableColumns = ['title'];
+
     protected array $publishedWith = ['media'];
 
     public function __construct(Album $album)

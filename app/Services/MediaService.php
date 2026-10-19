@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Constants\AuditAction;
+use App\Constants\ContentTypes;
 use App\Constants\MediaProperties;
 use App\Constants\MediaTreatment;
 use App\Models\User;
 use App\Repositories\Contracts\MediaRepositoryInterface;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use InvalidArgumentException;
 use Spatie\MediaLibrary\HasMedia;
@@ -29,30 +32,36 @@ class MediaService
     /**
      * @param  array<string, mixed>  $properties  keyed by MediaProperties
      */
-    public function attach(HasMedia $model, string|UploadedFile $file, string $collection, array $properties = [], ?string $disk = null, bool $preserveOriginal = false): Media
+    public function attach(HasMedia $model, string|UploadedFile $file, string $collection, array $properties = [], ?string $disk = null, bool $preserveOriginal = false, ?User $actor = null): Media
     {
         $properties = $this->normaliseProperties($properties) + $this->dimensions($file);
 
-        return $this->media->attach($model, $file, $collection, $properties, $disk, $preserveOriginal);
+        $media = $this->media->attach($model, $file, $collection, $properties, $disk, $preserveOriginal);
+
+        if ($actor !== null) {
+            $this->audit->record($actor, AuditAction::MEDIA_UPLOADED, $model instanceof Model ? $model : null, $this->auditMeta($media));
+        }
+
+        return $media;
     }
 
     /**
      * @param  array<string, mixed>  $properties
      */
-    public function updateProperties(Media $media, array $properties): Media
+    public function updateProperties(Media $media, array $properties, ?User $actor = null): Media
     {
-        return $this->media->updateProperties($media, $this->normaliseProperties($properties));
+        $media = $this->media->updateProperties($media, $this->normaliseProperties($properties));
+
+        if ($actor !== null) {
+            $this->audit->record($actor, AuditAction::MEDIA_UPDATED, $media->model, $this->auditMeta($media));
+        }
+
+        return $media;
     }
 
     public function remove(Media $media, ?User $actor = null): bool
     {
-        $this->audit->record($actor, AuditAction::MEDIA_DELETED, null, [
-            'media_id' => $media->getKey(),
-            'file_name' => $media->file_name,
-            'collection' => $media->collection_name,
-            'model_type' => $media->model_type,
-            'model_id' => $media->model_id,
-        ]);
+        $this->audit->record($actor, AuditAction::MEDIA_DELETED, null, $this->auditMeta($media));
 
         return $this->media->delete($media);
     }
@@ -80,6 +89,11 @@ class MediaService
         return $this->media->find($id);
     }
 
+    public function findOrFail(int $id): Media
+    {
+        return $this->media->findOrFail($id);
+    }
+
     /**
      * @param  list<int>  $orderedIds
      */
@@ -104,6 +118,64 @@ class MediaService
             MediaProperties::requiredForPublishing(),
             fn (string $key): bool => blank($media->getCustomProperty($key)),
         ));
+    }
+
+    public function isReadyForPublishing(Media $media): bool
+    {
+        return $this->missingForPublishing($media) === [];
+    }
+
+    /**
+     * Every image on the site for the media library.
+     *
+     * @param  array<string, mixed>  $filters  keyed by MediaRepositoryInterface::FILTER_*
+     * @return LengthAwarePaginator<int, Media>
+     */
+    public function library(?string $term = null, array $filters = [], int $perPage = 24): LengthAwarePaginator
+    {
+        return $this->media->searchImages($term, $filters, $perPage);
+    }
+
+    public function countIncompleteImages(): int
+    {
+        return $this->media->countIncompleteImages();
+    }
+
+    /**
+     * Where an image is used: the content type and record it belongs to, with
+     * a link to that record's admin screen, so editors can see what a deletion
+     * would affect.
+     *
+     * @return array{type: ?string, type_label: string, label: string, collection: string, url: ?string, trashed: bool}
+     */
+    public function usage(Media $media): array
+    {
+        $type = ContentTypes::keyForModel((string) $media->model_type);
+        /** @var Model|null $owner */
+        $owner = $media->model_type && $media->model_id
+            ? ($media->model_type)::withoutGlobalScopes()->find($media->model_id)
+            : null;
+
+        $typeLabel = $type === null ? class_basename((string) $media->model_type) : ContentTypes::get($type)['singular'];
+        $label = $owner?->getAttribute('title') ?? $owner?->getAttribute('name') ?? ($owner === null ? 'Not attached to any content' : $typeLabel.' #'.$owner->getKey());
+        $trashed = $owner !== null && method_exists($owner, 'trashed') && $owner->trashed();
+
+        $url = null;
+
+        if ($type !== null && $owner !== null && ! $trashed) {
+            $url = $type === ContentTypes::PROFILE
+                ? route(ContentTypes::editRoute($type))
+                : route(ContentTypes::editRoute($type), [ContentTypes::routeParameter($type) => $owner->getKey()]);
+        }
+
+        return [
+            'type' => $type,
+            'type_label' => $typeLabel,
+            'label' => (string) $label,
+            'collection' => (string) $media->collection_name,
+            'url' => $url,
+            'trashed' => $trashed,
+        ];
     }
 
     /**
@@ -164,5 +236,19 @@ class MediaService
         }
 
         return $clean;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function auditMeta(Media $media): array
+    {
+        return [
+            'media_id' => $media->getKey(),
+            'file_name' => $media->file_name,
+            'collection' => $media->collection_name,
+            'model_type' => $media->model_type,
+            'model_id' => $media->model_id,
+        ];
     }
 }

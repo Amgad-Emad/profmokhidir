@@ -96,7 +96,7 @@ class AwardServiceTest extends TestCase
 
         $this->assertTrue($this->service->delete($award, $actor));
 
-        $this->assertDatabaseMissing('awards', ['id' => $award->id]);
+        $this->assertSoftDeleted('awards', ['id' => $award->id]);
         $log = AuditLog::query()->where('action', AuditAction::CONTENT_DELETED)->where('subject_id', $award->id)->firstOrFail();
         $this->assertSame($actor->id, $log->user_id);
         $this->assertSame(['label' => 'Gone'], $log->meta);

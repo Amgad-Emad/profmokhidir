@@ -14,6 +14,7 @@ use App\Repositories\Contracts\TeachingMaterialRepositoryInterface;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\URL;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
@@ -102,6 +103,24 @@ class TeachingMaterialService extends AbstractContentService
         return $media;
     }
 
+    /**
+     * URL of the material's file. Members-only files live on the private disk
+     * and are reachable only through a temporary signed URL, which the download
+     * route verifies before the permission check.
+     */
+    public function downloadUrl(TeachingMaterial $material): ?string
+    {
+        if ($this->media->first($material, MediaCollections::FILE) === null) {
+            return null;
+        }
+
+        if ($material->isMembersOnly()) {
+            return URL::temporarySignedRoute('teaching.download', now()->addMinutes(TeachingAccess::SIGNED_URL_MINUTES), ['material' => $material->getKey()]);
+        }
+
+        return route('teaching.download', ['material' => $material->getKey()]);
+    }
+
     public function removeFile(TeachingMaterial $material, ?User $actor = null): void
     {
         $file = $this->media->first($material, MediaCollections::FILE);
@@ -113,12 +132,12 @@ class TeachingMaterialService extends AbstractContentService
         $this->flushCache();
     }
 
-    public function update($model, array $data): TeachingMaterial
+    public function update($model, array $data, ?User $actor = null): TeachingMaterial
     {
         $previousDisk = $model->fileDisk();
 
         /** @var TeachingMaterial $material */
-        $material = parent::update($model, $data);
+        $material = parent::update($model, $data, $actor);
 
         // Keep the file on the disk that matches the (possibly new) access level.
         if ($material->fileDisk() !== $previousDisk) {

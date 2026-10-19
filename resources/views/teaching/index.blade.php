@@ -76,7 +76,7 @@
                                         @if ($restricted)
                                             <p class="text-sm font-light italic text-ash">For community members. <a href="{{ $communityUrl }}" class="not-italic text-evergreen underline decoration-brass underline-offset-4">Join the community</a></p>
                                         @elseif ($file)
-                                            <x-file-link :media="$file" :href="route('teaching.download', $material)" label="Download" />
+                                            <x-file-link :media="$file" :href="$downloadUrls[$material->getKey()] ?? route('teaching.download', $material)" label="Download" />
                                         @elseif (filled($material->external_url))
                                             <x-external-link :href="$material->external_url" label="Open" />
                                         @endif

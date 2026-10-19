@@ -18,6 +18,8 @@ class EloquentCvEntryRepository extends BaseContentRepository implements CvEntry
 {
     protected array $searchColumns = ['title', 'organisation', 'role_description'];
 
+    protected array $sortableColumns = ['title', 'section', 'start_year'];
+
     protected array $filterColumns = ['status', 'section'];
 
     public function __construct(CvEntry $entry)

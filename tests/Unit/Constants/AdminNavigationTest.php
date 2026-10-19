@@ -51,8 +51,13 @@ class AdminNavigationTest extends TestCase
         $placeholders = AdminNavigation::placeholders();
 
         $this->assertArrayNotHasKey(AdminNavigation::ACCOUNT, $placeholders);
-        $this->assertArrayHasKey(AdminNavigation::TRIBUTES, $placeholders);
+        $this->assertArrayNotHasKey(AdminNavigation::TRIBUTES, $placeholders);
+        $this->assertArrayNotHasKey(AdminNavigation::PUBLICATIONS, $placeholders);
+        $this->assertArrayHasKey(AdminNavigation::USERS, $placeholders);
+        $this->assertTrue(AdminNavigation::isBuilt(AdminNavigation::MEDIA_LIBRARY));
+        $this->assertFalse(AdminNavigation::isBuilt(AdminNavigation::USERS));
         $this->assertSame('admin.tributes.index', AdminNavigation::routeFor(AdminNavigation::TRIBUTES));
+        $this->assertSame('admin.media.library', AdminNavigation::routeFor(AdminNavigation::MEDIA_LIBRARY));
         $this->assertSame(AdminNavigation::ACCOUNT_ROUTE, AdminNavigation::routeFor(AdminNavigation::ACCOUNT));
     }
 
@@ -61,7 +66,7 @@ class AdminNavigationTest extends TestCase
     {
         $items = AdminNavigation::itemsIn(AdminNavigation::GROUP_MEDIA);
 
-        $this->assertSame([AdminNavigation::VIDEOS, AdminNavigation::ALBUMS], array_keys($items));
+        $this->assertSame([AdminNavigation::VIDEOS, AdminNavigation::ALBUMS, AdminNavigation::MEDIA_LIBRARY], array_keys($items));
     }
 
     #[Test]

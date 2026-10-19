@@ -14,6 +14,8 @@ class EloquentProfileRepository extends BaseContentRepository implements Profile
 {
     protected array $searchColumns = ['name', 'title', 'affiliation'];
 
+    protected array $sortableColumns = ['name'];
+
     protected array $publishedWith = ['media'];
 
     public function __construct(Profile $profile)

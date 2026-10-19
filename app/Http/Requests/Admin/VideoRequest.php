@@ -1,0 +1,54 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Requests\Admin;
+
+use App\Constants\VideoProvider;
+use Illuminate\Validation\Rules\Enum;
+
+class VideoRequest extends ContentRequest
+{
+    public function __construct(private readonly ?int $ignoreId = null)
+    {
+        parent::__construct();
+    }
+
+    /**
+     * @return array<string, list<mixed>>
+     */
+    public function rules(): array
+    {
+        return [
+            'title' => ['required', 'string', 'max:255'],
+            'slug' => self::slugRule('videos', $this->ignoreId),
+            'date' => self::dateRule(),
+            'event' => ['nullable', 'string', 'max:255'],
+            'location' => ['nullable', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:2000'],
+            'provider' => ['required', new Enum(VideoProvider::class)],
+            'media_url' => ['required_unless:provider,'.VideoProvider::File->value, ...self::urlRule()],
+            'captions_url' => self::urlRule(),
+            'status' => self::statusRule(),
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return parent::messages() + [
+            'provider.Illuminate\Validation\Rules\Enum' => 'Choose where the video is hosted.',
+            'media_url.required_unless' => 'Enter the video link, or choose "Uploaded file" and upload it.',
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function attributes(): array
+    {
+        return ['media_url' => 'video link', 'captions_url' => 'captions link'];
+    }
+}

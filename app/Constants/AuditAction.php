@@ -32,11 +32,21 @@ final class AuditAction
 
     public const string USER_DELETED = 'user.deleted';
 
+    public const string CONTENT_CREATED = 'content.created';
+
+    public const string CONTENT_RESTORED = 'content.restored';
+
     public const string CONTENT_PUBLISHED = 'content.published';
 
     public const string CONTENT_UNPUBLISHED = 'content.unpublished';
 
     public const string CONTENT_DELETED = 'content.deleted';
+
+    public const string TRIBUTE_EDITED = 'tribute.edited';
+
+    public const string MEDIA_UPLOADED = 'media.uploaded';
+
+    public const string MEDIA_UPDATED = 'media.updated';
 
     public const string MEDIA_DELETED = 'media.deleted';
 
@@ -55,7 +65,8 @@ final class AuditAction
             self::TRIBUTE_APPROVED, self::TRIBUTE_REJECTED, self::TRIBUTE_DELETED,
             self::COMMUNITY_APPLIED, self::COMMUNITY_APPROVED, self::COMMUNITY_REJECTED, self::COMMUNITY_SUSPENDED,
             self::ROLE_ASSIGNED, self::ROLE_REMOVED, self::ROLES_SYNCED, self::USER_DELETED,
-            self::CONTENT_PUBLISHED, self::CONTENT_UNPUBLISHED, self::CONTENT_DELETED, self::MEDIA_DELETED,
+            self::CONTENT_CREATED, self::CONTENT_RESTORED, self::CONTENT_PUBLISHED, self::CONTENT_UNPUBLISHED, self::CONTENT_DELETED,
+            self::TRIBUTE_EDITED, self::MEDIA_UPLOADED, self::MEDIA_UPDATED, self::MEDIA_DELETED,
             self::CHAT_MESSAGE_DELETED, self::CHAT_REPORT_RESOLVED, self::ADMIN_LOGIN,
         ];
     }
@@ -79,9 +90,14 @@ final class AuditAction
             self::ROLE_REMOVED => 'removed a role',
             self::ROLES_SYNCED => 'changed roles',
             self::USER_DELETED => 'deleted a user',
+            self::CONTENT_CREATED => 'created content',
+            self::CONTENT_RESTORED => 'restored content from the trash',
             self::CONTENT_PUBLISHED => 'published content',
             self::CONTENT_UNPUBLISHED => 'unpublished content',
             self::CONTENT_DELETED => 'deleted content',
+            self::TRIBUTE_EDITED => 'edited a tribute',
+            self::MEDIA_UPLOADED => 'uploaded a file',
+            self::MEDIA_UPDATED => 'updated image details',
             self::MEDIA_DELETED => 'deleted a file',
             self::CHAT_MESSAGE_DELETED => 'deleted a chat message',
             self::CHAT_REPORT_RESOLVED => 'resolved a chat report',

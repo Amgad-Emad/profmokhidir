@@ -737,3 +737,151 @@
         transform: none;
     }
 }
+
+/* ------------------------------------------------------------------ admin */
+/*
+ | Admin screens: tabs, the index table, the status toggle and the Tiptap editor.
+ | Everything stays in the brand palette; state is shown by icon or text as well.
+ */
+.admin-tab {
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid transparent;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-ash);
+    margin-bottom: -1px;
+}
+
+.admin-tab:hover {
+    color: var(--color-evergreen);
+}
+
+.admin-tab[aria-selected='true'] {
+    border-bottom-color: var(--color-brass);
+    color: var(--color-evergreen);
+}
+
+.admin-table th {
+    padding: 0.875rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-bronze);
+    border-bottom: 1px solid var(--color-stone);
+    white-space: nowrap;
+}
+
+.admin-table td {
+    padding: 0.875rem 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--color-stone);
+    font-weight: 300;
+}
+
+.admin-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.admin-table tbody tr:hover {
+    background: var(--color-linen);
+}
+
+.admin-table tr.is-dragging {
+    opacity: 0.5;
+}
+
+.status-option:focus-within {
+    outline: 2px solid var(--color-bronze);
+    outline-offset: 2px;
+}
+
+.rich-text__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--color-stone);
+}
+
+.rich-text__toolbar > button {
+    min-width: 2.25rem;
+    height: 2.25rem;
+    padding: 0 0.5rem;
+    border-radius: var(--radius-card);
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    color: var(--color-evergreen);
+}
+
+.rich-text__toolbar > button:hover {
+    background: var(--color-linen);
+}
+
+.rich-text__toolbar > button[aria-pressed='true'] {
+    background: var(--color-evergreen);
+    color: var(--color-ivory);
+}
+
+.rich-text__link {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding-top: 0.5rem;
+}
+
+.rich-text__link input {
+    flex: 1 1 12rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--color-stone);
+    border-radius: var(--radius-card);
+    background: var(--color-ivory);
+    font-size: 0.875rem;
+}
+
+.rich-text__link button {
+    font-size: 0.875rem;
+    color: var(--color-bronze);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.rich-text__content {
+    padding: 1rem 1.25rem;
+    min-height: 16rem;
+}
+
+.rich-text__editable {
+    outline: none;
+    min-height: 14rem;
+}
+
+.rich-text__editable p.is-editor-empty:first-child::before {
+    content: 'Start writing…';
+    color: var(--color-ash);
+    float: left;
+    pointer-events: none;
+    height: 0;
+}
+
+.rich-text:focus-within {
+    border-color: var(--color-bronze);
+}
+
+.photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: 1rem;
+}
+
+.photo-grid__thumb {
+    aspect-ratio: 4 / 3;
+    width: 100%;
+    object-fit: cover;
+    border-radius: var(--radius-card);
+    border: 1px solid var(--color-stone);
+    background: var(--color-linen);
+}

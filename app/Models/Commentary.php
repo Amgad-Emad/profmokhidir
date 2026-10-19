@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
     'title', 'slug', 'date', 'summary', 'body', 'external_url', 'tags', 'byline',
@@ -17,7 +18,7 @@ use Illuminate\Database\Eloquent\Model;
 class Commentary extends Model
 {
     /** @use HasFactory<CommentaryFactory> */
-    use HasFactory, Publishable;
+    use HasFactory, Publishable, SoftDeletes;
 
     protected string $orderDateColumn = 'date';
 

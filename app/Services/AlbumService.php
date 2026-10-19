@@ -12,6 +12,7 @@ use App\Models\Album;
 use App\Models\User;
 use App\Repositories\Contracts\AlbumRepositoryInterface;
 use App\Services\Concerns\GeneratesSlugs;
+use App\Services\Concerns\GuardsImagePublishing;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Http\UploadedFile;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -21,7 +22,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  */
 class AlbumService extends AbstractContentService
 {
-    use GeneratesSlugs;
+    use GeneratesSlugs, GuardsImagePublishing;
 
     public function __construct(
         AlbumRepositoryInterface $albums,
@@ -87,6 +88,11 @@ class AlbumService extends AbstractContentService
         }
 
         $this->flushCache();
+    }
+
+    protected function guardedImageCollections(): array
+    {
+        return [MediaCollections::PHOTOS];
     }
 
     protected function prepare(array $data, $existing): array

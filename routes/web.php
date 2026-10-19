@@ -1,6 +1,8 @@
 <?php
 
 use App\Constants\AdminNavigation;
+use App\Constants\ContentTypes;
+use App\Constants\Permissions;
 use App\Constants\Roles;
 use App\Constants\Sections;
 use App\Http\Controllers\AboutController;
@@ -20,6 +22,25 @@ use App\Http\Controllers\TeachingMaterialController;
 use App\Http\Controllers\TributeController;
 use App\Http\Controllers\VideoController;
 use App\Http\Middleware\EnsureLocalEnvironment;
+use App\Livewire\Admin\Albums\Form as AlbumForm;
+use App\Livewire\Admin\Albums\Index as AlbumIndex;
+use App\Livewire\Admin\Awards\Form as AwardForm;
+use App\Livewire\Admin\Awards\Index as AwardIndex;
+use App\Livewire\Admin\Commentaries\Form as CommentaryForm;
+use App\Livewire\Admin\Commentaries\Index as CommentaryIndex;
+use App\Livewire\Admin\CvEntries\Form as CvEntryForm;
+use App\Livewire\Admin\CvEntries\Index as CvEntryIndex;
+use App\Livewire\Admin\Media\Library as MediaLibrary;
+use App\Livewire\Admin\OtherItems\Form as OtherItemForm;
+use App\Livewire\Admin\OtherItems\Index as OtherItemIndex;
+use App\Livewire\Admin\Profile\EditProfile;
+use App\Livewire\Admin\Publications\Form as PublicationForm;
+use App\Livewire\Admin\Publications\Index as PublicationIndex;
+use App\Livewire\Admin\TeachingMaterials\Form as TeachingMaterialForm;
+use App\Livewire\Admin\TeachingMaterials\Index as TeachingMaterialIndex;
+use App\Livewire\Admin\Tributes\Moderate as TributeModeration;
+use App\Livewire\Admin\Videos\Form as VideoForm;
+use App\Livewire\Admin\Videos\Index as VideoIndex;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
@@ -84,7 +105,43 @@ Route::middleware(['auth', 'verified', 'role:'.implode('|', Roles::staff()), 'tw
     ->group(function () {
         Route::get('/', DashboardController::class)->name('dashboard');
 
-        // One placeholder page per dashboard section until its own screens exist.
+        // Content screens (Livewire): one index with create and edit forms per type,
+        // the single profile form and the media library. Each route takes the
+        // permission of its navigation item; actions are authorised by policy.
+        Route::middleware('permission:'.Permissions::MANAGE_CONTENT)->group(function () {
+            Route::get(AdminNavigation::get(AdminNavigation::PROFILE)['path'], EditProfile::class)
+                ->name(substr(ContentTypes::indexRoute(ContentTypes::PROFILE), strlen(AdminNavigation::ROUTE_PREFIX)));
+
+            $screens = [
+                ContentTypes::CV_ENTRY => [CvEntryIndex::class, CvEntryForm::class],
+                ContentTypes::PUBLICATION => [PublicationIndex::class, PublicationForm::class],
+                ContentTypes::AWARD => [AwardIndex::class, AwardForm::class],
+                ContentTypes::COMMENTARY => [CommentaryIndex::class, CommentaryForm::class],
+                ContentTypes::TEACHING_MATERIAL => [TeachingMaterialIndex::class, TeachingMaterialForm::class],
+                ContentTypes::OTHER_ITEM => [OtherItemIndex::class, OtherItemForm::class],
+                ContentTypes::VIDEO => [VideoIndex::class, VideoForm::class],
+                ContentTypes::ALBUM => [AlbumIndex::class, AlbumForm::class],
+            ];
+
+            foreach ($screens as $type => [$index, $form]) {
+                $path = AdminNavigation::get(ContentTypes::get($type)['nav'])['path'];
+                $name = substr(ContentTypes::indexRoute($type), strlen(AdminNavigation::ROUTE_PREFIX));
+                $parameter = ContentTypes::routeParameter($type);
+
+                Route::get($path, $index)->name($name);
+                Route::get($path.'/create', $form)->name($name.'.create');
+                Route::get($path.'/{'.$parameter.':id}/edit', $form)->whereNumber($parameter)->name($name.'.edit');
+            }
+
+            Route::get(AdminNavigation::get(AdminNavigation::MEDIA_LIBRARY)['path'], MediaLibrary::class)
+                ->name(substr(AdminNavigation::routeFor(AdminNavigation::MEDIA_LIBRARY), strlen(AdminNavigation::ROUTE_PREFIX)));
+        });
+
+        Route::get(AdminNavigation::get(AdminNavigation::TRIBUTES)['path'], TributeModeration::class)
+            ->middleware('permission:'.Permissions::MODERATE_TRIBUTES)
+            ->name(substr(AdminNavigation::routeFor(AdminNavigation::TRIBUTES), strlen(AdminNavigation::ROUTE_PREFIX)));
+
+        // One placeholder page per remaining dashboard section until its own screens exist.
         foreach (AdminNavigation::placeholders() as $key => $item) {
             Route::get($item['path'], PlaceholderController::class)
                 ->middleware('permission:'.$item['permission'])

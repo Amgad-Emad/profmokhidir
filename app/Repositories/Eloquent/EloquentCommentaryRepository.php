@@ -15,6 +15,8 @@ class EloquentCommentaryRepository extends BaseContentRepository implements Comm
 {
     protected array $searchColumns = ['title', 'summary', 'byline'];
 
+    protected array $sortableColumns = ['title', 'date'];
+
     public function __construct(Commentary $commentary)
     {
         parent::__construct($commentary);

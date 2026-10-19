@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace App\Repositories\Eloquent;
 
+use App\Constants\MediaCollections;
+use App\Constants\MediaProperties;
 use App\Repositories\Contracts\MediaRepositoryInterface;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection;
@@ -80,5 +84,60 @@ final class SpatieMediaRepository implements MediaRepositoryInterface
     public function countFor(HasMedia $model): int
     {
         return $model->media()->count();
+    }
+
+    public function searchImages(?string $term = null, array $filters = [], int $perPage = 24): LengthAwarePaginator
+    {
+        $term = trim((string) $term);
+
+        return $this->imagesQuery()
+            ->when($term !== '', function (Builder $query) use ($term): void {
+                $like = '%'.addcslashes($term, '%_\\').'%';
+
+                $query->where(function (Builder $query) use ($like): void {
+                    $query->where('file_name', 'like', $like)->orWhere('name', 'like', $like);
+
+                    // JSON_UNQUOTE yields a binary collation, so compare lower-cased.
+                    foreach ([MediaProperties::ALT_TEXT, MediaProperties::CAPTION, MediaProperties::PLACE] as $property) {
+                        $query->orWhereRaw('LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, ?))) LIKE ?', ['$.'.$property, mb_strtolower($like)]);
+                    }
+                });
+            })
+            ->when(filled($filters[self::FILTER_COLLECTION] ?? null), fn (Builder $query) => $query->where('collection_name', $filters[self::FILTER_COLLECTION]))
+            ->when(filled($filters[self::FILTER_TREATMENT] ?? null), fn (Builder $query) => $query->where('custom_properties->'.MediaProperties::TREATMENT, $filters[self::FILTER_TREATMENT]))
+            ->when(filled($filters[self::FILTER_MODEL] ?? null), fn (Builder $query) => $query->where('model_type', $filters[self::FILTER_MODEL]))
+            ->when((bool) ($filters[self::FILTER_INCOMPLETE] ?? false), fn (Builder $query) => $this->whereIncomplete($query))
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->paginate($perPage)
+            ->withQueryString();
+    }
+
+    public function countIncompleteImages(): int
+    {
+        return $this->whereIncomplete($this->imagesQuery())->count();
+    }
+
+    /**
+     * @return Builder<Media>
+     */
+    private function imagesQuery(): Builder
+    {
+        return Media::query()->whereIn('collection_name', MediaCollections::images());
+    }
+
+    /**
+     * @param  Builder<Media>  $query
+     * @return Builder<Media>
+     */
+    private function whereIncomplete(Builder $query): Builder
+    {
+        return $query->where(function (Builder $query): void {
+            foreach (MediaProperties::requiredForPublishing() as $property) {
+                $path = 'custom_properties->'.$property;
+
+                $query->orWhereNull($path)->orWhere($path, '');
+            }
+        });
     }
 }

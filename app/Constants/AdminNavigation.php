@@ -50,6 +50,8 @@ final class AdminNavigation
 
     public const string ALBUMS = 'albums';
 
+    public const string MEDIA_LIBRARY = 'media-library';
+
     public const string APPLICATIONS = 'applications';
 
     public const string MEMBERS = 'members';
@@ -96,6 +98,7 @@ final class AdminNavigation
             self::OTHER => self::item('Other information', self::GROUP_CONTENT, 'content.other', 'content/other', Permissions::MANAGE_CONTENT),
             self::VIDEOS => self::item('Videos', self::GROUP_MEDIA, 'media.videos', 'media/videos', Permissions::MANAGE_CONTENT),
             self::ALBUMS => self::item('Pictures & albums', self::GROUP_MEDIA, 'media.albums', 'media/albums', Permissions::MANAGE_CONTENT),
+            self::MEDIA_LIBRARY => self::item('Media library', self::GROUP_MEDIA, 'media.library', 'media/library', Permissions::MANAGE_CONTENT),
             self::APPLICATIONS => self::item('Applications', self::GROUP_COMMUNITY, 'community.applications', 'community/applications', Permissions::MANAGE_COMMUNITY),
             self::MEMBERS => self::item('Members', self::GROUP_COMMUNITY, 'community.members', 'community/members', Permissions::MANAGE_COMMUNITY),
             self::CHAT_REPORTS => self::item('Chat reports', self::GROUP_COMMUNITY, 'community.reports', 'community/reports', Permissions::MODERATE_CHAT),
@@ -149,14 +152,36 @@ final class AdminNavigation
     }
 
     /**
-     * Items whose page lives under /admin and has no controller of its own yet.
+     * Items whose screens exist (routes/web.php registers them explicitly).
+     *
+     * @return list<string>
+     */
+    public static function built(): array
+    {
+        return [
+            self::PROFILE, self::CV, self::PUBLICATIONS, self::AWARDS, self::COMMENTARY, self::TEACHING, self::OTHER,
+            self::VIDEOS, self::ALBUMS, self::MEDIA_LIBRARY, self::TRIBUTES,
+        ];
+    }
+
+    public static function isBuilt(string $key): bool
+    {
+        return in_array($key, self::built(), true);
+    }
+
+    /**
+     * Items whose page lives under /admin and has no screens of its own yet.
      * Each gets a placeholder route until it is built.
      *
      * @return array<string, array{label: string, group: string, route: string, path: string, permission: string}>
      */
     public static function placeholders(): array
     {
-        return array_filter(self::items(), fn (array $item): bool => ! str_starts_with($item['path'], '/'));
+        return array_filter(
+            self::items(),
+            fn (array $item, string $key): bool => ! str_starts_with($item['path'], '/') && ! self::isBuilt($key),
+            ARRAY_FILTER_USE_BOTH,
+        );
     }
 
     public static function isValidGroup(string $group): bool

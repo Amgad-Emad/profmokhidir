@@ -11,6 +11,8 @@ use App\Constants\MediaTreatment;
 use App\Models\Profile;
 use App\Models\User;
 use App\Repositories\Contracts\ProfileRepositoryInterface;
+use App\Services\Concerns\GuardsImagePublishing;
+use App\Support\RichText;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Http\UploadedFile;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -20,6 +22,8 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  */
 class ProfileService extends AbstractContentService
 {
+    use GuardsImagePublishing;
+
     public function __construct(
         ProfileRepositoryInterface $profiles,
         AuditLogService $audit,
@@ -61,11 +65,16 @@ class ProfileService extends AbstractContentService
      *
      * @param  array<string, mixed>  $data
      */
-    public function save(array $data): Profile
+    public function save(array $data, ?User $actor = null): Profile
     {
         $existing = $this->current();
 
-        return $existing === null ? $this->create($data) : $this->update($existing, $data);
+        return $existing === null ? $this->create($data, $actor) : $this->update($existing, $data, $actor);
+    }
+
+    protected function guardedImageCollections(): array
+    {
+        return [MediaCollections::PORTRAIT];
     }
 
     /**
@@ -94,6 +103,10 @@ class ProfileService extends AbstractContentService
 
     protected function prepare(array $data, $existing): array
     {
+        if (array_key_exists('full_bio', $data)) {
+            $data['full_bio'] = RichText::sanitise(is_string($data['full_bio']) ? $data['full_bio'] : null) ?: null;
+        }
+
         foreach (['expertise', 'key_facts'] as $list) {
             if (array_key_exists($list, $data) && is_array($data[$list])) {
                 $data[$list] = array_values($data[$list]);

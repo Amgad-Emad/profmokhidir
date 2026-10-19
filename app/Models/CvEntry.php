@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
     'section', 'title', 'organisation', 'role_description', 'start_year', 'end_year',
@@ -19,7 +20,7 @@ use Illuminate\Database\Eloquent\Model;
 class CvEntry extends Model
 {
     /** @use HasFactory<CvEntryFactory> */
-    use HasFactory, Publishable;
+    use HasFactory, Publishable, SoftDeletes;
 
     protected string $orderDateColumn = 'start_year';
 

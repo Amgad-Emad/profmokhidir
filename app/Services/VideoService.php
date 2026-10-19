@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Models\Video;
 use App\Repositories\Contracts\VideoRepositoryInterface;
 use App\Services\Concerns\GeneratesSlugs;
+use App\Services\Concerns\GuardsImagePublishing;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Http\UploadedFile;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -22,7 +23,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  */
 class VideoService extends AbstractContentService
 {
-    use GeneratesSlugs;
+    use GeneratesSlugs, GuardsImagePublishing;
 
     public function __construct(
         VideoRepositoryInterface $videos,
@@ -76,6 +77,11 @@ class VideoService extends AbstractContentService
         }
 
         $this->flushCache();
+    }
+
+    protected function guardedImageCollections(): array
+    {
+        return [MediaCollections::THUMBNAIL];
     }
 
     protected function prepare(array $data, $existing): array

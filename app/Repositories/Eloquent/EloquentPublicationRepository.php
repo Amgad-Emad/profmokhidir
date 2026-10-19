@@ -17,6 +17,8 @@ class EloquentPublicationRepository extends BaseContentRepository implements Pub
 {
     protected array $searchColumns = ['title', 'authors', 'venue_publisher', 'abstract', 'doi'];
 
+    protected array $sortableColumns = ['title', 'type', 'year'];
+
     protected array $filterColumns = ['status', 'type', 'year'];
 
     protected array $publishedWith = ['media'];

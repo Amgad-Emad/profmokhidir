@@ -16,6 +16,9 @@ enum TeachingAccess: string
     case Public = 'public';
     case Members = 'members';
 
+    /** How long a signed link to a members-only file stays valid. */
+    public const int SIGNED_URL_MINUTES = 60;
+
     public function label(): string
     {
         return match ($this) {

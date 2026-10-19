@@ -138,6 +138,96 @@ class TributeService extends AbstractContentService
         return $tribute;
     }
 
+    /**
+     * Fix typos in a tribute. The original text is kept in the audit log.
+     *
+     * @param  array{name?: string, location?: ?string, message?: string}  $data
+     */
+    public function edit(Tribute $tribute, array $data, User $actor): Tribute
+    {
+        $original = [
+            'name' => $tribute->name,
+            'location' => $tribute->location,
+            'message' => $tribute->message,
+        ];
+
+        $changes = [];
+
+        if (array_key_exists('name', $data)) {
+            $changes['name'] = trim((string) $data['name']);
+        }
+
+        if (array_key_exists('location', $data)) {
+            $changes['location'] = filled($data['location']) ? trim((string) $data['location']) : null;
+        }
+
+        if (array_key_exists('message', $data)) {
+            $changes['message'] = mb_substr(trim((string) $data['message']), 0, Tribute::MESSAGE_MAX_LENGTH);
+        }
+
+        $changes = array_filter($changes, fn ($value, string $key): bool => $value !== $original[$key], ARRAY_FILTER_USE_BOTH);
+
+        if ($changes === []) {
+            return $tribute;
+        }
+
+        $tribute = $this->repository->update($tribute, $changes);
+
+        $this->audit->record($actor, AuditAction::TRIBUTE_EDITED, $tribute, [
+            'name' => $tribute->name,
+            'original' => array_intersect_key($original, $changes),
+            'changed' => array_keys($changes),
+        ]);
+        $this->flushCache();
+
+        return $tribute;
+    }
+
+    /**
+     * Approve several tributes at once; returns how many changed.
+     *
+     * @param  list<int>  $ids
+     */
+    public function approveMany(array $ids, User $actor): int
+    {
+        return $this->moderateMany($ids, $actor, fn (Tribute $tribute) => $this->approve($tribute, $actor), TributeStatus::Approved);
+    }
+
+    /**
+     * @param  list<int>  $ids
+     */
+    public function rejectMany(array $ids, User $actor): int
+    {
+        return $this->moderateMany($ids, $actor, fn (Tribute $tribute) => $this->reject($tribute, $actor), TributeStatus::Rejected);
+    }
+
+    public function countByStatus(TributeStatus $status): int
+    {
+        return $this->tributes()->countByStatus($status);
+    }
+
+    /**
+     * @param  list<int>  $ids
+     * @param  callable(Tribute): Tribute  $action
+     */
+    private function moderateMany(array $ids, User $actor, callable $action, TributeStatus $target): int
+    {
+        $count = 0;
+
+        foreach (array_unique(array_map('intval', $ids)) as $id) {
+            $tribute = $this->repository->find($id);
+
+            if ($tribute === null || $tribute->status === $target) {
+                continue;
+            }
+
+            $action($tribute);
+            $count++;
+        }
+
+        return $count;
+    }
+
     public function delete($model, ?User $actor = null): bool
     {
         $this->audit->record($actor, AuditAction::TRIBUTE_DELETED, $model, ['name' => $model->name]);

@@ -14,6 +14,8 @@ class EloquentAwardRepository extends BaseContentRepository implements AwardRepo
 {
     protected array $searchColumns = ['name', 'organisation', 'description'];
 
+    protected array $sortableColumns = ['name', 'year', 'organisation'];
+
     protected array $filterColumns = ['status', 'year'];
 
     public function __construct(Award $award)

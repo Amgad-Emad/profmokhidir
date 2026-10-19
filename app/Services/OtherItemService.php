@@ -12,6 +12,7 @@ use App\Models\OtherItem;
 use App\Models\User;
 use App\Repositories\Contracts\OtherItemRepositoryInterface;
 use App\Services\Concerns\GeneratesSlugs;
+use App\Services\Concerns\GuardsImagePublishing;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
@@ -22,7 +23,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  */
 class OtherItemService extends AbstractContentService
 {
-    use GeneratesSlugs;
+    use GeneratesSlugs, GuardsImagePublishing;
 
     public function __construct(
         OtherItemRepositoryInterface $items,
@@ -101,6 +102,11 @@ class OtherItemService extends AbstractContentService
     {
         $this->media->remove($media, $actor);
         $this->flushCache();
+    }
+
+    protected function guardedImageCollections(): array
+    {
+        return [MediaCollections::MEDIA];
     }
 
     protected function prepare(array $data, $existing): array

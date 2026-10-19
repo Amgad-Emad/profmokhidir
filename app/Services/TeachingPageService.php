@@ -32,6 +32,7 @@ class TeachingPageService
      *     active: array{topic: string|null, type: TeachingMaterialType|null},
      *     isFiltered: bool,
      *     downloadable: array<int, bool>,
+     *     downloadUrls: array<int, ?string>,
      *     canSeeMembers: bool,
      *     hasAny: bool,
      *     clearUrl: string,
@@ -56,6 +57,9 @@ class TeachingPageService
             'isFiltered' => $activeTopic !== null || $activeType !== null,
             'downloadable' => $filtered->mapWithKeys(fn (TeachingMaterial $material): array => [
                 (int) $material->getKey() => $this->materials->canDownload($material, $viewer),
+            ])->all(),
+            'downloadUrls' => $filtered->mapWithKeys(fn (TeachingMaterial $material): array => [
+                (int) $material->getKey() => $this->materials->canDownload($material, $viewer) ? $this->materials->downloadUrl($material) : null,
             ])->all(),
             'canSeeMembers' => $this->materials->canSeeMembersMaterials($viewer),
             'hasAny' => $all->isNotEmpty(),

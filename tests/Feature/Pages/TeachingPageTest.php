@@ -3,6 +3,7 @@
 namespace Tests\Feature\Pages;
 
 use App\Constants\Disks;
+use App\Constants\TeachingAccess;
 use App\Constants\TeachingMaterialType;
 use App\Models\TeachingMaterial;
 use App\Models\User;
@@ -121,15 +122,18 @@ class TeachingPageTest extends TestCase
         $this->actingAs(User::factory()->applicant()->create())->get(route('teaching'))
             ->assertOk()->assertSee('For community members.')->assertDontSee($download, false);
 
+        // Members get a temporary signed link to the private file, never the bare route.
         $this->actingAs(User::factory()->member()->create())->get(route('teaching'))
             ->assertOk()
-            ->assertSee('href="'.$download.'"', false)
+            ->assertSee('href="'.$download.'?expires=', false)
+            ->assertSee('signature=', false)
             ->assertSee('Download · PDF · 12 KB')
+            ->assertDontSee('href="'.$download.'"', false)
             ->assertDontSee('For community members.')
             ->assertDontSee('Apply to join the community');
 
         $this->actingAs(User::factory()->editor()->create())->get(route('teaching'))
-            ->assertOk()->assertSee('href="'.$download.'"', false);
+            ->assertOk()->assertSee('href="'.$download.'?expires=', false);
     }
 
     #[Test]
@@ -152,11 +156,22 @@ class TeachingPageTest extends TestCase
         $this->get(route('teaching.download', $noFile))->assertNotFound();
         $this->get(route('teaching.download', 999999))->assertNotFound();
 
+        // Members-only files are reachable only through a temporary signed link, and the
+        // permission check still runs behind the signature.
+        $signed = $this->materials->downloadUrl($members);
+        $this->assertStringContainsString('signature=', (string) $signed);
+
         $this->actingAs(User::factory()->applicant()->create())->get(route('teaching.download', $members))->assertForbidden();
-        $this->actingAs(User::factory()->suspendedMember()->create())->get(route('teaching.download', $members))->assertForbidden();
-        $this->actingAs(User::factory()->member()->create())->get(route('teaching.download', $members))->assertOk();
+        $this->actingAs(User::factory()->applicant()->create())->get($signed)->assertForbidden();
+        $this->actingAs(User::factory()->suspendedMember()->create())->get($signed)->assertForbidden();
+        $this->actingAs(User::factory()->member()->create())->get(route('teaching.download', $members))->assertForbidden();
+        $this->actingAs(User::factory()->member()->create())->get($signed)->assertOk();
+        $this->actingAs(User::factory()->member()->create())->get($signed.'tampered')->assertForbidden();
         $this->actingAs(User::factory()->member()->create())->get(route('teaching.download', $draft))->assertForbidden();
         $this->actingAs(User::factory()->admin()->create())->get(route('teaching.download', $draft))->assertOk();
+
+        $this->travel(TeachingAccess::SIGNED_URL_MINUTES + 1)->minutes();
+        $this->actingAs(User::factory()->member()->create())->get($signed)->assertForbidden();
     }
 
     #[Test]
