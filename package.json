@@ -6,7 +6,8 @@
         "build": "vite build",
         "dev": "vite",
         "a11y": "node tests/a11y/axe.mjs",
-        "perf": "node tests/perf/lighthouse.mjs"
+        "perf": "node tests/perf/lighthouse.mjs",
+        "qa:smoke": "node tests/qa/smoke.mjs"
     },
     "devDependencies": {
         "@axe-core/playwright": "^4.11.1",

@@ -2,7 +2,6 @@
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../vendor/laravel/fortify/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
 
 @import './fonts.css';
 @import './media.css';
