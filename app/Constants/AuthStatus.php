@@ -27,6 +27,9 @@ final class AuthStatus
     /** Flashed by EnsureTwoFactorIsEnabled when an admin still has to set up TOTP. */
     public const string TWO_FACTOR_REQUIRED = 'two-factor-required';
 
+    /** Flashed by EnsureAccountIsActive when a deactivated account is signed out. */
+    public const string ACCOUNT_DEACTIVATED = 'account-deactivated';
+
     /**
      * @return list<string>
      */
@@ -49,6 +52,7 @@ final class AuthStatus
             self::RECOVERY_CODES_GENERATED => 'New recovery codes have been generated. The old ones no longer work.',
             self::VERIFICATION_LINK_SENT => 'A new verification link has been sent to your email address.',
             self::TWO_FACTOR_REQUIRED => 'Administrator accounts must use two-factor authentication. Set up your authenticator app below before opening the dashboard.',
+            self::ACCOUNT_DEACTIVATED => 'This account has been deactivated. Contact an administrator.',
         ];
     }
 
@@ -64,7 +68,7 @@ final class AuthStatus
     {
         return match ($status) {
             self::TWO_FACTOR_REQUIRED, self::TWO_FACTOR_ENABLED => StatusTone::Bronze,
-            self::TWO_FACTOR_DISABLED => StatusTone::Ash,
+            self::TWO_FACTOR_DISABLED, self::ACCOUNT_DEACTIVATED => StatusTone::Ash,
             default => StatusTone::Cypress,
         };
     }

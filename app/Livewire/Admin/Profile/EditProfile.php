@@ -141,6 +141,14 @@ class EditProfile extends ContentForm
         return MediaCollections::PORTRAIT;
     }
 
+    /**
+     * The portrait always needs alt text, caption, place and year, draft or not.
+     */
+    protected function imageDetailsRequired(Model $record): bool
+    {
+        return true;
+    }
+
     protected function defaultTreatment(): MediaTreatment
     {
         return MediaTreatment::Portrait;

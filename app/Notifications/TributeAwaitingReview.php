@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Notifications;
 
 use App\Models\Tribute;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -12,8 +13,9 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Support\Str;
 
 /**
- * Tells an admin or editor that a visitor's tribute is waiting for review.
- * The visitor's email is deliberately left out of the message.
+ * Tells the notification address (or, when none is set, every admin and
+ * editor) that a visitor's tribute is waiting for review. The visitor's email
+ * is deliberately left out of the message.
  */
 class TributeAwaitingReview extends Notification implements ShouldQueue
 {
@@ -38,7 +40,7 @@ class TributeAwaitingReview extends Notification implements ShouldQueue
 
         return (new MailMessage)
             ->subject('A tribute is waiting for review')
-            ->greeting('Hello '.$notifiable->name.',')
+            ->greeting($notifiable instanceof User ? 'Hello '.$notifiable->name.',' : 'Hello,')
             ->line('A new tribute has been submitted on '.config('app.name').' and is waiting for review.')
             ->line('From: '.$tribute->name.($from !== '' ? ' ('.$from.')' : ''))
             ->line('"'.$this->excerpt().'"')

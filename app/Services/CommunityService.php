@@ -9,17 +9,20 @@ use App\Constants\CommunityStatus;
 use App\Constants\Roles;
 use App\Exceptions\CommunityApplicationException;
 use App\Models\User;
+use App\Notifications\CommunityApplicationReceived;
 use App\Notifications\CommunityApplicationReviewed;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Notification;
 
 /**
  * Scientific Community applications and membership. Signing up creates an
  * applicant; approval grants the member role; rejection, suspension and
  * removal take it away. Every decision is audited and the applicant is told
- * by email.
+ * by email; new applications are announced to the notification address from
+ * the site settings (or to every administrator when none is set).
  */
 class CommunityService
 {
@@ -28,6 +31,7 @@ class CommunityService
         private readonly UserService $userService,
         private readonly RoleService $roles,
         private readonly AuditLogService $audit,
+        private readonly SettingService $settings,
     ) {}
 
     /**
@@ -78,8 +82,27 @@ class CommunityService
         }
 
         $this->audit->record($user, AuditAction::COMMUNITY_APPLIED, $user);
+        $this->announceApplication($user);
 
         return $user;
+    }
+
+    /**
+     * Tell the notification address, or every administrator when none is set,
+     * that an application is waiting.
+     */
+    private function announceApplication(User $applicant): void
+    {
+        $notification = new CommunityApplicationReceived($applicant);
+        $address = $this->settings->notificationAddress();
+
+        if ($address !== null) {
+            Notification::route('mail', $address)->notify($notification);
+
+            return;
+        }
+
+        Notification::send($this->users->withRole(Roles::ADMIN), $notification);
     }
 
     public function approve(User $applicant, User $actor, ?string $note = null): User

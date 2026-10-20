@@ -5,20 +5,32 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Constants\AuditAction;
+use App\Constants\CommunityStatus;
 use App\Constants\Roles;
+use App\Exceptions\UserManagementException;
 use App\Models\User;
+use App\Notifications\StaffInvitation;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\PasswordBrokerFactory;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Str;
 use InvalidArgumentException;
 
+/**
+ * Accounts: creation, the staff invitation flow (set-password link through
+ * the password broker, never a password in an email), role changes,
+ * deactivation and the safeguards around administrators. Every change is
+ * audited; roles are only ever touched through RoleService.
+ */
 class UserService
 {
     public function __construct(
         private readonly UserRepositoryInterface $users,
         private readonly RoleService $roles,
         private readonly AuditLogService $audit,
+        private readonly PasswordBrokerFactory $passwords,
     ) {}
 
     /**
@@ -41,6 +53,157 @@ class UserService
         $this->roles->assign($user, $role, $actor);
 
         return $user;
+    }
+
+    /**
+     * Invite an administrator or editor: the account is created with an
+     * unusable random password and an unverified email, and the person
+     * receives a set-password link. Using the link verifies the email.
+     *
+     * @param  array{name: string, email: string, role: string}  $data
+     */
+    public function invite(array $data, ?User $actor = null): User
+    {
+        $this->guardStaffRole($data['role']);
+
+        $user = $this->create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => Str::password(40),
+            'role' => $data['role'],
+        ], $actor);
+
+        $this->audit->record($actor, AuditAction::USER_INVITED, $user, ['email' => $user->email, 'role' => $data['role']]);
+        $this->sendInvitation($user);
+
+        return $user;
+    }
+
+    /**
+     * Send a fresh set-password link to someone who has not used theirs yet.
+     */
+    public function resendInvitation(User $user, ?User $actor = null): User
+    {
+        if ($user->hasVerifiedEmail()) {
+            throw UserManagementException::invitationAlreadyAccepted();
+        }
+
+        $this->audit->record($actor, AuditAction::USER_INVITE_RESENT, $user, ['email' => $user->email]);
+        $this->sendInvitation($user);
+
+        return $user;
+    }
+
+    /**
+     * Whether the person still has to use their invitation link.
+     */
+    public function hasPendingInvitation(User $user): bool
+    {
+        return $this->isStaff($user) && ! $user->hasVerifiedEmail();
+    }
+
+    /**
+     * Set a user's staff role (admin or editor), or none to withdraw dashboard
+     * access while keeping any community role. Administrators cannot change
+     * their own role and the last active administrator cannot be demoted.
+     */
+    public function changeStaffRole(User $user, ?string $staffRole, User $actor): User
+    {
+        if ($staffRole !== null) {
+            $this->guardStaffRole($staffRole);
+        }
+
+        if ($actor->is($user)) {
+            throw UserManagementException::cannotChangeOwnRole();
+        }
+
+        $current = $this->roles->rolesOf($user);
+
+        if (in_array(Roles::ADMIN, $current, true) && $staffRole !== Roles::ADMIN && $this->isLastActiveAdmin($user)) {
+            throw UserManagementException::lastActiveAdmin();
+        }
+
+        $roles = array_values(array_diff($current, Roles::staff()));
+
+        if ($staffRole !== null) {
+            $roles[] = $staffRole;
+        }
+
+        return $this->roles->sync($user, array_values(array_unique($roles)), $actor);
+    }
+
+    /**
+     * Deactivated accounts cannot sign in. Nobody can deactivate themselves,
+     * and the last active administrator cannot be deactivated.
+     */
+    public function deactivate(User $user, User $actor): User
+    {
+        if ($actor->is($user)) {
+            throw UserManagementException::cannotDeactivateSelf();
+        }
+
+        if (! $user->isActive()) {
+            return $user;
+        }
+
+        if ($this->isLastActiveAdmin($user)) {
+            throw UserManagementException::lastActiveAdmin();
+        }
+
+        $user = $this->users->update($user, ['deactivated_at' => now()]);
+        $this->audit->record($actor, AuditAction::USER_DEACTIVATED, $user, ['email' => $user->email]);
+
+        return $user;
+    }
+
+    public function reactivate(User $user, ?User $actor = null): User
+    {
+        if ($user->isActive()) {
+            return $user;
+        }
+
+        $user = $this->users->update($user, ['deactivated_at' => null]);
+        $this->audit->record($actor, AuditAction::USER_REACTIVATED, $user, ['email' => $user->email]);
+
+        return $user;
+    }
+
+    /**
+     * True when no other active administrator exists.
+     */
+    public function isLastActiveAdmin(User $user): bool
+    {
+        if (! $user->isActive() || ! in_array(Roles::ADMIN, $this->roles->rolesOf($user), true)) {
+            return false;
+        }
+
+        return $this->users->countActiveWithRole(Roles::ADMIN, (int) $user->getKey()) === 0;
+    }
+
+    public function countActiveAdmins(): int
+    {
+        return $this->users->countActiveWithRole(Roles::ADMIN);
+    }
+
+    public function isStaff(User $user): bool
+    {
+        return array_intersect(Roles::staff(), $this->roles->rolesOf($user)) !== [];
+    }
+
+    /**
+     * The user's staff role (admin or editor), if any.
+     */
+    public function staffRoleOf(User $user): ?string
+    {
+        $roles = $this->roles->rolesOf($user);
+
+        foreach (Roles::staff() as $role) {
+            if (in_array($role, $roles, true)) {
+                return $role;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -87,6 +250,21 @@ class UserService
         return $this->users->update($user, ['password' => $password]);
     }
 
+    /**
+     * A password set through a reset or invitation link proves the address
+     * works, so an unverified email is marked verified at the same time.
+     */
+    public function resetPassword(User $user, string $password): User
+    {
+        $user = $this->updatePassword($user, $password);
+
+        if (! $user->hasVerifiedEmail()) {
+            $user = $this->users->markEmailVerified($user);
+        }
+
+        return $user;
+    }
+
     public function assignRole(User $user, string $role, ?User $actor = null): User
     {
         $this->guardRole($role);
@@ -123,6 +301,11 @@ class UserService
         return $this->users->delete($user);
     }
 
+    public function find(int $id): ?User
+    {
+        return $this->users->find($id);
+    }
+
     public function findByEmail(string $email): ?User
     {
         return $this->users->findByEmail($email);
@@ -154,10 +337,40 @@ class UserService
         return $this->users->paginateByRole($role, $perPage);
     }
 
+    /**
+     * The Users & roles list.
+     *
+     * @return LengthAwarePaginator<int, User>
+     */
+    public function search(?string $term = null, ?string $role = null, ?CommunityStatus $status = null, int $perPage = 15): LengthAwarePaginator
+    {
+        if ($role !== null) {
+            $this->guardRole($role);
+        }
+
+        return $this->users->search($term, $role, $status, $perPage);
+    }
+
+    private function sendInvitation(User $user): void
+    {
+        $token = $this->passwords->broker()->createToken($user);
+
+        $user->notify(new StaffInvitation($token, $this->staffRoleOf($user)));
+    }
+
     private function guardRole(string $role): void
     {
         if (! Roles::isValid($role)) {
             throw new InvalidArgumentException(sprintf('Unknown role "%s".', $role));
+        }
+    }
+
+    private function guardStaffRole(string $role): void
+    {
+        $this->guardRole($role);
+
+        if (! in_array($role, Roles::staff(), true)) {
+            throw UserManagementException::notStaffRole($role);
         }
     }
 }

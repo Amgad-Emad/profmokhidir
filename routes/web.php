@@ -4,13 +4,12 @@ use App\Constants\AdminNavigation;
 use App\Constants\ContentTypes;
 use App\Constants\Permissions;
 use App\Constants\RateLimits;
-use App\Constants\Seo;
 use App\Constants\Roles;
 use App\Constants\Sections;
+use App\Constants\Seo;
 use App\Http\Controllers\AboutController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\PlaceholderController;
 use App\Http\Controllers\AwardController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CommentaryController;
@@ -45,9 +44,11 @@ use App\Livewire\Admin\OtherItems\Index as OtherItemIndex;
 use App\Livewire\Admin\Profile\EditProfile;
 use App\Livewire\Admin\Publications\Form as PublicationForm;
 use App\Livewire\Admin\Publications\Index as PublicationIndex;
+use App\Livewire\Admin\Settings\SiteSettings;
 use App\Livewire\Admin\TeachingMaterials\Form as TeachingMaterialForm;
 use App\Livewire\Admin\TeachingMaterials\Index as TeachingMaterialIndex;
 use App\Livewire\Admin\Tributes\Moderate as TributeModeration;
+use App\Livewire\Admin\Users\Index as UserIndex;
 use App\Livewire\Admin\Videos\Form as VideoForm;
 use App\Livewire\Admin\Videos\Index as VideoIndex;
 use App\Livewire\Community\Chat\Room as ChatRoom;
@@ -183,11 +184,11 @@ Route::middleware(['auth', 'verified', 'role:'.implode('|', Roles::staff()), 'tw
             ->middleware('permission:'.Permissions::MODERATE_CHAT)
             ->name(substr(AdminNavigation::routeFor(AdminNavigation::CHAT_REPORTS), strlen(AdminNavigation::ROUTE_PREFIX)));
 
-        // One placeholder page per remaining dashboard section until its own screens exist.
-        foreach (AdminNavigation::placeholders() as $key => $item) {
-            Route::get($item['path'], PlaceholderController::class)
-                ->middleware('permission:'.$item['permission'])
-                ->defaults('item', $key)
-                ->name(substr($item['route'], strlen(AdminNavigation::ROUTE_PREFIX)));
-        }
+        // Settings: staff and community accounts, and the site settings. Both admin only.
+        Route::get(AdminNavigation::get(AdminNavigation::USERS)['path'], UserIndex::class)
+            ->middleware('permission:'.Permissions::MANAGE_USERS)
+            ->name(substr(AdminNavigation::routeFor(AdminNavigation::USERS), strlen(AdminNavigation::ROUTE_PREFIX)));
+        Route::get(AdminNavigation::get(AdminNavigation::SITE_SETTINGS)['path'], SiteSettings::class)
+            ->middleware('permission:'.Permissions::MANAGE_SETTINGS)
+            ->name(substr(AdminNavigation::routeFor(AdminNavigation::SITE_SETTINGS), strlen(AdminNavigation::ROUTE_PREFIX)));
     });

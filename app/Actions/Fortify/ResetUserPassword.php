@@ -15,7 +15,8 @@ class ResetUserPassword implements ResetsUserPasswords
     public function __construct(private readonly UserService $users) {}
 
     /**
-     * Validate and reset the user's forgotten password.
+     * Validate and reset the user's forgotten password. The same form completes
+     * a staff invitation, so an unverified email is verified at the same time.
      *
      * @param  array<string, string>  $input
      *
@@ -27,6 +28,6 @@ class ResetUserPassword implements ResetsUserPasswords
             'password' => $this->passwordRules(),
         ])->validate();
 
-        $this->users->updatePassword($user, $input['password']);
+        $this->users->resetPassword($user, $input['password']);
     }
 }

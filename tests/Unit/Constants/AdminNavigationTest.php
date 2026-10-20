@@ -41,6 +41,7 @@ class AdminNavigationTest extends TestCase
         $this->assertSame(Permissions::MANAGE_COMMUNITY, AdminNavigation::get(AdminNavigation::MEMBERS)['permission']);
         $this->assertSame(Permissions::MODERATE_CHAT, AdminNavigation::get(AdminNavigation::CHAT_REPORTS)['permission']);
         $this->assertSame(Permissions::MANAGE_USERS, AdminNavigation::get(AdminNavigation::USERS)['permission']);
+        $this->assertSame(Permissions::MANAGE_SETTINGS, AdminNavigation::get(AdminNavigation::SITE_SETTINGS)['permission']);
         $this->assertSame(Permissions::MODERATE_TRIBUTES, AdminNavigation::get(AdminNavigation::TRIBUTES)['permission']);
         $this->assertSame(Permissions::MANAGE_CONTENT, AdminNavigation::get(AdminNavigation::PUBLICATIONS)['permission']);
     }
@@ -53,9 +54,13 @@ class AdminNavigationTest extends TestCase
         $this->assertArrayNotHasKey(AdminNavigation::ACCOUNT, $placeholders);
         $this->assertArrayNotHasKey(AdminNavigation::TRIBUTES, $placeholders);
         $this->assertArrayNotHasKey(AdminNavigation::PUBLICATIONS, $placeholders);
-        $this->assertArrayHasKey(AdminNavigation::USERS, $placeholders);
+        $this->assertSame([], $placeholders, 'Every dashboard section has its own screens now.');
         $this->assertTrue(AdminNavigation::isBuilt(AdminNavigation::MEDIA_LIBRARY));
-        $this->assertFalse(AdminNavigation::isBuilt(AdminNavigation::USERS));
+        $this->assertTrue(AdminNavigation::isBuilt(AdminNavigation::USERS));
+        $this->assertTrue(AdminNavigation::isBuilt(AdminNavigation::SITE_SETTINGS));
+        $this->assertSame('admin.users.index', AdminNavigation::routeFor(AdminNavigation::USERS));
+        $this->assertSame('users', AdminNavigation::get(AdminNavigation::USERS)['path']);
+        $this->assertSame('admin.settings.site', AdminNavigation::routeFor(AdminNavigation::SITE_SETTINGS));
         $this->assertSame('admin.tributes.index', AdminNavigation::routeFor(AdminNavigation::TRIBUTES));
         $this->assertSame('admin.media.library', AdminNavigation::routeFor(AdminNavigation::MEDIA_LIBRARY));
         $this->assertSame(AdminNavigation::ACCOUNT_ROUTE, AdminNavigation::routeFor(AdminNavigation::ACCOUNT));

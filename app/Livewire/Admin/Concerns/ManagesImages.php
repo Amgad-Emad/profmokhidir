@@ -101,7 +101,7 @@ trait ManagesImages
 
         $this->authorize('manageMedia', $record);
 
-        $required = $record->getAttribute('status') === ContentStatus::Published;
+        $required = $this->imageDetailsRequired($record);
         $request = new ImageDetailsRequest;
 
         $this->validate(
@@ -175,8 +175,17 @@ trait ManagesImages
             'missing' => $missing,
             'imageAccept' => '.'.implode(',.', Uploads::IMAGE_EXTENSIONS),
             'imageHint' => 'JPEG, PNG or WebP up to '.Uploads::imageMaxLabel(),
-            'detailsRequired' => $record?->getAttribute('status') === ContentStatus::Published,
+            'detailsRequired' => $record !== null && $this->imageDetailsRequired($record),
         ];
+    }
+
+    /**
+     * Whether alt text, caption, place and year must be given now. By default
+     * they are optional on a draft and required once the record is published.
+     */
+    protected function imageDetailsRequired(Model $record): bool
+    {
+        return $record->getAttribute('status') === ContentStatus::Published;
     }
 
     protected function mediaService(): MediaService

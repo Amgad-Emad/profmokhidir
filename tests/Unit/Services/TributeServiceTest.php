@@ -5,6 +5,7 @@ namespace Tests\Unit\Services;
 use App\Constants\AuditAction;
 use App\Constants\CacheKeys;
 use App\Constants\Roles;
+use App\Constants\SettingKeys;
 use App\Constants\TributeRelationship;
 use App\Constants\TributeStatus;
 use App\Exceptions\TributeLimitReachedException;
@@ -13,8 +14,10 @@ use App\Models\Tribute;
 use App\Models\User;
 use App\Notifications\TributeAwaitingReview;
 use App\Services\RoleService;
+use App\Services\SettingService;
 use App\Services\TributeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Notification;
 use PHPUnit\Framework\Attributes\Test;
@@ -52,6 +55,20 @@ class TributeServiceTest extends TestCase
         Notification::assertSentTo([$admin, $editor, $both], TributeAwaitingReview::class, fn (TributeAwaitingReview $n): bool => $n->tribute->is($tribute));
         Notification::assertNotSentTo([$member, $applicant], TributeAwaitingReview::class);
         Notification::assertCount(3);
+    }
+
+    #[Test]
+    public function submit_notifies_the_configured_notification_address_instead_of_the_moderators(): void
+    {
+        Notification::fake();
+        $admin = User::factory()->admin()->create();
+        app(SettingService::class)->update([SettingKeys::NOTIFICATION_EMAIL => 'Notices@Example.com']);
+
+        $tribute = $this->service->submit(['name' => 'A', 'relationship' => TributeRelationship::Friend, 'message' => 'Hello'], '203.0.113.9');
+
+        Notification::assertSentOnDemand(TributeAwaitingReview::class, fn (TributeAwaitingReview $n, array $channels, AnonymousNotifiable $notifiable): bool => $notifiable->routes['mail'] === 'notices@example.com' && $n->tribute->is($tribute));
+        Notification::assertNotSentTo($admin, TributeAwaitingReview::class);
+        Notification::assertCount(1);
     }
 
     #[Test]

@@ -22,7 +22,8 @@ use Illuminate\Support\Facades\Notification;
 
 /**
  * Visitor tributes: submitted as pending, shown only once an admin or editor
- * approves them. Every submission emails the moderators (admins and editors).
+ * approves them. Every submission emails the notification address from the
+ * site settings, or every moderator (admins and editors) when none is set.
  * Approvals and rejections are audited.
  *
  * @extends AbstractContentService<Tribute>
@@ -39,6 +40,7 @@ class TributeService extends AbstractContentService
         AuditLogService $audit,
         CacheRepository $cache,
         private readonly UserRepositoryInterface $users,
+        private readonly SettingService $settings,
     ) {
         parent::__construct($tributes, $audit, $cache);
     }
@@ -82,9 +84,26 @@ class TributeService extends AbstractContentService
             'sort_order' => 0,
         ]);
 
-        Notification::send($this->moderators(), new TributeAwaitingReview($tribute));
+        $this->notifyStaff(new TributeAwaitingReview($tribute));
 
         return $tribute;
+    }
+
+    /**
+     * Send a staff notice to the configured notification address, or to every
+     * moderator when the site settings have none.
+     */
+    private function notifyStaff(TributeAwaitingReview $notification): void
+    {
+        $address = $this->settings->notificationAddress();
+
+        if ($address !== null) {
+            Notification::route('mail', $address)->notify($notification);
+
+            return;
+        }
+
+        Notification::send($this->moderators(), $notification);
     }
 
     /**

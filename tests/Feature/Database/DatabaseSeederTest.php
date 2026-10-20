@@ -5,6 +5,7 @@ namespace Tests\Feature\Database;
 use App\Constants\CommunityStatus;
 use App\Constants\ContentStatus;
 use App\Constants\Roles;
+use App\Constants\SettingKeys;
 use App\Constants\TributeStatus;
 use App\Models\Album;
 use App\Models\Award;
@@ -15,6 +16,7 @@ use App\Models\CvEntry;
 use App\Models\OtherItem;
 use App\Models\Profile;
 use App\Models\Publication;
+use App\Models\Setting;
 use App\Models\TeachingMaterial;
 use App\Models\Tribute;
 use App\Models\User;
@@ -51,6 +53,7 @@ class DatabaseSeederTest extends TestCase
     private function assertQuantities(): void
     {
         $this->assertSame(1, Profile::query()->count());
+        $this->assertSame(count(SettingKeys::all()), Setting::query()->count());
         $this->assertSame(12, CvEntry::query()->count());
         $this->assertSame(15, Publication::query()->count());
         $this->assertSame(6, Award::query()->count());
@@ -72,6 +75,8 @@ class DatabaseSeederTest extends TestCase
 
         $this->assertTrue($admin->hasRole(Roles::ADMIN));
         $this->assertTrue($editor->hasRole(Roles::EDITOR));
+        $this->assertNotNull($admin->email_verified_at, 'Local staff accounts are seeded verified.');
+        $this->assertNotNull($editor->email_verified_at);
         $this->assertSame(2, User::query()->communityStatus(CommunityStatus::Approved)->count());
         $this->assertSame(2, User::query()->communityStatus(CommunityStatus::Pending)->count());
         $this->assertSame(2, User::query()->role(Roles::MEMBER)->count());

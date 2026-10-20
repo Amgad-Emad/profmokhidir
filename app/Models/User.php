@@ -25,7 +25,7 @@ use Spatie\Permission\Traits\HasRoles;
 #[Fillable([
     'name', 'email', 'password',
     'community_status', 'affiliation', 'academic_field', 'reason_for_joining',
-    'reviewed_by', 'reviewed_at', 'review_note',
+    'reviewed_by', 'reviewed_at', 'review_note', 'deactivated_at',
 ])]
 #[Hidden(['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'])]
 class User extends Authenticatable implements MustVerifyEmail
@@ -44,6 +44,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'two_factor_confirmed_at' => 'datetime',
             'community_status' => CommunityStatus::class,
             'reviewed_at' => 'datetime',
+            'deactivated_at' => 'datetime',
         ];
     }
 
@@ -69,6 +70,14 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function communityStatus(Builder $query, CommunityStatus $status): void
     {
         $query->where('community_status', $status->value);
+    }
+
+    /**
+     * A deactivated account cannot sign in and is signed out on its next request.
+     */
+    public function isActive(): bool
+    {
+        return $this->deactivated_at === null;
     }
 
     public function isAdmin(): bool

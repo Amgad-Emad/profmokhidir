@@ -36,6 +36,16 @@ final class AuditAction
 
     public const string USER_DELETED = 'user.deleted';
 
+    public const string USER_INVITED = 'user.invited';
+
+    public const string USER_INVITE_RESENT = 'user.invite_resent';
+
+    public const string USER_DEACTIVATED = 'user.deactivated';
+
+    public const string USER_REACTIVATED = 'user.reactivated';
+
+    public const string SETTINGS_UPDATED = 'settings.updated';
+
     public const string CONTENT_CREATED = 'content.created';
 
     public const string CONTENT_RESTORED = 'content.restored';
@@ -72,6 +82,7 @@ final class AuditAction
             self::COMMUNITY_APPLIED, self::COMMUNITY_APPROVED, self::COMMUNITY_REJECTED, self::COMMUNITY_SUSPENDED,
             self::COMMUNITY_REINSTATED, self::COMMUNITY_REMOVED,
             self::ROLE_ASSIGNED, self::ROLE_REMOVED, self::ROLES_SYNCED, self::USER_DELETED,
+            self::USER_INVITED, self::USER_INVITE_RESENT, self::USER_DEACTIVATED, self::USER_REACTIVATED, self::SETTINGS_UPDATED,
             self::CONTENT_CREATED, self::CONTENT_RESTORED, self::CONTENT_PUBLISHED, self::CONTENT_UNPUBLISHED, self::CONTENT_DELETED,
             self::TRIBUTE_EDITED, self::MEDIA_UPLOADED, self::MEDIA_UPDATED, self::MEDIA_DELETED,
             self::CHAT_MESSAGE_DELETED, self::CHAT_MESSAGE_REPORTED, self::CHAT_REPORT_RESOLVED, self::ADMIN_LOGIN,
@@ -99,6 +110,11 @@ final class AuditAction
             self::ROLE_REMOVED => 'removed a role',
             self::ROLES_SYNCED => 'changed roles',
             self::USER_DELETED => 'deleted a user',
+            self::USER_INVITED => 'invited a staff member',
+            self::USER_INVITE_RESENT => 'resent a staff invitation',
+            self::USER_DEACTIVATED => 'deactivated an account',
+            self::USER_REACTIVATED => 'reactivated an account',
+            self::SETTINGS_UPDATED => 'updated the site settings',
             self::CONTENT_CREATED => 'created content',
             self::CONTENT_RESTORED => 'restored content from the trash',
             self::CONTENT_PUBLISHED => 'published content',

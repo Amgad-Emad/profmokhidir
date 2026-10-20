@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\EnsureCommunityMember;
 use App\Http\Middleware\EnsureTwoFactorIsEnabled;
 use App\Http\Responses\LoginResponse;
@@ -26,7 +27,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'role_or_permission' => RoleOrPermissionMiddleware::class,
             'two-factor' => EnsureTwoFactorIsEnabled::class,
             EnsureCommunityMember::ALIAS => EnsureCommunityMember::class,
+            EnsureAccountIsActive::ALIAS => EnsureAccountIsActive::class,
         ]);
+
+        // Deactivated accounts are signed out on their next request, whatever the page.
+        $middleware->web(append: [EnsureAccountIsActive::class]);
 
         // Signed-in users who open a guest page (sign in, reset password) go where they belong.
         $middleware->redirectUsersTo(fn (Request $request): string => LoginResponse::destinationFor($request->user(), app(AuthenticationService::class)));

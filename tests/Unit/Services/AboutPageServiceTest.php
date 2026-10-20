@@ -50,7 +50,7 @@ class AboutPageServiceTest extends TestCase
         $this->assertSame('', $data['bio']);
         $this->assertSame([], $data['expertise']);
         $this->assertSame([], $data['facts']);
-        $this->assertSame(['email' => null, 'note' => null], $data['contact']);
+        $this->assertSame(['email' => null, 'note' => null, 'phone' => null, 'address' => null], $data['contact']);
     }
 
     #[Test]
@@ -76,7 +76,7 @@ class AboutPageServiceTest extends TestCase
         $this->assertSame('<p>Hello</p>bad()<h2>Years</h2><blockquote>Light</blockquote>', $data['bio']);
         $this->assertSame(['Agronomy', 'Soil fertility'], $data['expertise']);
         $this->assertSame([['label' => 'Field', 'value' => 'Agronomy']], $data['facts']);
-        $this->assertSame(['email' => 'office@example.com', 'note' => 'Via the office.'], $data['contact']);
+        $this->assertSame(['email' => 'office@example.com', 'note' => 'Via the office.', 'phone' => null, 'address' => null], $data['contact']);
     }
 
     #[Test]
@@ -84,6 +84,6 @@ class AboutPageServiceTest extends TestCase
     {
         Profile::factory()->published()->create(['contact_email_public' => null, 'contact_note' => '   ']);
 
-        $this->assertSame(['email' => null, 'note' => null], $this->service->data()['contact']);
+        $this->assertSame(['email' => null, 'note' => null, 'phone' => null, 'address' => null], $this->service->data()['contact']);
     }
 }

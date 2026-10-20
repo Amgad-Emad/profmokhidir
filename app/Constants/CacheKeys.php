@@ -32,6 +32,9 @@ final class CacheKeys
 
     public const string TRIBUTES = 'public.tributes';
 
+    /** Site settings (contact details, notification address, mail sender). */
+    public const string SETTINGS = 'settings.all';
+
     /**
      * @return list<string>
      */
@@ -39,7 +42,7 @@ final class CacheKeys
     {
         return [
             self::PROFILE, self::CV_ENTRIES, self::PUBLICATIONS, self::AWARDS, self::VIDEOS,
-            self::ALBUMS, self::TEACHING_MATERIALS, self::COMMENTARIES, self::OTHER_ITEMS, self::TRIBUTES,
+            self::ALBUMS, self::TEACHING_MATERIALS, self::COMMENTARIES, self::OTHER_ITEMS, self::TRIBUTES, self::SETTINGS,
         ];
     }
 }

@@ -33,6 +33,46 @@ class EloquentUserRepository extends BaseEloquentRepository implements UserRepos
         return $user->refresh();
     }
 
+    public function markEmailVerified(User $user): User
+    {
+        $user->forceFill(['email_verified_at' => now()])->save();
+
+        return $user->refresh();
+    }
+
+    public function countActiveWithRole(string $role, ?int $excludeId = null): int
+    {
+        try {
+            return $this->query()
+                ->role($role)
+                ->whereNull('deactivated_at')
+                ->when($excludeId !== null, fn ($query) => $query->whereKeyNot($excludeId))
+                ->count();
+        } catch (RoleDoesNotExist) {
+            return 0;
+        }
+    }
+
+    public function search(?string $term = null, ?string $role = null, ?CommunityStatus $status = null, int $perPage = 15): LengthAwarePaginator
+    {
+        $term = trim((string) $term);
+
+        try {
+            return $this->query()
+                ->when($term !== '', fn ($query) => $query->where(function ($query) use ($term): void {
+                    $query->where('name', 'like', '%'.$term.'%')->orWhere('email', 'like', '%'.$term.'%');
+                }))
+                ->when($role !== null, fn ($query) => $query->role($role))
+                ->when($status !== null, fn ($query) => $query->communityStatus($status))
+                ->with('roles')
+                ->orderBy('name')
+                ->orderBy('id')
+                ->paginate($perPage);
+        } catch (RoleDoesNotExist) {
+            return $this->query()->whereRaw('1 = 0')->paginate($perPage);
+        }
+    }
+
     public function withRole(string $role): Collection
     {
         try {

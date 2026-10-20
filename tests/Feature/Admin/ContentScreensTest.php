@@ -100,7 +100,6 @@ class ContentScreensTest extends TestCase
             $this->actingAs($admin)->get(route(AdminNavigation::routeFor($key)))->assertOk()->assertDontSee('This section is on its way.');
         }
 
-        $this->assertArrayNotHasKey(AdminNavigation::TRIBUTES, AdminNavigation::placeholders());
-        $this->assertArrayHasKey(AdminNavigation::USERS, AdminNavigation::placeholders());
+        $this->assertSame([], AdminNavigation::placeholders());
     }
 }

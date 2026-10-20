@@ -51,12 +51,18 @@
                         </section>
                     @endif
 
-                    @if ($contact['email'] || $contact['note'])
+                    @if ($contact['email'] || $contact['note'] || $contact['phone'] || $contact['address'])
                         <section aria-labelledby="contact-title">
                             <h2 id="contact-title" class="t-label text-bronze">Contact</h2>
                             <div class="mt-5 flex flex-col gap-2 border-t border-stone pt-6">
                                 @if ($contact['email'])
                                     <a href="mailto:{{ $contact['email'] }}" class="t-body text-evergreen underline decoration-brass underline-offset-4">{{ $contact['email'] }}</a>
+                                @endif
+                                @if ($contact['phone'])
+                                    <a href="tel:{{ preg_replace('/[^0-9+]/', '', $contact['phone']) }}" class="t-body text-evergreen underline decoration-brass underline-offset-4" data-contact-phone>{{ $contact['phone'] }}</a>
+                                @endif
+                                @if ($contact['address'])
+                                    <p class="whitespace-pre-line text-base font-light text-ash" data-contact-address>{{ $contact['address'] }}</p>
                                 @endif
                                 @if ($contact['note'])
                                     <p class="text-base font-light text-ash">{{ $contact['note'] }}</p>

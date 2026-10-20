@@ -97,9 +97,23 @@ Rules that apply to every content type:
 - The CV is view-only on the page. There is deliberately no CV download or file route, and the
   test suite fails if one is added.
 
-Editors can do all of the above except community management and user administration.
-The **Users & roles** screen (`/admin/settings/users`) is still a placeholder: staff accounts are
-created with the seeder or `php artisan tinker` for now.
+Editors can do all of the above except community management, user administration and site
+settings.
+
+- **Users & roles** (`/admin/users`, admins only): every staff and community account with
+  search and filters by role and community status. Invite an administrator or editor by name,
+  email and role; they receive a set-password link (the same password-broker token as "forgot
+  password", so no password is ever shown or emailed) and administrators are sent to set up
+  two-factor authentication on first sign-in. Change roles, deactivate and reactivate staff
+  accounts (a deactivated account cannot sign in and is signed out on its next request) and
+  resend a pending invitation. Nobody can change their own role or deactivate themselves, and
+  the last active administrator can never be demoted or deactivated. Everything is written to
+  the audit log.
+- **Site settings** (`/admin/settings`, admins only): the public contact email, phone and
+  address (shown on the About page when the profile has no contact email of its own), the
+  address that receives "tribute awaiting review" and "community application received"
+  notices (every admin and editor is emailed when it is blank), and the mail sender name and
+  address (overriding `MAIL_FROM_*` once set). Stored in the `settings` table and cached.
 
 ## Switching the community chat to Reverb
 
@@ -161,8 +175,22 @@ php artisan db:seed --class=RolesAndPermissionsSeeder   # first deploy only
 ```
 
 Do **not** run the full `DatabaseSeeder` in production; it creates placeholder content.
-Create the first admin with `php artisan tinker` (or temporarily run `UserSeeder`) and have
-them enable two-factor authentication at `/account` before they can open `/admin`.
+
+**First administrator.** With the mailer configured, run
+
+```bash
+php artisan admin:create-first              # asks for the name and email
+php artisan admin:create-first --name="Site Owner" --email=owner@profmokhidir.com
+```
+
+It syncs the roles and permissions (so the `RolesAndPermissionsSeeder` step above is optional),
+creates the account as an administrator and emails a set-password link; no password is generated
+or printed. The link expires after 60 minutes (`php artisan queue:work` must be running if mail
+is queued); an existing admin can resend it from **Users & roles**. The command refuses to run
+once an active administrator exists (`--force` overrides). After setting their password the
+person signs in and is asked to set up two-factor authentication at `/account` before `/admin`
+opens. Further staff are invited from **Users & roles**, and the contact details, notification
+address and mail sender are set on **Site settings**.
 
 **Queue worker.** Mail notifications and media conversions are queued. Run
 `php artisan queue:work --tries=3 --max-time=3600` under Supervisor (or the host's

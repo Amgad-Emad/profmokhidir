@@ -9,6 +9,7 @@ use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Services\AuditLogService;
 use App\Services\RoleService;
 use App\Services\UserService;
+use Illuminate\Contracts\Auth\PasswordBrokerFactory;
 use Illuminate\Database\Eloquent\Collection;
 use InvalidArgumentException;
 use Mockery;
@@ -24,6 +25,8 @@ class UserServiceTest extends TestCase
 
     private AuditLogService&MockInterface $audit;
 
+    private PasswordBrokerFactory&MockInterface $passwords;
+
     private UserService $service;
 
     protected function setUp(): void
@@ -33,7 +36,8 @@ class UserServiceTest extends TestCase
         $this->users = Mockery::mock(UserRepositoryInterface::class);
         $this->roles = Mockery::mock(RoleService::class);
         $this->audit = Mockery::mock(AuditLogService::class);
-        $this->service = new UserService($this->users, $this->roles, $this->audit);
+        $this->passwords = Mockery::mock(PasswordBrokerFactory::class);
+        $this->service = new UserService($this->users, $this->roles, $this->audit, $this->passwords);
     }
 
     #[Test]

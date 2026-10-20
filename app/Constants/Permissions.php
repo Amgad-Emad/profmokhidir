@@ -23,6 +23,8 @@ final class Permissions
 
     public const string MANAGE_USERS = 'manage users';
 
+    public const string MANAGE_SETTINGS = 'manage settings';
+
     public const string ACCESS_CHAT = 'access chat';
 
     /**
@@ -37,6 +39,7 @@ final class Permissions
             self::MANAGE_COMMUNITY,
             self::MODERATE_CHAT,
             self::MANAGE_USERS,
+            self::MANAGE_SETTINGS,
             self::ACCESS_CHAT,
         ];
     }

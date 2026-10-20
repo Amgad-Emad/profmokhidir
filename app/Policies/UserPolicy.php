@@ -9,8 +9,9 @@ use App\Models\User;
 
 /**
  * Accounts and roles need "manage users"; community applications need
- * "manage community". Both are admin-only permissions. Nobody may delete or
- * change the roles of their own account.
+ * "manage community". Both are admin-only permissions. Nobody may delete,
+ * deactivate or change the roles of their own account (UserService also
+ * protects the last active administrator).
  */
 class UserPolicy
 {
@@ -40,6 +41,27 @@ class UserPolicy
     }
 
     public function assignRole(User $user, User $subject): bool
+    {
+        return ! $user->is($subject) && $user->can(Permissions::MANAGE_USERS);
+    }
+
+    /** Invite a new administrator or editor. */
+    public function invite(User $user): bool
+    {
+        return $user->can(Permissions::MANAGE_USERS);
+    }
+
+    public function resendInvitation(User $user, User $subject): bool
+    {
+        return ! $user->is($subject) && $user->can(Permissions::MANAGE_USERS);
+    }
+
+    public function deactivate(User $user, User $subject): bool
+    {
+        return ! $user->is($subject) && $user->can(Permissions::MANAGE_USERS);
+    }
+
+    public function reactivate(User $user, User $subject): bool
     {
         return ! $user->is($subject) && $user->can(Permissions::MANAGE_USERS);
     }

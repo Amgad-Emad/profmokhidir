@@ -22,6 +22,25 @@ interface UserRepositoryInterface extends BaseRepositoryInterface
     public function markEmailUnverified(User $user): User;
 
     /**
+     * Stamp the email as verified (after an invitation link has been used).
+     */
+    public function markEmailVerified(User $user): User;
+
+    /**
+     * Users holding the role whose account is not deactivated, optionally
+     * leaving one user out of the count.
+     */
+    public function countActiveWithRole(string $role, ?int $excludeId = null): int;
+
+    /**
+     * Staff and community users for the Users & roles screen: name or email
+     * search, optional role and community status filters, by name.
+     *
+     * @return LengthAwarePaginator<int, User>
+     */
+    public function search(?string $term = null, ?string $role = null, ?CommunityStatus $status = null, int $perPage = 15): LengthAwarePaginator;
+
+    /**
      * Users holding the given Spatie role.
      *
      * @return Collection<int, User>

@@ -20,6 +20,7 @@ class AboutPageService
         private readonly ProfileService $profiles,
         private readonly NavigationService $navigation,
         private readonly SeoService $seo,
+        private readonly SettingService $settings,
     ) {}
 
     /**
@@ -30,7 +31,7 @@ class AboutPageService
      *     bio: string,
      *     expertise: list<string>,
      *     facts: list<array{label: string, value: string}>,
-     *     contact: array{email: string|null, note: string|null},
+     *     contact: array{email: string|null, note: string|null, phone: string|null, address: string|null},
      *     links: list<array{key: string, label: string, title: string, url: string, route: string, placement: string, summary: string, active: bool}>,
      *     description: string|null,
      *     schema: array<string, mixed>|null
@@ -49,10 +50,7 @@ class AboutPageService
             'bio' => RichText::sanitise($profile?->full_bio),
             'expertise' => $this->expertise($profile),
             'facts' => $this->facts($profile),
-            'contact' => [
-                'email' => filled($profile?->contact_email_public) ? $profile->contact_email_public : null,
-                'note' => filled($profile?->contact_note) ? $profile->contact_note : null,
-            ],
+            'contact' => $this->contact($profile),
             'links' => $this->links(),
             'description' => $this->seo->description($profile?->short_bio, $section['summary']),
             'schema' => $profile === null ? null : $this->seo->person($profile, $portrait, $section['url']),
@@ -65,6 +63,24 @@ class AboutPageService
     public function links(): array
     {
         return array_map(fn (string $key): array => $this->navigation->section($key), Sections::aboutLinks());
+    }
+
+    /**
+     * The profile's own contact email and note; without them, the site
+     * contact details from the settings.
+     *
+     * @return array{email: string|null, note: string|null, phone: string|null, address: string|null}
+     */
+    public function contact(?Profile $profile): array
+    {
+        $site = $this->settings->contact();
+
+        return [
+            'email' => filled($profile?->contact_email_public) ? $profile->contact_email_public : $site['email'],
+            'note' => filled($profile?->contact_note) ? $profile->contact_note : null,
+            'phone' => $site['phone'],
+            'address' => $site['address'],
+        ];
     }
 
     /**

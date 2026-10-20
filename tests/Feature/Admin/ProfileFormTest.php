@@ -104,6 +104,31 @@ class ProfileFormTest extends TestCase
     }
 
     #[Test]
+    public function the_portrait_always_needs_alt_text_caption_place_and_year_even_on_a_draft(): void
+    {
+        $profile = Profile::factory()->draft()->create();
+
+        $component = Livewire::actingAs($this->editor)->test(EditProfile::class)
+            ->set('newImages', UploadedFile::fake()->image('portrait.jpg', 60, 80))
+            ->assertHasNoErrors()
+            ->assertViewHas('detailsRequired', true);
+
+        $id = $profile->fresh()->portrait()->getKey();
+
+        $component->call('saveImage', $id)
+            ->assertHasErrors(["images.$id.alt_text", "images.$id.caption", "images.$id.place", "images.$id.year"]);
+
+        $component->set("images.$id.alt_text", 'Portrait of Professor Khidir')
+            ->set("images.$id.caption", 'Portrait')
+            ->set("images.$id.place", 'Khartoum')
+            ->set("images.$id.year", '1990')
+            ->call('saveImage', $id)
+            ->assertHasNoErrors();
+
+        $this->assertSame('Khartoum', $profile->fresh()->portrait()->getCustomProperty(MediaProperties::PLACE));
+    }
+
+    #[Test]
     public function members_cannot_edit_the_profile(): void
     {
         Livewire::actingAs(User::factory()->member()->create())->test(EditProfile::class)->assertForbidden();

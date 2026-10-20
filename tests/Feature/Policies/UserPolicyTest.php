@@ -32,6 +32,10 @@ class UserPolicyTest extends TestCase
         $this->assertTrue($admin->can('update', $subject));
         $this->assertTrue($admin->can('delete', $subject));
         $this->assertTrue($admin->can('assignRole', $subject));
+        $this->assertTrue($admin->can('invite', User::class));
+        $this->assertTrue($admin->can('deactivate', $subject));
+        $this->assertTrue($admin->can('reactivate', $subject));
+        $this->assertTrue($admin->can('resendInvitation', $subject));
 
         $this->assertFalse($editor->can('viewAny', User::class));
         $this->assertFalse($editor->can('create', User::class));
@@ -39,6 +43,10 @@ class UserPolicyTest extends TestCase
         $this->assertFalse($editor->can('update', $subject));
         $this->assertFalse($editor->can('delete', $subject));
         $this->assertFalse($editor->can('assignRole', $subject));
+        $this->assertFalse($editor->can('invite', User::class));
+        $this->assertFalse($editor->can('deactivate', $subject));
+        $this->assertFalse($editor->can('reactivate', $subject));
+        $this->assertFalse($editor->can('resendInvitation', $subject));
     }
 
     #[Test]
@@ -61,5 +69,16 @@ class UserPolicyTest extends TestCase
             $this->assertFalse($user->can('assignRole', $user));
             $this->assertFalse($user->can('review', $user));
         }
+    }
+
+    #[Test]
+    public function admins_cannot_deactivate_or_re_role_themselves(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->assertFalse($admin->can('deactivate', $admin));
+        $this->assertFalse($admin->can('reactivate', $admin));
+        $this->assertFalse($admin->can('assignRole', $admin));
+        $this->assertFalse($admin->can('resendInvitation', $admin));
     }
 }

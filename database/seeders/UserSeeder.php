@@ -6,7 +6,6 @@ use App\Constants\Roles;
 use App\Models\User;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Services\UserService;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -39,12 +38,13 @@ class UserSeeder extends Seeder
 
             $password = Str::random(16);
 
-            $users->create([
+            // Local accounts skip email verification (there is no mailbox to click through).
+            $repository->markEmailVerified($users->create([
                 'name' => $account['name'],
                 'email' => $account['email'],
                 'password' => $password,
                 'role' => $account['role'],
-            ]);
+            ]));
 
             $rows[] = [$account['email'], Roles::labels()[$account['role']], $password];
         }

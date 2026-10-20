@@ -110,6 +110,22 @@ class UserFactory extends Factory
     }
 
     /**
+     * A deactivated account: cannot sign in until reactivated.
+     */
+    public function deactivated(): static
+    {
+        return $this->state(fn (array $attributes) => ['deactivated_at' => now()->subDay()]);
+    }
+
+    /**
+     * Invited staff who have not used their set-password link yet.
+     */
+    public function invited(): static
+    {
+        return $this->unverified();
+    }
+
+    /**
      * An approved community member.
      */
     public function member(): static

@@ -40,12 +40,18 @@ class AdminMiddlewareTest extends TestCase
     }
 
     #[Test]
-    public function every_placeholder_page_enforces_its_permission(): void
+    public function every_navigation_item_has_its_own_screen_and_enforces_its_permission(): void
     {
         $admin = User::factory()->admin()->create();
         $editor = User::factory()->editor()->create();
 
-        foreach (AdminNavigation::placeholders() as $key => $item) {
+        $this->assertSame([], AdminNavigation::placeholders());
+
+        foreach (AdminNavigation::items() as $key => $item) {
+            if ($key === AdminNavigation::ACCOUNT) {
+                continue;
+            }
+
             $this->actingAs($admin)->get(route($item['route']))->assertOk()->assertSee($item['label']);
 
             $response = $this->actingAs($editor)->get(route($item['route']));
@@ -63,7 +69,7 @@ class AdminMiddlewareTest extends TestCase
     {
         $editor = User::factory()->editor()->create();
 
-        foreach ([AdminNavigation::USERS, AdminNavigation::APPLICATIONS, AdminNavigation::MEMBERS, AdminNavigation::CHAT_REPORTS] as $key) {
+        foreach ([AdminNavigation::USERS, AdminNavigation::SITE_SETTINGS, AdminNavigation::APPLICATIONS, AdminNavigation::MEMBERS, AdminNavigation::CHAT_REPORTS] as $key) {
             $this->actingAs($editor)->get(route(AdminNavigation::routeFor($key)))->assertForbidden();
         }
 
