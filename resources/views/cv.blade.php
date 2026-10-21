@@ -4,7 +4,9 @@
     No download, print or file link anywhere on this page, and the print stylesheet hides it entirely.
 --}}
 <x-layouts.public :title="$section['title']" :description="$section['summary']">
-    <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28" aria-labelledby="section-title">
+    <x-reading-progress target="#cv-body" />
+
+    <section id="cv-body" class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28" aria-labelledby="section-title">
         <div class="cv-ledger">
             <x-folio :section="$section['label']" class="mb-16" />
 

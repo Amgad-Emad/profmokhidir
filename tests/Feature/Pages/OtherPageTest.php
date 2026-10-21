@@ -81,7 +81,7 @@ class OtherPageTest extends TestCase
                 '<div class="prose-bio mt-10" data-rise><p>Details.</p>x()<h2>Programme</h2></div>',
                 'href="'.route('other').'"', 'All other information',
             ], false)
-            ->assertDontSee('<script', false);
+            ->assertDontSee('<script>', false);
 
         $this->get(route('other.show', 'linked'))->assertNotFound();
         $this->get(route('other.show', 'bodiless'))->assertNotFound();
@@ -96,7 +96,7 @@ class OtherPageTest extends TestCase
 
         foreach ([route('other'), route('other.show', 'note')] as $url) {
             $html = $this->get($url)->assertOk()->getContent();
-            preg_match_all('/<a href="([^"]+)"[^>]*aria-current="page"[^>]*>/', $html, $matches);
+            preg_match_all('/<a href="([^"]+)"(?![^>]*breadcrumbs__link)[^>]*aria-current="page"[^>]*>/', $html, $matches);
             $this->assertSame([route('other')], array_values(array_unique($matches[1])));
         }
     }

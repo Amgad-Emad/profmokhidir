@@ -3,6 +3,8 @@
 namespace Tests\Feature\Errors;
 
 use App\Constants\ErrorPages;
+use App\Constants\Search;
+use App\Constants\Sections;
 use App\Constants\Seo;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -11,8 +13,8 @@ use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 /**
- * The error pages are evergreen with the MK mark, one Cormorant line and a
- * pill button home. 404 and 403 are reached through real requests; 419, 500
+ * The error pages are evergreen with the MK mark, one Cormorant line, a search
+ * box that needs no script, the chapters of the site and a pill button home. 404 and 403 are reached through real requests; 419, 500
  * and 503 are rendered directly because the test client never trips them.
  */
 class ErrorPagesTest extends TestCase
@@ -69,8 +71,26 @@ class ErrorPagesTest extends TestCase
         $this->assertStringContainsString('<h1 class="t-heading text-ivory">'.e($page['title']).'</h1>', $html);
         $this->assertStringContainsString('<p class="t-quote max-w-xl">'.e($page['line']).'</p>', $html);
         $this->assertStringContainsString('<a href="'.route('home').'" class="btn-pill-filled mt-4">'.ErrorPages::HOME_LABEL.'</a>', $html);
+
+        // The search box is a plain GET form to /search: it works on a page that loads no script.
+        $this->assertMatchesRegularExpression('/<form method="get" action="'.preg_quote(route(Search::ROUTE), '/').'" role="search"/', $html);
+        $this->assertStringContainsString('<label for="error-search" class="t-label block text-brass">'.ErrorPages::SEARCH_LABEL.'</label>', $html);
+        $this->assertMatchesRegularExpression('/<input id="error-search" name="'.Search::PARAM.'" type="search"/', $html);
+
+        // Every chapter is linked, in navigation order.
+        $this->assertStringContainsString('<nav class="error-page__chapters w-full max-w-xl" aria-label="Chapters">', $html);
+        $this->assertStringContainsString(ErrorPages::CHAPTERS_LABEL, $html);
+        preg_match_all('/class="error-page__chapter link-draw smallcaps">([^<]+)<\/a>/', $html, $chapters);
+        $this->assertSame(array_map(fn (array $section): string => e($section['label']), array_values(Sections::definitions())), $chapters[1]);
+
         $this->assertStringNotContainsString('livewire', $html);
-        $this->assertStringNotContainsString('<nav', $html);
+        $this->assertStringNotContainsString('<script', $html);
         $this->assertStringNotContainsString('fonts.googleapis.com', $html);
+    }
+
+    #[Test]
+    public function the_missing_page_line_says_it_was_misplaced_in_the_archive(): void
+    {
+        $this->assertSame('This page has been misplaced in the archive.', ErrorPages::get(ErrorPages::NOT_FOUND)['line']);
     }
 }

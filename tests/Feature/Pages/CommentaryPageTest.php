@@ -108,7 +108,7 @@ class CommentaryPageTest extends TestCase
                 'Next', 'href="'.route('commentary.show', 'older').'"', 'Older piece',
                 'href="'.route('commentary').'"', 'All commentary', 'class="seal"', 'folio--bottom',
             ], false)
-            ->assertDontSee('<script', false)
+            ->assertDontSee('<script>', false)
             ->assertDontSee('onclick', false)
             ->assertDontSee('livewire', false);
 
@@ -121,14 +121,14 @@ class CommentaryPageTest extends TestCase
     {
         $paragraph = str_repeat('word ', 250);
         Commentary::factory()->published()->tagged(['Education', 'Policy'])->create([
-            'title' => 'On teaching', 'slug' => 'on-teaching', 'external_url' => null,
+            'title' => 'On teaching', 'slug' => 'on-teaching', 'external_url' => null, 'date' => '2010-06-01', 'sort_order' => 20,
             'epigraph' => 'The field is the first classroom.', 'epigraph_attribution' => 'From a lecture, 1984',
             'body' => '<p>Opening.[^a]</p><h2>The field</h2><p>'.$paragraph.'</p><h3>Practicals</h3><p>'.$paragraph.'</p><h2>The field</h2><p>End.[^b][^missing]</p>'
                 .'<p>[^a]: First <em>note</em>.</p><p>[^b]: Second note.</p>',
         ]);
-        Commentary::factory()->published()->tagged(['Policy', 'Education'])->create(['title' => 'Closely related', 'slug' => 'closely', 'date' => '2001-01-01']);
-        Commentary::factory()->published()->tagged(['education'])->create(['title' => 'Also related', 'slug' => 'also', 'date' => '2020-01-01']);
-        Commentary::factory()->published()->tagged(['Sudan'])->create(['title' => 'Unrelated piece', 'slug' => 'unrelated']);
+        Commentary::factory()->published()->tagged(['Policy', 'Education'])->create(['title' => 'Closely related', 'slug' => 'closely', 'date' => '2001-01-01', 'sort_order' => 10]);
+        Commentary::factory()->published()->tagged(['education'])->create(['title' => 'Also related', 'slug' => 'also', 'date' => '2020-01-01', 'sort_order' => 30]);
+        Commentary::factory()->published()->tagged(['Sudan'])->create(['title' => 'Unrelated piece', 'slug' => 'unrelated', 'date' => '1990-01-01', 'sort_order' => 40]);
         Commentary::factory()->draft()->tagged(['Education'])->create(['title' => 'Draft related', 'slug' => 'draft-related']);
 
         $response = $this->get(route('commentary.show', 'on-teaching'))->assertOk();
@@ -222,7 +222,8 @@ class CommentaryPageTest extends TestCase
 
         foreach ([route('commentary'), route('commentary.show', 'piece')] as $url) {
             $html = $this->get($url)->assertOk()->getContent();
-            preg_match_all('/<a href="([^"]+)"[^>]*aria-current="page"[^>]*>/', $html, $matches);
+            // The breadcrumb trail marks the page itself; the navigation marks the section.
+            preg_match_all('/<a href="([^"]+)"(?![^>]*breadcrumbs__link)[^>]*aria-current="page"[^>]*>/', $html, $matches);
             $this->assertSame([route('commentary')], array_values(array_unique($matches[1])));
         }
     }

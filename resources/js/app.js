@@ -1,6 +1,7 @@
 // Public pages: Alpine for small UI behaviour and the brand motion script. Livewire is never loaded here.
 import Alpine from 'alpinejs';
 import siteMenu from './menu';
+import siteSearch from './search';
 import lightbox from './lightbox';
 import videoFacade from './video-facade';
 import { catalogueSheet, citePanel } from './catalogue';
@@ -9,6 +10,7 @@ import './motion';
 
 window.Alpine = Alpine;
 Alpine.data('siteMenu', siteMenu);
+Alpine.data('siteSearch', siteSearch);
 Alpine.data('lightbox', lightbox);
 Alpine.data('videoFacade', videoFacade);
 Alpine.data('catalogueSheet', catalogueSheet);

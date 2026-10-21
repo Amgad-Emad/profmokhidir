@@ -40,7 +40,7 @@ class TeachingPageTest extends TestCase
             ->assertSeeInOrder(['chapter-opening', 'Teaching', 'rule-brass', 'id="section-title"', 'Teaching Materials'], false)
             ->assertSee('Teaching materials will appear here as they are prepared for sharing.')
             ->assertDontSee('Draft slides')
-            ->assertDontSee('<form', false)
+            ->assertDontSee('name="topic"', false)
             ->assertDontSee('livewire', false);
     }
 

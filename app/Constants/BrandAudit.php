@@ -75,7 +75,7 @@ final class BrandAudit
      */
     public static function permittedKeyframes(): array
     {
-        return ['lightbox-fade'];
+        return ['lightbox-fade', 'skeleton-breathe'];
     }
 
     /**

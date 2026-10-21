@@ -24,6 +24,10 @@ final class ErrorPages
 
     public const string HOME_LABEL = 'Return home';
 
+    public const string SEARCH_LABEL = 'Search the archive';
+
+    public const string CHAPTERS_LABEL = 'Or turn to a chapter';
+
     /**
      * Status code => heading and the Cormorant line beneath it.
      *
@@ -38,7 +42,7 @@ final class ErrorPages
             ],
             self::NOT_FOUND => [
                 'title' => 'Page not found',
-                'line' => 'What you were looking for has moved on, as all things do.',
+                'line' => 'This page has been misplaced in the archive.',
             ],
             self::PAGE_EXPIRED => [
                 'title' => 'The page has expired',

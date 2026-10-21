@@ -5,6 +5,7 @@ use App\Constants\ContentTypes;
 use App\Constants\Permissions;
 use App\Constants\RateLimits;
 use App\Constants\Roles;
+use App\Constants\Search;
 use App\Constants\Sections;
 use App\Constants\Seo;
 use App\Constants\TributeCards;
@@ -21,6 +22,7 @@ use App\Http\Controllers\OtherItemController;
 use App\Http\Controllers\PictureController;
 use App\Http\Controllers\PublicationController;
 use App\Http\Controllers\RobotsController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SectionPlaceholderController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\StyleguideController;
@@ -62,6 +64,9 @@ Route::get('/', HomeController::class)->name('home');
 // Crawlers: the sitemap of published content and the robots rules (no static files, so both follow APP_URL).
 Route::get(Seo::SITEMAP_PATH, SitemapController::class)->name(Seo::SITEMAP_ROUTE);
 Route::get(Seo::ROBOTS_PATH, RobotsController::class)->name(Seo::ROBOTS_ROUTE);
+
+// Site-wide search: the plain page, and JSON for the header dialog (Accept: application/json).
+Route::get(Search::PATH, SearchController::class)->name(Search::ROUTE);
 
 // Sections with their own controller. Each keeps the route name from Sections::definitions();
 // detail routes nest under the same name (e.g. commentary.show).

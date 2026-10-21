@@ -266,8 +266,12 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        /* Sits tight against the word it annotates (an inline target, WCAG 2.5.8 exception); padding widens the tap area a little. */
-        padding: 0.25rem 0.125rem;
+        /* Sits tight against the word it annotates; the box is a 24px target (WCAG 2.5.8) with negative
+           block margins so it does not open up the line. */
+        min-width: 1.5rem;
+        min-height: 1.5rem;
+        padding: 0 0.125rem;
+        margin-block: -0.75rem;
         vertical-align: super;
         line-height: 0;
         font-family: var(--font-display);

@@ -162,7 +162,7 @@ class TributesPageTest extends TestCase
         foreach (['tributes', 'tributes.create', 'tributes.thanks'] as $route) {
             $html = $this->get(route($route))->assertOk()->getContent();
 
-            preg_match_all('/<a href="([^"]+)"[^>]*aria-current="page"[^>]*>/', $html, $matches);
+            preg_match_all('/<a href="([^"]+)"(?![^>]*breadcrumbs__link)[^>]*aria-current="page"[^>]*>/', $html, $matches);
 
             $this->assertSame([route('tributes')], array_values(array_unique($matches[1])), $route);
         }

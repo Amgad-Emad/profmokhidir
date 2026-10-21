@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Seo;
 
+use App\Constants\Breadcrumbs;
 use App\Constants\Disks;
 use App\Constants\Seo;
 use App\Constants\SocialCards;
@@ -133,10 +134,12 @@ class MetaTagsTest extends TestCase
         $html = $this->get(route('about'))->assertOk()->getContent();
 
         preg_match('/<script type="application\/ld\+json">(.*?)<\/script>/s', $html, $match);
-        $schema = json_decode($match[1], true, flags: JSON_THROW_ON_ERROR);
+        $graph = json_decode($match[1], true, flags: JSON_THROW_ON_ERROR);
 
-        $this->assertSame(Seo::SCHEMA_CONTEXT, $schema['@context']);
-        $this->assertSame(Seo::SCHEMA_PERSON, $schema['@type']);
+        // The Person shares one graph with the page's BreadcrumbList.
+        $this->assertSame(Seo::SCHEMA_CONTEXT, $graph['@context']);
+        $this->assertSame([Seo::SCHEMA_PERSON, Breadcrumbs::SCHEMA_LIST], array_column($graph['@graph'], '@type'));
+        $schema = $graph['@graph'][0];
         $this->assertSame('Mohamed Osman Khidir', $schema['name']);
         $this->assertSame('Professor Emeritus of Agronomy', $schema['jobTitle']);
         $this->assertSame(['@type' => Seo::SCHEMA_ORGANIZATION, 'name' => 'University of Khartoum'], $schema['affiliation']);
@@ -146,11 +149,16 @@ class MetaTagsTest extends TestCase
     }
 
     #[Test]
-    public function the_about_page_has_no_json_ld_without_a_published_profile(): void
+    public function the_about_page_has_only_the_breadcrumb_list_without_a_published_profile(): void
     {
         Profile::factory()->draft()->create();
 
-        $this->get(route('about'))->assertOk()->assertDontSee('application/ld+json', false);
+        $html = $this->get(route('about'))->assertOk()->getContent();
+
+        preg_match_all('/<script type="application\/ld\+json">(.*?)<\/script>/s', $html, $matches);
+        $this->assertCount(1, $matches[1]);
+        $this->assertSame(Breadcrumbs::SCHEMA_LIST, json_decode($matches[1][0], true, flags: JSON_THROW_ON_ERROR)['@type']);
+        $this->assertStringNotContainsString(Seo::SCHEMA_PERSON, $matches[1][0]);
     }
 
     #[Test]
@@ -166,8 +174,9 @@ class MetaTagsTest extends TestCase
         $schema = json_decode($match[1], true, flags: JSON_THROW_ON_ERROR);
 
         $this->assertSame(Seo::SCHEMA_CONTEXT, $schema['@context']);
+        $this->assertSame([Seo::SCHEMA_SCHOLARLY_ARTICLE, Seo::SCHEMA_SCHOLARLY_ARTICLE, Breadcrumbs::SCHEMA_LIST], array_column($schema['@graph'], '@type'));
+        $schema['@graph'] = array_values(array_filter($schema['@graph'], fn (array $item): bool => $item['@type'] === Seo::SCHEMA_SCHOLARLY_ARTICLE));
         $this->assertCount(2, $schema['@graph']);
-        $this->assertSame([Seo::SCHEMA_SCHOLARLY_ARTICLE, Seo::SCHEMA_SCHOLARLY_ARTICLE], array_column($schema['@graph'], '@type'));
         $this->assertEqualsCanonicalizing(['Dryland Agronomy', 'Soil Water'], array_column($schema['@graph'], 'headline'));
         $this->assertStringNotContainsString('Unpublished draft', $match[1]);
 

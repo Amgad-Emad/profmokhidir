@@ -5,7 +5,7 @@
     under the header and "Further reading" by shared topic. Prints as an article (resources/css/archive.css).
 --}}
 <x-layouts.public :title="$commentary->title" :description="$commentary->summary" :type="\App\Constants\Seo::OG_TYPE_ARTICLE">
-    <div class="reading-progress" x-data="readingProgress" data-target="#essay-body" aria-hidden="true"></div>
+    <x-reading-progress target="#essay-body" />
 
     <article class="essay mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28" aria-labelledby="section-title">
         <x-folio :section="$section['label']" class="mb-16" />

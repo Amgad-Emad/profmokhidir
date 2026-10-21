@@ -846,7 +846,8 @@
     /* ------------------------------------------------------- commentary essay */
     .reading-progress {
         position: fixed;
-        top: 5rem; /* directly under the fixed header */
+        top: var(--header-height, 5rem); /* directly under the fixed header, which condenses on scroll */
+        transition: top var(--duration-condense, 600ms) var(--ease-rise);
         left: 0;
         right: 0;
         z-index: 39;

@@ -24,6 +24,19 @@ final class Motion
 
     public const float HERO_SCALE_TO = 0.7;
 
+    /** The header condenses once the page has scrolled this far. */
+    public const int HEADER_CONDENSE_AFTER_PX = 40;
+
+    public const int HEADER_CONDENSE_DURATION_MS = 600;
+
+    /** Cross-fade between pages (View Transitions API); the header stays in place. */
+    public const int PAGE_TRANSITION_MS = 400;
+
+    public const string PAGE_TRANSITION_HEADER_NAME = 'site-header';
+
+    /** Hairline underlines draw left to right; outline buttons fill at the same pace. */
+    public const int LINK_DRAW_MS = 600;
+
     /** HTML attributes that opt an element into each behaviour. */
     public const string ATTR_RISE = 'data-rise';
 

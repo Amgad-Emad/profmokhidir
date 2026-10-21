@@ -1,19 +1,47 @@
 /*
- | Full-screen site menu (tablet and mobile). Registered as the Alpine component
- | `siteMenu` on the header. Accessible behaviour:
- |   - the toggle button reflects state through aria-expanded
- |   - focus moves into the panel on open and is trapped there (Tab / Shift+Tab wrap)
- |   - Escape closes and focus returns to the toggle button
- |   - page scrolling is locked while open; resizing to desktop closes it
+ | The header's behaviour. Registered as the Alpine component `siteMenu`:
+ |
+ |   - the glass bar condenses gently once the page has scrolled past the
+ |     threshold (the class drives a CSS height change; nothing is animated here)
+ |   - the full-screen menu (tablet and mobile): the toggle button reflects state
+ |     through aria-expanded, focus moves into the panel on open and is trapped
+ |     there (Tab / Shift+Tab wrap), Escape closes and focus returns to the
+ |     toggle button, page scrolling is locked while open, and resizing to
+ |     desktop closes it
  */
 
+import { focusablesIn, trapTab } from './focus-trap';
+
 const DESKTOP = '(min-width: 1024px)'; // Tailwind `lg`: the inline navigation takes over.
-const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+// Scroll distance after which the header condenses (App\Constants\Motion::HEADER_CONDENSE_AFTER_PX).
+const CONDENSE_AFTER = 40;
+const CONDENSED_CLASS = 'header-condensed';
 
 export default function siteMenu() {
     return {
         open: false,
         shown: false,
+        condensed: false,
+        ticking: false,
+
+        init() {
+            this.onScroll();
+        },
+
+        onScroll() {
+            if (this.ticking) return;
+            this.ticking = true;
+
+            window.requestAnimationFrame(() => {
+                this.ticking = false;
+                const condensed = (window.scrollY || window.pageYOffset) > CONDENSE_AFTER;
+
+                if (condensed !== this.condensed) {
+                    this.condensed = condensed;
+                    document.documentElement.classList.toggle(CONDENSED_CLASS, condensed);
+                }
+            });
+        },
 
         toggle() {
             this.open ? this.close() : this.show();
@@ -43,31 +71,12 @@ export default function siteMenu() {
         },
 
         focusables() {
-            return Array.from(this.$refs.panel.querySelectorAll(FOCUSABLE)).filter(
-                (el) => el.offsetParent !== null || el === document.activeElement,
-            );
+            return focusablesIn(this.$refs.panel);
         },
 
         trap(event) {
-            if (!this.open || event.key !== 'Tab') return;
-
-            const items = this.focusables();
-            if (items.length === 0) {
-                event.preventDefault();
-                return;
-            }
-
-            const first = items[0];
-            const last = items[items.length - 1];
-            const active = document.activeElement;
-
-            if (event.shiftKey && (active === first || active === this.$refs.panel)) {
-                event.preventDefault();
-                last.focus();
-            } else if (!event.shiftKey && active === last) {
-                event.preventDefault();
-                first.focus();
-            }
+            if (!this.open) return;
+            trapTab(event, this.$refs.panel);
         },
 
         onResize() {

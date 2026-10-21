@@ -155,9 +155,10 @@ class BrandAuditTest extends TestCase
             preg_match_all('/animation(?:-name)?\s*:\s*([^;}]+)/i', $contents, $animations);
 
             foreach ($animations[1] as $animation) {
-                $name = preg_split('/\s+/', trim($animation))[0];
+                // The build may reorder the shorthand, so the name can sit anywhere among its tokens.
+                $tokens = preg_split('/\s*,\s*|\s+/', trim($animation));
 
-                if (! in_array($name, [...BrandAudit::permittedKeyframes(), 'none'], true)) {
+                if (array_intersect($tokens, [...BrandAudit::permittedKeyframes(), 'none']) === []) {
                     $offenders[] = "{$file}: animation {$animation}";
                 }
             }

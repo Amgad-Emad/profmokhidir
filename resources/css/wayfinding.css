@@ -1,0 +1,537 @@
+/*
+ | Wayfinding: the condensing header, the search dialog and page, breadcrumbs,
+ | the reading line, skeletons, page transitions, and the hover and focus craft
+ | of links and buttons. Brand rules apply (see CLAUDE.md): brass for hairlines
+ | and small labels only, nothing bounces, reduced motion shows everything at once.
+ */
+
+:root {
+    --header-height: 5rem;
+    --duration-condense: 600ms;
+    --duration-draw: 600ms;
+    --duration-page: 400ms;
+}
+
+:root.header-condensed {
+    --header-height: 4rem;
+}
+
+/* Lock page scroll while the search dialog is open (the menu uses .menu-open). */
+.search-open {
+    overflow: hidden;
+}
+
+@layer components {
+    /* ------------------------------------------------------------- header */
+    .site-header__bar {
+        height: var(--header-height);
+        transition: height var(--duration-condense) var(--ease-rise);
+    }
+
+    .site-header__lockup {
+        transform-origin: left center;
+        transition: transform var(--duration-condense) var(--ease-rise);
+    }
+
+    .site-header.is-condensed .site-header__lockup {
+        transform: scale(0.88);
+    }
+
+    /* Search button: magnifier, label and the "/" key hint on wide screens. */
+    .site-search-toggle {
+        @apply inline-flex min-h-11 items-center gap-2 rounded-full px-2 text-champagne no-underline;
+        transition: color 300ms var(--ease-rise);
+    }
+
+    .site-search-toggle:hover,
+    .site-search-toggle:focus-visible {
+        color: var(--color-ivory);
+        text-decoration: none;
+    }
+
+    .site-search-toggle__icon {
+        width: 1.125rem;
+        height: 1.125rem;
+        flex-shrink: 0;
+    }
+
+    .site-search-toggle__key {
+        display: none;
+        min-width: 1.5rem;
+        padding: 0.125rem 0.375rem;
+        border: 1px solid color-mix(in srgb, var(--color-champagne) 40%, transparent);
+        border-radius: var(--radius-card);
+        font-family: var(--font-mono);
+        font-size: 0.6875rem;
+        line-height: 1.2;
+        text-align: center;
+        color: var(--color-champagne);
+    }
+
+    @media (min-width: 1280px) {
+        .site-search-toggle__key {
+            display: inline-block;
+        }
+    }
+
+    /* Full-screen menu as a table of contents: numeral, then the chapter. */
+    .site-menu__caption {
+        padding-bottom: var(--space-2, 1rem);
+        border-bottom: 1px solid var(--color-cypress);
+    }
+
+    .site-menu__item {
+        display: grid;
+        grid-template-columns: 3.5rem minmax(0, 1fr);
+        align-items: baseline;
+        column-gap: 0.5rem;
+    }
+
+    .site-menu__numeral {
+        text-align: left;
+    }
+
+    .site-menu__search {
+        color: var(--color-champagne);
+        font-size: 1.25rem;
+    }
+
+    /* ------------------------------------------------------ search dialog */
+    .site-search__input,
+    .search-form__input {
+        width: 100%;
+        min-height: 3.25rem;
+        padding: 0.75rem 0;
+        border: 0;
+        border-bottom: 1px solid var(--color-cypress);
+        border-radius: 0;
+        background: transparent;
+        font-family: var(--font-display);
+        font-weight: 300;
+        font-size: clamp(1.75rem, 1.25rem + 2vw, 2.5rem);
+        line-height: 1.2;
+        color: var(--color-ivory);
+        transition: border-color var(--duration-draw) var(--ease-rise);
+    }
+
+    .site-search__input::placeholder,
+    .search-form__input::placeholder {
+        color: color-mix(in srgb, var(--color-champagne) 60%, transparent);
+        font-style: italic;
+    }
+
+    .site-search__input:focus,
+    .search-form__input:focus {
+        outline: none;
+        border-bottom-color: var(--color-brass);
+    }
+
+    .site-search__input:focus-visible,
+    .search-form__input:focus-visible {
+        outline: 2px solid var(--color-brass);
+        outline-offset: 6px;
+    }
+
+    .site-search__input::-webkit-search-cancel-button,
+    .search-form__input::-webkit-search-cancel-button {
+        -webkit-appearance: none;
+        appearance: none;
+    }
+
+    .site-search__hint {
+        margin-top: 0.75rem;
+        font-size: 1rem;
+        color: color-mix(in srgb, var(--color-champagne) 75%, transparent);
+    }
+
+    .site-search__results.is-loading {
+        opacity: 0.4;
+        transition: opacity var(--duration-draw) var(--ease-rise);
+    }
+
+    /* The plain page's form on ivory: the same quiet rule in stone, evergreen ink. */
+    .search-form__row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 1rem 1.5rem;
+    }
+
+    .search-form__row .search-form__input {
+        flex: 1 1 16rem;
+        font-size: clamp(1.375rem, 1rem + 1.25vw, 1.75rem);
+        border-bottom-color: var(--color-stone);
+        color: var(--color-evergreen);
+    }
+
+    .search-form__row .search-form__input::placeholder {
+        color: var(--color-ash);
+    }
+
+    .search-form__row .search-form__input:focus {
+        border-bottom-color: var(--color-bronze);
+    }
+
+    .search-form__row .search-form__input:focus-visible {
+        outline-color: var(--color-bronze);
+    }
+
+    .search-form--ivory .search-form__row .search-form__input {
+        border-bottom-color: var(--color-cypress);
+        color: var(--color-ivory);
+    }
+
+    .search-form--ivory .search-form__row .search-form__input::placeholder {
+        color: color-mix(in srgb, var(--color-champagne) 60%, transparent);
+    }
+
+    .search-form--ivory .search-form__row .search-form__input:focus {
+        border-bottom-color: var(--color-brass);
+    }
+
+    .search-form--ivory .search-form__row .search-form__input:focus-visible {
+        outline-color: var(--color-brass);
+    }
+
+    /* ------------------------------------------------------------ results */
+    .search-results__prompt {
+        font-family: var(--font-display);
+        font-weight: 300;
+        font-style: italic;
+        font-size: 1.5rem;
+        line-height: 1.4;
+    }
+
+    .search-results__group + .search-results__group {
+        margin-top: 3.5rem;
+    }
+
+    .search-results__summary + .search-results__group {
+        margin-top: 2rem;
+    }
+
+    .search-results__heading {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 1rem;
+        font-family: var(--font-display);
+        font-weight: 300;
+        font-size: 1.75rem;
+        line-height: 1.2;
+    }
+
+    .search-results__heading a {
+        color: inherit;
+    }
+
+    .search-results__count {
+        font-size: 1.125rem;
+        color: var(--color-bronze);
+    }
+
+    .site-search .search-results__count {
+        color: var(--color-brass);
+    }
+
+    .search-results__rule {
+        margin-top: 0.75rem;
+    }
+
+    .search-results__list {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .search-results__item + .search-results__item {
+        border-top: 1px solid var(--color-stone);
+    }
+
+    .site-search .search-results__item + .search-results__item {
+        border-top-color: var(--color-cypress);
+    }
+
+    .search-results__link {
+        display: flex;
+        flex-direction: column;
+        gap: 0.375rem;
+        padding: 1.125rem 0;
+        color: inherit;
+        text-decoration: none;
+        transition: color 300ms var(--ease-rise);
+    }
+
+    .search-results__link:hover,
+    .search-results__link:focus-visible {
+        text-decoration: none;
+    }
+
+    .search-results__title {
+        font-family: var(--font-display);
+        font-weight: 300;
+        font-size: 1.375rem;
+        line-height: 1.25;
+    }
+
+    .search-results__link:hover .search-results__title,
+    .search-results__link:focus-visible .search-results__title {
+        text-decoration: underline;
+        text-decoration-color: var(--color-brass);
+        text-underline-offset: 0.2em;
+        text-decoration-thickness: 1px;
+    }
+
+    .search-results__meta {
+        margin: 0;
+    }
+
+    .search-results__excerpt {
+        font-family: var(--font-sans);
+        font-weight: 300;
+        font-size: 1rem;
+        line-height: 1.6;
+        color: var(--color-ash);
+    }
+
+    .site-search .search-results__excerpt {
+        color: color-mix(in srgb, var(--color-champagne) 85%, transparent);
+    }
+
+    .search-results__members {
+        font-size: 1rem;
+        color: var(--color-bronze);
+    }
+
+    .site-search .search-results__members {
+        color: var(--color-brass);
+    }
+
+    .search-results__more {
+        margin-top: 0.75rem;
+        font-size: 1.125rem;
+    }
+
+    .search-results__more a {
+        color: inherit;
+    }
+
+    /* The searched words: the brand highlight is a hairline, not a fill. */
+    .search-mark {
+        background: transparent;
+        color: inherit;
+        font-weight: 500;
+        text-decoration: underline;
+        text-decoration-color: var(--color-brass);
+        text-decoration-thickness: 1px;
+        text-underline-offset: 0.18em;
+    }
+
+    .search-results__chapters {
+        margin-top: 2rem;
+    }
+
+    .search-results__chapter-list,
+    .error-page__chapter-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem 1.75rem;
+        font-size: 1.25rem;
+    }
+
+    .error-page__chapter-list {
+        justify-content: center;
+    }
+
+    .search-results__chapter,
+    .error-page__chapter {
+        color: inherit;
+    }
+
+    .search-results__empty {
+        padding-top: 0;
+    }
+
+    /* -------------------------------------------------------- breadcrumbs */
+    .breadcrumbs__list {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0.25rem 0.75rem;
+        font-size: 1.125rem;
+        line-height: 1.5;
+        color: var(--color-ash);
+    }
+
+    .breadcrumbs--ivory .breadcrumbs__list {
+        color: var(--color-champagne);
+    }
+
+    .breadcrumbs__item {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 0.75rem;
+    }
+
+    .breadcrumbs__link {
+        color: inherit;
+    }
+
+    .breadcrumbs__link[aria-current='page'] {
+        color: var(--color-evergreen);
+        text-decoration: none;
+    }
+
+    .breadcrumbs--ivory .breadcrumbs__link[aria-current='page'] {
+        color: var(--color-ivory);
+    }
+
+    .breadcrumbs__separator {
+        color: var(--color-bronze);
+        font-family: var(--font-display);
+        font-weight: 300;
+    }
+
+    .breadcrumbs--ivory .breadcrumbs__separator {
+        color: var(--color-brass);
+    }
+
+    /* ------------------------------------------------------------ skeleton */
+    .skeleton {
+        display: flex;
+        flex-direction: column;
+        gap: 0.875rem;
+        padding: 0.25rem 0;
+    }
+
+    .skeleton__line {
+        display: block;
+        width: var(--w, 90%);
+        height: 0.875rem;
+        border-radius: 2px;
+        background-color: var(--color-linen);
+        animation: skeleton-breathe 2400ms ease-in-out infinite alternate;
+    }
+
+    .skeleton--ivory .skeleton__line {
+        background-color: color-mix(in srgb, var(--color-linen) 14%, transparent);
+    }
+
+    /* --------------------------------------------------------- empty state */
+    .empty-state__quote {
+        margin: 0;
+        max-width: 34rem;
+    }
+
+    .empty-state__quote p {
+        font-variant-ligatures: common-ligatures discretionary-ligatures;
+    }
+
+    .empty-state__attribution {
+        font-size: 1.125rem;
+    }
+
+    /* -------------------------------------------------- hover and focus craft */
+    /* Hairline underline drawn from left to right for inline-block links (nav, footer, breadcrumbs, results). */
+    .link-draw {
+        position: relative;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+    .link-draw::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -0.1em;
+        height: 1px;
+        background-color: currentColor;
+        transform: scaleX(0);
+        transform-origin: left center;
+        transition: transform var(--duration-draw) var(--ease-rise);
+    }
+
+    .link-draw:hover,
+    .link-draw:focus-visible {
+        text-decoration: none;
+    }
+
+    .link-draw:hover::after,
+    .link-draw:focus-visible::after {
+        transform: scaleX(1);
+    }
+
+    .footer-link {
+        position: relative;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+    .footer-link::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 1px;
+        background-color: var(--color-brass);
+        transform: scaleX(0);
+        transform-origin: left center;
+        transition: transform var(--duration-draw) var(--ease-rise);
+    }
+
+    .footer-link:hover,
+    .footer-link:focus-visible {
+        color: var(--color-ivory);
+        text-decoration: none;
+    }
+
+    .footer-link:hover::after,
+    .footer-link:focus-visible::after,
+    .footer-link[aria-current='page']::after {
+        transform: scaleX(1);
+    }
+
+    .footer-link[aria-current='page'] {
+        text-decoration: none;
+    }
+}
+
+/* ------------------------------------------------------------- page transitions */
+/*
+ | Cross-document view transitions: a 400ms cross-fade between pages while the
+ | header (and the mark inside it) keeps its place as its own group. Browsers
+ | without the API ignore the rule; reduced motion opts out entirely.
+ */
+.site-header {
+    view-transition-name: site-header;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    @view-transition {
+        navigation: auto;
+    }
+
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+        animation-duration: var(--duration-page);
+        animation-timing-function: var(--ease-rise);
+    }
+
+    ::view-transition-old(site-header),
+    ::view-transition-new(site-header) {
+        animation: none;
+        mix-blend-mode: normal;
+    }
+}
+
+/* A slow breath on loading placeholders; stilled under reduced motion by the global rule. */
+@keyframes skeleton-breathe {
+    from {
+        opacity: 0.55;
+    }
+
+    to {
+        opacity: 1;
+    }
+}

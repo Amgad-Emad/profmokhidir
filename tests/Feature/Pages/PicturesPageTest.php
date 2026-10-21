@@ -141,7 +141,7 @@ class PicturesPageTest extends TestCase
 
         foreach ([route('pictures'), route('pictures.show', 'field')] as $url) {
             $html = $this->get($url)->assertOk()->getContent();
-            preg_match_all('/<a href="([^"]+)"[^>]*aria-current="page"[^>]*>/', $html, $matches);
+            preg_match_all('/<a href="([^"]+)"(?![^>]*breadcrumbs__link)[^>]*aria-current="page"[^>]*>/', $html, $matches);
             $this->assertSame([route('pictures')], array_values(array_unique($matches[1])));
         }
     }

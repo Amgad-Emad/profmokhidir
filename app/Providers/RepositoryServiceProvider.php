@@ -20,6 +20,7 @@ use App\Repositories\Contracts\OtherItemRepositoryInterface;
 use App\Repositories\Contracts\ProfileRepositoryInterface;
 use App\Repositories\Contracts\PublicationRepositoryInterface;
 use App\Repositories\Contracts\RoleRepositoryInterface;
+use App\Repositories\Contracts\SearchRepositoryInterface;
 use App\Repositories\Contracts\SectionRepositoryInterface;
 use App\Repositories\Contracts\SettingRepositoryInterface;
 use App\Repositories\Contracts\TeachingMaterialRepositoryInterface;
@@ -41,6 +42,7 @@ use App\Repositories\Eloquent\EloquentHomeQuoteRepository;
 use App\Repositories\Eloquent\EloquentOtherItemRepository;
 use App\Repositories\Eloquent\EloquentProfileRepository;
 use App\Repositories\Eloquent\EloquentPublicationRepository;
+use App\Repositories\Eloquent\EloquentSearchRepository;
 use App\Repositories\Eloquent\EloquentSettingRepository;
 use App\Repositories\Eloquent\EloquentTeachingMaterialRepository;
 use App\Repositories\Eloquent\EloquentTributeRepository;
@@ -78,6 +80,7 @@ class RepositoryServiceProvider extends ServiceProvider
         ChatMessageRepositoryInterface::class => EloquentChatMessageRepository::class,
         ChatReadRepositoryInterface::class => EloquentChatReadRepository::class,
         ChatReportRepositoryInterface::class => EloquentChatReportRepository::class,
+        SearchRepositoryInterface::class => EloquentSearchRepository::class,
         AuditLogRepositoryInterface::class => EloquentAuditLogRepository::class,
         SettingRepositoryInterface::class => EloquentSettingRepository::class,
     ];

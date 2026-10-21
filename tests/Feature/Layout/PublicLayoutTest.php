@@ -67,12 +67,14 @@ class PublicLayoutTest extends TestCase
         $this->assertMatchesRegularExpression('/<button[^>]*aria-expanded="false"[^>]*aria-controls="nav-more"[^>]*>\s*More/', $this->html);
 
         preg_match('/<ul id="nav-more".*?<\/ul>/s', $this->html, $more);
-        $this->assertStringContainsString('block 2xl:hidden', $more[0]);
-        $this->assertStringContainsString('block xl:hidden', $more[0]);
+        $this->assertStringContainsString('<li class="block">', $more[0], 'Items past the xl count stay under More at every width: the bar is capped at max-w-7xl');
+        $this->assertStringContainsString('<li class="block xl:hidden">', $more[0]);
+        $this->assertStringContainsString('<li class="hidden">', $more[0]);
         $this->assertStringContainsString('Tributes', $more[0]);
+        $this->assertStringNotContainsString('2xl:', $this->html, 'No 2xl tier: the bar never grows past 1280px');
 
-        $this->assertSame(5, Header::INLINE_AT_LG);
-        $this->assertSame(7, Header::INLINE_AT_XL);
+        $this->assertSame(4, Header::INLINE_AT_LG);
+        $this->assertSame(6, Header::INLINE_AT_XL);
     }
 
     #[Test]

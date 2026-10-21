@@ -215,7 +215,7 @@ class VideosPageTest extends TestCase
 
         foreach ([route('videos'), route('videos.show', 'talk')] as $url) {
             $html = $this->get($url)->assertOk()->getContent();
-            preg_match_all('/<a href="([^"]+)"[^>]*aria-current="page"[^>]*>/', $html, $matches);
+            preg_match_all('/<a href="([^"]+)"(?![^>]*breadcrumbs__link)[^>]*aria-current="page"[^>]*>/', $html, $matches);
             $this->assertSame([route('videos')], array_values(array_unique($matches[1])));
         }
     }

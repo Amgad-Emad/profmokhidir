@@ -9,6 +9,7 @@
 @import './home.css';
 @import './archive.css';
 @import './remembrance.css';
+@import './wayfinding.css';
 
 /*
  | Brand design system — see CLAUDE.md "Brand (follow exactly)".
@@ -178,15 +179,15 @@
         text-transform: uppercase;
     }
 
-    /* Buttons: pill shaped, ivory filled or outline in the current colour. */
+    /* Buttons: pill shaped, ivory filled or outline in the current colour. Hover fills slowly from the left. */
     .btn-pill-filled,
     .btn-pill-outline {
         @apply inline-flex items-center justify-center gap-2 rounded-full px-7 py-3 font-sans text-base font-medium leading-none no-underline;
         min-height: 2.75rem; /* 44px touch target */
         transition:
-            background-color 300ms var(--ease-rise),
-            color 300ms var(--ease-rise),
-            border-color 300ms var(--ease-rise);
+            background-color var(--duration-draw, 600ms) var(--ease-rise),
+            color var(--duration-draw, 600ms) var(--ease-rise),
+            border-color var(--duration-draw, 600ms) var(--ease-rise);
     }
 
     .btn-pill-filled:hover,
@@ -203,14 +204,45 @@
         background-color: var(--color-linen);
     }
 
+    /* Outline: on ivory the fill is evergreen with ivory text; on evergreen surfaces, ivory with evergreen text. */
     .btn-pill-outline {
+        --btn-fill: var(--color-evergreen);
+        --btn-fill-ink: var(--color-ivory);
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
         border: 1px solid currentColor;
         color: currentColor;
         background-color: transparent;
     }
 
-    .btn-pill-outline:hover {
-        background-color: color-mix(in srgb, currentColor 8%, transparent);
+    .on-dark .btn-pill-outline,
+    .bg-evergreen .btn-pill-outline,
+    .bg-cypress .btn-pill-outline {
+        --btn-fill: var(--color-ivory);
+        --btn-fill-ink: var(--color-evergreen);
+    }
+
+    .btn-pill-outline::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background-color: var(--btn-fill);
+        transform: scaleX(0);
+        transform-origin: left center;
+        transition: transform var(--duration-draw, 600ms) var(--ease-rise);
+    }
+
+    .btn-pill-outline:hover,
+    .btn-pill-outline:focus-visible {
+        color: var(--btn-fill-ink);
+        border-color: var(--btn-fill);
+    }
+
+    .btn-pill-outline:hover::before,
+    .btn-pill-outline:focus-visible::before {
+        transform: scaleX(1);
     }
 
     /* Cards: 4px radius, linen or ivory surface, stone hairline. */
@@ -345,15 +377,13 @@
         bottom: 0.5rem;
     }
 
-    /* Footer section links. */
+    /* Footer section links (the drawn brass hairline lives in wayfinding.css). */
     .footer-link {
         @apply font-sans text-base font-light text-champagne;
     }
 
     .footer-link[aria-current='page'] {
         color: var(--color-ivory);
-        text-decoration: underline;
-        text-decoration-color: var(--color-brass);
     }
 
     /* Menu / Close buttons: label with two hairlines that form a cross when open. */
