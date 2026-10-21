@@ -18,7 +18,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * The single profile row. The portrait is the `portrait` media collection.
  */
 #[Fillable([
-    'name', 'title', 'affiliation', 'short_bio', 'full_bio', 'expertise', 'key_facts',
+    'name', 'title', 'affiliation', 'short_bio', 'full_bio', 'expertise', 'key_facts', 'students_supervised',
     'contact_email_public', 'contact_note', 'status', 'published_at', 'sort_order',
 ])]
 class Profile extends Model implements HasMedia
@@ -34,6 +34,7 @@ class Profile extends Model implements HasMedia
         return [
             'expertise' => 'array',
             'key_facts' => 'array',
+            'students_supervised' => 'integer',
         ];
     }
 

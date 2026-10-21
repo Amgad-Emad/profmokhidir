@@ -62,14 +62,13 @@ final class Sections
     }
 
     /**
-     * Sections linked from the row of quiet cards at the foot of the home page:
-     * everything the home chapters (Life, Work, Tributes) do not already cover.
+     * Sections the home page's "Continue the story" cards lead to, in order.
      *
      * @return list<string>
      */
-    public static function homeRow(): array
+    public static function homeStory(): array
     {
-        return [self::VIDEOS, self::PICTURES, self::TEACHING, self::COMMENTARY, self::COMMUNITY];
+        return [self::ABOUT, self::PUBLICATIONS, self::TRIBUTES];
     }
 
     /**

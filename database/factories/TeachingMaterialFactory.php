@@ -25,6 +25,7 @@ class TeachingMaterialFactory extends Factory
         return [
             'title' => '[Placeholder] '.rtrim(fake()->sentence(4), '.'),
             'course' => fake()->randomElement(['AGR 301 Crop Physiology', 'AGR 412 Soil Fertility', 'AGR 205 Principles of Agronomy']),
+            'course_description' => null,
             'topic' => fake()->randomElement(['Photosynthesis', 'Nitrogen cycle', 'Irrigation', 'Seed systems']),
             'type' => fake()->randomElement(TeachingMaterialType::cases()),
             'description' => '[Placeholder] '.fake()->sentence(14),

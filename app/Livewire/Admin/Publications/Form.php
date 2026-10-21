@@ -57,6 +57,8 @@ class Form extends ContentForm
             'citation' => null,
             'abstract' => null,
             'url' => null,
+            'topic' => null,
+            'is_featured' => false,
             'status' => ContentStatus::Draft->value,
         ];
     }
@@ -71,6 +73,7 @@ class Form extends ContentForm
         $data = $this->documentViewData();
         $data['fileUrl'] = $data['file']?->getUrl();
         $data['types'] = PublicationType::labels();
+        $data['topics'] = app(PublicationService::class)->distinct('topic');
 
         return $data;
     }

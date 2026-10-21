@@ -7,6 +7,9 @@
  |   [data-rise-group]     children rise one after another, 120ms apart
  |   [data-rule]           brass rule draws left to right over 1600ms
  |   [data-scroll-scale]   scales 1.0 -> 0.7 and fades slightly as it scrolls out
+ |   [data-scroll-line]    writes --line-progress (0 -> 1) as the element passes
+ |                         the reading line, so a hairline draws with the scroll
+ |                         (and stays drawn when scrolling back up)
  |
  | Everything is skipped under prefers-reduced-motion: content shows at once.
  */
@@ -15,6 +18,8 @@ const STAGGER_MS = 120;
 const SCALE_FROM = 1;
 const SCALE_TO = 0.7;
 const FADE_TO = 0.6;
+// The hairline is drawn down to this fraction of the viewport height.
+const LINE_REACH = 0.75;
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -28,6 +33,30 @@ function revealEverything(root) {
         el.style.removeProperty('transform');
         el.style.removeProperty('opacity');
     });
+    root.querySelectorAll('[data-scroll-line]').forEach((el) => el.style.removeProperty('--line-progress'));
+}
+
+// Run `update` once now and then at most once a frame while scrolling or resizing.
+function onScrollFrame(update) {
+    let ticking = false;
+
+    const onScroll = () => {
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(() => {
+            ticking = false;
+            update();
+        });
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    update();
+
+    return () => {
+        window.removeEventListener('scroll', onScroll);
+        window.removeEventListener('resize', onScroll);
+    };
 }
 
 function setupRise(root) {
@@ -64,10 +93,7 @@ function setupScrollScale(root) {
     const targets = Array.from(root.querySelectorAll('[data-scroll-scale]'));
     if (targets.length === 0) return () => {};
 
-    let ticking = false;
-
     const update = () => {
-        ticking = false;
         const scrollY = window.scrollY || window.pageYOffset;
 
         targets.forEach((el) => {
@@ -84,23 +110,43 @@ function setupScrollScale(root) {
         });
     };
 
-    const onScroll = () => {
-        if (ticking) return;
-        ticking = true;
-        window.requestAnimationFrame(update);
-    };
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll, { passive: true });
-    update();
+    const stop = onScrollFrame(update);
 
     return () => {
-        window.removeEventListener('scroll', onScroll);
-        window.removeEventListener('resize', onScroll);
+        stop();
         targets.forEach((el) => {
             el.style.removeProperty('transform');
             el.style.removeProperty('opacity');
         });
+    };
+}
+
+function setupScrollLines(root) {
+    const lines = Array.from(root.querySelectorAll('[data-scroll-line]'));
+    if (lines.length === 0) return () => {};
+
+    // Furthest progress per line: a drawn line stays drawn when the reader scrolls back up.
+    const drawn = new WeakMap();
+
+    const update = () => {
+        const reach = window.innerHeight * LINE_REACH;
+
+        lines.forEach((el) => {
+            // 0 while the element's top is below the reading line, 1 once its bottom has passed it.
+            const rect = el.getBoundingClientRect();
+            const progress = rect.height > 0 ? Math.min(1, Math.max(0, (reach - rect.top) / rect.height)) : 1;
+            const furthest = Math.max(drawn.get(el) ?? 0, progress);
+
+            drawn.set(el, furthest);
+            el.style.setProperty('--line-progress', furthest.toFixed(4));
+        });
+    };
+
+    const stop = onScrollFrame(update);
+
+    return () => {
+        stop();
+        lines.forEach((el) => el.style.removeProperty('--line-progress'));
     };
 }
 
@@ -112,7 +158,7 @@ export function initMotion(root = document) {
             revealEverything(root);
             return;
         }
-        teardown = [setupRise(root), setupScrollScale(root)];
+        teardown = [setupRise(root), setupScrollScale(root), setupScrollLines(root)];
     };
 
     const stop = () => {

@@ -6,6 +6,8 @@
 @import './fonts.css';
 @import './media.css';
 @import './typography.css';
+@import './home.css';
+@import './archive.css';
 
 /*
  | Brand design system — see CLAUDE.md "Brand (follow exactly)".

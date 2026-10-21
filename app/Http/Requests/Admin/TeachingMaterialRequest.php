@@ -18,6 +18,7 @@ class TeachingMaterialRequest extends ContentRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'course' => ['nullable', 'string', 'max:255'],
+            'course_description' => ['nullable', 'string', 'max:1000'],
             'topic' => ['nullable', 'string', 'max:255'],
             'type' => ['required', new Enum(TeachingMaterialType::class)],
             'description' => ['nullable', 'string', 'max:2000'],

@@ -2,7 +2,9 @@
 
 namespace Tests\Unit\Services;
 
+use App\Constants\Sections;
 use App\Models\OtherItem;
+use App\Services\NavigationService;
 use App\Services\OtherPageService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
@@ -63,5 +65,14 @@ class OtherPageServiceTest extends TestCase
         $this->assertTrue($data['item']->is($item));
         $this->assertSame('<p>Text</p><h2>Heading</h2>', $data['body']);
         $this->assertTrue($data['section']['active']);
+    }
+
+    #[Test]
+    public function the_index_gives_the_chapter_number_of_the_section(): void
+    {
+        $this->assertSame(
+            $this->app->make(NavigationService::class)->chapter(Sections::OTHER),
+            $this->service->index()['chapter'],
+        );
     }
 }

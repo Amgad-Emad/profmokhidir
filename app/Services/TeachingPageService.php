@@ -8,7 +8,10 @@ use App\Constants\Sections;
 use App\Constants\TeachingMaterialType;
 use App\Models\TeachingMaterial;
 use App\Models\User;
+use App\Support\FileSize;
+use App\View\Components\FileLink;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Str;
 
 /**
  * Assembles the teaching materials page: every published material grouped by
@@ -18,6 +21,8 @@ use Illuminate\Database\Eloquent\Collection;
  */
 class TeachingPageService
 {
+    public const string OTHER_COURSE_LABEL = 'Other materials';
+
     public function __construct(
         private readonly TeachingMaterialService $materials,
         private readonly NavigationService $navigation,
@@ -26,7 +31,9 @@ class TeachingPageService
     /**
      * @return array{
      *     section: array{key: string, label: string, title: string, url: string, route: string, placement: string, summary: string, active: bool},
-     *     courses: array<string, Collection<int, TeachingMaterial>>,
+     *     chapter: int,
+     *     courses: list<array{name: string, label: string, anchor: string, description: string|null, materials: Collection<int, TeachingMaterial>}>,
+     *     files: array<int, array{type: string, size: string}>,
      *     topics: list<string>,
      *     types: list<TeachingMaterialType>,
      *     active: array{topic: string|null, type: TeachingMaterialType|null},
@@ -50,7 +57,13 @@ class TeachingPageService
 
         return [
             'section' => $this->navigation->section(Sections::TEACHING, Sections::TEACHING),
-            'courses' => $this->materials->groupByCourse($filtered),
+            'chapter' => $this->navigation->chapter(Sections::TEACHING),
+            'courses' => $this->courses($this->materials->groupByCourse($filtered), $all),
+            'files' => $filtered->mapWithKeys(function (TeachingMaterial $material): array {
+                $file = $material->file();
+
+                return $file === null ? [] : [(int) $material->getKey() => ['type' => FileLink::typeOf($file), 'size' => FileSize::format((int) $file->size)]];
+            })->all(),
             'topics' => $topics,
             'types' => $this->types($all),
             'active' => ['topic' => $activeTopic, 'type' => $activeType],
@@ -66,6 +79,40 @@ class TeachingPageService
             'clearUrl' => route(Sections::definitions()[Sections::TEACHING]['route']),
             'communityUrl' => route(Sections::definitions()[Sections::COMMUNITY]['route']),
         ];
+    }
+
+    /**
+     * Each course as a syllabus entry: its heading, anchor, short description and
+     * materials in display order. The description is the first one an editor
+     * filled in among the course's materials (looked up across all of them, so
+     * it stays when a filter hides that material); materials with no course
+     * come last under OTHER_COURSE_LABEL.
+     *
+     * @param  array<string, Collection<int, TeachingMaterial>>  $grouped
+     * @param  Collection<int, TeachingMaterial>  $all
+     * @return list<array{name: string, label: string, anchor: string, description: string|null, materials: Collection<int, TeachingMaterial>}>
+     */
+    public function courses(array $grouped, Collection $all): array
+    {
+        $courses = [];
+
+        foreach ($grouped as $name => $materials) {
+            $name = (string) $name;
+            $description = $all
+                ->filter(fn (TeachingMaterial $material): bool => (string) $material->course === $name)
+                ->map(fn (TeachingMaterial $material): string => trim((string) $material->course_description))
+                ->first(fn (string $text): bool => $text !== '');
+
+            $courses[] = [
+                'name' => $name,
+                'label' => $name === '' ? self::OTHER_COURSE_LABEL : $name,
+                'anchor' => 'course-'.($name === '' ? 'other' : Str::slug($name)),
+                'description' => $description,
+                'materials' => $materials,
+            ];
+        }
+
+        return $courses;
     }
 
     /**

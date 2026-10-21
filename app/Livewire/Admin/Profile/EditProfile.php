@@ -57,6 +57,7 @@ class EditProfile extends ContentForm
             'full_bio' => null,
             'expertise' => [],
             'key_facts' => [],
+            'students_supervised' => null,
             'contact_email_public' => null,
             'contact_note' => null,
             'status' => ContentStatus::Draft->value,

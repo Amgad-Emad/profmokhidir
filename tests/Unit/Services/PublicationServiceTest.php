@@ -8,6 +8,7 @@ use App\Constants\MediaCollections;
 use App\Constants\PublicationType;
 use App\Models\Publication;
 use App\Services\PublicationService;
+use App\Support\PublicationFilters;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
@@ -64,18 +65,42 @@ class PublicationServiceTest extends TestCase
     }
 
     #[Test]
-    public function published_filtered_applies_type_and_year(): void
+    public function published_filtered_applies_type_year_range_and_topic(): void
     {
-        Publication::factory()->published()->type(PublicationType::Book)->year(1990)->create();
-        Publication::factory()->published()->type(PublicationType::Book)->year(2000)->create();
-        Publication::factory()->published()->type(PublicationType::Report)->year(1990)->create();
-        Publication::factory()->draft()->type(PublicationType::Book)->year(1990)->create();
+        Publication::factory()->published()->type(PublicationType::Book)->year(1990)->topic('Agronomy')->create();
+        Publication::factory()->published()->type(PublicationType::Book)->year(2000)->topic('Soil')->create();
+        Publication::factory()->published()->type(PublicationType::Report)->year(1990)->topic('Agronomy')->create();
+        Publication::factory()->draft()->type(PublicationType::Book)->year(1990)->topic('Agronomy')->create();
 
         $this->assertSame(3, $this->service->publishedFiltered()->total());
-        $this->assertSame(2, $this->service->publishedFiltered('book')->total());
-        $this->assertSame(1, $this->service->publishedFiltered('book', 1990)->total());
-        $this->assertSame(2, $this->service->publishedFiltered(null, 1990)->total());
-        $this->assertSame(3, $this->service->publishedFiltered('not-a-type')->total());
+        $this->assertSame(2, $this->service->publishedFiltered(new PublicationFilters(PublicationType::Book))->total());
+        $this->assertSame(1, $this->service->publishedFiltered(new PublicationFilters(PublicationType::Book, 1990, 1990))->total());
+        $this->assertSame(2, $this->service->publishedFiltered(new PublicationFilters(null, null, 1995))->total());
+        $this->assertSame(1, $this->service->publishedFiltered(new PublicationFilters(null, 1995))->total());
+        $this->assertSame(2, $this->service->publishedFiltered(new PublicationFilters(topic: 'Agronomy'))->total());
+        $this->assertSame([2000 => 1, 1990 => 2], $this->service->decadeCounts());
+        $this->assertSame([1990 => 1], $this->service->decadeCounts(new PublicationFilters(PublicationType::Report)));
+    }
+
+    #[Test]
+    public function it_stores_the_featured_flag_and_a_trimmed_topic_and_caches_the_featured_strip(): void
+    {
+        $featured = $this->service->create(['title' => 'Featured', 'type' => 'book', 'is_featured' => '1', 'topic' => '  Agronomy  ', 'status' => 'published']);
+        $plain = $this->service->create(['title' => 'Plain', 'type' => 'book', 'topic' => '   ', 'status' => 'published']);
+
+        $this->assertTrue($featured->is_featured);
+        $this->assertSame('Agronomy', $featured->topic);
+        $this->assertFalse($plain->fresh()->is_featured);
+        $this->assertNull($plain->topic);
+
+        $this->assertSame(['Featured'], $this->service->featured()->pluck('title')->all());
+        $this->assertTrue(Cache::has(CacheKeys::PUBLICATIONS_FEATURED));
+        $this->assertSame(['Agronomy'], $this->service->filters()['topics']);
+
+        $this->service->update($plain, ['is_featured' => true]);
+
+        $this->assertFalse(Cache::has(CacheKeys::PUBLICATIONS_FEATURED), 'Saving a publication clears the featured strip');
+        $this->assertSame(['Featured', 'Plain'], $this->service->featured()->pluck('title')->sort()->values()->all());
     }
 
     #[Test]

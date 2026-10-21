@@ -7,6 +7,7 @@ namespace App\Repositories\Eloquent;
 use App\Models\Commentary;
 use App\Repositories\Contracts\CommentaryRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * @extends BaseContentRepository<Commentary>
@@ -64,6 +65,31 @@ class EloquentCommentaryRepository extends BaseContentRepository implements Comm
             'previous' => $previousId === null ? null : $this->publishedQuery()->find($previousId),
             'next' => $nextId === null ? null : $this->publishedQuery()->find($nextId),
         ];
+    }
+
+    public function publishedRelated(Commentary $commentary, int $limit): Collection
+    {
+        $tags = array_values(array_filter((array) $commentary->tags, fn ($tag): bool => is_string($tag) && trim($tag) !== ''));
+
+        if ($tags === [] || $limit < 1) {
+            return new Collection;
+        }
+
+        // Tags match without regard to case, as the tag filter does; JSON_CONTAINS would not, so the match is made here.
+        $shared = fn (Commentary $candidate): int => count(array_uintersect(
+            array_filter((array) $candidate->tags, 'is_string'),
+            $tags,
+            fn (string $a, string $b): int => strcmp(mb_strtolower(trim($a)), mb_strtolower(trim($b))),
+        ));
+
+        return $this->query()->published()
+            ->whereKeyNot($commentary->getKey())
+            ->whereNotNull('tags')
+            ->get()
+            ->filter(fn (Commentary $candidate): bool => $shared($candidate) > 0)
+            ->sort(fn (Commentary $a, Commentary $b): int => [$shared($b), $b->date?->getTimestamp() ?? 0, $b->getKey()] <=> [$shared($a), $a->date?->getTimestamp() ?? 0, $a->getKey()])
+            ->take($limit)
+            ->values();
     }
 
     public function publishedTags(): array

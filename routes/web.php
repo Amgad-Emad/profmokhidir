@@ -38,6 +38,8 @@ use App\Livewire\Admin\Community\Applications as CommunityApplications;
 use App\Livewire\Admin\Community\Reports as ChatReports;
 use App\Livewire\Admin\CvEntries\Form as CvEntryForm;
 use App\Livewire\Admin\CvEntries\Index as CvEntryIndex;
+use App\Livewire\Admin\HomeQuotes\Form as HomeQuoteForm;
+use App\Livewire\Admin\HomeQuotes\Index as HomeQuoteIndex;
 use App\Livewire\Admin\Media\Library as MediaLibrary;
 use App\Livewire\Admin\OtherItems\Form as OtherItemForm;
 use App\Livewire\Admin\OtherItems\Index as OtherItemIndex;
@@ -150,6 +152,7 @@ Route::middleware(['auth', 'verified', 'role:'.implode('|', Roles::staff()), 'tw
                 ContentTypes::COMMENTARY => [CommentaryIndex::class, CommentaryForm::class],
                 ContentTypes::TEACHING_MATERIAL => [TeachingMaterialIndex::class, TeachingMaterialForm::class],
                 ContentTypes::OTHER_ITEM => [OtherItemIndex::class, OtherItemForm::class],
+                ContentTypes::HOME_QUOTE => [HomeQuoteIndex::class, HomeQuoteForm::class],
                 ContentTypes::VIDEO => [VideoIndex::class, VideoForm::class],
                 ContentTypes::ALBUM => [AlbumIndex::class, AlbumForm::class],
             ];

@@ -61,7 +61,7 @@ class CommentaryFormTest extends TestCase
         }
 
         $this->get(route('commentary.show', $commentary->slug))->assertOk()
-            ->assertSee('<h2>A heading</h2>', false)
+            ->assertSee('<h2 id="part-a-heading">A heading</h2>', false)
             ->assertSee('<strong>bold words</strong>', false)
             ->assertSee('<em>italic words</em>', false)
             ->assertSee('<blockquote>', false)

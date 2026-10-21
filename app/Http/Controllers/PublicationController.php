@@ -14,6 +14,6 @@ class PublicationController extends Controller
     {
         $filters = $request->filters();
 
-        return view('publications.index', $page->data($filters['type'], $filters['year']));
+        return view('publications.index', $page->data($filters['type'], $filters['from'], $filters['to'], $filters['topic']));
     }
 }

@@ -14,7 +14,14 @@
             <x-admin.field name="form.doi" label="DOI" placeholder="10.1000/xyz123" />
             <x-admin.field name="form.url" label="Link" type="url" placeholder="https://" />
         </div>
-        <x-admin.textarea-field name="form.citation" label="Citation" rows="3" />
+        <x-admin.field name="form.topic" label="Topic" hint="The subject this work is catalogued under, used by the topic filter. Reuse an existing topic where one fits." list="publication-topics" />
+        <datalist id="publication-topics">
+            @foreach ($topics as $topic)
+                <option value="{{ $topic }}"></option>
+            @endforeach
+        </datalist>
+        <x-admin.checkbox-field name="form.is_featured" label="Show in Selected works" hint="Featured works open the publications page. Keep the selection to a handful." />
+        <x-admin.textarea-field name="form.citation" label="Citation" rows="3" hint="Kept for the record. The public page writes APA, MLA, Chicago and BibTeX from the fields above." />
         <x-admin.textarea-field name="form.abstract" label="Abstract" rows="6" />
         @unless ($isNew)
             <x-admin.field name="form.slug" label="Slug" hint="Part of the public address. Leave as it is unless the link must change." class="font-mono" />

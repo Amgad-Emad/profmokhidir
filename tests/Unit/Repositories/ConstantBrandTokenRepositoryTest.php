@@ -3,10 +3,10 @@
 namespace Tests\Unit\Repositories;
 
 use App\Constants\Brand;
-use App\Repositories\Contracts\BrandTokenRepositoryInterface;
-use App\Repositories\Eloquent\ConstantBrandTokenRepository;
 use App\Constants\Ornaments;
 use App\Constants\Typesetting;
+use App\Repositories\Contracts\BrandTokenRepositoryInterface;
+use App\Repositories\Eloquent\ConstantBrandTokenRepository;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -79,16 +79,17 @@ class ConstantBrandTokenRepositoryTest extends TestCase
     }
 
     #[Test]
-    public function it_describes_the_four_motion_behaviours(): void
+    public function it_describes_the_five_motion_behaviours(): void
     {
         $motion = $this->repository->motion();
 
-        $this->assertSame(['rise', 'rise-group', 'rule', 'scroll-scale'], array_keys($motion));
+        $this->assertSame(['rise', 'rise-group', 'rule', 'scroll-scale', 'scroll-line'], array_keys($motion));
         $this->assertSame('data-rise', $motion['rise']['attribute']);
         $this->assertStringContainsString('1200ms', $motion['rise']['summary']);
         $this->assertStringContainsString('120ms', $motion['rise-group']['summary']);
         $this->assertStringContainsString('1600ms', $motion['rule']['summary']);
         $this->assertStringContainsString('0.7', $motion['scroll-scale']['summary']);
+        $this->assertSame('data-scroll-line', $motion['scroll-line']['attribute']);
     }
 
     #[Test]

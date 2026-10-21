@@ -20,7 +20,7 @@ class OtherPageTest extends TestCase
         $this->get(route('other'))
             ->assertOk()
             ->assertSee('<title>Other Information · ', false)
-            ->assertSeeInOrder(['section-header', 'Other Information', 'rule-brass', 'id="section-title"'], false)
+            ->assertSeeInOrder(['chapter-opening', 'Other Information', 'rule-brass', 'id="section-title"'], false)
             ->assertSee('Further information will be added here as it becomes available.')
             ->assertDontSee('Draft notice')
             ->assertDontSee('livewire', false);

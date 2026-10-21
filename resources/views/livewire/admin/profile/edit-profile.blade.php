@@ -38,6 +38,8 @@
             <button type="button" wire:click="addKeyFact" class="mt-3 text-sm text-evergreen underline decoration-brass underline-offset-4">Add a key fact</button>
         </fieldset>
 
+        <x-admin.field name="form.students_supervised" label="Students supervised" type="number" inputmode="numeric" class="sm:max-w-xs" hint="Only if the family or university has confirmed the number. It appears in the figures on the home page; leave it blank to leave it out." />
+
         <div class="grid gap-6 sm:grid-cols-2">
             <x-admin.field name="form.contact_email_public" label="Public contact email" type="email" />
             <x-admin.field name="form.contact_note" label="Contact note" />

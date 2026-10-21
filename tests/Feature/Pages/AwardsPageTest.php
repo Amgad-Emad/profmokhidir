@@ -19,15 +19,15 @@ class AwardsPageTest extends TestCase
         $this->get(route('awards'))
             ->assertOk()
             ->assertSee('<title>Awards · ', false)
-            ->assertSeeInOrder(['section-header', 'Awards', 'rule-brass', 'id="section-title"'], false)
+            ->assertSeeInOrder(['chapter-opening', 'Awards', 'rule-brass', 'id="section-title"'], false)
             ->assertSee('Awards and recognitions will be listed here once they are published.')
             ->assertDontSee('Draft medal')
-            ->assertDontSee('class="timeline', false)
+            ->assertDontSee('class="honour-roll', false)
             ->assertDontSee('livewire', false);
     }
 
     #[Test]
-    public function it_renders_a_timeline_with_every_populated_field_in_display_order(): void
+    public function it_renders_a_roll_of_honour_with_every_populated_field_in_display_order(): void
     {
         Award::factory()->published()->create([
             'name' => 'Order of Merit', 'organisation' => 'Republic of the Sudan', 'year' => 2010,
@@ -41,15 +41,22 @@ class AwardsPageTest extends TestCase
 
         $response
             ->assertSeeInOrder([
-                '<ol class="timeline', 'data-rise-group',
-                'timeline__item', 'Lifetime Achievement Award',
-                'timeline__item', '>2010<', 'Order of Merit', 'Republic of the Sudan', 'For services to agricultural education.',
+                'class="honour-roll"', 'data-ornament="double-rule"', '<ol class="honour-roll__list">',
+                'class="honour"', 'class="honour__name"', 'Lifetime Achievement Award',
+                'class="honour"', 'data-ornament="rule-dot"', 'class="honour__name"', 'Order of Merit',
+                'class="honour__organisation">Republic of the Sudan', 'honour__separator', 'class="honour__year">2010',
+                'For services to agricultural education.',
                 'href="https://www.example.org/honours" rel="noopener"', 'Source · example.org',
+                'data-ornament="double-rule"',
             ], false)
             ->assertDontSee('Awards and recognitions will be listed here');
 
-        $this->assertSame(1, substr_count($response->getContent(), 'Source · '));
-        $this->assertSame(1, substr_count($response->getContent(), 'font-display text-xl font-light italic text-ash'), 'Empty organisation is not rendered');
+        $html = $response->getContent();
+        $this->assertSame(1, substr_count($html, 'Source · '));
+        $this->assertSame(1, substr_count($html, 'class="honour__meta"'), 'An award with neither organisation nor year has no meta line');
+        $this->assertSame(1, substr_count($html, 'data-ornament="rule-dot"'), 'Ornaments separate awards; none before the first');
+        $this->assertSame(2, substr_count($html, 'data-ornament="double-rule"'), 'The roll opens and closes with a double rule');
+        $this->assertStringNotContainsString('class="timeline', $html);
     }
 
     #[Test]

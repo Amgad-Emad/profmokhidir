@@ -13,6 +13,9 @@ class ProfileRequest extends ContentRequest
 
     public const int MAX_KEY_FACTS = 12;
 
+    /** Fits the unsigned smallint column. */
+    public const int MAX_STUDENTS_SUPERVISED = 65535;
+
     /**
      * @return array<string, list<mixed>>
      */
@@ -29,6 +32,7 @@ class ProfileRequest extends ContentRequest
             'key_facts' => ['nullable', 'array', 'max:'.self::MAX_KEY_FACTS],
             'key_facts.*.label' => ['nullable', 'string', 'max:60'],
             'key_facts.*.value' => ['nullable', 'string', 'max:200'],
+            'students_supervised' => ['nullable', 'integer', 'min:1', 'max:'.self::MAX_STUDENTS_SUPERVISED],
             'contact_email_public' => ['nullable', 'string', 'email', 'max:255'],
             'contact_note' => ['nullable', 'string', 'max:500'],
             'status' => self::statusRule(),
@@ -47,6 +51,7 @@ class ProfileRequest extends ContentRequest
             'key_facts.*.label' => 'key fact label',
             'key_facts.*.value' => 'key fact value',
             'expertise.*' => 'expertise entry',
+            'students_supervised' => 'number of students supervised',
         ];
     }
 }

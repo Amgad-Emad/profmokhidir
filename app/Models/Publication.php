@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Constants\Catalogue;
 use App\Constants\Disks;
 use App\Constants\MediaCollections;
 use App\Constants\PublicationType;
@@ -22,7 +23,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  */
 #[Fillable([
     'title', 'slug', 'type', 'authors', 'year', 'venue_publisher', 'doi', 'citation', 'abstract', 'url',
-    'status', 'published_at', 'sort_order',
+    'is_featured', 'topic', 'status', 'published_at', 'sort_order',
 ])]
 class Publication extends Model implements HasMedia
 {
@@ -39,6 +40,7 @@ class Publication extends Model implements HasMedia
         return [
             'type' => PublicationType::class,
             'year' => 'integer',
+            'is_featured' => 'boolean',
         ];
     }
 
@@ -68,6 +70,47 @@ class Publication extends Model implements HasMedia
     protected function inYear(Builder $query, int $year): void
     {
         $query->where('year', $year);
+    }
+
+    /**
+     * Marked by an editor for the "Selected works" strip.
+     *
+     * @param  Builder<Publication>  $query
+     */
+    #[Scope]
+    protected function featured(Builder $query): void
+    {
+        $query->where('is_featured', true);
+    }
+
+    /**
+     * @param  Builder<Publication>  $query
+     */
+    #[Scope]
+    protected function onTopic(Builder $query, string $topic): void
+    {
+        $query->where('topic', $topic);
+    }
+
+    /**
+     * Published between two years, inclusive; either end may be open.
+     *
+     * @param  Builder<Publication>  $query
+     */
+    #[Scope]
+    protected function betweenYears(Builder $query, ?int $from, ?int $to): void
+    {
+        $query
+            ->when($from !== null, fn (Builder $query) => $query->where('year', '>=', $from))
+            ->when($to !== null, fn (Builder $query) => $query->where('year', '<=', $to));
+    }
+
+    /**
+     * The decade a publication belongs to (1978 => 1970), or null when undated.
+     */
+    public function decade(): ?int
+    {
+        return $this->year === null ? null : intdiv($this->year, Catalogue::DECADE) * Catalogue::DECADE;
     }
 
     public function file(): ?Media

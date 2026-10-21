@@ -1,8 +1,11 @@
+{{-- Teaching materials as a syllabus: each course with its description and a numbered reading list. --}}
 <x-layouts.public :title="$section['title']" :description="$section['summary']">
     <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28" aria-labelledby="section-title">
-        <x-section-header :label="$section['label']" :title="$section['title']" level="1" id="section-title">
+        <x-folio :section="$section['label']" class="mb-16" />
+
+        <x-chapter-opening :number="$chapter" :label="$section['label']" :title="$section['title']" level="1" id="section-title">
             {{ $section['summary'] }}
-        </x-section-header>
+        </x-chapter-opening>
 
         @if (! $hasAny)
             <x-empty-state class="mt-6" message="Teaching materials will appear here as they are prepared for sharing." />
@@ -48,45 +51,63 @@
                 <x-empty-state class="mt-6" message="No materials match these filters." />
             @endif
 
-            <div class="mt-14 flex flex-col gap-20">
-                @foreach ($courses as $course => $materials)
-                    @php $anchor = 'course-'.($course === '' ? 'other' : \Illuminate\Support\Str::slug($course)); @endphp
-                    <section aria-labelledby="{{ $anchor }}">
-                        <h2 id="{{ $anchor }}" class="font-display text-quote font-light leading-tight" data-rise>{{ $course === '' ? 'Other materials' : $course }}</h2>
-                        <ul class="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3" data-rise-group>
-                            @foreach ($materials as $material)
+            <div class="syllabus">
+                @foreach ($courses as $course)
+                    <section class="syllabus__course" aria-labelledby="{{ $course['anchor'] }}">
+                        <div class="syllabus__head" data-rise>
+                            <h2 id="{{ $course['anchor'] }}" class="syllabus__title">@typeset($course['label'])</h2>
+                            <span class="syllabus__count">{{ $course['materials']->count() }} {{ $course['materials']->count() === 1 ? 'item' : 'items' }}</span>
+                        </div>
+                        <hr class="rule-brass" data-rule>
+                        @if (filled($course['description']))
+                            <p class="syllabus__description" data-rise>@typeset($course['description'])</p>
+                        @endif
+
+                        <ol class="syllabus__list" data-rise-group>
+                            @foreach ($course['materials'] as $material)
                                 @php
+                                    $id = (int) $material->getKey();
+                                    $restricted = $material->isMembersOnly() && ! ($downloadable[$id] ?? false);
                                     $file = $material->file();
-                                    $restricted = $material->isMembersOnly() && ! ($downloadable[$material->getKey()] ?? false);
+                                    $meta = [
+                                        $material->type?->label(),
+                                        $material->topic,
+                                        filled($material->version) ? 'Version '.$material->version : null,
+                                        $material->material_date,
+                                        isset($files[$id]) ? $files[$id]['type'].' · '.$files[$id]['size'] : null,
+                                    ];
                                 @endphp
-                                <li class="card flex h-full flex-col gap-3">
-                                    <x-meta :items="[$material->type?->label(), $material->topic, $material->isMembersOnly() ? $material->access->label() : null]" />
-                                    <h3 class="font-display text-2xl font-light leading-snug text-evergreen">{{ $material->title }}</h3>
-                                    @if (filled($material->description))
-                                        <p class="text-base font-light text-evergreen">{{ $material->description }}</p>
-                                    @endif
-                                    @if (filled($material->version) || $material->material_date)
-                                        <p class="text-sm font-light text-ash">
-                                            @if (filled($material->version)){{ $material->version }}@endif
-                                            @if (filled($material->version) && $material->material_date) · @endif
-                                            <x-date :date="$material->material_date" />
-                                        </p>
-                                    @endif
-                                    <div class="mt-auto pt-3">
+                                <li class="syllabus__item">
+                                    <div class="syllabus__body">
+                                        @if ($material->isMembersOnly())
+                                            <p class="syllabus__lock"><x-icon name="lock" class="size-3.5" /><span>{{ $material->access->label() }}</span></p>
+                                        @endif
+                                        <h3 class="syllabus__item-title">@typeset($material->title)</h3>
+                                        @if (filled($material->description))
+                                            <p class="syllabus__item-description">@typeset($material->description)</p>
+                                        @endif
+                                        <x-meta class="mt-3" :items="$meta" />
+                                        @if ($material->isMembersOnly())
+                                            <p class="syllabus__members">{{ \App\Constants\TeachingAccess::MEMBERS_NOTE }}</p>
+                                        @endif
+                                    </div>
+                                    <div class="syllabus__action">
                                         @if ($restricted)
-                                            <p class="text-sm font-light italic text-ash">For community members. <a href="{{ $communityUrl }}" class="not-italic text-evergreen underline decoration-brass underline-offset-4">Join the community</a></p>
+                                            <a href="{{ $communityUrl }}" class="link-meta">Join the community<span class="sr-only"> to open {{ $material->title }}</span></a>
                                         @elseif ($file)
-                                            <x-file-link :media="$file" :href="$downloadUrls[$material->getKey()] ?? route('teaching.download', $material)" label="Download" />
+                                            <x-file-link :media="$file" :href="$downloadUrls[$id] ?? route('teaching.download', $material)" label="Download" />
                                         @elseif (filled($material->external_url))
                                             <x-external-link :href="$material->external_url" label="Open" />
                                         @endif
                                     </div>
                                 </li>
                             @endforeach
-                        </ul>
+                        </ol>
                     </section>
                 @endforeach
             </div>
         @endif
+
+        <x-folio :section="$section['label']" position="bottom" class="mt-16" />
     </section>
 </x-layouts.public>

@@ -50,6 +50,7 @@ class Form extends ContentForm
         return [
             'title' => '',
             'course' => null,
+            'course_description' => null,
             'topic' => null,
             'type' => TeachingMaterialType::Slides->value,
             'description' => null,

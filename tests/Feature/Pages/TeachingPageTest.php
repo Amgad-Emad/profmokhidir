@@ -37,7 +37,7 @@ class TeachingPageTest extends TestCase
         $this->get(route('teaching'))
             ->assertOk()
             ->assertSee('<title>Teaching Materials · ', false)
-            ->assertSeeInOrder(['section-header', 'Teaching', 'rule-brass', 'id="section-title"', 'Teaching Materials'], false)
+            ->assertSeeInOrder(['chapter-opening', 'Teaching', 'rule-brass', 'id="section-title"', 'Teaching Materials'], false)
             ->assertSee('Teaching materials will appear here as they are prepared for sharing.')
             ->assertDontSee('Draft slides')
             ->assertDontSee('<form', false)
@@ -45,11 +45,14 @@ class TeachingPageTest extends TestCase
     }
 
     #[Test]
-    public function it_groups_cards_by_course_with_type_description_version_date_and_links(): void
+    public function it_sets_each_course_as_a_syllabus_with_its_description_and_a_numbered_reading_list(): void
     {
         $withFile = TeachingMaterial::factory()->published()->type(TeachingMaterialType::Slides)->course('AGR 301 Crop Physiology')->create([
             'title' => 'Photosynthesis slides', 'topic' => 'Photosynthesis', 'description' => 'Lecture 3 slides.', 'version' => 'v2.1',
-            'material_date' => '2019-09-01', 'external_url' => null,
+            'material_date' => '2019-09-01', 'external_url' => null, 'course_description' => 'How crops capture light.', 'sort_order' => 2,
+        ]);
+        TeachingMaterial::factory()->published()->type(TeachingMaterialType::Notes)->course('AGR 301 Crop Physiology')->create([
+            'title' => 'Water relations notes', 'topic' => null, 'course_description' => null, 'sort_order' => 1,
         ]);
         $this->materials->attachFile($withFile, UploadedFile::fake()->createWithContent('slides.pptx', str_repeat('a', 640 * 1024)));
 
@@ -63,10 +66,13 @@ class TeachingPageTest extends TestCase
 
         $response
             ->assertSeeInOrder([
-                'id="course-agr-205-principles-of-agronomy"', 'AGR 205 Principles of Agronomy',
-                'Reading</p>', 'Reading list', 'href="https://library.example.edu/list" rel="noopener"', 'Open · library.example.edu',
-                'id="course-agr-301-crop-physiology"', 'AGR 301 Crop Physiology',
-                'Slides · Photosynthesis', 'Photosynthesis slides', 'Lecture 3 slides.', 'v2.1', '<time datetime="2019-09-01">1 September 2019</time>',
+                'id="course-agr-205-principles-of-agronomy"', '<span class="caps">AGR</span> 205 Principles of Agronomy', '1 item',
+                '<ol class="syllabus__list"', 'class="syllabus__item"', 'Reading list', 'Reading</p>', 'href="https://library.example.edu/list" rel="noopener"', 'Open · library.example.edu',
+                'id="course-agr-301-crop-physiology"', '<span class="caps">AGR</span> 301 Crop Physiology', '2 items', 'rule-brass',
+                'class="syllabus__description" data-rise>How crops capture light.</p>',
+                'class="syllabus__item"', 'Water relations notes',
+                'class="syllabus__item"', 'Photosynthesis slides', 'Lecture 3 slides.',
+                'Slides · Photosynthesis · Version v2.1 · <time datetime="2019-09-01">1 September 2019</time> · PPTX · 640 KB',
                 'href="'.route('teaching.download', $withFile).'" target="_blank" rel="noopener"', 'Download · PPTX · 640 KB',
                 'id="course-other"', 'Other materials', 'Loose notes',
             ], false)
@@ -75,7 +81,10 @@ class TeachingPageTest extends TestCase
             ->assertSee('<option value="Photosynthesis">Photosynthesis</option>', false)
             ->assertSee('<option value="slides">Slides</option>', false);
 
-        $this->assertGreaterThanOrEqual(3, substr_count($response->getContent(), 'data-rise-group'));
+        $html = $response->getContent();
+        $this->assertGreaterThanOrEqual(3, substr_count($html, 'data-rise-group'));
+        $this->assertSame(1, substr_count($html, 'class="syllabus__description"'), 'Only courses with a description show one');
+        $this->assertStringNotContainsString('syllabus__lock', $html, 'Public materials carry no lock label');
     }
 
     #[Test]
@@ -111,16 +120,14 @@ class TeachingPageTest extends TestCase
 
         $this->get(route('teaching'))
             ->assertOk()
-            ->assertSee('Problem set 4')
-            ->assertSee('Community members')
-            ->assertSee('For community members.')
-            ->assertSee('href="'.route('community').'"', false)
+            ->assertSeeInOrder(['class="syllabus__lock"', 'Community members', 'Problem set 4', 'class="syllabus__members">For members of the Scientific Community</p>'], false)
+            ->assertSee('href="'.route('community').'" class="link-meta">Join the community', false)
             ->assertSee('Apply to join the community')
             ->assertDontSee($download, false)
             ->assertDontSee('https://www.example.org/set', false);
 
         $this->actingAs(User::factory()->applicant()->create())->get(route('teaching'))
-            ->assertOk()->assertSee('For community members.')->assertDontSee($download, false);
+            ->assertOk()->assertSee('class="link-meta">Join the community', false)->assertDontSee($download, false);
 
         // Members get a temporary signed link to the private file, never the bare route.
         $this->actingAs(User::factory()->member()->create())->get(route('teaching'))
@@ -128,8 +135,9 @@ class TeachingPageTest extends TestCase
             ->assertSee('href="'.$download.'?expires=', false)
             ->assertSee('signature=', false)
             ->assertSee('Download · PDF · 12 KB')
+            ->assertSee('For members of the Scientific Community')
             ->assertDontSee('href="'.$download.'"', false)
-            ->assertDontSee('For community members.')
+            ->assertDontSee('class="link-meta">Join the community', false)
             ->assertDontSee('Apply to join the community');
 
         $this->actingAs(User::factory()->editor()->create())->get(route('teaching'))

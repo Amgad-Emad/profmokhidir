@@ -35,10 +35,17 @@ class TeachingMaterialSeeder extends Seeder
             ['AGR 412 Soil Fertility', 'Past examination papers', TeachingMaterialType::Other, 'Exam archive', TeachingAccess::Members],
         ];
 
+        $descriptions = [
+            'AGR 205 Principles of Agronomy' => '[Placeholder] An introduction to field crops, their growth and management, for second-year students.',
+            'AGR 301 Crop Physiology' => '[Placeholder] How crops capture light, water and nutrients, and how the season shapes yield.',
+            'AGR 412 Soil Fertility' => '[Placeholder] Nutrient cycles in irrigated and rain-fed soils, with practical fertility assessment.',
+        ];
+
         foreach ($rows as $index => [$course, $topic, $type, $title, $access]) {
             $material = $materials->create([
                 'title' => '[Placeholder] '.$title,
                 'course' => $course,
+                'course_description' => $descriptions[$course] ?? null,
                 'topic' => $topic,
                 'type' => $type,
                 'description' => '[Placeholder] Description of this material, to be replaced with approved text.',

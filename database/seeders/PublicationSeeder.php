@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Constants\PublicationType;
 use App\Models\Publication;
 use App\Services\PublicationService;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class PublicationSeeder extends Seeder
@@ -37,6 +36,10 @@ class PublicationSeeder extends Seeder
             [PublicationType::Other, 2012, 'Reflections on a life in agronomy', '[Placeholder] Sudan Journal of Agricultural Research (essay)'],
         ];
 
+        $topics = ['Agronomy', 'Crop physiology', 'Soil fertility', 'Agricultural education'];
+        // A few works open the catalogue in the "Selected works" strip.
+        $featured = [0, 4, 7];
+
         foreach ($items as $index => [$type, $year, $title, $venue]) {
             $publications->create([
                 'title' => '[Placeholder] '.$title,
@@ -48,6 +51,8 @@ class PublicationSeeder extends Seeder
                 'citation' => sprintf('[Placeholder] Khidir, M. O. (%d). %s. %s.', $year, $title, $venue),
                 'abstract' => '[Placeholder] Abstract text to be replaced with the approved summary of this work.',
                 'url' => null,
+                'topic' => $topics[$index % count($topics)],
+                'is_featured' => in_array($index, $featured, true),
                 'status' => 'published',
                 'sort_order' => $index + 1,
             ]);

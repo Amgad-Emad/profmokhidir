@@ -12,9 +12,16 @@ use Tests\TestCase;
 class PublicFilterRequestsTest extends TestCase
 {
     #[Test]
-    public function publication_filters_accept_a_type_and_a_four_digit_year(): void
+    public function publication_filters_accept_a_type_a_year_range_and_a_topic(): void
     {
         $rules = (new PublicationIndexRequest)->rules();
+
+        $this->assertTrue(Validator::make(['from' => '1970', 'to' => '1990', 'topic' => 'Agronomy'], $rules)->passes());
+        $this->assertTrue(Validator::make(['from' => '', 'to' => '', 'topic' => ''], $rules)->passes());
+        $this->assertFalse(Validator::make(['from' => 'abc'], $rules)->passes());
+        $this->assertFalse(Validator::make(['to' => '99999'], $rules)->passes());
+        $this->assertFalse(Validator::make(['topic' => str_repeat('a', 101)], $rules)->passes());
+        $this->assertFalse(Validator::make(['topic' => ['Agronomy']], $rules)->passes());
 
         $this->assertTrue(Validator::make(['type' => 'book', 'year' => '1978'], $rules)->passes());
         $this->assertTrue(Validator::make([], $rules)->passes());
@@ -32,13 +39,26 @@ class PublicFilterRequestsTest extends TestCase
         $request->setContainer($this->app)->setRedirector($this->app->make('redirect'));
         $request->validateResolved();
 
-        $this->assertSame(['type' => 'book', 'year' => 1978], $request->filters());
+        // The single `year` of the earlier list is a one-year range.
+        $this->assertSame(['type' => 'book', 'from' => 1978, 'to' => 1978, 'topic' => null], $request->filters());
+
+        $range = PublicationIndexRequest::create('/publications?from=1970&to=1990&topic=+Agronomy+', 'GET');
+        $range->setContainer($this->app)->setRedirector($this->app->make('redirect'));
+        $range->validateResolved();
+
+        $this->assertSame(['type' => null, 'from' => 1970, 'to' => 1990, 'topic' => 'Agronomy'], $range->filters());
+
+        $open = PublicationIndexRequest::create('/publications?from=1970&year=1990', 'GET');
+        $open->setContainer($this->app)->setRedirector($this->app->make('redirect'));
+        $open->validateResolved();
+
+        $this->assertSame(['type' => null, 'from' => 1970, 'to' => null, 'topic' => null], $open->filters(), 'An explicit range wins over the single year');
 
         $empty = PublicationIndexRequest::create('/publications', 'GET');
         $empty->setContainer($this->app)->setRedirector($this->app->make('redirect'));
         $empty->validateResolved();
 
-        $this->assertSame(['type' => null, 'year' => null], $empty->filters());
+        $this->assertSame(['type' => null, 'from' => null, 'to' => null, 'topic' => null], $empty->filters());
     }
 
     #[Test]

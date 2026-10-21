@@ -8,6 +8,7 @@
             <x-admin.field name="form.course" label="Course" />
             <x-admin.field name="form.topic" label="Topic" />
         </div>
+        <x-admin.textarea-field name="form.course_description" label="Course description" rows="2" hint="A sentence or two under the course heading on the syllabus. Only one material per course needs it; the first filled in is used." />
         <div class="grid gap-6 sm:grid-cols-2">
             <x-admin.select-field name="form.type" label="Type" :options="$types" required />
             <x-admin.select-field name="form.access" label="Who may download" :options="$accessOptions" required hint="Members-only files are stored privately and served through signed links." />

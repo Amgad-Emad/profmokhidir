@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
-    'title', 'slug', 'date', 'summary', 'body', 'external_url', 'tags', 'byline',
+    'title', 'slug', 'date', 'summary', 'epigraph', 'epigraph_attribution', 'body', 'external_url', 'tags', 'byline',
     'status', 'published_at', 'sort_order',
 ])]
 class Commentary extends Model

@@ -23,6 +23,8 @@ class CommentaryRequest extends ContentRequest
             'slug' => self::slugRule('commentaries', $this->ignoreId),
             'date' => self::dateRule(),
             'summary' => ['nullable', 'string', 'max:1000'],
+            'epigraph' => ['nullable', 'string', 'max:500'],
+            'epigraph_attribution' => ['nullable', 'string', 'max:255'],
             'body' => ['nullable', 'string', 'max:100000'],
             'external_url' => self::urlRule(),
             'tags' => ['nullable', 'string', 'max:500'],

@@ -117,6 +117,6 @@ class PublicSectionsSweepTest extends TestCase
 
         $home = $this->get(route('home'))->assertOk();
 
-        $this->assertGreaterThanOrEqual(3, substr_count($home->getContent(), 'class="empty-state'), 'Each home chapter has an empty state');
+        $this->assertSame(2, substr_count($home->getContent(), 'class="empty-state'), 'The timeline and the figures each have an empty state');
     }
 }

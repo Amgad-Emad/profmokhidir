@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Constants\Essay;
 use App\Constants\PageSizes;
 use App\Constants\Sections;
 use App\Models\Commentary;
 use App\Support\RichText;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Assembles the Commentary Corner: the tag-filtered archive and the long-form
@@ -22,6 +24,7 @@ class CommentaryPageService
         private readonly CommentaryService $commentaries,
         private readonly NavigationService $navigation,
         private readonly TypesetterService $typesetter,
+        private readonly EssayService $essay,
     ) {}
 
     /**
@@ -58,6 +61,9 @@ class CommentaryPageService
      *     chapter: int,
      *     commentary: Commentary,
      *     body: string,
+     *     contents: list<array{id: string, text: string, level: int}>,
+     *     readingTime: string,
+     *     related: Collection<int, Commentary>,
      *     tags: list<TagOption>,
      *     previous: Commentary|null,
      *     next: Commentary|null
@@ -66,12 +72,20 @@ class CommentaryPageService
     public function show(Commentary $commentary): array
     {
         $neighbours = $this->commentaries->neighbours($commentary);
+        // The note on where the piece first appeared (beside the date) is note 1 when present.
+        $essay = $this->essay->prepare(
+            $this->typesetter->html(RichText::sanitise($commentary->body)),
+            filled($commentary->external_url) ? 2 : 1,
+        );
 
         return [
             'section' => $this->navigation->section(Sections::COMMENTARY, Sections::COMMENTARY.'.show'),
             'chapter' => $this->navigation->chapter(Sections::COMMENTARY),
             'commentary' => $commentary,
-            'body' => $this->typesetter->html(RichText::sanitise($commentary->body)),
+            'body' => $essay['html'],
+            'contents' => $essay['contents'],
+            'readingTime' => $essay['minutes'].' '.Essay::READING_TIME_SUFFIX,
+            'related' => $this->commentaries->related($commentary),
             'tags' => $this->tagOptions($this->commentaries->normaliseTags($commentary->tags), null),
             'previous' => $neighbours['previous'],
             'next' => $neighbours['next'],

@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Constants\CacheKeys;
+use App\Constants\Catalogue;
 use App\Constants\MediaCollections;
 use App\Constants\PublicationType;
 use App\Models\Publication;
 use App\Models\User;
 use App\Repositories\Contracts\PublicationRepositoryInterface;
 use App\Services\Concerns\GeneratesSlugs;
+use App\Support\PublicationFilters;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
@@ -40,7 +42,7 @@ class PublicationService extends AbstractContentService
 
     protected function cacheKeys(): array
     {
-        return [CacheKeys::PUBLICATIONS, CacheKeys::PUBLICATIONS.'.filters', CacheKeys::PUBLICATIONS.'.latest'];
+        return [CacheKeys::PUBLICATIONS, CacheKeys::PUBLICATIONS_FILTERS, CacheKeys::PUBLICATIONS_LATEST, CacheKeys::PUBLICATIONS_FEATURED];
     }
 
     public function findPublishedBySlug(string $slug): ?Publication
@@ -49,28 +51,47 @@ class PublicationService extends AbstractContentService
     }
 
     /**
-     * Public listing with the type and year filters.
+     * The public catalogue with its type, year-range and topic filters.
      *
      * @return LengthAwarePaginator<int, Publication>
      */
-    public function publishedFiltered(?string $type = null, ?int $year = null, int $perPage = 20): LengthAwarePaginator
+    public function publishedFiltered(PublicationFilters $filters = new PublicationFilters, int $perPage = 20): LengthAwarePaginator
     {
-        $typeEnum = $type !== null && $type !== '' ? PublicationType::tryFrom($type) : null;
+        return $this->publications()->paginatePublishedFiltered($filters, $perPage);
+    }
 
-        return $this->publications()->paginatePublishedFiltered($typeEnum, $year, $perPage);
+    /**
+     * Matching records per decade (newest first, undated under ""), for the group counts.
+     *
+     * @return array<int|string, int>
+     */
+    public function decadeCounts(PublicationFilters $filters = new PublicationFilters): array
+    {
+        return $this->publications()->publishedDecadeCounts($filters);
     }
 
     /**
      * Available filter values among published publications (cached).
      *
-     * @return array{years: list<int>, types: list<PublicationType>}
+     * @return array{years: list<int>, types: list<PublicationType>, topics: list<string>}
      */
     public function filters(): array
     {
-        return $this->remember(CacheKeys::PUBLICATIONS.'.filters', fn (): array => [
+        return $this->remember(CacheKeys::PUBLICATIONS_FILTERS, fn (): array => [
             'years' => $this->publications()->publishedYears(),
             'types' => $this->publications()->publishedTypes(),
+            'topics' => $this->publications()->publishedTopics(),
         ]);
+    }
+
+    /**
+     * The "Selected works" strip: published records marked as featured (cached).
+     *
+     * @return Collection<int, Publication>
+     */
+    public function featured(int $limit = Catalogue::SELECTED_WORKS_LIMIT): Collection
+    {
+        return $this->remember(CacheKeys::PUBLICATIONS_FEATURED, fn (): Collection => $this->publications()->publishedFeatured($limit));
     }
 
     /**
@@ -78,7 +99,7 @@ class PublicationService extends AbstractContentService
      */
     public function latest(int $limit = 3): Collection
     {
-        return $this->remember(CacheKeys::PUBLICATIONS.'.latest', fn (): Collection => $this->publications()->latestPublished($limit));
+        return $this->remember(CacheKeys::PUBLICATIONS_LATEST, fn (): Collection => $this->publications()->latestPublished($limit));
     }
 
     public function attachFile(Publication $publication, string|UploadedFile $file): Media
@@ -104,6 +125,15 @@ class PublicationService extends AbstractContentService
     {
         if (isset($data['type']) && is_string($data['type'])) {
             $data['type'] = PublicationType::from($data['type']);
+        }
+
+        if (array_key_exists('is_featured', $data)) {
+            $data['is_featured'] = (bool) $data['is_featured'];
+        }
+
+        if (array_key_exists('topic', $data)) {
+            $topic = is_string($data['topic']) ? trim($data['topic']) : '';
+            $data['topic'] = $topic === '' ? null : $topic;
         }
 
         if (isset($data['doi']) && is_string($data['doi'])) {

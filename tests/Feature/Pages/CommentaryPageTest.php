@@ -95,11 +95,13 @@ class CommentaryPageTest extends TestCase
             ->assertSee('<title>On teaching · ', false)
             ->assertSee('<meta name="description" content="Why the lecture still matters.">', false)
             ->assertSeeInOrder([
-                'sidenote-host', 'folio', 'chapter-opening', '<span class="sr-only">Chapter </span>VIII</span>', 'Commentary', 'id="section-title"', 'On teaching',
+                'class="reading-progress" x-data="readingProgress" data-target="#essay-body" aria-hidden="true"',
+                'folio', 'sidenote-host', 'chapter-opening', '<span class="sr-only">Chapter </span>VIII</span>', 'Commentary', 'id="section-title"', 'On teaching',
                 '<span class="smallcaps">Prof. Mohamed Osman Khidir</span>', '<time datetime="2021-03-12" class="whitespace-nowrap">12 March 2021</time>',
-                'First published at www.example.org',
+                'First published at www.example.org', '1 min read',
                 'Why the lecture still matters.',
-                '<div class="drop-cap prose-bio mt-10" data-rise="data-rise"><p>First paragraph.</p>alert(1)<blockquote>A quote.</blockquote><p>Second.</p></div>',
+                '<div id="essay-body">',
+                '<div class="drop-cap prose-bio essay__body mt-10" data-rise="data-rise"><p>First paragraph.</p>alert(1)<blockquote>A quote.</blockquote><p>Second.</p></div>',
                 'href="https://www.example.org/essay" rel="noopener"', 'Read the original · example.org',
                 'ornament--fleuron', 'aria-label="Topics"', 'href="'.e(route('commentary', ['tag' => 'Education'])).'"', 'Education',
                 'aria-label="More commentary"', 'Previous', 'href="'.route('commentary.show', 'newer').'"', 'Newer piece',
@@ -112,6 +114,88 @@ class CommentaryPageTest extends TestCase
 
         $this->get(route('commentary.show', 'newer'))->assertOk()->assertDontSee('>Previous<', false)->assertSee('>Next<', false);
         $this->get(route('commentary.show', 'older'))->assertOk()->assertSee('>Previous<', false)->assertDontSee('>Next<', false);
+    }
+
+    #[Test]
+    public function the_essay_has_an_epigraph_a_table_of_contents_sidenotes_and_further_reading_by_tag(): void
+    {
+        $paragraph = str_repeat('word ', 250);
+        Commentary::factory()->published()->tagged(['Education', 'Policy'])->create([
+            'title' => 'On teaching', 'slug' => 'on-teaching', 'external_url' => null,
+            'epigraph' => 'The field is the first classroom.', 'epigraph_attribution' => 'From a lecture, 1984',
+            'body' => '<p>Opening.[^a]</p><h2>The field</h2><p>'.$paragraph.'</p><h3>Practicals</h3><p>'.$paragraph.'</p><h2>The field</h2><p>End.[^b][^missing]</p>'
+                .'<p>[^a]: First <em>note</em>.</p><p>[^b]: Second note.</p>',
+        ]);
+        Commentary::factory()->published()->tagged(['Policy', 'Education'])->create(['title' => 'Closely related', 'slug' => 'closely', 'date' => '2001-01-01']);
+        Commentary::factory()->published()->tagged(['education'])->create(['title' => 'Also related', 'slug' => 'also', 'date' => '2020-01-01']);
+        Commentary::factory()->published()->tagged(['Sudan'])->create(['title' => 'Unrelated piece', 'slug' => 'unrelated']);
+        Commentary::factory()->draft()->tagged(['Education'])->create(['title' => 'Draft related', 'slug' => 'draft-related']);
+
+        $response = $this->get(route('commentary.show', 'on-teaching'))->assertOk();
+
+        $response
+            ->assertSeeInOrder([
+                'essay__layout--contents',
+                '<nav class="essay__contents" aria-labelledby="essay-contents-title" x-data="essayContents">', 'Contents',
+                'href="#part-the-field"', 'The field', 'class="essay__contents-sub"', 'href="#part-practicals"', 'href="#part-the-field-2"',
+                'chapter-opening', 'On teaching', 'chapter-opening__epigraph', 'The field is the first classroom.', '<span class="smallcaps">From a lecture, 1984</span>',
+                '3 min read',
+                '<details class="essay__contents-inline"', 'href="#part-the-field"',
+                '<p>Opening.<span class="sidenote"', 'aria-describedby="note-1"', '>1</button>', 'First <em>note</em>.',
+                '<h2 id="part-the-field">The field</h2>', '<h3 id="part-practicals">Practicals</h3>', '<h2 id="part-the-field-2">The field</h2>',
+                '<p>End.<span class="sidenote"', 'aria-describedby="note-2"', 'Second note.',
+                'class="essay__print-source"',
+                'aria-labelledby="further-reading-title"', 'Further reading',
+                'href="'.route('commentary.show', 'closely').'"', 'Closely related',
+                'href="'.route('commentary.show', 'also').'"', 'Also related',
+            ], false)
+            ->assertDontSee('[^', false)
+            ->assertDontSee('Unrelated piece')
+            ->assertDontSee('Draft related');
+    }
+
+    #[Test]
+    public function an_origin_note_beside_the_date_keeps_body_sidenotes_numbered_after_it(): void
+    {
+        Commentary::factory()->published()->create([
+            'slug' => 'noted', 'date' => '2021-03-12', 'external_url' => 'https://www.example.org/essay',
+            'body' => '<p>Text.[^1]</p><p>[^1]: Body note.</p>',
+        ]);
+
+        $this->get(route('commentary.show', 'noted'))
+            ->assertOk()
+            ->assertSeeInOrder(['aria-describedby="note-origin"', '>1</button>', 'First published at', 'aria-describedby="note-2"', '>2</button>', 'Body note.'], false);
+    }
+
+    #[Test]
+    public function short_essays_have_no_table_of_contents_and_no_further_reading_without_shared_tags(): void
+    {
+        Commentary::factory()->published()->tagged(['Solo'])->create(['slug' => 'short', 'body' => '<h2>Only heading</h2><p>Text.</p>', 'epigraph' => null]);
+
+        $this->get(route('commentary.show', 'short'))
+            ->assertOk()
+            ->assertSee('<h2 id="part-only-heading">Only heading</h2>', false)
+            ->assertDontSee('essay__contents', false)
+            ->assertDontSee('essay__layout--contents', false)
+            ->assertDontSee('chapter-opening__epigraph', false)
+            ->assertDontSee('Further reading');
+    }
+
+    #[Test]
+    public function commentaries_print_as_articles(): void
+    {
+        $css = (string) file_get_contents(resource_path('css/archive.css'));
+        $print = substr($css, (int) strpos($css, '@media print'));
+
+        $this->assertNotSame('', $print);
+
+        foreach (['.site-header', '.site-footer', '.reading-progress', '.essay__aside', '.essay__topics', '.essay__more', '.further-reading'] as $hidden) {
+            $this->assertStringContainsString($hidden, $print, "{$hidden} is hidden on paper");
+        }
+
+        $this->assertStringContainsString('.essay__print-source', $print, 'The printed article ends with its address');
+        $this->assertStringContainsString("content: ' (' attr(href) ')'", $print, 'Links print their address');
+        $this->assertMatchesRegularExpression('/\.essay \.sidenote__note,\s*\.essay \.sidenote__note:not\(\.is-open\)\s*\{\s*display: block !important;/', $print, 'Sidenotes print inline');
     }
 
     #[Test]

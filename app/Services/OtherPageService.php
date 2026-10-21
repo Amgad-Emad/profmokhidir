@@ -26,6 +26,7 @@ class OtherPageService
     /**
      * @return array{
      *     section: array{key: string, label: string, title: string, url: string, route: string, placement: string, summary: string, active: bool},
+     *     chapter: int,
      *     categories: list<array{label: string, anchor: string, items: Collection<int, OtherItem>}>
      * }
      */
@@ -45,6 +46,7 @@ class OtherPageService
 
         return [
             'section' => $this->navigation->section(Sections::OTHER, Sections::OTHER),
+            'chapter' => $this->navigation->chapter(Sections::OTHER),
             'categories' => $categories,
         ];
     }

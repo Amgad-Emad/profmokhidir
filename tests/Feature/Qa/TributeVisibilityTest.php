@@ -65,7 +65,8 @@ class TributeVisibilityTest extends TestCase
         $this->assertNotNull($tribute->fresh()->published_at);
 
         $this->get(route('tributes'))->assertOk()->assertSee('Zq Visitor')->assertSee('Zq message text')->assertDontSee(self::EMAIL);
-        $this->get(route('home'))->assertOk()->assertSee('Zq Visitor')->assertDontSee(self::EMAIL);
+        // The home page quotes only lines editors choose (Home quotes), never the latest tributes.
+        $this->get(route('home'))->assertOk()->assertDontSee('Zq Visitor')->assertDontSee(self::EMAIL);
     }
 
     #[Test]

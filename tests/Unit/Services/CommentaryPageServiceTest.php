@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Services;
 
+use App\Constants\Essay;
 use App\Constants\PageSizes;
 use App\Models\Commentary;
 use App\Services\CommentaryPageService;
@@ -74,5 +75,35 @@ class CommentaryPageServiceTest extends TestCase
         $this->assertTrue($this->service->find('yes')->is($published));
         $this->assertNull($this->service->find('no'));
         $this->assertNull($this->service->find('missing'));
+    }
+
+    #[Test]
+    public function the_detail_page_has_the_prepared_essay_its_contents_reading_time_and_further_reading(): void
+    {
+        $commentary = Commentary::factory()->published()->tagged(['Education'])->create([
+            'external_url' => null,
+            'body' => '<p>Opening.[^1]</p><h2>First part</h2><p>Text.</p><h2>Second part</h2><p>[^1]: A note.</p>',
+        ]);
+        $related = Commentary::factory()->published()->tagged(['Education'])->create();
+
+        $data = $this->service->show($commentary);
+
+        $this->assertSame(['part-first-part', 'part-second-part'], array_column($data['contents'], 'id'));
+        $this->assertSame('1 '.Essay::READING_TIME_SUFFIX, $data['readingTime']);
+        $this->assertStringContainsString('aria-describedby="note-1"', $data['body']);
+        $this->assertStringContainsString('<h2 id="part-first-part">First part</h2>', $data['body']);
+        $this->assertStringNotContainsString('[^1]', $data['body']);
+        $this->assertTrue($related->is($data['related']->first()));
+    }
+
+    #[Test]
+    public function body_sidenotes_start_at_two_when_the_origin_note_takes_the_first_number(): void
+    {
+        $commentary = Commentary::factory()->published()->create([
+            'external_url' => 'https://www.example.org/essay',
+            'body' => '<p>Text.[^1]</p><p>[^1]: A note.</p>',
+        ]);
+
+        $this->assertStringContainsString('aria-describedby="note-2"', $this->service->show($commentary)['body']);
     }
 }

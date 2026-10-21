@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             TeachingMaterialSeeder::class,
             CommentarySeeder::class,
             OtherItemSeeder::class,
+            HomeQuoteSeeder::class,
             TributeSeeder::class,
             ChatSeeder::class,
             AuditLogSeeder::class,

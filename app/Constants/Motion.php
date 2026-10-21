@@ -33,6 +33,8 @@ final class Motion
 
     public const string ATTR_SCROLL_SCALE = 'data-scroll-scale';
 
+    public const string ATTR_SCROLL_LINE = 'data-scroll-line';
+
     /**
      * @return array<string, array{attribute: string, summary: string}>
      */
@@ -54,6 +56,10 @@ final class Motion
             'scroll-scale' => [
                 'attribute' => self::ATTR_SCROLL_SCALE,
                 'summary' => sprintf('Scales from %.1f to %.1f and fades slightly as the hero scrolls out.', self::HERO_SCALE_FROM, self::HERO_SCALE_TO),
+            ],
+            'scroll-line' => [
+                'attribute' => self::ATTR_SCROLL_LINE,
+                'summary' => 'A brass hairline draws downward with the scroll as its chapter passes the reading line; fully drawn without scripts or with reduced motion.',
             ],
         ];
     }

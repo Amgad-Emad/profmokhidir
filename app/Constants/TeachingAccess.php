@@ -19,6 +19,9 @@ enum TeachingAccess: string
     /** How long a signed link to a members-only file stays valid. */
     public const int SIGNED_URL_MINUTES = 60;
 
+    /** The line under a members-only material on the syllabus. */
+    public const string MEMBERS_NOTE = 'For members of the Scientific Community';
+
     public function label(): string
     {
         return match ($this) {

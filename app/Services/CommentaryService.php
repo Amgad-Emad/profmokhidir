@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Constants\CacheKeys;
+use App\Constants\Essay;
 use App\Models\Commentary;
 use App\Repositories\Contracts\CommentaryRepositoryInterface;
 use App\Services\Concerns\GeneratesSlugs;
 use App\Support\RichText;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * @extends AbstractContentService<Commentary>
@@ -56,6 +58,16 @@ class CommentaryService extends AbstractContentService
     }
 
     /**
+     * "Further reading": published commentaries sharing a topic tag with this one.
+     *
+     * @return Collection<int, Commentary>
+     */
+    public function related(Commentary $commentary, int $limit = Essay::FURTHER_READING_LIMIT): Collection
+    {
+        return $this->commentaries()->publishedRelated($commentary, $limit);
+    }
+
+    /**
      * @return list<string>
      */
     public function tags(): array
@@ -67,6 +79,13 @@ class CommentaryService extends AbstractContentService
     {
         if (array_key_exists('body', $data)) {
             $data['body'] = RichText::sanitise(is_string($data['body']) ? $data['body'] : null) ?: null;
+        }
+
+        foreach (['epigraph', 'epigraph_attribution'] as $field) {
+            if (array_key_exists($field, $data)) {
+                $value = is_string($data[$field]) ? trim($data[$field]) : '';
+                $data[$field] = $value === '' ? null : $value;
+            }
         }
 
         if (array_key_exists('tags', $data)) {

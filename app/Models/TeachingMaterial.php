@@ -23,7 +23,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * private disk; the disk is chosen by the service from `access` when attaching.
  */
 #[Fillable([
-    'title', 'course', 'topic', 'type', 'description', 'version', 'material_date', 'external_url', 'access',
+    'title', 'course', 'course_description', 'topic', 'type', 'description', 'version', 'material_date', 'external_url', 'access',
     'status', 'published_at', 'sort_order',
 ])]
 class TeachingMaterial extends Model implements HasMedia

@@ -124,10 +124,21 @@ async function checkKeyboard(page, path, viewport) {
     });
     const expected = await page.$$eval(
         'a[href], button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])',
-        (els) => els.filter((el) => {
-            const style = getComputedStyle(el);
-            return !el.disabled && style.display !== 'none' && style.visibility !== 'hidden' && el.closest('[x-cloak]') === null && el.getClientRects().length > 0;
-        }).length,
+        (els) => {
+            // A radio group is one Tab stop, and controls inside a closed <details> (other than its summary) are skipped by Tab.
+            const groups = new Set();
+            return els.filter((el) => {
+                const style = getComputedStyle(el);
+                const closed = el.closest('details:not([open])');
+                if (closed && el.tagName !== 'SUMMARY') return false;
+                if (el.type === 'radio') {
+                    const group = `${el.form ? 'f' : ''}:${el.name}`;
+                    if (groups.has(group)) return false;
+                    groups.add(group);
+                }
+                return !el.disabled && style.display !== 'none' && style.visibility !== 'hidden' && el.closest('[x-cloak]') === null && el.getClientRects().length > 0;
+            }).length;
+        },
     );
     await page.addStyleTag({ content: '*, html { scroll-behavior: auto !important; }' });
     await page.evaluate(() => { window.__a11ySeen = new Set(); });

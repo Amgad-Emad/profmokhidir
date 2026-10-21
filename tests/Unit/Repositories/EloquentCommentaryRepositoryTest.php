@@ -88,4 +88,20 @@ class EloquentCommentaryRepositoryTest extends TestCase
 
         $this->assertSame(['previous' => null, 'next' => null], $this->repository->neighbours($draft));
     }
+
+    #[Test]
+    public function related_commentaries_share_a_tag_regardless_of_case_most_shared_first_then_newest(): void
+    {
+        $current = Commentary::factory()->published()->tagged(['Education', 'Policy'])->create(['title' => 'Current']);
+        Commentary::factory()->published()->tagged(['education'])->create(['title' => 'One tag, newer', 'date' => '2020-01-01']);
+        Commentary::factory()->published()->tagged(['Policy', 'EDUCATION', 'Sudan'])->create(['title' => 'Two tags', 'date' => '1999-01-01']);
+        Commentary::factory()->published()->tagged(['Policy'])->create(['title' => 'One tag, older', 'date' => '2010-01-01']);
+        Commentary::factory()->published()->tagged(['Sudan'])->create(['title' => 'No shared tag']);
+        Commentary::factory()->published()->create(['title' => 'Untagged', 'tags' => null]);
+        Commentary::factory()->draft()->tagged(['Education'])->create(['title' => 'Draft']);
+
+        $this->assertSame(['Two tags', 'One tag, newer', 'One tag, older'], $this->repository->publishedRelated($current, 5)->pluck('title')->all());
+        $this->assertSame(['Two tags'], $this->repository->publishedRelated($current, 1)->pluck('title')->all());
+        $this->assertTrue($this->repository->publishedRelated(Commentary::factory()->published()->create(['tags' => []]), 3)->isEmpty());
+    }
 }

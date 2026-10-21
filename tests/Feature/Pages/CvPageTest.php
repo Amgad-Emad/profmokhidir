@@ -28,7 +28,7 @@ class CvPageTest extends TestCase
     }
 
     #[Test]
-    public function it_groups_entries_by_section_with_a_summary_strip_and_last_updated_date(): void
+    public function it_sets_entries_as_a_ledger_by_section_with_a_sticky_index_and_last_updated_date(): void
     {
         CvEntry::factory()->published()->section(CvSection::Achievement)->create([
             'title' => 'Fellow of the Academy', 'organisation' => 'Sudanese Academy of Sciences', 'role_description' => null,
@@ -50,14 +50,15 @@ class CvPageTest extends TestCase
         $response = $this->get(route('cv'))->assertOk();
 
         $response
-            ->assertSeeInOrder(['Last updated', '<time datetime="2024-03-12">12 March 2024</time>'], false)
-            ->assertSeeInOrder(['aria-label="CV sections"', 'href="#cv-education"', '>2<', 'Education', 'href="#cv-appointment"', '>1<', 'Appointments', 'href="#cv-achievement"', '>1<', 'Achievements'], false)
+            ->assertSeeInOrder(['class="cv-ledger__updated"', '<span class="smallcaps">Last updated</span>', '<time datetime="2024-03-12">12 March 2024</time>'], false)
+            ->assertSeeInOrder(['<nav class="cv-ledger__index" aria-labelledby="cv-index-title">', 'Sections',
+                'href="#cv-education"', 'Education', '>2<', 'href="#cv-appointment"', 'Appointments', '>1<', 'href="#cv-achievement"', 'Achievements', '>1<'], false)
             ->assertSeeInOrder([
-                'id="cv-education"', 'Education',
-                '1969–1972', 'PhD in Agronomy', 'University of Reading', 'Thesis on sorghum water use.',
-                '1962–1966', 'BSc in Agriculture',
-                'id="cv-appointment"', 'Appointments', '1998–present', 'Professor Emeritus', 'University of Khartoum',
-                'id="cv-achievement"', 'Achievements', '>2005<', 'Fellow of the Academy', 'Sudanese Academy of Sciences',
+                'id="cv-education"', 'chapter-opening', '2 entries', 'id="cv-education-title"', 'Education',
+                'class="ledger"', 'class="ledger__years">1969–1972', 'PhD in Agronomy', 'University of Reading', 'Thesis on sorghum water use.',
+                'class="ledger__years">1962–1966', 'BSc in Agriculture',
+                'id="cv-appointment"', 'chapter-opening', '1 entry', 'Appointments', '1998–present', 'Professor Emeritus', 'University of Khartoum',
+                'id="cv-achievement"', 'chapter-opening', 'Achievements', 'class="ledger__years">2005<', 'Fellow of the Academy', 'Sudanese Academy of Sciences',
             ], false)
             ->assertDontSee('cv-leadership', false)
             ->assertDontSee('cv-project', false)
@@ -66,7 +67,8 @@ class CvPageTest extends TestCase
 
         $html = $response->getContent();
         $this->assertGreaterThanOrEqual(3, substr_count($html, 'data-rise-group'));
-        $this->assertSame(0, preg_match('/<p class="font-display text-xl font-light italic text-ash"><\/p>/', $html), 'Empty organisation is not rendered');
+        $this->assertSame(3, substr_count($html, 'class="ledger__organisation"'), 'The empty organisation is not rendered');
+        $this->assertStringNotContainsString('class="ledger__description"></p>', $html, 'Empty descriptions are not rendered');
     }
 
     #[Test]
@@ -82,6 +84,22 @@ class CvPageTest extends TestCase
         $this->assertDoesNotMatchRegularExpression('/download|print|\.pdf|\.docx/i', strip_tags($html));
         $this->assertStringNotContainsString(' download', $html);
         $this->assertStringNotContainsString('window.print', $html);
+    }
+
+    #[Test]
+    public function the_print_stylesheet_hides_the_cv_and_prints_only_a_notice(): void
+    {
+        CvEntry::factory()->published()->create(['title' => 'Lecturer in Agronomy']);
+
+        $this->get(route('cv'))
+            ->assertOk()
+            ->assertSeeInOrder(['<div class="cv-ledger">', 'Lecturer in Agronomy', '<p class="cv-print-notice">', 'to be read online only'], false);
+
+        $css = (string) file_get_contents(resource_path('css/archive.css'));
+        $print = substr($css, (int) strpos($css, '@media print'));
+
+        $this->assertMatchesRegularExpression('/\.cv-ledger\s*\{\s*display:\s*none\s*!important;/', $print, 'Printing the CV page prints no CV');
+        $this->assertMatchesRegularExpression('/\.cv-print-notice\s*\{\s*display:\s*none;/', $css, 'The notice is hidden on screen');
     }
 
     #[Test]

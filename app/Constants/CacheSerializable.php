@@ -8,6 +8,7 @@ use App\Models\Album;
 use App\Models\Award;
 use App\Models\Commentary;
 use App\Models\CvEntry;
+use App\Models\HomeQuote;
 use App\Models\OtherItem;
 use App\Models\Profile;
 use App\Models\Publication;
@@ -39,7 +40,7 @@ final class CacheSerializable
     {
         return [
             Profile::class, CvEntry::class, Publication::class, Award::class, Video::class,
-            Album::class, TeachingMaterial::class, Commentary::class, OtherItem::class, Tribute::class,
+            Album::class, TeachingMaterial::class, Commentary::class, OtherItem::class, Tribute::class, HomeQuote::class,
         ];
     }
 

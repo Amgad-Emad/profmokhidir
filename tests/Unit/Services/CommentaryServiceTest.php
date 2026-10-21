@@ -3,6 +3,7 @@
 namespace Tests\Unit\Services;
 
 use App\Constants\CacheKeys;
+use App\Constants\Essay;
 use App\Models\Commentary;
 use App\Services\CommentaryService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -90,5 +91,31 @@ class CommentaryServiceTest extends TestCase
 
         $this->assertTrue($neighbours['previous']->is($first));
         $this->assertNull($neighbours['next']);
+    }
+
+    #[Test]
+    public function it_trims_the_epigraph_and_stores_blank_ones_as_null(): void
+    {
+        $commentary = $this->service->create(['title' => 'With epigraph', 'epigraph' => '  The field is the first classroom.  ', 'epigraph_attribution' => ' A lecture ']);
+        $blank = $this->service->create(['title' => 'Without', 'epigraph' => '   ', 'epigraph_attribution' => '']);
+
+        $this->assertSame('The field is the first classroom.', $commentary->epigraph);
+        $this->assertSame('A lecture', $commentary->epigraph_attribution);
+        $this->assertNull($blank->epigraph);
+        $this->assertNull($blank->epigraph_attribution);
+    }
+
+    #[Test]
+    public function related_returns_published_commentaries_sharing_a_tag_up_to_the_further_reading_limit(): void
+    {
+        $current = Commentary::factory()->published()->tagged(['Education'])->create();
+        Commentary::factory()->published()->tagged(['Education'])->count(Essay::FURTHER_READING_LIMIT + 1)->create();
+        Commentary::factory()->published()->tagged(['Sudan'])->create();
+
+        $related = $this->service->related($current);
+
+        $this->assertCount(Essay::FURTHER_READING_LIMIT, $related);
+        $this->assertFalse($related->contains($current));
+        $this->assertCount(1, $this->service->related($current, 1));
     }
 }

@@ -3,8 +3,10 @@
 namespace Tests\Unit\Services;
 
 use App\Constants\CacheKeys;
+use App\Constants\Sections;
 use App\Models\Award;
 use App\Services\AwardsPageService;
+use App\Services\NavigationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use PHPUnit\Framework\Attributes\Test;
@@ -27,5 +29,14 @@ class AwardsPageServiceTest extends TestCase
         $this->assertTrue($data['section']['active']);
         $this->assertSame([$first->id, $second->id], $data['awards']->pluck('id')->all());
         $this->assertTrue(Cache::has(CacheKeys::AWARDS));
+    }
+
+    #[Test]
+    public function it_gives_the_chapter_number_of_the_awards_section(): void
+    {
+        $this->assertSame(
+            $this->app->make(NavigationService::class)->chapter(Sections::AWARDS),
+            $this->app->make(AwardsPageService::class)->data()['chapter'],
+        );
     }
 }

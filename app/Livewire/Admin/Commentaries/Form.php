@@ -43,6 +43,8 @@ class Form extends ContentForm
             'slug' => null,
             'date' => null,
             'summary' => null,
+            'epigraph' => null,
+            'epigraph_attribution' => null,
             'body' => null,
             'external_url' => null,
             'tags' => null,

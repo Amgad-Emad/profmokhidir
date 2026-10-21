@@ -18,6 +18,12 @@ final class CacheKeys
 
     public const string PUBLICATIONS = 'public.publications';
 
+    public const string PUBLICATIONS_FILTERS = 'public.publications.filters';
+
+    public const string PUBLICATIONS_LATEST = 'public.publications.latest';
+
+    public const string PUBLICATIONS_FEATURED = 'public.publications.featured';
+
     public const string AWARDS = 'public.awards';
 
     public const string VIDEOS = 'public.videos';
@@ -32,6 +38,8 @@ final class CacheKeys
 
     public const string TRIBUTES = 'public.tributes';
 
+    public const string HOME_QUOTES = 'public.home_quotes';
+
     /** Site settings (contact details, notification address, mail sender). */
     public const string SETTINGS = 'settings.all';
 
@@ -42,7 +50,8 @@ final class CacheKeys
     {
         return [
             self::PROFILE, self::CV_ENTRIES, self::PUBLICATIONS, self::AWARDS, self::VIDEOS,
-            self::ALBUMS, self::TEACHING_MATERIALS, self::COMMENTARIES, self::OTHER_ITEMS, self::TRIBUTES, self::SETTINGS,
+            self::ALBUMS, self::TEACHING_MATERIALS, self::COMMENTARIES, self::OTHER_ITEMS, self::TRIBUTES,
+            self::HOME_QUOTES, self::SETTINGS,
         ];
     }
 }

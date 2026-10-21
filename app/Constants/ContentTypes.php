@@ -8,6 +8,7 @@ use App\Models\Album;
 use App\Models\Award;
 use App\Models\Commentary;
 use App\Models\CvEntry;
+use App\Models\HomeQuote;
 use App\Models\OtherItem;
 use App\Models\Profile;
 use App\Models\Publication;
@@ -41,6 +42,8 @@ final class ContentTypes
 
     public const string OTHER_ITEM = 'other_item';
 
+    public const string HOME_QUOTE = 'home_quote';
+
     /**
      * Type key => model class, labels, the admin navigation item whose route
      * prefix the screens use, and the public route (with the attribute used as
@@ -60,6 +63,7 @@ final class ContentTypes
             self::TEACHING_MATERIAL => self::type(TeachingMaterial::class, 'Teaching material', 'Teaching materials', AdminNavigation::TEACHING, 'teaching'),
             self::COMMENTARY => self::type(Commentary::class, 'Commentary', 'Commentaries', AdminNavigation::COMMENTARY, 'commentary.show', 'slug'),
             self::OTHER_ITEM => self::type(OtherItem::class, 'Other item', 'Other information', AdminNavigation::OTHER, 'other.show', 'slug'),
+            self::HOME_QUOTE => self::type(HomeQuote::class, 'Home quote', 'Home quotes', AdminNavigation::HOME_QUOTES, 'home'),
         ];
     }
 

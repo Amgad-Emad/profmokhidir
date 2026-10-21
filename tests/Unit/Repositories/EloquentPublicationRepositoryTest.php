@@ -6,6 +6,7 @@ use App\Constants\PublicationType;
 use App\Models\Publication;
 use App\Repositories\Contracts\PublicationRepositoryInterface;
 use App\Repositories\Eloquent\EloquentPublicationRepository;
+use App\Support\PublicationFilters;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -47,18 +48,61 @@ class EloquentPublicationRepositoryTest extends TestCase
     }
 
     #[Test]
-    public function it_paginates_published_publications_filtered_by_type_and_year(): void
+    public function it_paginates_published_publications_filtered_by_type_year_range_and_topic(): void
     {
-        Publication::factory()->published()->type(PublicationType::Book)->year(1990)->count(2)->create();
-        Publication::factory()->published()->type(PublicationType::JournalArticle)->year(1990)->create();
-        Publication::factory()->published()->type(PublicationType::Book)->year(2001)->create();
-        Publication::factory()->draft()->type(PublicationType::Book)->year(1990)->create();
+        Publication::factory()->published()->type(PublicationType::Book)->year(1990)->topic('Agronomy')->count(2)->create();
+        Publication::factory()->published()->type(PublicationType::JournalArticle)->year(1990)->topic('Soil')->create();
+        Publication::factory()->published()->type(PublicationType::Book)->year(2001)->topic('Soil')->create();
+        Publication::factory()->draft()->type(PublicationType::Book)->year(1990)->topic('Agronomy')->create();
 
-        $this->assertSame(4, $this->repository->paginatePublishedFiltered()->total());
-        $this->assertSame(3, $this->repository->paginatePublishedFiltered(PublicationType::Book)->total());
-        $this->assertSame(3, $this->repository->paginatePublishedFiltered(null, 1990)->total());
-        $this->assertSame(2, $this->repository->paginatePublishedFiltered(PublicationType::Book, 1990)->total());
-        $this->assertTrue($this->repository->paginatePublishedFiltered()->first()->relationLoaded('media'));
+        $this->assertSame(4, $this->repository->paginatePublishedFiltered(new PublicationFilters)->total());
+        $this->assertSame(3, $this->repository->paginatePublishedFiltered(new PublicationFilters(PublicationType::Book))->total());
+        $this->assertSame(3, $this->repository->paginatePublishedFiltered(new PublicationFilters(null, 1990, 1990))->total());
+        $this->assertSame(2, $this->repository->paginatePublishedFiltered(new PublicationFilters(PublicationType::Book, 1990, 1990))->total());
+        $this->assertSame(1, $this->repository->paginatePublishedFiltered(new PublicationFilters(null, 1991))->total());
+        $this->assertSame(3, $this->repository->paginatePublishedFiltered(new PublicationFilters(null, null, 2000))->total());
+        $this->assertSame(2, $this->repository->paginatePublishedFiltered(new PublicationFilters(topic: 'Soil'))->total());
+        $this->assertSame(1, $this->repository->paginatePublishedFiltered(new PublicationFilters(PublicationType::Book, topic: 'Soil'))->total());
+        $this->assertTrue($this->repository->paginatePublishedFiltered(new PublicationFilters)->first()->relationLoaded('media'));
+    }
+
+    #[Test]
+    public function the_catalogue_is_ordered_newest_year_first_with_undated_records_last(): void
+    {
+        Publication::factory()->published()->create(['title' => 'Undated', 'year' => null, 'sort_order' => 1]);
+        Publication::factory()->published()->create(['title' => 'Old', 'year' => 1971, 'sort_order' => 2]);
+        Publication::factory()->published()->create(['title' => 'New B', 'year' => 2001, 'sort_order' => 5]);
+        Publication::factory()->published()->create(['title' => 'New A', 'year' => 2001, 'sort_order' => 3]);
+
+        $this->assertSame(['New A', 'New B', 'Old', 'Undated'], $this->repository->paginatePublishedFiltered(new PublicationFilters)->pluck('title')->all());
+    }
+
+    #[Test]
+    public function it_counts_matching_records_per_decade_newest_first_with_undated_under_an_empty_key(): void
+    {
+        Publication::factory()->published()->type(PublicationType::Book)->year(1971)->create();
+        Publication::factory()->published()->type(PublicationType::Book)->year(1979)->create();
+        Publication::factory()->published()->type(PublicationType::Report)->year(2003)->create();
+        Publication::factory()->published()->type(PublicationType::Book)->create(['year' => null]);
+        Publication::factory()->draft()->type(PublicationType::Book)->year(1975)->create();
+
+        $this->assertSame([2000 => 1, 1970 => 2, '' => 1], $this->repository->publishedDecadeCounts(new PublicationFilters));
+        $this->assertSame([1970 => 2, '' => 1], $this->repository->publishedDecadeCounts(new PublicationFilters(PublicationType::Book)));
+        $this->assertSame([], $this->repository->publishedDecadeCounts(new PublicationFilters(PublicationType::Chapter)));
+    }
+
+    #[Test]
+    public function it_lists_featured_publications_in_display_order_and_distinct_topics(): void
+    {
+        Publication::factory()->published()->featured()->topic('Soil')->create(['title' => 'Second', 'sort_order' => 2]);
+        Publication::factory()->published()->featured()->topic('Agronomy')->create(['title' => 'First', 'sort_order' => 1]);
+        Publication::factory()->published()->featured()->topic(null)->create(['title' => 'Third', 'sort_order' => 3]);
+        Publication::factory()->published()->topic('')->create(['title' => 'Not featured']);
+        Publication::factory()->draft()->featured()->topic('Draft topic')->create(['title' => 'Draft']);
+
+        $this->assertSame(['First', 'Second', 'Third'], $this->repository->publishedFeatured(5)->pluck('title')->all());
+        $this->assertSame(['First', 'Second'], $this->repository->publishedFeatured(2)->pluck('title')->all());
+        $this->assertSame(['Agronomy', 'Soil'], $this->repository->publishedTopics());
     }
 
     #[Test]

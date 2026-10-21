@@ -2,9 +2,11 @@
 
 namespace Tests\Unit\Services;
 
+use App\Constants\Sections;
 use App\Constants\TeachingMaterialType;
 use App\Models\TeachingMaterial;
 use App\Models\User;
+use App\Services\NavigationService;
 use App\Services\TeachingPageService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -33,7 +35,7 @@ class TeachingPageServiceTest extends TestCase
 
         $guest = $this->service->data(null);
 
-        $this->assertSame(['A Course', 'B Course'], array_keys($guest['courses']));
+        $this->assertSame(['A Course', 'B Course'], array_column($guest['courses'], 'name'));
         $this->assertTrue($guest['hasAny']);
         $this->assertFalse($guest['canSeeMembers']);
         $downloadable = $guest['downloadable'];
@@ -59,8 +61,8 @@ class TeachingPageServiceTest extends TestCase
 
         $data = $this->service->data(null, 'Photosynthesis', 'notes');
 
-        $this->assertSame(['C2'], array_keys($data['courses']));
-        $this->assertCount(1, $data['courses']['C2']);
+        $this->assertSame(['C2'], array_column($data['courses'], 'name'));
+        $this->assertCount(1, $data['courses'][0]['materials']);
         $this->assertSame(['topic' => 'Photosynthesis', 'type' => TeachingMaterialType::Notes], $data['active']);
         $this->assertTrue($data['isFiltered']);
         $this->assertSame(['irrigation', 'Photosynthesis'], $data['topics']);
@@ -69,7 +71,7 @@ class TeachingPageServiceTest extends TestCase
         $unknown = $this->service->data(null, 'Nope', 'bogus');
         $this->assertSame(['topic' => null, 'type' => null], $unknown['active']);
         $this->assertFalse($unknown['isFiltered']);
-        $this->assertSame(['C1', 'C2'], array_keys($unknown['courses']));
+        $this->assertSame(['C1', 'C2'], array_column($unknown['courses'], 'name'));
 
         $none = $this->service->data(null, 'irrigation', 'slides');
         $this->assertSame([], $none['courses']);
@@ -103,5 +105,27 @@ class TeachingPageServiceTest extends TestCase
         $this->assertSame([], $data['courses']);
         $this->assertSame([], $data['topics']);
         $this->assertSame([], $data['types']);
+    }
+
+    #[Test]
+    public function each_course_carries_its_label_anchor_and_first_filled_description_even_when_filtered(): void
+    {
+        TeachingMaterial::factory()->published()->course('AGR 301 Crop Physiology')->create(['topic' => 'Light', 'course_description' => null, 'sort_order' => 1]);
+        TeachingMaterial::factory()->published()->course('AGR 301 Crop Physiology')->create(['topic' => 'Water', 'course_description' => '  How crops capture light.  ', 'sort_order' => 2]);
+        TeachingMaterial::factory()->published()->course('AGR 301 Crop Physiology')->create(['topic' => 'Water', 'course_description' => 'A later description.', 'sort_order' => 3]);
+        TeachingMaterial::factory()->published()->create(['course' => null, 'topic' => 'Light', 'course_description' => null]);
+
+        $data = $this->service->data(null);
+
+        $this->assertSame(['AGR 301 Crop Physiology', ''], array_column($data['courses'], 'name'));
+        $this->assertSame(['AGR 301 Crop Physiology', TeachingPageService::OTHER_COURSE_LABEL], array_column($data['courses'], 'label'));
+        $this->assertSame(['course-agr-301-crop-physiology', 'course-other'], array_column($data['courses'], 'anchor'));
+        $this->assertSame(['How crops capture light.', null], array_column($data['courses'], 'description'));
+        $this->assertSame($this->app->make(NavigationService::class)->chapter(Sections::TEACHING), $data['chapter']);
+
+        // The description comes from all of the course's materials, so a filter that hides its source keeps it.
+        $filtered = $this->service->data(null, 'Light');
+        $this->assertSame('How crops capture light.', $filtered['courses'][0]['description']);
+        $this->assertCount(1, $filtered['courses'][0]['materials']);
     }
 }

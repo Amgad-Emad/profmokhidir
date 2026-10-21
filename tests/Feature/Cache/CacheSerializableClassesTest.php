@@ -5,13 +5,14 @@ namespace Tests\Feature\Cache;
 use App\Constants\CacheKeys;
 use App\Constants\CacheSerializable;
 use App\Constants\Disks;
+use App\Models\Award;
+use App\Models\CvEntry;
+use App\Models\HomeQuote;
 use App\Models\Profile;
 use App\Models\Publication;
-use App\Models\Tribute;
 use App\Services\HomePageService;
+use App\Services\HomeQuoteService;
 use App\Services\ProfileService;
-use App\Services\PublicationService;
-use App\Services\TributeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
@@ -73,23 +74,24 @@ class CacheSerializableClassesTest extends TestCase
     {
         Profile::factory()->published()->withPortrait()->create();
         Publication::factory()->published()->count(2)->create();
-        Tribute::factory()->approved()->count(2)->create();
+        CvEntry::factory()->published()->count(2)->create(['start_year' => 1965]);
+        Award::factory()->published()->create(['year' => 1985]);
+        HomeQuote::factory()->published()->create(['quote' => 'Cached quote']);
 
         $this->app->make(HomePageService::class)->data();
 
-        $this->assertTrue(Cache::store('database')->has(CacheKeys::PUBLICATIONS.'.latest'));
-        $this->assertTrue(Cache::store('database')->has(CacheKeys::TRIBUTES.'.latest'));
+        foreach ([CacheKeys::CV_ENTRIES, CacheKeys::AWARDS, CacheKeys::HOME_QUOTES] as $key) {
+            $this->assertTrue(Cache::store('database')->has($key), $key);
+        }
 
         $data = $this->app->make(HomePageService::class)->data();
 
         $this->assertInstanceOf(Profile::class, $data['profile']);
-        $this->assertContainsOnlyInstancesOf(Publication::class, $data['publications']);
-        $this->assertContainsOnlyInstancesOf(Tribute::class, $data['tributes']);
-        $this->assertSame(2, $data['publications']->count());
-        $this->assertSame(2, $data['tributes']->count());
-
-        $this->assertContainsOnlyInstancesOf(Publication::class, $this->app->make(PublicationService::class)->latest());
-        $this->assertContainsOnlyInstancesOf(Tribute::class, $this->app->make(TributeService::class)->latestApproved());
+        $this->assertSame(['1960–1969', '1980–1989'], array_column($data['chapters'], 'years'));
+        $this->assertInstanceOf(HomeQuote::class, $data['chapters'][0]['interlude']);
+        $this->assertSame('Cached quote', $data['chapters'][0]['interlude']->quote);
+        $this->assertSame(2, $data['stats'][0]['value']);
+        $this->assertContainsOnlyInstancesOf(HomeQuote::class, $this->app->make(HomeQuoteService::class)->published());
     }
 
     #[Test]

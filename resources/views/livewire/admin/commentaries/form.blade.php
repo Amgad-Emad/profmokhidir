@@ -9,7 +9,11 @@
             <x-admin.field name="form.byline" label="Byline" />
         </div>
         <x-admin.textarea-field name="form.summary" label="Summary" rows="3" hint="Shown in the list and as the page description." />
-        <x-admin.rich-text name="form.body" label="Body" hint="Headings, bold, italic, links, lists and quotes." />
+        <div class="grid gap-6 sm:grid-cols-[2fr_1fr]">
+            <x-admin.textarea-field name="form.epigraph" label="Epigraph" rows="2" hint="An optional short quotation set under the title." />
+            <x-admin.field name="form.epigraph_attribution" label="Epigraph source" />
+        </div>
+        <x-admin.rich-text name="form.body" label="Body" hint="Headings (they make the table of contents), bold, italic, links, lists and quotes. For a sidenote, type a marker such as [^1] in the text and a paragraph starting [^1]: with the note." />
         <x-admin.field name="form.external_url" label="External link" type="url" placeholder="https://" hint="If the piece was published elsewhere." />
         <x-admin.field name="form.tags" label="Topic tags" hint="Separate tags with commas." />
         @unless ($isNew)

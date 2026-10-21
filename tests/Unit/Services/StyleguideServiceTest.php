@@ -86,7 +86,7 @@ class StyleguideServiceTest extends TestCase
         $this->assertCount(9, $sections['colours']);
         $this->assertCount(3, $sections['fonts']);
         $this->assertCount(5, $sections['typeScale']);
-        $this->assertCount(4, $sections['motion']);
+        $this->assertCount(5, $sections['motion']);
     }
 
     #[Test]

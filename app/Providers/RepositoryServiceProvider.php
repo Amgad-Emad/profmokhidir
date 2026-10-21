@@ -14,6 +14,7 @@ use App\Repositories\Contracts\ChatReadRepositoryInterface;
 use App\Repositories\Contracts\ChatReportRepositoryInterface;
 use App\Repositories\Contracts\CommentaryRepositoryInterface;
 use App\Repositories\Contracts\CvEntryRepositoryInterface;
+use App\Repositories\Contracts\HomeQuoteRepositoryInterface;
 use App\Repositories\Contracts\MediaRepositoryInterface;
 use App\Repositories\Contracts\OtherItemRepositoryInterface;
 use App\Repositories\Contracts\ProfileRepositoryInterface;
@@ -36,6 +37,7 @@ use App\Repositories\Eloquent\EloquentChatReadRepository;
 use App\Repositories\Eloquent\EloquentChatReportRepository;
 use App\Repositories\Eloquent\EloquentCommentaryRepository;
 use App\Repositories\Eloquent\EloquentCvEntryRepository;
+use App\Repositories\Eloquent\EloquentHomeQuoteRepository;
 use App\Repositories\Eloquent\EloquentOtherItemRepository;
 use App\Repositories\Eloquent\EloquentProfileRepository;
 use App\Repositories\Eloquent\EloquentPublicationRepository;
@@ -70,6 +72,7 @@ class RepositoryServiceProvider extends ServiceProvider
         TeachingMaterialRepositoryInterface::class => EloquentTeachingMaterialRepository::class,
         CommentaryRepositoryInterface::class => EloquentCommentaryRepository::class,
         OtherItemRepositoryInterface::class => EloquentOtherItemRepository::class,
+        HomeQuoteRepositoryInterface::class => EloquentHomeQuoteRepository::class,
         TributeRepositoryInterface::class => EloquentTributeRepository::class,
         ChatChannelRepositoryInterface::class => EloquentChatChannelRepository::class,
         ChatMessageRepositoryInterface::class => EloquentChatMessageRepository::class,

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Admin;
 
+use App\Constants\Catalogue;
 use App\Constants\PublicationType;
 use Illuminate\Validation\Rules\Enum;
 
@@ -30,6 +31,8 @@ class PublicationRequest extends ContentRequest
             'citation' => ['nullable', 'string', 'max:2000'],
             'abstract' => ['nullable', 'string', 'max:5000'],
             'url' => self::urlRule(),
+            'topic' => ['nullable', 'string', 'max:'.Catalogue::TOPIC_MAX],
+            'is_featured' => ['boolean'],
             'status' => self::statusRule(),
         ];
     }
@@ -49,6 +52,6 @@ class PublicationRequest extends ContentRequest
      */
     public function attributes(): array
     {
-        return ['venue_publisher' => 'venue or publisher', 'doi' => 'DOI', 'url' => 'link'];
+        return ['venue_publisher' => 'venue or publisher', 'doi' => 'DOI', 'url' => 'link', 'is_featured' => 'selected works'];
     }
 }
