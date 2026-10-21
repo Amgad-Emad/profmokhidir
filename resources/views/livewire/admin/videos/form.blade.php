@@ -10,6 +10,10 @@
             <x-admin.field name="form.location" label="Location" />
         </div>
         <x-admin.textarea-field name="form.description" label="Description" rows="4" />
+        <div class="grid gap-6 sm:grid-cols-2">
+            <x-admin.select-field name="form.decade" label="Decade" :options="$decades" placeholder="From the date" hint="Where the recording is filed when videos are grouped by decade. Leave empty to use its date." />
+            <x-admin.checkbox-field name="form.is_featured" label="Featured recording" hint="Opens the Videos page as the lecture hall's first recording. Keep it to one or two." class="sm:self-end" />
+        </div>
         <x-admin.select-field name="form.provider" label="Source" :options="$providers" required live />
         <x-admin.field name="form.media_url" label="Video link" type="url" placeholder="https://" hint="The YouTube, Vimeo or external page address. Not needed for an uploaded file." />
         <x-admin.field name="form.captions_url" label="Captions link" type="url" placeholder="https://" hint="A WebVTT captions file, for accessible playback." />

@@ -18,9 +18,10 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
  * Collections: `video` (single, optional uploaded file) and `thumbnail` (single poster image).
+ * `decade` overrides the decade its date gives; `is_featured` puts it at the top of Videos.
  */
 #[Fillable([
-    'title', 'slug', 'date', 'event', 'location', 'description', 'provider', 'media_url', 'captions_url',
+    'title', 'slug', 'date', 'decade', 'is_featured', 'event', 'location', 'description', 'provider', 'media_url', 'captions_url',
     'status', 'published_at', 'sort_order',
 ])]
 class Video extends Model implements HasMedia
@@ -37,6 +38,8 @@ class Video extends Model implements HasMedia
     {
         return [
             'date' => 'date',
+            'decade' => 'integer',
+            'is_featured' => 'boolean',
             'provider' => VideoProvider::class,
         ];
     }

@@ -16,6 +16,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use App\Constants\Archive;
 use Tests\TestCase;
 
 class SpatieMediaRepositoryTest extends TestCase
@@ -184,5 +185,21 @@ class SpatieMediaRepositoryTest extends TestCase
         $this->assertNull(Media::query()->find($media->id));
         $this->assertSame(1, $this->repository->countFor($material->fresh()));
         $this->assertSame('slides', Storage::disk(Disks::PRIVATE)->get($moved->getPathRelativeToRoot()));
+    }
+
+    #[Test]
+    public function archive_columns_are_set_without_touching_the_custom_properties(): void
+    {
+        $album = Album::factory()->create();
+        $media = $this->repository->attach($album, PlaceholderImage::grey(40, 30), MediaCollections::PHOTOS, [MediaProperties::CAPTION => 'Kept']);
+
+        $this->assertNull($media->getAttribute(Archive::DECADE));
+        $this->assertFalse((bool) $media->getAttribute(Archive::FEATURED));
+
+        $updated = $this->repository->updateArchiveFields($media, 1960, true);
+
+        $this->assertSame(1960, (int) $updated->fresh()->getAttribute(Archive::DECADE));
+        $this->assertTrue((bool) $updated->fresh()->getAttribute(Archive::FEATURED));
+        $this->assertSame('Kept', $updated->fresh()->getCustomProperty(MediaProperties::CAPTION));
     }
 }

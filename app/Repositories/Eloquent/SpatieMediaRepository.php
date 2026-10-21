@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories\Eloquent;
 
+use App\Constants\Archive;
 use App\Constants\MediaCollections;
 use App\Constants\MediaProperties;
 use App\Repositories\Contracts\MediaRepositoryInterface;
@@ -57,6 +58,13 @@ final class SpatieMediaRepository implements MediaRepositoryInterface
         }
 
         $media->save();
+
+        return $media;
+    }
+
+    public function updateArchiveFields(Media $media, ?int $decade, bool $featured): Media
+    {
+        $media->forceFill([Archive::DECADE => $decade, Archive::FEATURED => $featured])->save();
 
         return $media;
     }

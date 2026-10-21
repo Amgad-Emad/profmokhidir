@@ -16,7 +16,7 @@ class EloquentVideoRepository extends BaseContentRepository implements VideoRepo
 
     protected array $sortableColumns = ['title', 'date', 'provider'];
 
-    protected array $filterColumns = ['status', 'provider'];
+    protected array $filterColumns = ['status', 'provider', 'is_featured'];
 
     protected array $publishedWith = ['media'];
 

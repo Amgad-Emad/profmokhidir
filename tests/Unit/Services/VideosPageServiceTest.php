@@ -31,18 +31,53 @@ class VideosPageServiceTest extends TestCase
     }
 
     #[Test]
-    public function the_index_lists_published_videos_in_display_order_from_the_cache(): void
+    public function the_index_opens_with_the_first_recording_and_lists_the_rest_in_display_order_from_the_cache(): void
     {
         $second = Video::factory()->published()->create(['sort_order' => 2]);
-        $first = Video::factory()->published()->create(['sort_order' => 1]);
+        $first = Video::factory()->published()->provider(VideoProvider::YouTube, 'https://youtu.be/dQw4w9WgXcQ')->create(['sort_order' => 1]);
         Video::factory()->draft()->create(['sort_order' => 0]);
 
         $data = $this->page->index();
 
         $this->assertSame('videos', $data['section']['key']);
         $this->assertTrue($data['section']['active']);
-        $this->assertSame([$first->id, $second->id], $data['videos']->pluck('id')->all());
+        $this->assertTrue($data['featured']->is($first));
+        $this->assertSame(VideoEmbed::KIND_EMBED, $data['player']['kind']);
+        $this->assertSame([$second->id], $data['videos']->pluck('id')->all());
         $this->assertTrue(Cache::has(CacheKeys::VIDEOS));
+    }
+
+    #[Test]
+    public function a_flagged_recording_is_featured_ahead_of_the_first_and_an_empty_hall_has_none(): void
+    {
+        $this->assertNull($this->page->index()['featured']);
+        $this->assertNull($this->page->index()['player']);
+
+        Video::factory()->published()->create(['sort_order' => 1]);
+        $flagged = Video::factory()->published()->featured()->create(['sort_order' => 3]);
+        Video::factory()->draft()->featured()->create(['sort_order' => 0]);
+        $this->app->make(VideoService::class)->flushCache();
+
+        $data = $this->page->index();
+
+        $this->assertTrue($data['featured']->is($flagged));
+        $this->assertFalse($data['videos']->contains($flagged));
+        $this->assertCount(1, $data['videos']);
+    }
+
+    #[Test]
+    public function the_detail_page_lists_other_recordings_from_the_same_event(): void
+    {
+        $video = Video::factory()->published()->create(['event' => 'Inaugural Lecture', 'sort_order' => 1]);
+        $same = Video::factory()->published()->create(['event' => 'inaugural lecture ', 'sort_order' => 2]);
+        Video::factory()->published()->create(['event' => 'Alumni Gathering', 'sort_order' => 3]);
+        Video::factory()->draft()->create(['event' => 'Inaugural Lecture']);
+
+        $data = $this->page->show($video);
+
+        $this->assertSame([$same->id], $data['related']->pluck('id')->all());
+        $this->assertSame(['Inaugural Lecture', $video->location], $this->page->labelParts($video));
+        $this->assertSame([], $this->page->labelParts(Video::factory()->make(['event' => null, 'location' => ' '])));
     }
 
     #[Test]

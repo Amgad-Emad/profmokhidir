@@ -1,5 +1,7 @@
 /*
- | Videos and Pictures: media cards, the video facade and the album lightbox.
+ | Videos and Pictures as a museum archive: the album index as an exhibition,
+ | each album as an exhibition wall with museum labels, the object view
+ | (lightbox), the lecture hall with its facade, and the media cards.
  | Imported by app.css; uses only the brand tokens defined there.
  */
 @layer components {
@@ -14,10 +16,201 @@
         width: 100%;
     }
 
-    /* Gallery photos: the frame is a link the lightbox takes over. */
+    /* Gallery photos: the frame is a link the object view takes over. */
     .photo__link {
         display: block;
         text-decoration: none;
+    }
+
+    /* The untreated print beneath a lifting duotone (see .photo__frame--lift below). */
+    .photo__frame--lift {
+        position: relative;
+    }
+
+    .photo__frame--lift .photo__under {
+        position: absolute;
+        inset: 0;
+    }
+
+    .photo__frame--lift .photo-archive {
+        position: relative;
+    }
+
+    /* ---------------------------------------------------- museum label */
+    /* Title in Cormorant, place and year in small caps with old-style figures, an optional one-line note. */
+    .museum-label {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1);
+        max-width: 32rem;
+        color: var(--color-evergreen);
+    }
+
+    .museum-label__title {
+        font-family: var(--font-display);
+        font-weight: 300;
+        font-size: 1.375rem; /* 22px */
+        line-height: var(--space-4);
+        text-wrap: pretty;
+    }
+
+    .museum-label__meta {
+        font-size: 1.125rem;
+        line-height: var(--space-3);
+        color: var(--color-bronze);
+    }
+
+    .museum-label__note {
+        font-size: 0.9375rem; /* 15px */
+        line-height: var(--space-3);
+        font-weight: 300;
+        color: var(--color-ash);
+    }
+
+    .museum-label--ivory {
+        color: var(--color-ivory);
+    }
+
+    .museum-label--ivory .museum-label__meta {
+        color: var(--color-brass);
+    }
+
+    .museum-label--ivory .museum-label__note {
+        color: var(--color-champagne);
+    }
+
+    /* ------------------------------------------------------- exhibition */
+    /* Album index: a calm asymmetric grid, two albums to a row at different heights. */
+    .exhibition {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        column-gap: 1.5rem;
+        row-gap: 5rem;
+    }
+
+    .exhibition__item {
+        grid-column: 1 / -1;
+    }
+
+    @media (min-width: 640px) {
+        .exhibition {
+            row-gap: 7rem;
+        }
+
+        .exhibition__item:nth-child(4n + 1) {
+            grid-column: 1 / span 7;
+        }
+
+        .exhibition__item:nth-child(4n + 2) {
+            grid-column: 9 / span 4;
+            margin-top: 6rem;
+        }
+
+        .exhibition__item:nth-child(4n + 3) {
+            grid-column: 2 / span 4;
+        }
+
+        .exhibition__item:nth-child(4n + 4) {
+            grid-column: 7 / span 6;
+            margin-top: 4rem;
+        }
+    }
+
+    .exhibition__album {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .exhibition__cover {
+        display: block;
+        border-radius: var(--radius-card);
+        text-decoration: none;
+    }
+
+    .exhibition__label {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+
+    .exhibition__title {
+        font-family: var(--font-display);
+        font-weight: 300;
+        font-size: clamp(1.75rem, 1.2rem + 1.5vw, 2.5rem);
+        line-height: 1.15;
+    }
+
+    /* Date range and count: Cormorant small caps with old-style figures. */
+    .exhibition__meta {
+        font-size: 1.25rem;
+        line-height: var(--space-4);
+        color: var(--color-bronze);
+    }
+
+    /* --------------------------------------------------- exhibition wall */
+    /* Album page: frames of varied width (each photo's own proportions, so faces are never cropped) on a 12-column wall. */
+    .wall {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        column-gap: 2rem;
+        row-gap: 4rem;
+        align-items: end;
+    }
+
+    .wall__item {
+        grid-column: 1 / -1;
+    }
+
+    @media (min-width: 640px) {
+        .wall {
+            row-gap: 6rem;
+        }
+
+        .wall__item {
+            grid-column: span var(--span, 6);
+        }
+
+        /* Hang alternate frames off the line so the wall breathes. */
+        .wall__item:nth-child(3n + 2) {
+            margin-top: 3rem;
+        }
+    }
+
+    /* ----------------------------------------------- through the decades */
+    .decade__header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 1rem 2rem;
+    }
+
+    /* ------------------------------------------------------ lecture hall */
+    .lecture-hall__label {
+        display: grid;
+        gap: 1.5rem 3rem;
+        margin-top: 2rem;
+    }
+
+    @media (min-width: 1024px) {
+        .lecture-hall__label {
+            grid-template-columns: minmax(0, 1fr) minmax(0, 24rem);
+            align-items: start;
+        }
+    }
+
+    .lecture-hall__text {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+
+    .lecture-hall__title {
+        font-family: var(--font-display);
+        font-weight: 300;
+        font-size: clamp(1.75rem, 1.2rem + 1.8vw, 3rem);
+        line-height: 1.1;
     }
 
     /* Hosted video facade: our own poster with a play control over it. */
@@ -32,7 +225,7 @@
         color: var(--color-ivory);
         text-decoration: none;
         background-color: color-mix(in srgb, var(--color-evergreen) 24%, transparent);
-        transition: background-color 300ms var(--ease-rise);
+        transition: background-color 600ms var(--ease-rise);
     }
 
     .video-facade__play:hover,
@@ -41,6 +234,7 @@
         background-color: color-mix(in srgb, var(--color-evergreen) 44%, transparent);
     }
 
+    /* A 1px brass ring with a hairline triangle. */
     .video-facade__ring {
         display: flex;
         align-items: center;
@@ -59,7 +253,18 @@
         margin-left: 0.2rem;
     }
 
-    /* Lightbox: a full-screen evergreen <dialog>. */
+    .video-player--featured .video-facade__ring {
+        width: 7rem;
+        height: 7rem;
+    }
+
+    .video-player--featured .video-facade__ring svg {
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+
+    /* ------------------------------------------------------- object view */
+    /* A full-screen evergreen <dialog>: the photograph large, its label to the side on desktop and below on mobile. */
     .lightbox {
         position: fixed;
         inset: 0;
@@ -126,29 +331,27 @@
         flex: 1;
         min-height: 0;
         flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 1.25rem;
+        gap: 1.5rem;
         margin: 0;
-        padding: 0 3rem;
+        padding: 0.5rem 0 0;
     }
 
     .lightbox__frame {
         display: flex;
-        flex: 0 1 auto;
+        flex: 1 1 auto;
         min-height: 0;
         width: 100%;
         align-items: center;
         justify-content: center;
     }
 
-    /* Tall enough for the bar and caption to stay in view; the caption sits just below the image. */
+    /* Short enough for the label below to stay in view on a phone; the image cross-fades only. */
     .lightbox__image {
         display: block;
         width: auto;
         height: auto;
         max-width: 100%;
-        max-height: calc(100dvh - 11rem);
+        max-height: calc(100dvh - 16rem);
         object-fit: contain;
         opacity: 0;
         transition: opacity 400ms var(--ease-rise);
@@ -160,28 +363,29 @@
 
     .lightbox__caption {
         display: flex;
+        flex: 0 0 auto;
         flex-direction: column;
-        align-items: center;
-        gap: 0.35rem;
-        max-width: 68ch;
-        text-align: center;
+        gap: 1rem;
+    }
+
+    .lightbox__nav {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 0.5rem;
     }
 
     .lightbox__arrow {
-        position: absolute;
-        top: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         width: 2.75rem;
         height: 2.75rem;
-        transform: translateY(-50%);
         border-radius: 9999px;
         border: 1px solid var(--color-brass);
-        background-color: color-mix(in srgb, var(--color-evergreen) 70%, transparent);
+        background-color: transparent;
         color: var(--color-ivory);
         cursor: pointer;
-        transition: background-color 300ms var(--ease-rise);
+        transition: background-color 600ms var(--ease-rise);
     }
 
     .lightbox__arrow:hover {
@@ -193,25 +397,32 @@
         height: 0.75rem;
     }
 
-    .lightbox__arrow--prev {
-        left: 0.5rem;
-    }
-
-    .lightbox__arrow--next {
-        right: 0.5rem;
-    }
-
-    @media (min-width: 640px) {
-        .lightbox__arrow--prev {
-            left: 1.5rem;
+    @media (min-width: 1024px) {
+        .lightbox__figure {
+            flex-direction: row;
+            align-items: center;
+            gap: 3rem;
+            padding: 1rem 0 2rem;
         }
 
-        .lightbox__arrow--next {
-            right: 1.5rem;
+        .lightbox__image {
+            max-height: calc(100dvh - 9rem);
+        }
+
+        .lightbox__caption {
+            flex: 0 0 20rem;
+            align-self: center;
+            gap: 1.5rem;
+            padding-left: 2rem;
+            border-left: 1px solid color-mix(in srgb, var(--color-brass) 50%, transparent);
+        }
+
+        .lightbox__nav {
+            margin-top: 1rem;
         }
     }
 
-    /* Page scrolling is locked while the lightbox is open. */
+    /* Page scrolling is locked while the object view is open. */
     .lightbox-open {
         overflow: hidden;
     }
@@ -231,5 +442,17 @@
         to {
             opacity: 1;
         }
+    }
+}
+
+/* On a pointer that hovers, with motion allowed, a duotone lifts slowly a little toward the original print. */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .photo__frame--lift .photo-archive {
+        transition: opacity 1200ms var(--ease-rise);
+    }
+
+    .photo__frame--lift:hover .photo-archive,
+    .photo__link:focus-visible .photo__frame--lift .photo-archive {
+        opacity: 0.72;
     }
 }

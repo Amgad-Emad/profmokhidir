@@ -21,7 +21,9 @@ class LightboxTest extends TestCase
             'aria-live="polite" x-text="counter()"', 'x-ref="close"', '@click="close()"', '<span class="t-label">Close</span>',
             'x-ref="image"', 'class="lightbox__image"', ':src="current.src || null"', ':srcset="current.srcset || null"', 'sizes="100vw"',
             ':alt="current.alt || \'\'"', ':width="current.width || null"', ':height="current.height || null"', '@load="loaded = true"',
-            '<figcaption class="lightbox__caption">', 'x-text="current.caption"', 'class="t-label text-brass"', 'x-text="current.meta"',
+            '<figcaption class="lightbox__caption">', 'museum-label museum-label--ivory', 'museum-label__title" x-show="current.caption" x-text="current.caption"',
+            'museum-label__meta smallcaps" x-show="current.meta" x-text="current.meta"', 'museum-label__note" x-show="current.note" x-text="current.note"',
+            'class="t-label text-brass" x-show="current.credit"', '<span class="sr-only">Credit: </span><span x-text="current.credit"></span>', 'class="lightbox__nav"',
             '@click="prev()"', 'Previous photograph', '@click="next()"', 'Next photograph',
         ] as $fragment) {
             $this->assertStringContainsString($fragment, $html, "missing {$fragment}");
@@ -44,6 +46,10 @@ class LightboxTest extends TestCase
         $css = file_get_contents(resource_path('css/media.css'));
         $this->assertStringContainsString("@import './media.css';", file_get_contents(resource_path('css/app.css')));
         $this->assertStringContainsString('.lightbox__image.is-loaded', $css);
+        $this->assertStringContainsString('lightboxNote', $js);
+        $this->assertStringContainsString('lightboxCredit', $js);
+        $this->assertMatchesRegularExpression('/@media \(min-width: 1024px\) \{[^}]*\.lightbox__figure \{\s*flex-direction: row;/s', $css, 'The label sits beside the photograph on desktop');
+        $this->assertMatchesRegularExpression('/\(hover: hover\) and \(pointer: fine\) and \(prefers-reduced-motion: no-preference\)[^{]*\{[^@]*\.photo__frame--lift \.photo-archive \{\s*transition: opacity 1200ms var\(--ease-rise\);/s', $css, 'The duotone lifts only on hover-capable pointers without reduced motion');
         $this->assertStringContainsString('transition: opacity 400ms var(--ease-rise);', $css);
         $this->assertDoesNotMatchRegularExpression('/#[0-9a-f]{3,6}\b/i', $css, 'Only brand tokens are used');
         $this->assertDoesNotMatchRegularExpression('/scale\(/', $css);

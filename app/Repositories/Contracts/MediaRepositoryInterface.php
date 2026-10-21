@@ -50,6 +50,11 @@ interface MediaRepositoryInterface
      */
     public function updateProperties(Media $media, array $properties): Media;
 
+    /**
+     * Set the archive columns of an album photo (Archive::DECADE, Archive::FEATURED).
+     */
+    public function updateArchiveFields(Media $media, ?int $decade, bool $featured): Media;
+
     public function delete(Media $media): bool;
 
     public function clearCollection(HasMedia $model, string $collection): void;

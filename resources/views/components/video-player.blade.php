@@ -4,24 +4,24 @@
     our own image and the iframe (youtube-nocookie.com / Vimeo with dnt=1) is created only when the
     visitor presses play. Without JavaScript the play control is a plain link to the hosting page.
 --}}
-@props(['player', 'title'])
+@props(['player', 'title', 'featured' => false])
 @php
     $aspect = \App\Constants\VideoEmbed::ASPECT;
     $poster = $player['poster'];
     $posterUrl = $poster ? \App\Support\ResponsiveImage::largestUrl($poster) : null;
 @endphp
-<div {{ $attributes->class(['video-player']) }}>
+<div {{ $attributes->class(['video-player', 'video-player--featured' => $featured]) }}>
     @if ($player['kind'] === \App\Constants\VideoEmbed::KIND_EMBED)
         <div class="video-facade on-dark relative overflow-hidden rounded-card bg-evergreen" style="aspect-ratio: {{ $aspect }}" x-data="videoFacade">
             <div class="absolute inset-0" x-show="! playing">
                 @if ($poster)
-                    <x-photo :media="$poster" :aspect="$aspect" :captioned="false" sizes="(min-width: 1024px) 896px, 100vw" class="h-full" />
+                    <x-photo :media="$poster" :aspect="$aspect" :captioned="false" :sizes="$featured ? '(min-width: 1280px) 1232px, 100vw' : '(min-width: 1024px) 896px, 100vw'" :loading="$featured ? 'eager' : 'lazy'" class="h-full" />
                 @else
                     <div class="glow-brass h-full w-full"></div>
                 @endif
                 <a href="{{ $player['url'] }}" rel="noopener" class="video-facade__play" @click.prevent="play()">
                     <span class="video-facade__ring" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M8 5.5v13l11-6.5z" /></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 5.5v13l11-6.5z" /></svg>
                     </span>
                     <span class="t-label">Play</span>
                     <span class="sr-only">{{ $title }}</span>

@@ -15,6 +15,7 @@ use App\Services\Concerns\GeneratesSlugs;
 use App\Services\Concerns\GuardsImagePublishing;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Http\UploadedFile;
+use InvalidArgumentException;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
@@ -90,6 +91,21 @@ class AlbumService extends AbstractContentService
         $this->flushCache();
     }
 
+    /**
+     * File a photo under a decade (null: its year decides) and feature it on the wall.
+     */
+    public function updatePhotoArchive(Album $album, Media $photo, ?int $decade, bool $featured, ?User $actor = null): Media
+    {
+        if (! $this->belongsToAlbum($album, $photo)) {
+            throw new InvalidArgumentException('The photo does not belong to this album.');
+        }
+
+        $photo = $this->media->updateArchiveFields($photo, $decade, $featured, $actor);
+        $this->flushCache();
+
+        return $photo;
+    }
+
     protected function guardedImageCollections(): array
     {
         return [MediaCollections::PHOTOS];
@@ -98,5 +114,12 @@ class AlbumService extends AbstractContentService
     protected function prepare(array $data, $existing): array
     {
         return $this->withUniqueSlug($data, $existing);
+    }
+
+    private function belongsToAlbum(Album $album, Media $photo): bool
+    {
+        return $photo->model_type === $album->getMorphClass()
+            && (int) $photo->model_id === (int) $album->getKey()
+            && $photo->collection_name === MediaCollections::PHOTOS;
     }
 }

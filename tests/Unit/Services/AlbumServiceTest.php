@@ -13,6 +13,10 @@ use App\Support\PlaceholderImage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
+use App\Constants\Archive;
+use App\Constants\CacheKeys;
+use Illuminate\Support\Facades\Cache;
+use InvalidArgumentException;
 use Tests\TestCase;
 
 class AlbumServiceTest extends TestCase
@@ -91,5 +95,43 @@ class AlbumServiceTest extends TestCase
         $this->assertSame('in-the-field-2', $second->slug);
         $this->assertTrue($this->service->findPublishedBySlug('in-the-field')->is($first));
         $this->assertNull($this->service->findPublishedBySlug('in-the-field-2'));
+    }
+
+    #[Test]
+    public function a_photo_can_be_filed_under_a_decade_and_featured_on_the_wall(): void
+    {
+        $album = Album::factory()->published()->create();
+        $photo = $this->service->addPhoto($album, PlaceholderImage::grey(40, 30));
+        $this->service->published();
+        $this->assertTrue(Cache::has(CacheKeys::ALBUMS));
+
+        $photo = $this->service->updatePhotoArchive($album, $photo, 1970, true, User::factory()->editor()->create());
+
+        $this->assertSame(1970, (int) $photo->fresh()->getAttribute(Archive::DECADE));
+        $this->assertTrue((bool) $photo->fresh()->getAttribute(Archive::FEATURED));
+        $this->assertFalse(Cache::has(CacheKeys::ALBUMS));
+        $this->assertDatabaseHas('audit_logs', ['action' => AuditAction::MEDIA_UPDATED]);
+
+        $photo = $this->service->updatePhotoArchive($album, $photo, null, false);
+        $this->assertNull($photo->fresh()->getAttribute(Archive::DECADE));
+        $this->assertFalse((bool) $photo->fresh()->getAttribute(Archive::FEATURED));
+    }
+
+    #[Test]
+    public function archive_fields_reject_photos_of_other_albums_and_unknown_decades(): void
+    {
+        $album = Album::factory()->create();
+        $other = Album::factory()->create();
+        $photo = $this->service->addPhoto($other, PlaceholderImage::grey(40, 30));
+
+        try {
+            $this->service->updatePhotoArchive($album, $photo, null, true);
+            $this->fail('A photo of another album was accepted.');
+        } catch (InvalidArgumentException $exception) {
+            $this->assertStringContainsString('does not belong', $exception->getMessage());
+        }
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->service->updatePhotoArchive($other, $photo, 1900, false);
     }
 }

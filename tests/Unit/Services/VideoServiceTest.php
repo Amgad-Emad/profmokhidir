@@ -14,6 +14,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
+use App\Constants\Archive;
 use Tests\TestCase;
 
 class VideoServiceTest extends TestCase
@@ -78,5 +79,52 @@ class VideoServiceTest extends TestCase
 
         $this->assertTrue($this->service->findPublishedBySlug('talk')->is($published));
         $this->assertNull($this->service->findPublishedBySlug('draft-talk'));
+    }
+
+    #[Test]
+    public function the_featured_recording_is_the_flagged_one_or_else_the_first(): void
+    {
+        $this->assertNull($this->service->featured());
+
+        $first = Video::factory()->published()->create(['sort_order' => 1]);
+        $this->service->flushCache();
+        $this->assertTrue($this->service->featured()->is($first));
+
+        $flagged = Video::factory()->published()->featured()->create(['sort_order' => 2]);
+        $this->service->flushCache();
+        $this->assertTrue($this->service->featured()->is($flagged));
+    }
+
+    #[Test]
+    public function recordings_from_the_same_event_are_matched_loosely_and_limited(): void
+    {
+        $video = Video::factory()->published()->create(['event' => 'Inaugural Lecture', 'sort_order' => 1]);
+        $others = Video::factory()->count(4)->published()->create(['event' => ' inaugural lecture', 'sort_order' => 2]);
+        Video::factory()->published()->create(['event' => 'Other', 'sort_order' => 3]);
+
+        $related = $this->service->fromSameEvent($video);
+
+        $this->assertCount(Archive::RELATED_LIMIT, $related);
+        $this->assertFalse($related->contains($video));
+        $this->assertTrue($others->contains($related->first()));
+        $this->assertCount(4, $this->service->fromSameEvent($video, 10));
+        $this->assertCount(0, $this->service->fromSameEvent(Video::factory()->published()->create(['event' => null])));
+    }
+
+    #[Test]
+    public function the_decade_is_the_override_or_the_dates_decade_and_the_archive_fields_are_cast(): void
+    {
+        $video = $this->service->create(['title' => 'Talk', 'provider' => 'link', 'media_url' => 'https://x.example', 'date' => '1987-05-01', 'decade' => '', 'is_featured' => '1']);
+
+        $this->assertNull($video->decade);
+        $this->assertTrue($video->is_featured);
+        $this->assertSame(1980, $this->service->decadeOf($video));
+
+        $video = $this->service->update($video, ['decade' => '1970', 'is_featured' => 0]);
+
+        $this->assertSame(1970, $video->decade);
+        $this->assertFalse($video->is_featured);
+        $this->assertSame(1970, $this->service->decadeOf($video));
+        $this->assertNull($this->service->decadeOf(Video::factory()->make(['date' => null, 'decade' => null])));
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin\Albums;
 
+use App\Constants\Archive;
 use App\Constants\ContentStatus;
 use App\Constants\ContentTypes;
 use App\Constants\MediaCollections;
@@ -11,6 +12,7 @@ use App\Constants\MediaProperties;
 use App\Constants\MediaTreatment;
 use App\Http\Requests\Admin\AlbumRequest;
 use App\Http\Requests\Admin\ContentRequest;
+use App\Http\Requests\Admin\PhotoArchiveRequest;
 use App\Livewire\Admin\Concerns\ManagesImages;
 use App\Livewire\Admin\ContentForm;
 use App\Models\Album;
@@ -22,12 +24,65 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class Form extends ContentForm
 {
-    use ManagesImages;
+    use ManagesImages {
+        loadImages as loadImageDetails;
+    }
+
+    /** @var array<int, array{decade: int|string|null, is_featured: bool}> photo id => archive fields */
+    public array $archive = [];
 
     public function mount(?Album $album = null): void
     {
         $this->initialise($album);
         $this->loadImages();
+    }
+
+    protected function loadImages(): void
+    {
+        $this->loadImageDetails();
+
+        $this->archive = [];
+        $record = $this->record();
+
+        if ($record === null) {
+            return;
+        }
+
+        foreach ($this->mediaService()->inCollection($record, $this->imageCollection()) as $photo) {
+            $this->archive[(int) $photo->getKey()] = [
+                Archive::DECADE => $photo->getAttribute(Archive::DECADE),
+                Archive::FEATURED => (bool) $photo->getAttribute(Archive::FEATURED),
+            ];
+        }
+    }
+
+    /**
+     * File a photo under a decade and feature it on the exhibition wall.
+     */
+    public function savePhotoArchive(int $id): void
+    {
+        $record = $this->record();
+        $photo = $this->mediaService()->find($id);
+
+        if ($record === null || $photo === null || ! array_key_exists($id, $this->archive)) {
+            return;
+        }
+
+        $this->authorize('manageMedia', $record);
+
+        $request = new PhotoArchiveRequest;
+        $validated = $this->validate(
+            ["archive.$id.".Archive::DECADE => PhotoArchiveRequest::archiveRules()[Archive::DECADE], "archive.$id.".Archive::FEATURED => PhotoArchiveRequest::archiveRules()[Archive::FEATURED]],
+            ["archive.$id.".Archive::DECADE.'.in' => $request->messages()[Archive::DECADE.'.in']],
+            ["archive.$id.".Archive::FEATURED => PhotoArchiveRequest::archiveAttributes()[Archive::FEATURED]],
+        );
+
+        $fields = $validated['archive'][$id];
+        $decade = blank($fields[Archive::DECADE]) ? null : (int) $fields[Archive::DECADE];
+
+        app(AlbumService::class)->updatePhotoArchive($record, $photo, $decade, (bool) ($fields[Archive::FEATURED] ?? false), auth()->user());
+        $this->loadImages();
+        $this->notify('Archive details saved.');
     }
 
     protected function type(): string
@@ -64,6 +119,7 @@ class Form extends ContentForm
     {
         $data = $this->imagesViewData();
         $data['coverId'] = $data['media']->first(fn (Media $photo): bool => (bool) $photo->getCustomProperty(MediaProperties::IS_COVER, false))?->getKey();
+        $data['decades'] = Archive::decadeOptions();
 
         return $data;
     }

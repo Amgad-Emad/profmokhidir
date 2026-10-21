@@ -7,6 +7,7 @@ use App\Constants\ContentStatus;
 use App\Constants\Roles;
 use App\Constants\SettingKeys;
 use App\Constants\TributeStatus;
+use App\Constants\Archive;
 use App\Models\Album;
 use App\Models\Award;
 use App\Models\ChatChannel;
@@ -97,8 +98,10 @@ class DatabaseSeederTest extends TestCase
         $this->assertSame('public', $profile->portrait()->disk);
 
         $albums = Album::query()->get();
-        $this->assertSame(7, $albums->sum(fn (Album $album): int => $album->photos()->count()));
+        $this->assertSame(9, $albums->sum(fn (Album $album): int => $album->photos()->count()));
         $this->assertNotNull($albums->first()->cover());
+        $this->assertSame(1, $albums->first()->photos()->filter(fn ($photo): bool => (bool) $photo->getAttribute(Archive::FEATURED))->count(), 'Each seeded wall features its first print');
+        $this->assertSame(1, Video::query()->where(Archive::FEATURED, true)->count(), 'One seeded recording opens the lecture hall');
 
         foreach (Video::query()->get() as $video) {
             $this->assertNotNull($video->thumbnail(), "video {$video->id} has no thumbnail");

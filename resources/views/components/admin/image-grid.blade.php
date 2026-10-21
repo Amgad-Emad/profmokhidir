@@ -4,7 +4,7 @@
     confirmation. Expects the ManagesImages view data ($media, $missing, $images,
     $detailsRequired, $imageAccept, $imageHint).
 --}}
-@props(['media', 'missing', 'images', 'detailsRequired' => false, 'accept', 'hint', 'multiple' => false, 'label' => 'Images', 'coverId' => null, 'orderable' => false, 'confirmingId' => null, 'canUpload' => true])
+@props(['media', 'missing', 'images', 'detailsRequired' => false, 'accept', 'hint', 'multiple' => false, 'label' => 'Images', 'coverId' => null, 'orderable' => false, 'confirmingId' => null, 'canUpload' => true, 'archive' => null, 'decades' => []])
 <section aria-labelledby="images-heading" data-image-grid>
     <div class="flex items-center justify-between gap-4">
         <h2 id="images-heading" class="font-display text-3xl font-light">{{ $label }}</h2>
@@ -45,6 +45,9 @@
                             @if ($coverId !== null && (int) $coverId === (int) $id)
                                 <x-admin.status-badge tone="cypress" label="Cover" />
                             @endif
+                            @if ($archive !== null && ! empty($archive[$id][\App\Constants\Archive::FEATURED]))
+                                <x-admin.status-badge tone="cypress" label="Featured" />
+                            @endif
                         </div>
                         <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
                             @if ($orderable)
@@ -57,13 +60,28 @@
                             <button type="button" wire:click="confirmRemoveImage({{ $id }})" class="text-bronze underline-offset-4 hover:underline" data-remove-image>Remove</button>
                         </div>
                     </div>
-                    <form wire:submit="saveImage({{ $id }})" class="space-y-4">
-                        <x-admin.image-details :prefix="'images.'.$id" :required="$detailsRequired" />
-                        <div class="flex items-center gap-4">
-                            <x-button type="submit" variant="outline" class="px-5 py-2 text-sm">Save details</x-button>
-                            <span class="text-sm font-light text-ash" wire:loading wire:target="saveImage({{ $id }})">Saving…</span>
-                        </div>
-                    </form>
+                    <div class="space-y-8">
+                        <form wire:submit="saveImage({{ $id }})" class="space-y-4">
+                            <x-admin.image-details :prefix="'images.'.$id" :required="$detailsRequired" />
+                            <div class="flex items-center gap-4">
+                                <x-button type="submit" variant="outline" class="px-5 py-2 text-sm">Save details</x-button>
+                                <span class="text-sm font-light text-ash" wire:loading wire:target="saveImage({{ $id }})">Saving…</span>
+                            </div>
+                        </form>
+                        @if ($archive !== null && array_key_exists($id, $archive))
+                            <form wire:submit="savePhotoArchive({{ $id }})" class="space-y-4 border-t border-stone pt-6" data-photo-archive>
+                                <p class="t-label text-bronze">In the archive</p>
+                                <div class="grid gap-5 sm:grid-cols-2">
+                                    <x-admin.select-field :name="'archive.'.$id.'.'.\App\Constants\Archive::DECADE" label="Decade" :options="$decades" placeholder="From the year" hint="Through the decades files the photo under its year unless you choose another decade." />
+                                    <x-admin.checkbox-field :name="'archive.'.$id.'.'.\App\Constants\Archive::FEATURED" label="Featured on the wall" hint="Hangs one size larger in the album." class="sm:self-end" />
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <x-button type="submit" variant="outline" class="px-5 py-2 text-sm">Save archive details</x-button>
+                                    <span class="text-sm font-light text-ash" wire:loading wire:target="savePhotoArchive({{ $id }})">Saving…</span>
+                                </div>
+                            </form>
+                        @endif
+                    </div>
                 </li>
             @endforeach
         </ul>

@@ -4,44 +4,54 @@
             {{ $section['summary'] }}
         </x-section-header>
 
-        @if ($videos->isEmpty())
+        @if ($featured === null)
             <x-empty-state class="mt-6" message="Recordings of lectures, interviews and events will appear here once they are published." />
         @else
-            <ul class="mt-16 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3" data-rise-group>
-                @foreach ($videos as $video)
-                    @php
-                        $url = route('videos.show', $video->slug);
-                        $meta = array_values(array_filter([$video->event, $video->location], 'filled'));
-                    @endphp
-                    <li>
-                        <article class="media-card flex h-full flex-col gap-5">
-                            <a href="{{ $url }}" class="media-card__media" tabindex="-1" aria-hidden="true">
-                                @if ($video->thumbnail())
-                                    <x-photo :media="$video->thumbnail()" :aspect="\App\Constants\VideoEmbed::ASPECT" :captioned="false" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw" />
-                                @else
-                                    <div class="media-card__placeholder glow-brass rounded-card" style="aspect-ratio: {{ \App\Constants\VideoEmbed::ASPECT }}"></div>
-                                @endif
-                            </a>
-                            <div class="flex flex-col gap-2">
-                                @if ($video->date || $meta !== [])
-                                    <p class="t-label text-bronze">
-                                        @if ($video->date)<x-date :date="$video->date" />@endif
-                                        @foreach ($meta as $index => $part)
-                                            @if ($index > 0 || $video->date){{ \App\Constants\DateFormats::META_SEPARATOR }}@endif{{ $part }}
-                                        @endforeach
-                                    </p>
-                                @endif
-                                <h2 class="font-display text-2xl font-light leading-snug text-evergreen">
-                                    <a href="{{ $url }}" class="text-evergreen">{{ $video->title }}</a>
-                                </h2>
-                                @if (filled($video->description))
-                                    <p class="t-body text-ash">{{ \Illuminate\Support\Str::limit(trim($video->description), \App\Services\VideosPageService::DESCRIPTION_LIMIT) }}</p>
-                                @endif
-                            </div>
-                        </article>
-                    </li>
-                @endforeach
-            </ul>
+            <article class="lecture-hall mt-16" aria-labelledby="featured-title" data-rise>
+                <x-video-player :player="$player" :title="$featured->title" :featured="true" />
+                <div class="lecture-hall__label">
+                    <div class="lecture-hall__text">
+                        <p class="t-label text-bronze">Featured recording</p>
+                        <h2 id="featured-title" class="lecture-hall__title">
+                            <a href="{{ route('videos.show', $featured->slug) }}" class="text-evergreen">{{ $featured->title }}</a>
+                        </h2>
+                        <x-video-label :video="$featured" />
+                    </div>
+                    @if (filled($featured->description))
+                        <p class="t-body max-w-measure text-ash">{{ \Illuminate\Support\Str::limit(trim($featured->description), \App\Services\VideosPageService::DESCRIPTION_LIMIT) }}</p>
+                    @endif
+                </div>
+            </article>
+
+            @if ($videos->isNotEmpty())
+                <h2 class="t-label mt-24 text-bronze" id="all-recordings" data-rise>All recordings</h2>
+                <hr class="rule-brass mt-4" data-rule>
+                <ul class="mt-12 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3" data-rise-group aria-labelledby="all-recordings">
+                    @foreach ($videos as $video)
+                        @php $url = route('videos.show', $video->slug); @endphp
+                        <li>
+                            <article class="media-card flex h-full flex-col gap-5">
+                                <a href="{{ $url }}" class="media-card__media" tabindex="-1" aria-hidden="true">
+                                    @if ($video->thumbnail())
+                                        <x-photo :media="$video->thumbnail()" :aspect="\App\Constants\VideoEmbed::ASPECT" :captioned="false" sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw" />
+                                    @else
+                                        <div class="media-card__placeholder glow-brass rounded-card" style="aspect-ratio: {{ \App\Constants\VideoEmbed::ASPECT }}"></div>
+                                    @endif
+                                </a>
+                                <div class="flex flex-col gap-2">
+                                    <x-video-label :video="$video" />
+                                    <h3 class="font-display text-2xl font-light leading-snug text-evergreen">
+                                        <a href="{{ $url }}" class="text-evergreen">{{ $video->title }}</a>
+                                    </h3>
+                                    @if (filled($video->description))
+                                        <p class="t-body text-ash">{{ \Illuminate\Support\Str::limit(trim($video->description), \App\Services\VideosPageService::DESCRIPTION_LIMIT) }}</p>
+                                    @endif
+                                </div>
+                            </article>
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
         @endif
     </section>
 </x-layouts.public>

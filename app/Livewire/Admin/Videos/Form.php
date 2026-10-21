@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin\Videos;
 
+use App\Constants\Archive;
 use App\Constants\ContentStatus;
 use App\Constants\ContentTypes;
 use App\Constants\MediaCollections;
@@ -56,6 +57,8 @@ class Form extends ContentForm
             'title' => '',
             'slug' => null,
             'date' => null,
+            'decade' => null,
+            'is_featured' => false,
             'event' => null,
             'location' => null,
             'description' => null,
@@ -78,6 +81,7 @@ class Form extends ContentForm
 
         return $this->imagesViewData() + [
             'providers' => VideoProvider::labels(),
+            'decades' => Archive::decadeOptions(),
             'videoFile' => $videoFile,
             'videoFileUrl' => $videoFile?->getUrl(),
             'videoAccept' => '.'.implode(',.', Uploads::VIDEO_EXTENSIONS),

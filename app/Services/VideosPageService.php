@@ -15,9 +15,11 @@ use Illuminate\Support\Str;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
- * Assembles the Videos section: the grid of published recordings and the detail
- * page whose player is chosen by provider (cookie-free embed behind a facade,
- * an uploaded file in <video>, or a plain link out).
+ * Assembles the Videos section as a lecture hall: a featured recording with a
+ * large still at the top, the other recordings below, and the detail page
+ * whose player is chosen by provider (cookie-free embed behind a facade, an
+ * uploaded file in <video>, or a plain link out) with the recordings from the
+ * same event.
  *
  * @phpstan-type Player array{
  *     kind: string,
@@ -43,14 +45,20 @@ class VideosPageService
     /**
      * @return array{
      *     section: array{key: string, label: string, title: string, url: string, route: string, placement: string, summary: string, active: bool},
+     *     featured: Video|null,
+     *     player: Player|null,
      *     videos: Collection<int, Video>
      * }
      */
     public function index(): array
     {
+        $featured = $this->videos->featured();
+
         return [
             'section' => $this->navigation->section(Sections::VIDEOS, Sections::VIDEOS),
-            'videos' => $this->videos->published(),
+            'featured' => $featured,
+            'player' => $featured === null ? null : $this->player($featured),
+            'videos' => $this->videos->published()->reject(fn (Video $video): bool => $video->is($featured))->values(),
         ];
     }
 
@@ -64,7 +72,8 @@ class VideosPageService
      *     section: array{key: string, label: string, title: string, url: string, route: string, placement: string, summary: string, active: bool},
      *     video: Video,
      *     player: Player,
-     *     description: string|null
+     *     description: string|null,
+     *     related: Collection<int, Video>
      * }
      */
     public function show(Video $video): array
@@ -74,7 +83,21 @@ class VideosPageService
             'video' => $video,
             'player' => $this->player($video),
             'description' => filled($video->description) ? Str::limit(trim((string) $video->description), self::DESCRIPTION_LIMIT) : null,
+            'related' => $this->videos->fromSameEvent($video),
         ];
+    }
+
+    /**
+     * The label line of a recording: event, place and date, in that order.
+     *
+     * @return list<string>
+     */
+    public function labelParts(Video $video): array
+    {
+        return array_values(array_filter([
+            filled($video->event) ? trim((string) $video->event) : null,
+            filled($video->location) ? trim((string) $video->location) : null,
+        ]));
     }
 
     public function detailUrl(Video $video): string
@@ -102,12 +125,12 @@ class VideosPageService
         $embed = $video->provider->isEmbeddable() ? VideoEmbed::embedUrl($video->provider, $url) : null;
 
         if ($embed !== null) {
-            return $this->playerData(Embed::KIND_EMBED, embedUrl: $embed, url: $url, host: ExternalLink::hostOf($url ?? ''), label: 'Watch on '.$video->provider->label(), poster: $poster);
+            return $this->playerData(Embed::KIND_EMBED, embedUrl: $embed, captions: $video->captions_url, url: $url, host: ExternalLink::hostOf($url ?? ''), label: 'Watch on '.$video->provider->label(), poster: $poster);
         }
 
         $host = ExternalLink::hostOf($url ?? '');
 
-        return $this->playerData(Embed::KIND_LINK, url: $url, host: $host, label: $host === '' ? 'Watch the video' : 'Watch on '.$host, poster: $poster);
+        return $this->playerData(Embed::KIND_LINK, captions: $video->captions_url, url: $url, host: $host, label: $host === '' ? 'Watch the video' : 'Watch on '.$host, poster: $poster);
     }
 
     /**

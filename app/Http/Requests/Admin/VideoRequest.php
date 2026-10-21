@@ -23,6 +23,7 @@ class VideoRequest extends ContentRequest
             'title' => ['required', 'string', 'max:255'],
             'slug' => self::slugRule('videos', $this->ignoreId),
             'date' => self::dateRule(),
+            ...PhotoArchiveRequest::archiveRules(),
             'event' => ['nullable', 'string', 'max:255'],
             'location' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:2000'],
@@ -41,7 +42,7 @@ class VideoRequest extends ContentRequest
         return parent::messages() + [
             'provider.Illuminate\Validation\Rules\Enum' => 'Choose where the video is hosted.',
             'media_url.required_unless' => 'Enter the video link, or choose "Uploaded file" and upload it.',
-        ];
+        ] + PhotoArchiveRequest::archiveMessages();
     }
 
     /**
@@ -49,6 +50,6 @@ class VideoRequest extends ContentRequest
      */
     public function attributes(): array
     {
-        return ['media_url' => 'video link', 'captions_url' => 'captions link'];
+        return ['media_url' => 'video link', 'captions_url' => 'captions link'] + PhotoArchiveRequest::archiveAttributes();
     }
 }

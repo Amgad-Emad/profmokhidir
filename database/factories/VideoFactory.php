@@ -32,6 +32,8 @@ class VideoFactory extends Factory
             'title' => $title,
             'slug' => Str::slug($title).'-'.Str::lower(Str::random(5)),
             'date' => fake()->dateTimeBetween('-20 years', '-1 month')->format('Y-m-d'),
+            'decade' => null,
+            'is_featured' => false,
             'event' => '[Placeholder] '.fake()->catchPhrase().' Lecture',
             'location' => fake()->city(),
             'description' => '[Placeholder] '.fake()->paragraph(3),
@@ -52,6 +54,16 @@ class VideoFactory extends Factory
             'provider' => $provider,
             'media_url' => $url,
         ], fn ($value): bool => $value !== null));
+    }
+
+    public function featured(): static
+    {
+        return $this->state(fn (array $attributes) => ['is_featured' => true]);
+    }
+
+    public function decade(int $decade): static
+    {
+        return $this->state(fn (array $attributes) => ['decade' => $decade]);
     }
 
     public function withThumbnail(): static

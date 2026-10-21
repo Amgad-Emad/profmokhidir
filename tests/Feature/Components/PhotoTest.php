@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use App\Services\AlbumService;
 use Tests\TestCase;
 
 class PhotoTest extends TestCase
@@ -159,5 +160,36 @@ class PhotoTest extends TestCase
 
         // The sync conversion job records its results on its own instance, so re-read the row.
         return $this->app->make(ProfileService::class)->setPortrait($profile, PlaceholderImage::grey(64, 64), $properties)->refresh();
+    }
+
+    #[Test]
+    public function a_wall_photo_sets_a_museum_label_and_an_archive_duotone_can_lift(): void
+    {
+        $album = Album::factory()->create();
+        $media = $this->app->make(AlbumService::class)->addPhoto($album, PlaceholderImage::grey(64, 48), [
+            MediaProperties::ALT_TEXT => 'Standing in a field', MediaProperties::CAPTION => 'Gezira research station', MediaProperties::PLACE => 'Wad Madani',
+            MediaProperties::YEAR => 1972, MediaProperties::NOTE => 'With the first cohort.', MediaProperties::CREDIT => 'Family archive',
+        ]);
+
+        $html = Blade::render('<x-photo :media="$media" :lightbox="true" :label="true" :lift="true" :show-caption="true" />', ['media' => $media]);
+
+        $this->assertStringContainsString('data-lightbox-note="With the first cohort."', $html);
+        $this->assertStringContainsString('data-lightbox-credit="Family archive"', $html);
+        $this->assertStringContainsString('photo__frame overflow-hidden rounded-card photo__frame--lift bg-stone', $html);
+        $this->assertMatchesRegularExpression('/<img src="[^"]+"[^>]*alt=""[^>]*class="photo__under h-full w-full object-cover"[^>]*aria-hidden="true">\s*<img/', $html, 'The untreated print sits beneath the duotone');
+        $this->assertSame(2, substr_count($html, '<img'));
+        $this->assertStringContainsString('<figcaption class="museum-label">', $html);
+        $this->assertStringContainsString('<span class="museum-label__title">Gezira research station</span>', $html);
+        $this->assertStringContainsString('<span class="museum-label__meta smallcaps">Wad Madani, 1972</span>', $html);
+        $this->assertStringContainsString('<span class="museum-label__note">With the first cohort.</span>', $html);
+        $this->assertStringNotContainsString('t-label', $html);
+
+        // Portraits keep the warm monochrome: no lift layer, and the label only when asked for.
+        $portrait = $this->app->make(AlbumService::class)->addPhoto($album, PlaceholderImage::grey(48, 64), [MediaProperties::TREATMENT => MediaTreatment::Portrait, MediaProperties::YEAR => 1980]);
+        $html = Blade::render('<x-photo :media="$media" :lift="true" />', ['media' => $portrait]);
+
+        $this->assertStringNotContainsString('photo__under', $html);
+        $this->assertStringNotContainsString('photo__frame--lift', $html);
+        $this->assertStringContainsString('<span class="t-label text-bronze">1980</span>', $html);
     }
 }

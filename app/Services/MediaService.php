@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Constants\Archive;
 use App\Constants\AuditAction;
 use App\Constants\ContentTypes;
 use App\Constants\MediaProperties;
@@ -54,6 +55,24 @@ class MediaService
 
         if ($actor !== null) {
             $this->audit->record($actor, AuditAction::MEDIA_UPDATED, $media->model, $this->auditMeta($media));
+        }
+
+        return $media;
+    }
+
+    /**
+     * Set an album photo's decade override (null: taken from its year) and featured flag.
+     */
+    public function updateArchiveFields(Media $media, ?int $decade, bool $featured, ?User $actor = null): Media
+    {
+        if ($decade !== null && ! in_array($decade, Archive::decades(), true)) {
+            throw new InvalidArgumentException(sprintf('Unknown decade "%d".', $decade));
+        }
+
+        $media = $this->media->updateArchiveFields($media, $decade, $featured);
+
+        if ($actor !== null) {
+            $this->audit->record($actor, AuditAction::MEDIA_UPDATED, $media->model, $this->auditMeta($media) + [Archive::DECADE => $decade, Archive::FEATURED => $featured]);
         }
 
         return $media;

@@ -53,11 +53,13 @@ class PicturesPageTest extends TestCase
         $this->get(route('pictures'))
             ->assertOk()
             ->assertSeeInOrder([
-                'data-rise-group',
-                'media-card', 'href="'.route('pictures.show', 'field').'"',
-                'aspect-ratio: 4 / 3', 'srcset="'.$cover->getUrl(MediaConversions::SMALL).' 480w', 'width="64" height="48"', 'photo-archive', 'loading="lazy"',
-                '3 photographs', 'In the field', 'Research stations across the decades.',
-                'href="'.route('pictures.show', 'empty').'"', 'media-card__placeholder', '0 photographs', 'Empty album',
+                'aria-label="View"', '3 photographs in 2 albums',
+                'href="'.route('pictures').'" class="filter-pill" aria-current="true">Albums', 'href="'.route('pictures', ['view' => 'decades']).'" class="filter-pill">Through the decades',
+                'class="exhibition mt-16" data-rise-group',
+                'exhibition__item', 'href="'.route('pictures.show', 'field').'" class="exhibition__cover"',
+                'photo__frame--lift', 'aspect-ratio: 64 / 48', 'class="photo__under', 'srcset="'.$cover->getUrl(MediaConversions::SMALL).' 480w', 'width="64" height="48"', 'photo-archive', 'loading="lazy"',
+                'exhibition__title', 'In the field', 'exhibition__meta smallcaps', '3 photographs', 'Research stations across the decades.',
+                'href="'.route('pictures.show', 'empty').'"', 'media-card__placeholder', 'Empty album', '0 photographs',
             ], false)
             ->assertDontSee('<figcaption', false)
             ->assertDontSee('Photographs will be gathered into albums here');
@@ -72,7 +74,7 @@ class PicturesPageTest extends TestCase
 
         $this->albums->addPhoto($album, PlaceholderImage::grey(64, 48), [
             MediaProperties::ALT_TEXT => 'Standing in a sorghum field', MediaProperties::CAPTION => 'Gezira research station',
-            MediaProperties::PLACE => 'Wad Madani', MediaProperties::YEAR => 1972,
+            MediaProperties::PLACE => 'Wad Madani', MediaProperties::YEAR => 1972, MediaProperties::NOTE => 'With the first cohort.', MediaProperties::CREDIT => 'Family archive',
         ]);
         $this->albums->addPhoto($album, PlaceholderImage::grey(48, 64), [
             MediaProperties::ALT_TEXT => 'Portrait at the gate', MediaProperties::TREATMENT => MediaTreatment::Portrait, MediaProperties::YEAR => 1980,
@@ -86,26 +88,32 @@ class PicturesPageTest extends TestCase
             ->assertSee('<meta name="description" content="Research stations across the decades.">', false)
             ->assertSeeInOrder([
                 'section-header', 'Pictures', 'id="section-title"', 'In the field', 'Research stations across the decades.',
-                'x-data="lightbox"', 'data-rise-group', 'aria-label="Photographs in In the field"',
+                'exhibition__meta smallcaps', '<span>1972–1980</span>', '2 photographs',
+                'x-data="lightbox"', 'class="wall mt-16" data-rise-group aria-label="Photographs in In the field"',
+                'class="wall__item" style="--span: 6"',
                 'href="'.$first->getUrl(MediaConversions::LARGE).'"', 'photo__link', 'data-lightbox-item',
                 'data-lightbox-src="'.$first->getUrl(MediaConversions::LARGE).'"',
                 'data-lightbox-srcset="'.$first->getUrl(MediaConversions::SMALL).' 480w',
                 'data-lightbox-alt="Standing in a sorghum field"', 'data-lightbox-treatment="photo-archive"',
                 'data-lightbox-caption="Gezira research station"', 'data-lightbox-meta="Wad Madani, 1972"',
+                'data-lightbox-note="With the first cohort."', 'data-lightbox-credit="Family archive"',
                 'data-lightbox-width="64" data-lightbox-height="48"',
+                'photo__frame--lift', 'aspect-ratio: 64 / 48', 'class="photo__under h-full w-full object-cover"',
                 'alt="Standing in a sorghum field"', 'width="64" height="48"', 'class="photo-archive h-full w-full object-cover"', 'loading="lazy"',
-                'View larger', '<figcaption', 'Gezira research station', 'Wad Madani, 1972',
+                'View larger', '<figcaption class="museum-label">', 'museum-label__title">Gezira research station', 'museum-label__meta smallcaps">Wad Madani, 1972', 'museum-label__note">With the first cohort.',
+                'class="wall__item" style="--span: 4"',
                 'href="'.$second->getUrl(MediaConversions::LARGE).'"', 'data-lightbox-alt="Portrait at the gate"', 'data-lightbox-treatment="photo-portrait"',
-                'data-lightbox-meta="1980"', 'alt="Portrait at the gate"', 'photo-portrait', '1980',
+                'data-lightbox-meta="1980"', 'alt="Portrait at the gate"', 'photo-portrait', 'museum-label__meta smallcaps">1980',
                 '<dialog', 'x-ref="dialog"', 'class="lightbox on-dark"', 'aria-label="In the field"', '@keydown="onKeydown($event)"', '@touchstart.passive', '@touchend.passive',
-                'aria-live="polite"', 'x-ref="close"', 'Close', 'x-ref="image"', 'sizes="100vw"', 'Previous photograph', 'Next photograph',
-                'aria-label="More albums"', 'href="'.route('pictures').'"', 'All albums', 'href="'.route('pictures.show', 'halls').'"', 'Lecture halls',
+                'aria-live="polite"', 'x-ref="close"', 'Close', 'x-ref="image"', 'sizes="100vw"', 'museum-label museum-label--ivory', 'x-text="current.credit"', 'Previous photograph', 'Next photograph',
+                'aria-label="More albums"', 'href="'.route('pictures').'"', 'All albums', 'href="'.route('pictures', ['view' => 'decades']).'"', 'Through the decades', 'href="'.route('pictures.show', 'halls').'"', 'Lecture halls',
             ], false)
             ->assertDontSee('Drafts')
             ->assertDontSee('livewire', false);
 
         $html = $response->getContent();
         $this->assertStringNotContainsString('data-lightbox-caption', substr($html, strpos($html, 'data-lightbox-alt="Portrait at the gate"')));
+        $this->assertStringNotContainsString('photo__under', substr($html, strpos($html, 'class="wall__item" style="--span: 4"')), 'Portraits keep the warm monochrome without a lift layer');
         $this->assertStringNotContainsString('href="'.route('pictures.show', 'field').'"', substr($html, strpos($html, 'aria-label="More albums"')), 'The album does not link to itself');
     }
 

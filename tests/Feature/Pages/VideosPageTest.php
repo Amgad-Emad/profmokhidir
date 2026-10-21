@@ -39,9 +39,9 @@ class VideosPageTest extends TestCase
     }
 
     #[Test]
-    public function the_index_shows_a_card_per_video_with_thumbnail_label_line_title_and_description(): void
+    public function the_index_opens_with_a_featured_recording_behind_a_facade_then_a_card_per_video(): void
     {
-        $withThumbnail = Video::factory()->published()->withThumbnail()->create([
+        $withThumbnail = Video::factory()->published()->withThumbnail()->provider(VideoProvider::YouTube, 'https://www.youtube.com/watch?v=dQw4w9WgXcQ')->create([
             'title' => 'Inaugural lecture', 'slug' => 'inaugural', 'date' => '1983-03-12', 'event' => 'Inaugural Lecture', 'location' => 'Khartoum',
             'description' => 'On the soil beneath our feet.', 'sort_order' => 1,
         ]);
@@ -54,19 +54,27 @@ class VideosPageTest extends TestCase
 
         $response
             ->assertSeeInOrder([
-                'data-rise-group',
-                'media-card', 'href="'.route('videos.show', 'inaugural').'"',
-                'aspect-ratio: 16 / 9', 'srcset="'.$thumbnail->getUrl(MediaConversions::SMALL).' 480w', 'width="960" height="540"', 'photo-archive', 'loading="lazy"',
-                '<time datetime="1983-03-12">12 March 1983</time>', '· Inaugural Lecture', '· Khartoum',
-                'Inaugural lecture', 'On the soil beneath our feet.',
-                'href="'.route('videos.show', 'bare').'"', 'media-card__placeholder', 'Wad Madani', 'Bare interview',
+                'class="lecture-hall mt-16" aria-labelledby="featured-title" data-rise',
+                'video-player video-player--featured', 'video-facade', 'x-data="videoFacade"',
+                'aspect-ratio: 16 / 9', 'srcset="'.$thumbnail->getUrl(MediaConversions::SMALL).' 480w', 'width="960" height="540"', 'photo-archive', 'loading="eager"', 'fetchpriority="high"',
+                'class="video-facade__play"', 'video-facade__ring', 'fill="none" stroke="currentColor" stroke-width="1"', 'Play', '<template x-if="playing">',
+                'Featured recording', 'id="featured-title"', 'href="'.route('videos.show', 'inaugural').'"', 'Inaugural lecture',
+                'Inaugural Lecture', '· Khartoum', '· <time datetime="1983-03-12">12 March 1983</time>', 'On the soil beneath our feet.',
+                'id="all-recordings"', 'All recordings', 'data-rise-group', 'media-card', 'href="'.route('videos.show', 'bare').'"', 'media-card__placeholder', 'Wad Madani', 'Bare interview',
             ], false)
-            ->assertDontSee('Recordings of lectures, interviews and events will appear here')
-            ->assertDontSee('youtube', false)
-            ->assertDontSee('<iframe', false);
+            ->assertDontSee('Recordings of lectures, interviews and events will appear here');
 
-        // Thumbnail captions belong to the detail page, not the card.
-        $this->assertStringNotContainsString('<figcaption', $response->getContent());
+        $html = $response->getContent();
+        // The featured still is ours; the only iframe is inert inside <template>.
+        preg_match_all('/<(?:img|script|link|video|source|track)\b[^>]*\b(?:src|href|poster)="([^"]+)"/', $html, $matches);
+
+        foreach ($matches[1] as $url) {
+            $this->assertStringNotContainsString('youtube', $url, 'Nothing from YouTube loads on page view');
+        }
+
+        $this->assertSame(1, substr_count($html, '<iframe'));
+        $this->assertStringNotContainsString('<figcaption', $html, 'Thumbnail captions belong to the detail page, not the card.');
+        $this->assertSame(1, substr_count($html, 'href="'.route('videos.show', 'inaugural').'"'), 'The featured recording is not repeated among the cards');
     }
 
     #[Test]
@@ -84,7 +92,7 @@ class VideosPageTest extends TestCase
             ->assertSee('<meta name="description" content="On the soil beneath our feet.">', false)
             ->assertSeeInOrder([
                 'section-header', 'Videos', 'id="section-title"', 'Inaugural lecture',
-                '<time datetime="1983-03-12">12 March 1983</time>', '· Inaugural Lecture', '· Khartoum',
+                'Inaugural Lecture', '· Khartoum', '· <time datetime="1983-03-12">12 March 1983</time>',
                 'video-facade', 'x-data="videoFacade"', 'photo-archive',
                 'href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" rel="noopener" class="video-facade__play" @click.prevent="play()"',
                 'Play', 'Inaugural lecture',
@@ -107,6 +115,29 @@ class VideosPageTest extends TestCase
         // The embed exists only inside the <template>.
         $this->assertSame(1, substr_count($html, '<iframe'));
         $this->assertMatchesRegularExpression('/<template x-if="playing">\s*<iframe/', $html);
+    }
+
+    #[Test]
+    public function the_detail_page_lists_more_from_the_same_event_and_links_captions_for_hosted_videos(): void
+    {
+        Video::factory()->published()->provider(VideoProvider::YouTube, 'https://youtu.be/dQw4w9WgXcQ')->create([
+            'slug' => 'opening', 'title' => 'Opening address', 'event' => 'Alumni Gathering', 'captions_url' => 'https://cdn.example.org/opening.vtt', 'sort_order' => 1,
+        ]);
+        Video::factory()->published()->withThumbnail()->create(['slug' => 'panel', 'title' => 'Panel discussion', 'event' => 'Alumni Gathering', 'location' => 'Khartoum', 'sort_order' => 2]);
+        Video::factory()->published()->create(['slug' => 'elsewhere', 'title' => 'Elsewhere', 'event' => 'Field Day', 'sort_order' => 3]);
+        Video::factory()->draft()->create(['slug' => 'draft', 'title' => 'Draft panel', 'event' => 'Alumni Gathering']);
+
+        $response = $this->get(route('videos.show', 'opening'))->assertOk();
+
+        $response->assertSeeInOrder([
+            'href="https://cdn.example.org/opening.vtt"', 'Captions for this recording (WebVTT)',
+            'aria-labelledby="same-event"', 'More from this event', 'media-card', 'href="'.route('videos.show', 'panel').'"', 'photo-archive', 'Alumni Gathering', '· Khartoum', 'Panel discussion',
+            'aria-label="More videos"', 'All videos',
+        ], false)
+            ->assertDontSee('Elsewhere')
+            ->assertDontSee('Draft panel');
+
+        $this->get(route('videos.show', 'elsewhere'))->assertOk()->assertDontSee('More from this event')->assertDontSee('Captions for this recording');
     }
 
     #[Test]

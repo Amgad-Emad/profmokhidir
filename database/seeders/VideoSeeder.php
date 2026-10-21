@@ -27,6 +27,7 @@ class VideoSeeder extends Seeder
 
         foreach ($videos as $index => [$title, $date, $event, $location, $provider, $url]) {
             Video::factory()->published()->withThumbnail()->create([
+                'is_featured' => $index === 0,
                 'title' => '[Placeholder] '.$title,
                 'date' => $date,
                 'event' => '[Placeholder] '.$event,

@@ -21,6 +21,9 @@ final class MediaProperties
 
     public const string PERMISSIONS_NOTE = 'permissions_note';
 
+    /** Optional one-line note on the museum label below the caption. */
+    public const string NOTE = 'note';
+
     /** One of MediaTreatment. */
     public const string TREATMENT = 'treatment';
 
@@ -38,7 +41,7 @@ final class MediaProperties
     public static function all(): array
     {
         return [
-            self::ALT_TEXT, self::CAPTION, self::PLACE, self::YEAR,
+            self::ALT_TEXT, self::CAPTION, self::PLACE, self::YEAR, self::NOTE,
             self::CREDIT, self::PERMISSIONS_NOTE, self::TREATMENT, self::IS_COVER,
             self::WIDTH, self::HEIGHT,
         ];

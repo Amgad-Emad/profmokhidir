@@ -13,6 +13,6 @@
     </form>
 
     <div class="mt-14 max-w-4xl">
-        <x-admin.image-grid label="Photos" :media="$media" :missing="$missing" :images="$images" :details-required="$detailsRequired" :accept="$imageAccept" :hint="$imageHint" multiple orderable :cover-id="$coverId" :confirming-id="$confirmingImageId" :can-upload="! $isNew" />
+        <x-admin.image-grid label="Photos" :media="$media" :missing="$missing" :images="$images" :details-required="$detailsRequired" :accept="$imageAccept" :hint="$imageHint" multiple orderable :cover-id="$coverId" :confirming-id="$confirmingImageId" :can-upload="! $isNew" :archive="$archive" :decades="$decades" />
     </div>
 </div>

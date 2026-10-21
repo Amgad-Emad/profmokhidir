@@ -1,5 +1,5 @@
 /*
- | Album lightbox. Registered as the Alpine component `lightbox` on the gallery
+ | Object view (album lightbox). Registered as the Alpine component `lightbox` on the gallery
  | wrapper; the <dialog> markup is <x-lightbox />. Each <x-photo :lightbox="true">
  | renders a link carrying data-lightbox-* attributes, which are read once here.
  |
@@ -23,6 +23,8 @@ function itemFrom(link) {
         alt: data.lightboxAlt || '',
         caption: data.lightboxCaption || '',
         meta: data.lightboxMeta || '',
+        note: data.lightboxNote || '',
+        credit: data.lightboxCredit || '',
         treatment: data.lightboxTreatment || '',
         width: Number(data.lightboxWidth) || null,
         height: Number(data.lightboxHeight) || null,

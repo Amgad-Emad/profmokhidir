@@ -35,6 +35,33 @@ class AlbumFactory extends Factory
     }
 
     /**
+     * Hang a varied wall: one placeholder photo per [width, height, year] in
+     * order, the first featured, so the exhibition layout has every format.
+     *
+     * @param  list<array{int, int, int}>  $prints
+     */
+    public function withWall(array $prints, string $place = 'Khartoum'): static
+    {
+        return $this->afterCreating(function (Album $album) use ($prints, $place): void {
+            $service = app(AlbumService::class);
+
+            foreach ($prints as $i => [$width, $height, $year]) {
+                $photo = $service->addPhoto($album, PlaceholderImage::grey($width, $height, 'Photo '.($i + 1)), [
+                    MediaProperties::ALT_TEXT => 'Placeholder photo '.($i + 1).' from '.$album->title,
+                    MediaProperties::CAPTION => '[Placeholder] Photo '.($i + 1),
+                    MediaProperties::PLACE => $place,
+                    MediaProperties::YEAR => $year,
+                    MediaProperties::CREDIT => '[Placeholder] Family archive',
+                ]);
+
+                if ($i === 0) {
+                    $service->updatePhotoArchive($album, $photo, null, true);
+                }
+            }
+        });
+    }
+
+    /**
      * Attach grey placeholder photos through the service, in order.
      */
     public function withPhotos(int $count = 3, int $width = 640, int $height = 427): static

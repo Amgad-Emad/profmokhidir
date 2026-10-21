@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Constants\Archive;
+use App\Constants\PictureView;
 use App\Services\PicturesPageService;
+use Illuminate\Http\Request;
 use Illuminate\Contracts\View\View;
 
 class PictureController extends Controller
 {
-    public function index(PicturesPageService $page): View
+    public function index(Request $request, PicturesPageService $page): View
     {
-        return view('pictures.index', $page->index());
+        return view('pictures.index', $page->index(PictureView::fromQuery($request->query(Archive::QUERY_VIEW))));
     }
 
     public function show(string $album, PicturesPageService $page): View
