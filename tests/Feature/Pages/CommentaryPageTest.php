@@ -95,15 +95,16 @@ class CommentaryPageTest extends TestCase
             ->assertSee('<title>On teaching · ', false)
             ->assertSee('<meta name="description" content="Why the lecture still matters.">', false)
             ->assertSeeInOrder([
-                'max-w-[68ch]', 'section-header', 'Commentary', 'id="section-title"', 'On teaching',
-                'Prof. Mohamed Osman Khidir · <time datetime="2021-03-12">12 March 2021</time>',
+                'sidenote-host', 'folio', 'chapter-opening', '<span class="sr-only">Chapter </span>VIII</span>', 'Commentary', 'id="section-title"', 'On teaching',
+                '<span class="smallcaps">Prof. Mohamed Osman Khidir</span>', '<time datetime="2021-03-12" class="whitespace-nowrap">12 March 2021</time>',
+                'First published at www.example.org',
                 'Why the lecture still matters.',
-                '<div class="prose-bio mt-10" data-rise><p>First paragraph.</p>alert(1)<blockquote>A quote.</blockquote><p>Second.</p></div>',
+                '<div class="drop-cap prose-bio mt-10" data-rise="data-rise"><p>First paragraph.</p>alert(1)<blockquote>A quote.</blockquote><p>Second.</p></div>',
                 'href="https://www.example.org/essay" rel="noopener"', 'Read the original · example.org',
-                'aria-label="Topics"', 'href="'.e(route('commentary', ['tag' => 'Education'])).'"', 'Education',
+                'ornament--fleuron', 'aria-label="Topics"', 'href="'.e(route('commentary', ['tag' => 'Education'])).'"', 'Education',
                 'aria-label="More commentary"', 'Previous', 'href="'.route('commentary.show', 'newer').'"', 'Newer piece',
                 'Next', 'href="'.route('commentary.show', 'older').'"', 'Older piece',
-                'href="'.route('commentary').'"', 'All commentary',
+                'href="'.route('commentary').'"', 'All commentary', 'class="seal"', 'folio--bottom',
             ], false)
             ->assertDontSee('<script', false)
             ->assertDontSee('onclick', false)

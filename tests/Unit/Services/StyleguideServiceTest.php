@@ -82,10 +82,25 @@ class StyleguideServiceTest extends TestCase
     {
         $sections = $this->service->sections();
 
-        $this->assertSame(['colours', 'fonts', 'typeScale', 'motion'], array_keys($sections));
+        $this->assertSame(['colours', 'fonts', 'typeScale', 'motion', 'typesetting', 'ornaments', 'typesetExamples'], array_keys($sections));
         $this->assertCount(9, $sections['colours']);
         $this->assertCount(3, $sections['fonts']);
         $this->assertCount(5, $sections['typeScale']);
         $this->assertCount(4, $sections['motion']);
+    }
+
+    #[Test]
+    public function it_shows_the_typesetter_before_and_after_and_the_ornaments(): void
+    {
+        $examples = $this->service->typesetExamples();
+
+        $this->assertNotEmpty($examples);
+        foreach ($examples as $example) {
+            $this->assertNotSame($example['before'], $example['after'], 'Every sample shows a change');
+        }
+        $this->assertStringContainsString('1975–1992', implode(' ', array_column($examples, 'after')));
+        $this->assertStringContainsString('<span class="caps">FAO</span>', implode(' ', array_column($examples, 'after')));
+        $this->assertCount(3, $this->service->ornaments());
+        $this->assertArrayHasKey('features', $this->service->typesetting());
     }
 }

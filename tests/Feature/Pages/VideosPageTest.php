@@ -171,7 +171,7 @@ class VideosPageTest extends TestCase
             ->assertOk()
             ->assertDontSee('<time', false)
             ->assertDontSee('t-label mt-6', false)
-            ->assertDontSee('max-w-[68ch]', false);
+            ->assertDontSee('max-w-measure', false);
 
         $this->get(route('videos.show', 'draft-talk'))->assertNotFound();
         $this->get(route('videos.show', 'missing'))->assertNotFound();

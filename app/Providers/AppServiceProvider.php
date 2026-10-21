@@ -8,9 +8,11 @@ use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\EnsureCommunityMember;
 use App\Models\User;
 use App\Services\SettingService;
+use App\Services\TypesetterService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
@@ -26,6 +28,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::define('access-admin', fn (User $user): bool => $user->canAccessAdmin());
+
+        // @typeset($text): database text with curly quotes, en dashes, non-breaking spaces and small caps, escaped.
+        Blade::directive('typeset', fn (string $expression): string => '<?php echo app(\\'.TypesetterService::class.'::class)->inline('.$expression.'); ?>');
 
         // Public community signups: a handful per address per hour.
         RateLimiter::for(RateLimits::COMMUNITY_SIGNUP, function (Request $request) {

@@ -1,29 +1,39 @@
 <x-layouts.public :title="$section['title']" :description="$description" :schema="$schema" :type="\App\Constants\Seo::OG_TYPE_PROFILE">
     <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28" aria-labelledby="section-title">
-        <x-section-header :label="$section['label']" :title="$section['title']" level="1" id="section-title" />
+        <x-folio :section="$section['label']" class="mb-16" />
+
+        <x-chapter-opening :number="$chapter" :label="$section['label']" :title="$section['title']" level="1" id="section-title">
+            <x-slot:epigraph>
+                <x-epigraph>{{ \App\Constants\Taglines::ABOUT_EPIGRAPH }}</x-epigraph>
+            </x-slot:epigraph>
+        </x-chapter-opening>
 
         @if ($profile === null)
             <x-empty-state class="mt-6" message="The biography is being prepared and will appear here once it is published." />
         @else
-            <div class="mt-14 grid gap-12 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-20">
+            <div class="mt-16 grid gap-12 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-16 xl:grid-cols-[minmax(0,1fr)_47rem]">
                 <div class="lg:sticky lg:top-28 lg:self-start" data-rise-group>
                     @if ($portrait)
-                        <x-photo :media="$portrait" sizes="(min-width: 1024px) 36vw, 100vw" loading="eager" :show-caption="true" class="max-w-md" />
+                        <x-photo :media="$portrait" sizes="(min-width: 1280px) 22rem, (min-width: 1024px) 36vw, 100vw" loading="eager" :show-caption="true" class="max-w-md" />
                     @endif
                     <div class="mt-8 flex flex-col gap-2">
-                        <h2 class="font-display text-quote font-light leading-tight text-evergreen">{{ $profile->name }}</h2>
+                        <h2 class="font-display text-quote font-light leading-tight text-evergreen">@typeset($profile->name)</h2>
                         @if (filled($profile->title))
-                            <p class="t-body text-evergreen">{{ $profile->title }}</p>
+                            <p class="t-body text-evergreen">@typeset($profile->title)</p>
                         @endif
                         @if (filled($profile->affiliation))
-                            <p class="text-base font-light text-ash">{{ $profile->affiliation }}</p>
+                            <p class="text-base font-light text-ash">@typeset($profile->affiliation)</p>
                         @endif
                     </div>
                 </div>
 
-                <div class="flex flex-col gap-16" data-rise-group>
+                <div class="sidenote-host flex flex-col gap-16" data-rise-group>
                     @if ($bio !== '')
-                        <div class="prose-bio max-w-[68ch]">{!! $bio !!}</div>
+                        <x-drop-cap class="prose-bio">{!! $bio !!}</x-drop-cap>
+                    @endif
+
+                    @if ($expertise !== [] || $facts !== [])
+                        <x-ornament type="fleuron" class="!my-0" />
                     @endif
 
                     @if ($expertise !== [])
@@ -44,7 +54,7 @@
                                 @foreach ($facts as $fact)
                                     <div class="flex flex-col gap-1">
                                         <dt class="t-label text-bronze">{{ $fact['label'] }}</dt>
-                                        <dd class="t-body text-evergreen">{{ $fact['value'] }}</dd>
+                                        <dd class="figures-lining font-display text-[1.75rem] font-light leading-10 text-evergreen">{{ $fact['value'] }}</dd>
                                     </div>
                                 @endforeach
                             </dl>
@@ -56,7 +66,7 @@
                             <h2 id="contact-title" class="t-label text-bronze">Contact</h2>
                             <div class="mt-5 flex flex-col gap-2 border-t border-stone pt-6">
                                 @if ($contact['email'])
-                                    <a href="mailto:{{ $contact['email'] }}" class="t-body text-evergreen underline decoration-brass underline-offset-4">{{ $contact['email'] }}</a>
+                                    <p class="t-body"><a href="mailto:{{ $contact['email'] }}" class="text-evergreen underline decoration-brass underline-offset-4">{{ $contact['email'] }}</a>@if ($contact['note'])<x-sidenote :number="1">@typeset($contact['note'])</x-sidenote>@endif</p>
                                 @endif
                                 @if ($contact['phone'])
                                     <a href="tel:{{ preg_replace('/[^0-9+]/', '', $contact['phone']) }}" class="t-body text-evergreen underline decoration-brass underline-offset-4" data-contact-phone>{{ $contact['phone'] }}</a>
@@ -64,8 +74,8 @@
                                 @if ($contact['address'])
                                     <p class="whitespace-pre-line text-base font-light text-ash" data-contact-address>{{ $contact['address'] }}</p>
                                 @endif
-                                @if ($contact['note'])
-                                    <p class="text-base font-light text-ash">{{ $contact['note'] }}</p>
+                                @if ($contact['note'] && ! $contact['email'])
+                                    <p class="text-base font-light text-ash">@typeset($contact['note'])</p>
                                 @endif
                             </div>
                         </section>
@@ -86,6 +96,10 @@
                     </nav>
                 </div>
             </div>
+
+            <x-seal />
         @endif
+
+        <x-folio :section="$section['label']" position="bottom" class="mt-16" />
     </section>
 </x-layouts.public>

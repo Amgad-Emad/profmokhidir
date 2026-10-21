@@ -19,7 +19,7 @@
                                 <p class="font-display text-xl font-light italic text-ash">{{ $award->organisation }}</p>
                             @endif
                             @if (filled($award->description))
-                                <p class="t-body mt-3 max-w-[68ch] text-evergreen">{{ $award->description }}</p>
+                                <p class="t-body mt-3 max-w-measure text-evergreen">{{ $award->description }}</p>
                             @endif
                             @if (filled($award->source_url))
                                 <p class="mt-3"><x-external-link :href="$award->source_url" label="Source" /></p>

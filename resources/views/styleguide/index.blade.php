@@ -19,7 +19,7 @@ SVG);
             <p class="t-quote max-w-2xl">&ldquo;Knowledge is the light we pass on.&rdquo;</p>
             <p class="t-body max-w-2xl">Every colour, type style, button, card, rule, image treatment and motion pattern in one place. This page is served only in the local environment.</p>
             <nav aria-label="Sections" class="flex flex-wrap gap-3">
-                @foreach (['colours' => 'Colours', 'type' => 'Type', 'buttons' => 'Buttons', 'cards' => 'Cards', 'rules' => 'Rules', 'mark' => 'Mark', 'photos' => 'Photos', 'motion' => 'Motion'] as $id => $label)
+                @foreach (['colours' => 'Colours', 'type' => 'Type', 'buttons' => 'Buttons', 'cards' => 'Cards', 'rules' => 'Rules', 'mark' => 'Mark', 'photos' => 'Photos', 'motion' => 'Motion', 'press' => 'Press'] as $id => $label)
                     <a href="#{{ $id }}" class="btn-pill-outline">{{ $label }}</a>
                 @endforeach
             </nav>
@@ -268,6 +268,122 @@ SVG);
                     <li><code class="block break-all font-mono text-xs text-ash">{{ Typography::path($file['file']) }} · {{ $file['family'] }} {{ $file['style'] }} {{ $file['weight'] }}</code></li>
                 @endforeach
             </ul>
+        </section>
+
+        {{-- Press typography --}}
+        <section id="press" class="py-20" aria-labelledby="press-title">
+            <hr class="rule-brass mb-10" data-rule>
+            <p class="t-label text-bronze" data-rise>09 · Press typography</p>
+            <h2 id="press-title" class="t-heading mt-3" data-rise>Typographic craft and ornament</h2>
+            <p class="t-body mt-4 max-w-measure text-ash" data-rise>Restraint, not effects: OpenType figures and small caps, an {{ $typesetting['baseline'] }}px rhythm ({{ $typesetting['bodyLine'] }}px body lines), a measure of {{ $typesetting['measure']['min'] }}–{{ $typesetting['measure']['max'] }} characters, and hairline ornaments in brass.</p>
+
+            <h3 class="mt-12 font-display text-3xl" data-rise>OpenType features</h3>
+            <dl class="mt-6 grid gap-5 md:grid-cols-2" data-rise-group>
+                @foreach ($typesetting['features'] as $key => $feature)
+                    <div class="card card-ivory">
+                        <dt class="t-label text-bronze">{{ $feature['context'] }}</dt>
+                        <dd class="mt-2 font-mono text-xs text-ash">{{ $feature['css'] }}</dd>
+                        @if ($feature['features'] !== [])
+                            <dd class="mt-1 font-mono text-xs text-ash">{{ implode(' · ', $feature['features']) }}</dd>
+                        @endif
+                    </div>
+                @endforeach
+            </dl>
+            <div class="mt-8 grid gap-5 md:grid-cols-2" data-rise-group>
+                <div class="card">
+                    <p class="t-label text-bronze">Old-style figures in running text</p>
+                    <p class="mt-3 font-display text-3xl">Taught from 1975 to 1992, 40 years in all.</p>
+                    <p class="t-label mt-6 text-bronze">Lining tabular figures in stats</p>
+                    <p class="figures-lining mt-3 font-display text-3xl">1975 · 1992 · 60+ · 40</p>
+                </div>
+                <div class="card">
+                    <p class="t-label text-bronze">Small caps and ligatures</p>
+                    <p class="mt-3 font-display text-3xl">Reports for the <span class="caps">FAO</span> and <span class="caps">UNESCO</span></p>
+                    <p class="mt-3 font-display text-2xl">By <span class="smallcaps">Mohamed Osman Khidir</span></p>
+                    <p class="mt-3 font-display text-3xl italic pull-quote">The strictest artist, the first office</p>
+                    <p class="t-label mt-6 text-bronze">Hanken tabular figures</p>
+                    <p class="mt-2 font-sans tabular-nums">1,111 · 2,048 · 9,999</p>
+                </div>
+            </div>
+
+            <h3 class="mt-12 font-display text-3xl" data-rise>Typesetter</h3>
+            <p class="t-body mt-2 max-w-measure text-ash" data-rise>App\Services\TypesetterService runs on database text as it renders: curly quotes, en dashes for ranges, non-breaking spaces before units, after titles and between initials, an ellipsis, small caps for capitals.</p>
+            <div class="mt-6 overflow-x-auto" data-rise>
+                <table class="w-full text-left text-base">
+                    <thead><tr class="border-b border-stone"><th class="t-label py-3 pr-6 text-bronze">As written</th><th class="t-label py-3 text-bronze">As rendered</th></tr></thead>
+                    <tbody>
+                        @foreach ($typesetExamples as $example)
+                            <tr class="border-b border-stone align-top">
+                                <td class="py-4 pr-6 font-mono text-sm text-ash">{{ $example['before'] }}</td>
+                                <td class="py-4 font-display text-xl">{!! $example['after'] !!}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 class="mt-12 font-display text-3xl" data-rise>&lt;x-chapter-opening&gt; and &lt;x-epigraph&gt;</h3>
+            <div class="mt-6 grid gap-5 md:grid-cols-2">
+                <div class="card card-ivory">
+                    <x-chapter-opening :number="2" label="Khartoum" title="The first lectures" level="4">
+                        <x-slot:epigraph>
+                            <x-epigraph attribution="Sample attribution">Knowledge is the light we pass on.</x-epigraph>
+                        </x-slot:epigraph>
+                    </x-chapter-opening>
+                </div>
+                <div class="card on-dark border-cypress bg-evergreen text-champagne">
+                    <x-chapter-opening :number="3" label="Legacy" title="His lessons continue" tone="ivory" level="4">
+                        <x-slot:epigraph>
+                            <x-epigraph attribution="Sample attribution" tone="ivory">His lessons continue in every student he taught.</x-epigraph>
+                        </x-slot:epigraph>
+                    </x-chapter-opening>
+                </div>
+            </div>
+
+            <h3 class="mt-12 font-display text-3xl" data-rise>&lt;x-drop-cap&gt;</h3>
+            <div class="mt-6 grid gap-5 md:grid-cols-2">
+                <div class="card card-ivory">
+                    <x-drop-cap class="prose-bio"><p>Professor Khidir devoted his life to agricultural science and to the students who sought his guidance. Over several decades he supervised graduate students and published widely on crop physiology.</p><p>A second paragraph has no initial.</p></x-drop-cap>
+                </div>
+                <div class="card on-dark border-cypress bg-evergreen">
+                    <x-drop-cap class="prose-bio !text-champagne" tone="ivory"><p>On evergreen the initial is set in champagne. Over several decades he supervised graduate students and published widely on crop physiology and soil fertility.</p></x-drop-cap>
+                </div>
+            </div>
+
+            <h3 class="mt-12 font-display text-3xl" data-rise>&lt;x-ornament&gt;</h3>
+            <div class="mt-6 grid gap-5 md:grid-cols-2">
+                <div class="card card-ivory">
+                    @foreach ($ornaments as $type => $ornament)
+                        <p class="t-label text-bronze">{{ $type }} · {{ $ornament['label'] }}</p>
+                        <x-ornament :type="$type" class="!my-6" />
+                    @endforeach
+                </div>
+                <div class="card on-dark border-cypress bg-evergreen text-champagne">
+                    @foreach ($ornaments as $type => $ornament)
+                        <p class="t-label text-brass">{{ $type }}</p>
+                        <x-ornament :type="$type" class="!my-6" />
+                    @endforeach
+                </div>
+            </div>
+
+            <h3 class="mt-12 font-display text-3xl" data-rise>&lt;x-sidenote&gt;</h3>
+            <div class="sidenote-host mt-6">
+                <p class="t-body">Sidenotes sit in the right margin when the column is wide enough, like Tufte's,<x-sidenote :number="1">This is a sidenote. On a narrow screen it opens inline when the number is tapped.</x-sidenote> and open inline on a phone. The reference is a button described by its note.<x-sidenote :number="2">Without JavaScript the notes are always shown inline.</x-sidenote> Resize the window to see both forms.</p>
+            </div>
+
+            <h3 class="mt-12 font-display text-3xl" data-rise>&lt;x-folio&gt; and &lt;x-seal&gt;</h3>
+            <div class="mt-6 grid gap-5 md:grid-cols-2">
+                <div class="card card-ivory">
+                    <x-folio section="About" />
+                    <x-seal />
+                    <x-folio section="About" position="bottom" class="mt-10" />
+                </div>
+                <div class="card on-dark border-cypress bg-evergreen text-champagne">
+                    <x-folio section="Tributes" tone="ivory" />
+                    <x-seal tone="ivory" />
+                    <x-folio section="Tributes" position="bottom" tone="ivory" class="mt-10" />
+                </div>
+            </div>
         </section>
     </div>
 </x-layouts.public>

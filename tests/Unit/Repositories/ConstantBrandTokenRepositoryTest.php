@@ -5,6 +5,8 @@ namespace Tests\Unit\Repositories;
 use App\Constants\Brand;
 use App\Repositories\Contracts\BrandTokenRepositoryInterface;
 use App\Repositories\Eloquent\ConstantBrandTokenRepository;
+use App\Constants\Ornaments;
+use App\Constants\Typesetting;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -87,5 +89,24 @@ class ConstantBrandTokenRepositoryTest extends TestCase
         $this->assertStringContainsString('120ms', $motion['rise-group']['summary']);
         $this->assertStringContainsString('1600ms', $motion['rule']['summary']);
         $this->assertStringContainsString('0.7', $motion['scroll-scale']['summary']);
+    }
+
+    #[Test]
+    public function it_serves_the_typesetting_rules_features_rhythm_and_ornaments(): void
+    {
+        $rules = $this->repository->typesettingRules();
+        $this->assertSame(Typesetting::units(), $rules['units']);
+        $this->assertSame(Typesetting::bindingAbbreviations(), $rules['bindingAbbreviations']);
+        $this->assertSame(Typesetting::capsExceptions(), $rules['capsExceptions']);
+
+        $typesetting = $this->repository->typesetting();
+        $this->assertSame(Typesetting::features(), $typesetting['features']);
+        $this->assertSame(8, $typesetting['baseline']);
+        $this->assertSame(32, $typesetting['bodyLine']);
+        $this->assertSame(['min' => 60, 'max' => 72], $typesetting['measure']);
+        $this->assertSame(0, $typesetting['bodyLine'] % $typesetting['baseline'], 'Body lines sit on the baseline grid');
+
+        $this->assertSame(Ornaments::definitions(), $this->repository->ornaments());
+        $this->assertSame([Ornaments::RULE_DOT, Ornaments::DOUBLE_RULE, Ornaments::FLEURON], array_keys($this->repository->ornaments()));
     }
 }

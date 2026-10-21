@@ -100,4 +100,16 @@ class NavigationServiceTest extends TestCase
         $this->assertCount(1, $items);
         $this->assertSame('Awards', $items[0]['label']);
     }
+
+    #[Test]
+    public function chapter_numbers_follow_the_section_order(): void
+    {
+        $this->assertSame(1, $this->navigation->chapter(Sections::ABOUT));
+        $this->assertSame(2, $this->navigation->chapter(Sections::CV));
+        $this->assertSame(8, $this->navigation->chapter(Sections::COMMENTARY));
+        $this->assertSame(11, $this->navigation->chapter(Sections::TRIBUTES));
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->navigation->chapter('nowhere');
+    }
 }

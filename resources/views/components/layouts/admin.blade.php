@@ -17,7 +17,7 @@
     @vite(['resources/css/app.css', 'resources/js/admin.js'])
     @livewireStyles
 </head>
-<body class="min-h-screen bg-linen text-evergreen">
+<body class="min-h-screen bg-linen text-evergreen tabular-nums">
     <x-duotone-filter />
     <a href="#main" class="skip-link">Skip to content</a>
 

@@ -75,7 +75,7 @@ class OtherPageTest extends TestCase
             ->assertOk()
             ->assertSee('<title>Memorial lecture · ', false)
             ->assertSeeInOrder([
-                'max-w-[68ch]', 'id="section-title"', 'Memorial lecture',
+                'max-w-measure', 'id="section-title"', 'Memorial lecture',
                 'Announcement · Announcements · <time datetime="2024-04-10">10 April 2024</time>',
                 'Held each spring.',
                 '<div class="prose-bio mt-10" data-rise><p>Details.</p>x()<h2>Programme</h2></div>',

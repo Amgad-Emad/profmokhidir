@@ -5,6 +5,7 @@
 
 @import './fonts.css';
 @import './media.css';
+@import './typography.css';
 
 /*
  | Brand design system — see CLAUDE.md "Brand (follow exactly)".
@@ -41,7 +42,7 @@
     --text-quote: 2rem; /* 32px */
     --text-quote--line-height: 1.3;
     --text-body: 1.125rem; /* 18px */
-    --text-body--line-height: 1.7;
+    --text-body--line-height: 1.7778; /* 32px: body lines sit on the 8px baseline grid */
     --text-label: 0.75rem; /* 12px */
     --text-label--line-height: 1.4;
     --text-label--letter-spacing: 0.3em;
@@ -49,6 +50,9 @@
     --tracking-label: 0.3em;
 
     --radius-card: 4px;
+
+    /* Reading measure: 528px of Hanken Grotesk Light at 18px holds 60-72 characters a line (max-w-measure). Fixed in rem so larger type keeps the same column. */
+    --container-measure: 33rem;
 
     /* Motion: unhurried, scroll-linked, nothing bounces. */
     --ease-rise: cubic-bezier(0.16, 1, 0.3, 1);
@@ -159,7 +163,7 @@
         font-family: var(--font-sans);
         font-weight: 300;
         font-size: 1.125rem; /* 18px */
-        line-height: 1.7;
+        line-height: 1.7778; /* 32px */
     }
 
     .t-label {
@@ -567,19 +571,20 @@
     }
 
     /*
-     | Reading prose for the biography and commentary (editor HTML reduced by App\Support\RichText): body copy at a
-     | ~68ch measure, Cormorant headings, and the blockquote in the quote style.
+     | Reading prose for the biography and commentary (editor HTML reduced by App\Support\RichText, then typeset by
+     | App\Services\TypesetterService): body copy on the measure and the 8px grid (18px on 32px lines, spacing in
+     | baseline units), Cormorant headings, and the blockquote as a pull quote in the quote style.
      */
     .prose-bio {
         font-family: var(--font-sans);
         font-weight: 300;
         font-size: 1.125rem; /* 18px */
-        line-height: 1.7;
+        line-height: 1.7778; /* 32px */
         color: var(--color-evergreen);
     }
 
     .prose-bio > * + * {
-        margin-top: 1.25em;
+        margin-top: var(--space-3);
     }
 
     .prose-bio h2,
@@ -588,7 +593,13 @@
         font-family: var(--font-display);
         font-weight: 300;
         line-height: 1.15;
-        margin-top: 2em;
+        margin-top: var(--space-6);
+    }
+
+    .prose-bio > h2 + *,
+    .prose-bio > h3 + *,
+    .prose-bio > h4 + * {
+        margin-top: var(--space-2);
     }
 
     .prose-bio h2 {
@@ -608,10 +619,10 @@
         font-weight: 300;
         font-style: italic;
         font-size: 2rem; /* 32px, the quote style */
-        line-height: 1.3;
-        margin-top: 2em;
-        margin-bottom: 2em;
-        padding-top: 1.5rem;
+        line-height: 1.25; /* 40px */
+        margin-top: var(--space-6);
+        margin-bottom: var(--space-6);
+        padding-top: var(--space-3);
         border-top: 1px solid var(--color-brass);
     }
 

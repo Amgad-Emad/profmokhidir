@@ -6,6 +6,8 @@ namespace App\Repositories\Eloquent;
 
 use App\Constants\Brand;
 use App\Constants\Motion;
+use App\Constants\Ornaments;
+use App\Constants\Typesetting;
 use App\Constants\Typography;
 use App\Repositories\Contracts\BrandTokenRepositoryInterface;
 
@@ -38,5 +40,30 @@ final class ConstantBrandTokenRepository implements BrandTokenRepositoryInterfac
     public function motion(): array
     {
         return Motion::behaviours();
+    }
+
+    public function typesettingRules(): array
+    {
+        return [
+            'units' => Typesetting::units(),
+            'bindingAbbreviations' => Typesetting::bindingAbbreviations(),
+            'capsExceptions' => Typesetting::capsExceptions(),
+        ];
+    }
+
+    public function typesetting(): array
+    {
+        return [
+            'features' => Typesetting::features(),
+            'rhythm' => Typesetting::rhythm(),
+            'baseline' => Typesetting::BASELINE_PX,
+            'bodyLine' => Typesetting::BODY_LINE_PX,
+            'measure' => ['min' => Typesetting::MEASURE_MIN_CHARS, 'max' => Typesetting::MEASURE_MAX_CHARS],
+        ];
+    }
+
+    public function ornaments(): array
+    {
+        return Ornaments::definitions();
     }
 }

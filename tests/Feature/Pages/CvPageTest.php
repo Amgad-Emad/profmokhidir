@@ -20,7 +20,7 @@ class CvPageTest extends TestCase
         $this->get(route('cv'))
             ->assertOk()
             ->assertSee('<title>CV and Achievements · ', false)
-            ->assertSeeInOrder(['section-header', 'CV &amp; Achievements', 'rule-brass', 'id="section-title"', 'CV and Achievements'], false)
+            ->assertSeeInOrder(['chapter-opening', '<span class="sr-only">Chapter </span>II</span>', 'CV &amp; Achievements', 'rule-brass', 'id="section-title"', '<span class="caps">CV</span> and Achievements'], false)
             ->assertSee('The curriculum vitae is being compiled and will appear here once it is published.')
             ->assertDontSee('Draft lecturer post')
             ->assertDontSee('Last updated')
@@ -54,9 +54,9 @@ class CvPageTest extends TestCase
             ->assertSeeInOrder(['aria-label="CV sections"', 'href="#cv-education"', '>2<', 'Education', 'href="#cv-appointment"', '>1<', 'Appointments', 'href="#cv-achievement"', '>1<', 'Achievements'], false)
             ->assertSeeInOrder([
                 'id="cv-education"', 'Education',
-                '1969 – 1972', 'PhD in Agronomy', 'University of Reading', 'Thesis on sorghum water use.',
-                '1962 – 1966', 'BSc in Agriculture',
-                'id="cv-appointment"', 'Appointments', '1998 – present', 'Professor Emeritus', 'University of Khartoum',
+                '1969–1972', 'PhD in Agronomy', 'University of Reading', 'Thesis on sorghum water use.',
+                '1962–1966', 'BSc in Agriculture',
+                'id="cv-appointment"', 'Appointments', '1998–present', 'Professor Emeritus', 'University of Khartoum',
                 'id="cv-achievement"', 'Achievements', '>2005<', 'Fellow of the Academy', 'Sudanese Academy of Sciences',
             ], false)
             ->assertDontSee('cv-leadership', false)
@@ -72,7 +72,10 @@ class CvPageTest extends TestCase
     #[Test]
     public function it_never_offers_the_cv_as_a_download_or_print(): void
     {
-        CvEntry::factory()->published()->count(3)->create();
+        // Fixed text: random job titles ("Job Printer") would trip the pattern below.
+        CvEntry::factory()->published()->count(3)->create([
+            'title' => 'Lecturer in Agronomy', 'organisation' => 'University of Khartoum', 'role_description' => 'Taught crop physiology.',
+        ]);
 
         $html = $this->get(route('cv'))->assertOk()->getContent();
 

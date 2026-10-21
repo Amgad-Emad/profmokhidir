@@ -16,6 +16,9 @@ final class Taglines
 
     public const string HOME_QUOTE = 'Scholarship is the one inheritance that grows each time it is shared.';
 
+    /** Epigraph under the About chapter opening. */
+    public const string ABOUT_EPIGRAPH = 'Knowledge is the light we pass on.';
+
     public const string READ_STORY = 'Read his story';
 
     public const string LEAVE_TRIBUTE = 'Leave a tribute';
@@ -32,7 +35,7 @@ final class Taglines
     public static function all(): array
     {
         return [
-            self::HERO_LABEL, self::HERO_LINE, self::HOME_QUOTE, self::READ_STORY, self::LEAVE_TRIBUTE,
+            self::HERO_LABEL, self::HERO_LINE, self::HOME_QUOTE, self::ABOUT_EPIGRAPH, self::READ_STORY, self::LEAVE_TRIBUTE,
             self::TRIBUTES_LABEL, self::TRIBUTES_HEADING, self::TRIBUTE_THANKS,
         ];
     }

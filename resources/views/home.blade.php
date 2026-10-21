@@ -27,8 +27,8 @@
     <section class="bg-ivory" aria-label="Quotation">
         <div class="mx-auto max-w-3xl px-4 py-24 sm:px-6 lg:py-32">
             <hr class="rule-brass" data-rule>
-            <blockquote class="t-quote mt-10 text-evergreen" data-rise>
-                <p>&ldquo;{{ $copy['quote'] }}&rdquo;</p>
+            <blockquote class="t-quote pull-quote mt-10 text-evergreen" data-rise>
+                <p><span class="hang-quote">&ldquo;</span>@typeset($copy['quote'])&rdquo;</p>
             </blockquote>
         </div>
     </section>
@@ -36,10 +36,10 @@
     {{-- 3. Chapters --}}
     <section class="bg-linen" aria-labelledby="chapter-life">
         <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28">
-            <x-section-header label="Chapter one" title="Life" id="chapter-life" />
+            <x-chapter-opening :number="1" title="Life" id="chapter-life" />
             <div class="mt-10 grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]" data-rise-group>
                 @if ($profile && filled($profile->short_bio))
-                    <p class="t-body max-w-[68ch] text-evergreen">{{ $profile->short_bio }}</p>
+                    <p class="t-body max-w-measure text-evergreen">@typeset($profile->short_bio)</p>
                 @else
                     <x-empty-state message="The biography is being prepared." />
                 @endif
@@ -55,7 +55,7 @@
 
     <section class="bg-ivory" aria-labelledby="chapter-work">
         <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28">
-            <x-section-header label="Chapter two" title="Work" id="chapter-work" />
+            <x-chapter-opening :number="2" title="Work" id="chapter-work" />
             <div class="mt-10 grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]" data-rise-group>
                 <div>
                     @if ($publications->isNotEmpty())
@@ -64,7 +64,7 @@
                                 <li class="flex flex-col gap-2 py-6">
                                     <p class="t-label text-bronze">{{ implode(' · ', array_filter([$publication->type?->label(), $publication->year])) }}</p>
                                     <h3 class="font-display text-2xl font-light leading-snug text-evergreen">
-                                        <a href="{{ $publication->url ?? $publication->doiUrl() ?? route('publications') }}" class="text-evergreen">{{ $publication->title }}</a>
+                                        <a href="{{ $publication->url ?? $publication->doiUrl() ?? route('publications') }}" class="text-evergreen">@typeset($publication->title)</a>
                                     </h3>
                                     @if (filled($publication->venue_publisher))
                                         <p class="text-base font-light text-ash">{{ $publication->venue_publisher }}</p>
@@ -79,7 +79,7 @@
                 </div>
                 <div class="card card-ivory flex flex-col items-start gap-4 self-start">
                     @if ($awardCount > 0)
-                        <p class="font-display text-7xl font-light leading-none text-evergreen">{{ $awardCount }}</p>
+                        <p class="figures-lining font-display text-7xl font-light leading-none text-evergreen">{{ $awardCount }}</p>
                         <p class="t-label text-bronze">{{ $awardCount === 1 ? 'Award and honour' : 'Awards and honours' }}</p>
                     @else
                         <p class="t-label text-bronze">Awards and honours</p>
@@ -93,7 +93,7 @@
 
     <section class="on-dark bg-evergreen text-champagne" aria-labelledby="chapter-tributes">
         <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28">
-            <x-section-header label="Chapter three" title="Tributes" tone="ivory" id="chapter-tributes" />
+            <x-chapter-opening :number="3" title="Tributes" tone="ivory" id="chapter-tributes" />
             @if ($tributes->isNotEmpty())
                 <ul class="mt-10 grid gap-6 md:grid-cols-3" data-rise-group aria-label="Recent tributes">
                     @foreach ($tributes as $tribute)
@@ -133,6 +133,8 @@
                     </li>
                 @endforeach
             </ul>
+
+            <x-seal />
         </div>
     </section>
 </x-layouts.public>

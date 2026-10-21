@@ -27,7 +27,7 @@
                                     <a href="{{ route('commentary.show', $commentary->slug) }}" class="text-evergreen">{{ $commentary->title }}</a>
                                 </h2>
                                 @if (filled($commentary->summary))
-                                    <p class="t-body max-w-[68ch] text-evergreen">{{ $commentary->summary }}</p>
+                                    <p class="t-body max-w-measure text-evergreen">{{ $commentary->summary }}</p>
                                 @endif
                                 @if (filled($commentary->tags))
                                     <ul class="mt-2 flex flex-wrap gap-2" aria-label="Topics">

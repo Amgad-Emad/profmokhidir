@@ -12,7 +12,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 /**
  * Assembles the Commentary Corner: the tag-filtered archive and the long-form
- * detail page with its sanitised body, tags and previous/next links.
+ * detail page with its sanitised, typeset body, tags and previous/next links.
  *
  * @phpstan-type TagOption array{value: string, label: string, url: string, active: bool}
  */
@@ -21,6 +21,7 @@ class CommentaryPageService
     public function __construct(
         private readonly CommentaryService $commentaries,
         private readonly NavigationService $navigation,
+        private readonly TypesetterService $typesetter,
     ) {}
 
     /**
@@ -54,6 +55,7 @@ class CommentaryPageService
     /**
      * @return array{
      *     section: array{key: string, label: string, title: string, url: string, route: string, placement: string, summary: string, active: bool},
+     *     chapter: int,
      *     commentary: Commentary,
      *     body: string,
      *     tags: list<TagOption>,
@@ -67,8 +69,9 @@ class CommentaryPageService
 
         return [
             'section' => $this->navigation->section(Sections::COMMENTARY, Sections::COMMENTARY.'.show'),
+            'chapter' => $this->navigation->chapter(Sections::COMMENTARY),
             'commentary' => $commentary,
-            'body' => RichText::sanitise($commentary->body),
+            'body' => $this->typesetter->html(RichText::sanitise($commentary->body)),
             'tags' => $this->tagOptions($this->commentaries->normaliseTags($commentary->tags), null),
             'previous' => $neighbours['previous'],
             'next' => $neighbours['next'],

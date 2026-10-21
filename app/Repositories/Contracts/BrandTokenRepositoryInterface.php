@@ -36,4 +36,23 @@ interface BrandTokenRepositoryInterface
      * @return array<string, array{attribute: string, summary: string}>
      */
     public function motion(): array;
+
+    /**
+     * Rules the typesetter applies to database text.
+     *
+     * @return array{units: list<string>, bindingAbbreviations: list<string>, capsExceptions: list<string>}
+     */
+    public function typesettingRules(): array;
+
+    /**
+     * OpenType features per context, and the rhythm and measure tokens.
+     *
+     * @return array{features: array<string, array{context: string, css: string, features: list<string>}>, rhythm: array<string, int>, baseline: int, bodyLine: int, measure: array{min: int, max: int}}
+     */
+    public function typesetting(): array;
+
+    /**
+     * @return array<string, array{label: string, width: int, height: int, shapes: list<array<string, string|float|int>>}>
+     */
+    public function ornaments(): array;
 }

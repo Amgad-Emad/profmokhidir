@@ -1,0 +1,332 @@
+/*
+ | Press typography: OpenType detail, the 8px rhythm and the reading measure, and
+ | the ornament components (<x-drop-cap>, <x-chapter-opening>, <x-ornament>,
+ | <x-sidenote>, <x-folio>, <x-epigraph>, <x-seal>). Imported by app.css; mirrors
+ | App\Constants\Typesetting and App\Constants\Ornaments. Restraint first: brass
+ | only for hairlines, nothing moves except the rule and the existing rise.
+ */
+:root {
+    /* 8px baseline rhythm: --space-N is N baseline units. */
+    --baseline: 0.5rem;
+    --space-1: calc(var(--baseline) * 1);
+    --space-2: calc(var(--baseline) * 2);
+    --space-3: calc(var(--baseline) * 3);
+    --space-4: calc(var(--baseline) * 4);
+    --space-6: calc(var(--baseline) * 6);
+    --space-8: calc(var(--baseline) * 8);
+    --space-12: calc(var(--baseline) * 12);
+    --space-16: calc(var(--baseline) * 16);
+
+    /* Sidenotes: note width and the gap between the text and the margin. */
+    --sidenote-width: 12rem;
+    --sidenote-gap: 2rem;
+}
+
+@layer base {
+    html {
+        font-kerning: normal;
+        /* Never fake small caps: Hanken Grotesk has none, so .caps there stays in capitals. */
+        font-synthesis-small-caps: none;
+    }
+
+    p,
+    li,
+    dd,
+    figcaption,
+    blockquote {
+        text-wrap: pretty;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    .t-display,
+    .t-heading,
+    .t-quote {
+        text-wrap: balance;
+    }
+
+    /* Cormorant Garamond: old-style proportional figures and common ligatures in running text and dates. */
+    h1,
+    h2,
+    h3,
+    h4,
+    blockquote,
+    .font-display,
+    .t-display,
+    .t-heading,
+    .t-quote {
+        font-variant-numeric: oldstyle-nums proportional-nums;
+        font-variant-ligatures: common-ligatures;
+    }
+
+    /* Tables and counts: lining tabular figures (Cormorant lnum/tnum, Hanken tnum). */
+    table,
+    .admin-table {
+        font-variant-numeric: lining-nums tabular-nums;
+    }
+}
+
+@layer components {
+    /* Lining tabular figures for stats and counts set in Cormorant. */
+    .figures-lining {
+        font-variant-numeric: lining-nums tabular-nums;
+    }
+
+    /* Runs of capitals from the typesetter: real small caps (c2sc) in Cormorant, spaced capitals elsewhere. */
+    .caps {
+        font-variant-caps: all-small-caps;
+        letter-spacing: 0.05em;
+    }
+
+    /* Names in bylines and attributions: Cormorant small caps (smcp + c2sc). */
+    .smallcaps {
+        font-family: var(--font-display);
+        font-weight: 300;
+        font-variant-caps: all-small-caps;
+        font-variant-numeric: oldstyle-nums;
+        letter-spacing: 0.08em;
+    }
+
+    /* Chapter numerals: small caps in the label's tracking, a size up so the small caps match the label's capitals. */
+    .t-numeral {
+        font-family: var(--font-display);
+        font-weight: 300;
+        font-size: 1.25rem; /* 20px */
+        line-height: var(--space-3);
+        font-variant-caps: all-small-caps;
+        letter-spacing: 0.3em;
+    }
+
+    /* Pull quotes: discretionary ligatures and an opening quotation mark that hangs in the margin. */
+    .prose-bio blockquote,
+    .pull-quote {
+        font-variant-ligatures: common-ligatures discretionary-ligatures;
+        hanging-punctuation: first last;
+    }
+
+    @supports not (hanging-punctuation: first) {
+        .hang-quote {
+            margin-left: -0.42em;
+        }
+    }
+
+    /* <x-drop-cap>: the first paragraph opens with a three-line Cormorant initial. */
+    .drop-cap > p:first-of-type::first-letter {
+        float: left;
+        margin: 0.06em 0.1em 0 0;
+        font-family: var(--font-display);
+        font-weight: 300;
+        font-style: normal;
+        font-size: 7.25rem; /* three 32px lines from cap height to baseline */
+        line-height: 0.8;
+        color: var(--color-evergreen);
+    }
+
+    .drop-cap--ivory > p:first-of-type::first-letter {
+        color: var(--color-champagne);
+    }
+
+    @supports (initial-letter: 3) or (-webkit-initial-letter: 3) {
+        .drop-cap > p:first-of-type::first-letter {
+            float: none;
+            margin: 0 0.12em 0 0;
+            font-size: inherit;
+            line-height: inherit;
+            -webkit-initial-letter: 3;
+            initial-letter: 3;
+        }
+    }
+
+    /* <x-chapter-opening>: numeral and label, a drawing hairline, then the heading. */
+    .chapter-opening__label {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: var(--space-1) var(--space-3);
+    }
+
+    .chapter-opening__rule {
+        margin-top: var(--space-2);
+    }
+
+    .chapter-opening__title {
+        margin-top: var(--space-4);
+    }
+
+    .chapter-opening__epigraph {
+        margin-top: var(--space-6);
+    }
+
+    /* <x-ornament>: hairline SVG ornaments. Strokes only, 1px at every size, never filled. */
+    .ornament {
+        display: flex;
+        justify-content: center;
+        margin-block: var(--space-8);
+    }
+
+    .ornament--start {
+        justify-content: flex-start;
+    }
+
+    .ornament svg {
+        display: block;
+        overflow: visible;
+    }
+
+    .ornament svg * {
+        fill: none;
+        stroke: var(--color-brass);
+        stroke-width: 1px;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        vector-effect: non-scaling-stroke;
+    }
+
+    /* <x-epigraph>: short italic quote, set to the right on a narrow measure, attribution in small caps. */
+    .epigraph {
+        max-width: 26rem;
+        margin-inline-start: auto;
+        margin-block: 0;
+    }
+
+    .epigraph__quote {
+        font-family: var(--font-display);
+        font-weight: 300;
+        font-style: italic;
+        font-size: 1.5rem; /* 24px */
+        line-height: var(--space-4);
+        font-variant-ligatures: common-ligatures discretionary-ligatures;
+    }
+
+    .epigraph__attribution {
+        margin-top: var(--space-2);
+        text-align: right;
+        font-size: 1.125rem;
+        line-height: var(--space-3);
+    }
+
+    /* <x-folio>: a quiet running head or foot, like a printed page. */
+    .folio {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        font-size: 1rem;
+        line-height: var(--space-3);
+        color: var(--color-ash);
+    }
+
+    .folio__rule {
+        flex: 1 1 auto;
+        height: 1px;
+        min-width: var(--space-4);
+        background-color: var(--color-stone);
+    }
+
+    .folio--ivory {
+        color: var(--color-champagne);
+    }
+
+    .folio--ivory .folio__rule {
+        background-color: var(--color-cypress);
+    }
+
+    /* <x-seal>: the mark as a closing seal, a short rule centred beneath it. */
+    .seal {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-block: var(--space-12) 0;
+    }
+
+    .seal__rule {
+        display: block;
+        width: var(--space-6);
+        height: 1px;
+        background-color: var(--color-brass);
+    }
+
+    /*
+     | <x-sidenote>: the reference is a small button; the note is revealed inline
+     | on narrow screens and sits in the right margin when the host is wide enough
+     | to hold the measure plus the note. The host (.sidenote-host) is the query
+     | container; its text is held to the measure so notes float into the margin.
+     */
+    .sidenote-host {
+        container: sidenotes / inline-size;
+        max-width: calc(var(--container-measure) + var(--sidenote-width) + var(--sidenote-gap));
+    }
+
+    .sidenote-host > * {
+        max-width: var(--container-measure);
+    }
+
+    .sidenote__ref {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        /* Sits tight against the word it annotates (an inline target, WCAG 2.5.8 exception); padding widens the tap area a little. */
+        padding: 0.25rem 0.125rem;
+        vertical-align: super;
+        line-height: 0;
+        font-family: var(--font-display);
+        font-size: 1rem;
+        font-variant-numeric: lining-nums;
+        color: var(--color-bronze);
+        cursor: pointer;
+    }
+
+    .sidenote__ref[aria-expanded='true'] {
+        color: var(--color-evergreen);
+    }
+
+    .sidenote__number {
+        font-family: var(--font-display);
+        font-variant-numeric: lining-nums;
+        color: var(--color-bronze);
+        margin-right: 0.25em;
+    }
+
+    .sidenote__note {
+        display: block;
+        margin-block: var(--space-2);
+        padding-left: var(--space-2);
+        border-left: 1px solid var(--color-brass);
+        font-family: var(--font-sans);
+        font-weight: 300;
+        font-size: 0.9375rem; /* 15px */
+        line-height: var(--space-3);
+        font-style: normal;
+        letter-spacing: normal;
+        text-transform: none;
+        text-align: left;
+        color: var(--color-ash);
+    }
+
+    @media (scripting: enabled) {
+        .sidenote__note:not(.is-open) {
+            display: none;
+        }
+    }
+
+    /* The measure (33rem) plus the note and gap (14rem). */
+    @container sidenotes (min-width: 47rem) {
+        .sidenote__note,
+        .sidenote__note:not(.is-open) {
+            display: block;
+            float: right;
+            clear: right;
+            position: relative;
+            width: var(--sidenote-width);
+            margin: 0.25em calc(-1 * (var(--sidenote-width) + var(--sidenote-gap))) var(--space-2) 0;
+            padding-left: 0;
+            border-left: 0;
+            font-size: 0.875rem; /* 14px */
+        }
+
+        .sidenote__ref {
+            cursor: default;
+        }
+    }
+}

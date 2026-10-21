@@ -19,7 +19,18 @@ class StyleguideService
     /** WCAG 2.2 AA minimum contrast for large text (24px, or 18.66px bold) and UI components. */
     public const float AA_LARGE = 3.0;
 
-    public function __construct(private readonly BrandTokenRepositoryInterface $tokens) {}
+    /** Sample strings for the typesetter's before/after table on the style guide. */
+    private const array TYPESET_SAMPLES = [
+        'He called it "the patient science" and said it\'s never finished.',
+        'Taught at Khartoum 1975-1992, and in the field from 1970 - present.',
+        'Prof. Khidir and M. O. Khidir measured 12 ha at 35 °C... see pp. 12-34.',
+        'Reports for the FAO and UNESCO in the \'80s.',
+    ];
+
+    public function __construct(
+        private readonly BrandTokenRepositoryInterface $tokens,
+        private readonly TypesetterService $typesetter,
+    ) {}
 
     /**
      * Every colour with its role and its contrast against the two primary surfaces.
@@ -70,9 +81,40 @@ class StyleguideService
     }
 
     /**
+     * OpenType features per context, the 8px rhythm and the measure.
+     *
+     * @return array{features: array<string, array{context: string, css: string, features: list<string>}>, rhythm: array<string, int>, baseline: int, bodyLine: int, measure: array{min: int, max: int}}
+     */
+    public function typesetting(): array
+    {
+        return $this->tokens->typesetting();
+    }
+
+    /**
+     * @return array<string, array{label: string, width: int, height: int, shapes: list<array<string, string|float|int>>}>
+     */
+    public function ornaments(): array
+    {
+        return $this->tokens->ornaments();
+    }
+
+    /**
+     * Each sample as written and as the typesetter renders it (escaped HTML).
+     *
+     * @return list<array{before: string, after: string}>
+     */
+    public function typesetExamples(): array
+    {
+        return array_map(fn (string $sample): array => [
+            'before' => $sample,
+            'after' => $this->typesetter->inline($sample)->toHtml(),
+        ], self::TYPESET_SAMPLES);
+    }
+
+    /**
      * Everything the style guide view needs.
      *
-     * @return array{colours: list<array<string, mixed>>, fonts: array<string, mixed>, typeScale: array<string, mixed>, motion: array<string, mixed>}
+     * @return array{colours: list<array<string, mixed>>, fonts: array<string, mixed>, typeScale: array<string, mixed>, motion: array<string, mixed>, typesetting: array<string, mixed>, ornaments: array<string, mixed>, typesetExamples: list<array{before: string, after: string}>}
      */
     public function sections(): array
     {
@@ -81,6 +123,9 @@ class StyleguideService
             'fonts' => $this->fonts(),
             'typeScale' => $this->typeScale(),
             'motion' => $this->motion(),
+            'typesetting' => $this->typesetting(),
+            'ornaments' => $this->ornaments(),
+            'typesetExamples' => $this->typesetExamples(),
         ];
     }
 

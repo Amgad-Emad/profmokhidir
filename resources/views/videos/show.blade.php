@@ -18,7 +18,7 @@
             </div>
 
             @if (filled($video->description))
-                <p class="t-body mt-10 max-w-[68ch] text-evergreen" data-rise>{{ $video->description }}</p>
+                <p class="t-body mt-10 max-w-measure text-evergreen" data-rise>{{ $video->description }}</p>
             @endif
 
             <nav class="mt-14 border-t border-stone pt-8" aria-label="More videos">

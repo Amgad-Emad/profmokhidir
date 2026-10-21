@@ -27,6 +27,7 @@ class CvPageService
     /**
      * @return array{
      *     section: array{key: string, label: string, title: string, url: string, route: string, placement: string, summary: string, active: bool},
+     *     chapter: int,
      *     lastUpdated: CarbonInterface|null,
      *     groups: list<CvGroup>,
      *     summary: list<array{key: string, label: string, anchor: string, count: int}>,
@@ -39,6 +40,7 @@ class CvPageService
 
         return [
             'section' => $this->navigation->section(Sections::CV, Sections::CV),
+            'chapter' => $this->navigation->chapter(Sections::CV),
             'lastUpdated' => $groups === [] ? null : $this->entries->latestUpdate(),
             'groups' => $groups,
             'summary' => array_map(fn (array $group): array => [

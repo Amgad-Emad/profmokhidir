@@ -22,8 +22,8 @@ final class DateFormats
     /** Joins the parts of a metadata line ("Book · 1978 · Khartoum"). */
     public const string META_SEPARATOR = ' · ';
 
-    /** Joins a year range ("1969 – 1975"). */
-    public const string RANGE_SEPARATOR = ' – ';
+    /** Joins a year range with a closed-up en dash ("1969–1975", "1990–present"). */
+    public const string RANGE_SEPARATOR = '–';
 
     /** Shown in place of an end year for an ongoing entry. */
     public const string PRESENT = 'present';

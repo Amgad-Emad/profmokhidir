@@ -52,7 +52,7 @@ class CvEntry extends Model
     }
 
     /**
-     * "1969 – 1975", "1990 – present", "1980", or null when no year is set.
+     * "1969–1975", "1990–present", "1980", or null when no year is set.
      */
     public function yearRange(): ?string
     {

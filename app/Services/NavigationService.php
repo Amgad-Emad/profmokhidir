@@ -65,6 +65,21 @@ class NavigationService
     /**
      * A section is active on its own route and on any nested route (e.g. publications.show).
      */
+    /**
+     * A section's chapter number: its 1-based place in the site's section order
+     * (About is I, CV and Achievements II, and so on), for <x-chapter-opening>.
+     */
+    public function chapter(string $key): int
+    {
+        $position = array_search($key, array_keys($this->sections->all()), true);
+
+        if ($position === false) {
+            throw new InvalidArgumentException(sprintf('Unknown section "%s".', $key));
+        }
+
+        return $position + 1;
+    }
+
     public function isActive(string $route, ?string $currentRoute): bool
     {
         if ($currentRoute === null) {

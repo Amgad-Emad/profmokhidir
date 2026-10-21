@@ -87,9 +87,9 @@ class HomePageTest extends TestCase
         $response = $this->get(route('home'))->assertOk();
 
         $response
-            ->assertSeeInOrder(['Chapter one', 'Life', 'A short published biography.', 'Professor of Agronomy · University of Khartoum', 'href="'.route('about').'"'], false)
-            ->assertSeeInOrder(['Chapter two', 'Work', 'Newest paper', 'Field Journal', 'Older paper', 'Oldest paper', 'href="'.route('publications').'"', '>4<', 'Awards and honours', 'href="'.route('cv').'"'], false)
-            ->assertSeeInOrder(['Chapter three', 'Tributes', 'An approved tribute.', 'href="'.route('tributes').'"'], false)
+            ->assertSeeInOrder(['Chapter </span>I</span>', 'Life', 'A short published biography.', 'Professor of Agronomy · University of Khartoum', 'href="'.route('about').'"'], false)
+            ->assertSeeInOrder(['Chapter </span>II</span>', 'Work', 'Newest paper', 'Field Journal', 'Older paper', 'Oldest paper', 'href="'.route('publications').'"', '>4<', 'Awards and honours', 'href="'.route('cv').'"'], false)
+            ->assertSeeInOrder(['Chapter </span>III</span>', 'Tributes', 'An approved tribute.', 'href="'.route('tributes').'"'], false)
             ->assertDontSee('Not shown')
             ->assertDontSee('Draft paper')
             ->assertDontSee('A fourth tribute')
@@ -97,7 +97,7 @@ class HomePageTest extends TestCase
 
         $this->assertSame(3, substr_count($response->getContent(), 'An approved tribute.'));
         $this->assertGreaterThanOrEqual(5, substr_count($response->getContent(), 'data-rise-group'));
-        $this->assertSame(3, substr_count($response->getContent(), '<div class="section-header">'));
+        $this->assertSame(3, substr_count($response->getContent(), '<div class="chapter-opening">'));
     }
 
     #[Test]

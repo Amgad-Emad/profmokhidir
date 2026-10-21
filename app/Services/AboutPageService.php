@@ -10,9 +10,9 @@ use App\Support\RichText;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
- * Assembles the About page from the published profile: sanitised biography,
- * expertise tags, key facts, optional public contact details and the links on
- * to the CV, Publications and Awards sections.
+ * Assembles the About page from the published profile: sanitised and typeset
+ * biography, expertise tags, key facts, optional public contact details and the
+ * links on to the CV, Publications and Awards sections.
  */
 class AboutPageService
 {
@@ -21,11 +21,13 @@ class AboutPageService
         private readonly NavigationService $navigation,
         private readonly SeoService $seo,
         private readonly SettingService $settings,
+        private readonly TypesetterService $typesetter,
     ) {}
 
     /**
      * @return array{
      *     section: array{key: string, label: string, title: string, url: string, route: string, placement: string, summary: string, active: bool},
+     *     chapter: int,
      *     profile: Profile|null,
      *     portrait: Media|null,
      *     bio: string,
@@ -45,9 +47,10 @@ class AboutPageService
 
         return [
             'section' => $section,
+            'chapter' => $this->navigation->chapter(Sections::ABOUT),
             'profile' => $profile,
             'portrait' => $portrait,
-            'bio' => RichText::sanitise($profile?->full_bio),
+            'bio' => $this->typesetter->html(RichText::sanitise($profile?->full_bio)),
             'expertise' => $this->expertise($profile),
             'facts' => $this->facts($profile),
             'contact' => $this->contact($profile),
@@ -91,7 +94,7 @@ class AboutPageService
         $items = is_array($profile?->expertise) ? $profile->expertise : [];
 
         return array_values(array_filter(
-            array_map(fn ($item): string => is_string($item) ? trim($item) : '', $items),
+            array_map(fn ($item): string => is_string($item) ? $this->typesetter->text(trim($item)) : '', $items),
             fn (string $item): bool => $item !== '',
         ));
     }
@@ -115,7 +118,7 @@ class AboutPageService
             $value = trim((string) ($item['value'] ?? ''));
 
             if ($label !== '' && $value !== '') {
-                $facts[] = ['label' => $label, 'value' => $value];
+                $facts[] = ['label' => $label, 'value' => $this->typesetter->text($value)];
             }
         }
 
