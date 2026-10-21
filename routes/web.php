@@ -7,6 +7,7 @@ use App\Constants\RateLimits;
 use App\Constants\Roles;
 use App\Constants\Sections;
 use App\Constants\Seo;
+use App\Constants\TributeCards;
 use App\Http\Controllers\AboutController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -90,8 +91,14 @@ Route::get($sections[Sections::OTHER]['path'].'/{slug}', [OtherItemController::c
 
 Route::get($sections[Sections::TRIBUTES]['path'], [TributeController::class, 'index'])->name($sections[Sections::TRIBUTES]['route']);
 Route::get($sections[Sections::TRIBUTES]['path'].'/new', [TributeController::class, 'create'])->name($sections[Sections::TRIBUTES]['route'].'.create');
+Route::post($sections[Sections::TRIBUTES]['path'].'/new', [TributeController::class, 'edit'])->name($sections[Sections::TRIBUTES]['route'].'.edit');
+Route::post($sections[Sections::TRIBUTES]['path'].'/preview', [TributeController::class, 'preview'])->name($sections[Sections::TRIBUTES]['route'].'.preview');
+Route::get($sections[Sections::TRIBUTES]['path'].'/preview', [TributeController::class, 'previewAgain'])->name($sections[Sections::TRIBUTES]['route'].'.preview.show');
 Route::post($sections[Sections::TRIBUTES]['path'], [TributeController::class, 'store'])->name($sections[Sections::TRIBUTES]['route'].'.store');
 Route::get($sections[Sections::TRIBUTES]['path'].'/thank-you', [TributeController::class, 'thanks'])->name($sections[Sections::TRIBUTES]['route'].'.thanks');
+Route::get($sections[Sections::TRIBUTES]['path'].'/{tribute}/card', [TributeController::class, 'card'])
+    ->whereNumber('tribute')
+    ->name(TributeCards::ROUTE);
 
 // Scientific Community: public page with the application form, then the members-only
 // chat (Livewire). The chat routes check membership on every request, including

@@ -52,7 +52,7 @@ class SchemaTest extends TestCase
     public function the_remaining_tables_exist_with_their_key_columns(): void
     {
         $this->assertTrue(Schema::hasColumns('users', ['community_status', 'affiliation', 'academic_field', 'reason_for_joining', 'reviewed_by', 'reviewed_at', 'review_note']));
-        $this->assertTrue(Schema::hasColumns('tributes', ['name', 'relationship', 'location', 'message', 'email', 'status', 'approved_by', 'approved_at', 'ip_hash', 'published_at', 'sort_order']));
+        $this->assertTrue(Schema::hasColumns('tributes', ['name', 'relationship', 'location', 'message', 'email', 'status', 'approved_by', 'approved_at', 'ip_hash', 'published_at', 'sort_order', 'is_featured', 'featured_at', 'share_card_path']));
         $this->assertTrue(Schema::hasColumns('chat_channels', ['name', 'slug', 'description', 'last_message_id']));
         $this->assertTrue(Schema::hasColumns('chat_messages', ['channel_id', 'user_id', 'client_uuid', 'body', 'version', 'edited_at', 'deleted_at']));
         $this->assertTrue(Schema::hasColumns('chat_reads', ['channel_id', 'user_id', 'last_read_message_id']));

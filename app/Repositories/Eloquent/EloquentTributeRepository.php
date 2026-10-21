@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories\Eloquent;
 
+use App\Constants\TributeRelationship;
 use App\Constants\TributeStatus;
 use App\Models\Tribute;
 use App\Repositories\Contracts\TributeRepositoryInterface;
@@ -52,5 +53,34 @@ class EloquentTributeRepository extends BaseContentRepository implements Tribute
     public function countRecentFromIp(string $ipHash, DateTimeInterface $since): int
     {
         return $this->query()->where('ip_hash', $ipHash)->where('created_at', '>=', $since)->count();
+    }
+
+    public function paginateApproved(?TributeRelationship $relationship, int $perPage, ?int $exceptId = null): LengthAwarePaginator
+    {
+        return $this->query()
+            ->published()
+            ->when($relationship !== null, fn ($query) => $query->withRelationship($relationship))
+            ->when($exceptId !== null, fn ($query) => $query->whereKeyNot($exceptId))
+            ->ordered()
+            ->paginate($perPage)
+            ->withQueryString();
+    }
+
+    public function featured(): ?Tribute
+    {
+        return $this->query()->published()->featured()->orderByDesc('featured_at')->orderByDesc('id')->first();
+    }
+
+    public function clearFeatured(?int $exceptId = null): int
+    {
+        return $this->query()
+            ->featured()
+            ->when($exceptId !== null, fn ($query) => $query->whereKeyNot($exceptId))
+            ->update(['is_featured' => false, 'featured_at' => null]);
+    }
+
+    public function approvedWithoutShareCard(): Collection
+    {
+        return $this->query()->published()->whereNull('share_card_path')->ordered()->get();
     }
 }

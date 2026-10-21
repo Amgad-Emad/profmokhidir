@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Repositories;
 
+use App\Constants\TributeRelationship;
 use App\Constants\TributeStatus;
 use App\Models\Tribute;
 use App\Models\User;
@@ -106,5 +107,52 @@ class EloquentTributeRepositoryTest extends TestCase
 
         $this->assertSame(2, $this->repository->search('Ahmed')->total());
         $this->assertSame(1, $this->repository->search('Ahmed', ['relationship' => 'student'])->total());
+    }
+
+    #[Test]
+    public function paginate_approved_filters_by_relationship_in_display_order_and_can_leave_one_out(): void
+    {
+        $student = Tribute::factory()->approved()->relationship(TributeRelationship::Student)->create(['sort_order' => 2]);
+        $colleague = Tribute::factory()->approved()->relationship(TributeRelationship::Colleague)->create(['sort_order' => 1]);
+        $family = Tribute::factory()->approved()->relationship(TributeRelationship::Family)->create(['sort_order' => 3]);
+        Tribute::factory()->pending()->relationship(TributeRelationship::Student)->create();
+
+        $this->assertSame([$colleague->id, $student->id, $family->id], $this->repository->paginateApproved(null, 10)->pluck('id')->all());
+        $this->assertSame([$student->id], $this->repository->paginateApproved(TributeRelationship::Student, 10)->pluck('id')->all());
+        $this->assertSame([$colleague->id, $family->id], $this->repository->paginateApproved(null, 10, $student->id)->pluck('id')->all());
+        $this->assertSame(1, $this->repository->paginateApproved(null, 1)->lastPage() === 3 ? 1 : 0);
+        $this->assertSame(0, $this->repository->paginateApproved(TributeRelationship::Friend, 10)->total());
+    }
+
+    #[Test]
+    public function featured_returns_the_latest_featured_approved_tribute_and_can_be_cleared(): void
+    {
+        $this->assertNull($this->repository->featured());
+
+        $older = Tribute::factory()->featured()->create(['featured_at' => now()->subDay()]);
+        $newer = Tribute::factory()->featured()->create(['featured_at' => now()]);
+        $pendingButFlagged = Tribute::factory()->pending()->create(['is_featured' => true, 'featured_at' => now()->addMinute()]);
+
+        $this->assertTrue($this->repository->featured()->is($newer));
+
+        $this->assertSame(2, $this->repository->clearFeatured($newer->id));
+        $this->assertTrue($newer->fresh()->is_featured);
+        $this->assertFalse($older->fresh()->is_featured);
+        $this->assertNull($older->fresh()->featured_at);
+        $this->assertFalse($pendingButFlagged->fresh()->is_featured);
+
+        $this->assertSame(1, $this->repository->clearFeatured());
+        $this->assertNull($this->repository->featured());
+    }
+
+    #[Test]
+    public function approved_without_share_card_lists_only_approved_tributes_lacking_a_card(): void
+    {
+        $missing = Tribute::factory()->approved()->create(['share_card_path' => null, 'sort_order' => 2]);
+        $missingFirst = Tribute::factory()->approved()->create(['share_card_path' => null, 'sort_order' => 1]);
+        Tribute::factory()->approved()->create(['share_card_path' => 'tributes/share/tribute-1.png']);
+        Tribute::factory()->pending()->create(['share_card_path' => null]);
+
+        $this->assertSame([$missingFirst->id, $missing->id], $this->repository->approvedWithoutShareCard()->pluck('id')->all());
     }
 }

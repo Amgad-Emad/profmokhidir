@@ -2,14 +2,21 @@
 
 namespace Tests\Feature\Console;
 
+use App\Constants\Disks;
 use App\Constants\Sections;
 use App\Constants\SocialCards;
+use App\Constants\TributeCards;
+use App\Models\Tribute;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class GenerateSocialCardsTest extends TestCase
 {
+    use RefreshDatabase;
+
     #[Test]
     public function it_writes_each_card_as_a_1200_by_630_png_into_the_given_directory(): void
     {
@@ -48,5 +55,33 @@ class GenerateSocialCardsTest extends TestCase
         }
 
         $this->assertFileExists(resource_path('fonts/OFL.txt'));
+    }
+
+    #[Test]
+    public function with_tributes_it_draws_the_missing_tribute_share_cards_once(): void
+    {
+        Storage::fake(Disks::PUBLIC);
+        $directory = storage_path('framework/testing/social-cards-'.uniqid());
+        $approved = Tribute::factory()->approved()->count(2)->create();
+        Tribute::factory()->pending()->create();
+
+        try {
+            $this->artisan('brand:social-cards', ['--output' => $directory, '--tributes' => true])
+                ->expectsOutputToContain('2 tribute share cards drawn.')
+                ->assertSuccessful();
+
+            foreach ($approved as $tribute) {
+                Storage::disk(Disks::PUBLIC)->assertExists(TributeCards::path($tribute->id));
+                $this->assertSame(TributeCards::path($tribute->id), $tribute->fresh()->share_card_path);
+            }
+
+            $this->assertCount(2, Storage::disk(Disks::PUBLIC)->allFiles());
+
+            $this->artisan('brand:social-cards', ['--output' => $directory, '--tributes' => true])
+                ->expectsOutputToContain('0 tribute share cards drawn.')
+                ->assertSuccessful();
+        } finally {
+            File::deleteDirectory($directory);
+        }
     }
 }

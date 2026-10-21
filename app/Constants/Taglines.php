@@ -50,6 +50,12 @@ final class Taglines
 
     public const string TRIBUTE_THANKS = 'Thank you. Your tribute will appear once it has been reviewed.';
 
+    /** Small label above the featured tribute. */
+    public const string TRIBUTES_FEATURED_LABEL = 'A tribute';
+
+    /** Small label above the pages of the book. */
+    public const string TRIBUTES_BOOK_LABEL = 'The book of remembrance';
+
     /**
      * Section key (Sections::homeStory()) => the line on its home card.
      *
@@ -72,7 +78,7 @@ final class Taglines
         return [
             self::HERO_LABEL, self::HERO_LINE, self::HOME_EPIGRAPH, self::HOME_CLOSING, self::SCROLL_CUE,
             self::HOME_CHAPTERS, self::HOME_NUMBERS, self::HOME_CONTINUE, self::STORY_ABOUT, self::STORY_PUBLICATIONS, self::STORY_TRIBUTES, self::ABOUT_EPIGRAPH, self::READ_STORY, self::LEAVE_TRIBUTE,
-            self::TRIBUTES_LABEL, self::TRIBUTES_HEADING, self::TRIBUTE_THANKS,
+            self::TRIBUTES_LABEL, self::TRIBUTES_HEADING, self::TRIBUTE_THANKS, self::TRIBUTES_FEATURED_LABEL, self::TRIBUTES_BOOK_LABEL,
         ];
     }
 }

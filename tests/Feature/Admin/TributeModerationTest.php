@@ -135,4 +135,67 @@ class TributeModerationTest extends TestCase
         $this->actingAs(User::factory()->admin()->create())->get(route('admin.tributes.index'))->assertOk();
         Livewire::actingAs(User::factory()->member()->create())->test(Moderate::class)->assertForbidden();
     }
+
+    #[Test]
+    public function an_approved_tribute_can_be_featured_and_unfeatured_from_the_approved_tab(): void
+    {
+        $first = Tribute::factory()->approved()->create(['name' => 'First Person']);
+        $second = Tribute::factory()->approved()->create(['name' => 'Second Person']);
+
+        $component = Livewire::actingAs($this->editor)->test(Moderate::class, ['tab' => 'approved'])
+            ->assertSee('data-feature', false)
+            ->assertDontSee('data-featured-badge', false)
+            ->call('feature', $first->getKey())
+            ->assertSee('Tribute featured. It now opens the book of remembrance.')
+            ->assertSee('data-featured-badge', false)
+            ->assertSee('data-unfeature', false);
+
+        $this->assertTrue($first->fresh()->isFeatured());
+
+        $component->call('feature', $second->getKey());
+        $this->assertFalse($first->fresh()->isFeatured());
+        $this->assertTrue($second->fresh()->isFeatured());
+
+        $component->call('unfeature', $second->getKey())
+            ->assertSee('Tribute no longer featured.')
+            ->assertDontSee('data-featured-badge', false);
+
+        $this->assertFalse($second->fresh()->isFeatured());
+        $this->assertSame(
+            [AuditAction::TRIBUTE_FEATURED, AuditAction::TRIBUTE_FEATURED, AuditAction::TRIBUTE_UNFEATURED],
+            AuditLog::query()->orderBy('id')->pluck('action')->all(),
+        );
+
+        // The public page shows the featured tribute as the frontispiece while it is featured.
+        $component->call('feature', $first->getKey());
+        $this->get(route('tributes'))->assertOk()->assertSee('data-featured', false)->assertSeeInOrder(['frontispiece', 'First Person'], false);
+    }
+
+    #[Test]
+    public function pending_tributes_cannot_be_featured(): void
+    {
+        $pending = Tribute::factory()->pending()->create(['name' => 'Waiting']);
+
+        Livewire::actingAs($this->editor)->test(Moderate::class)
+            ->assertDontSee('data-feature', false)
+            ->call('feature', $pending->getKey())
+            ->assertSee('Only an approved tribute can be featured.');
+
+        $this->assertFalse($pending->fresh()->isFeatured());
+        $this->assertSame(0, AuditLog::query()->count());
+    }
+
+    #[Test]
+    public function rejecting_a_featured_tribute_removes_it_from_the_featured_place(): void
+    {
+        $featured = Tribute::factory()->featured()->create(['name' => 'Starred']);
+
+        Livewire::actingAs($this->editor)->test(Moderate::class, ['tab' => 'approved'])
+            ->assertSee('data-featured-badge', false)
+            ->call('confirm', 'reject', $featured->getKey())
+            ->call('reject');
+
+        $this->assertFalse($featured->fresh()->isFeatured());
+        $this->get(route('tributes'))->assertOk()->assertDontSee('data-featured', false);
+    }
 }

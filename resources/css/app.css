@@ -8,6 +8,7 @@
 @import './typography.css';
 @import './home.css';
 @import './archive.css';
+@import './remembrance.css';
 
 /*
  | Brand design system — see CLAUDE.md "Brand (follow exactly)".
@@ -506,11 +507,6 @@
         width: 1px;
         height: 1px;
         overflow: hidden;
-    }
-
-    /* Tribute wall: cards flow into columns; each card stays whole. */
-    .tribute-wall > li {
-        break-inside: avoid;
     }
 
     /* Awards timeline: a brass hairline down the left with a small brass marker per entry. */

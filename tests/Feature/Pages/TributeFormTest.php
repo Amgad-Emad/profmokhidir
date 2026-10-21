@@ -3,6 +3,7 @@
 namespace Tests\Feature\Pages;
 
 use App\Constants\Taglines;
+use App\Constants\TributeForm;
 use App\Constants\TributeRelationship;
 use App\Constants\TributeStatus;
 use App\Http\Controllers\TributeController;
@@ -36,31 +37,123 @@ class TributeFormTest extends TestCase
     }
 
     #[Test]
-    public function the_form_renders_every_field_with_a_live_counter_a_honeypot_and_no_livewire(): void
+    public function the_first_step_renders_every_field_with_hints_a_live_counter_a_honeypot_and_no_livewire(): void
     {
         $response = $this->get(route('tributes.create'))->assertOk();
 
         $response
             ->assertSee('<title>'.Taglines::LEAVE_TRIBUTE.' · ', false)
-            ->assertSeeInOrder(['section-header', 'Tributes', 'rule-brass', 'id="section-title"', Taglines::LEAVE_TRIBUTE], false)
-            ->assertSee('action="'.route('tributes.store').'"', false)
+            ->assertSeeInOrder(['section-header', 'Tributes', 'rule-brass', 'id="section-title"', Taglines::LEAVE_TRIBUTE, TributeForm::INTRO], false)
+            ->assertSeeInOrder(['<p class="tribute-steps mt-8" data-rise data-step="write">', '<span class="sr-only">Step 1 of 2</span>', 'Step I of II', 'aria-current="step">Write</span>', '>Preview</span>'], false)
+            ->assertSee('action="'.route('tributes.preview').'"', false)
             ->assertSee('name="_token"', false)
             ->assertSee('id="name" name="name" type="text"', false)
+            ->assertSee(TributeForm::hint('name'))
             ->assertSee('<select id="relationship" name="relationship"', false)
             ->assertSee('<option value="student"', false)
             ->assertSee('<option value="other"', false)
             ->assertSee('id="location" name="location"', false)
+            ->assertSee(TributeForm::hint('location'))
             ->assertSee('x-data="{ count: 0 }"', false)
             ->assertSee('<textarea id="message" name="message" rows="8"', false)
+            ->assertSee('Share a memory, a lesson or a moment.')
             ->assertSee('maxlength="'.Tribute::MESSAGE_MAX_LENGTH.'"', false)
             ->assertSee('<span x-text="count">0</span> / '.Tribute::MESSAGE_MAX_LENGTH.' characters', false)
             ->assertSee('id="email" name="email" type="email"', false)
-            ->assertSee('Never shown publicly.')
+            ->assertSee('never shown publicly')
             ->assertSee('class="form-honeypot" aria-hidden="true"', false)
             ->assertSee('name="'.StoreTributeRequest::HONEYPOT.'" tabindex="-1" autocomplete="off"', false)
-            ->assertSee('type="checkbox" name="consent"', false)
-            ->assertSee('Send tribute')
+            ->assertDontSee('type="checkbox" name="consent"', false)
+            ->assertSee('Preview your tribute')
             ->assertDontSee('livewire', false);
+    }
+
+    #[Test]
+    public function the_preview_step_shows_the_tribute_as_it_will_appear_with_the_consent_and_hidden_fields(): void
+    {
+        $response = $this->post(route('tributes.preview'), $this->payload(['consent' => null]))->assertOk();
+
+        $response
+            ->assertSee('<meta name="robots" content="noindex', false)
+            ->assertSeeInOrder([
+                TributeForm::PREVIEW_INTRO,
+                'data-step="preview"', '<span class="sr-only">Step 2 of 2</span>', 'Step II of II', '>Write</span>', 'aria-current="step">Preview</span>',
+                '<div class="leaf mt-12" data-rise data-preview>', '<article class="tribute-entry">',
+                '<span class="hang-quote">&ldquo;</span>He taught me to look twice before answering.&rdquo;</p>',
+                '<h2 class="tribute-entry__author smallcaps">Ahmed El-Sheikh</h2>', 't-label text-bronze tribute-entry__meta">Student · Khartoum, Sudan',
+                '<form method="POST" action="'.route('tributes.store').'"',
+                '<input type="hidden" name="name" value="Ahmed El-Sheikh">',
+                '<input type="hidden" name="relationship" value="student">',
+                '<input type="hidden" name="location" value="Khartoum, Sudan">',
+                '<input type="hidden" name="message" value="He taught me to look twice before answering.">',
+                '<input type="hidden" name="email" value="ahmed@example.com">',
+                'class="form-honeypot" aria-hidden="true"',
+                'type="checkbox" name="consent"', TributeForm::CONSENT,
+                'Send tribute', 'formaction="'.route('tributes.edit').'"', 'formnovalidate', 'Change something',
+            ], false)
+            ->assertDontSee('tribute-entry__card', false)
+            ->assertDontSee('livewire', false);
+
+        $this->assertDatabaseCount('tributes', 0);
+    }
+
+    #[Test]
+    public function an_invalid_first_step_returns_to_the_form_with_errors_and_input(): void
+    {
+        $this->from(route('tributes.create'))
+            ->post(route('tributes.preview'), ['name' => '', 'relationship' => 'stranger', 'message' => '', 'location' => 'Khartoum'])
+            ->assertRedirect(route('tributes.create'))
+            ->assertSessionHasErrors(['name', 'relationship', 'message'])
+            ->assertSessionDoesntHaveErrors(['consent'])
+            ->assertSessionHasInput('location', 'Khartoum');
+    }
+
+    #[Test]
+    public function the_preview_can_be_revisited_from_flashed_input_and_sends_the_visitor_back_otherwise(): void
+    {
+        $this->get('/tributes/preview')->assertRedirect(route('tributes.create'));
+
+        $this->withSession(['_old_input' => $this->payload()])
+            ->get('/tributes/preview')
+            ->assertOk()
+            ->assertSee('Ahmed El-Sheikh')
+            ->assertSee('<input type="hidden" name="message" value="He taught me to look twice before answering.">', false);
+    }
+
+    #[Test]
+    public function change_something_returns_to_the_form_with_the_fields_filled_in(): void
+    {
+        $response = $this->post(route('tributes.edit'), $this->payload())
+            ->assertRedirect(route('tributes.create'))
+            ->assertSessionHasInput('name', 'Ahmed El-Sheikh')
+            ->assertSessionHasInput('message', 'He taught me to look twice before answering.');
+
+        $this->followRedirects($response)
+            ->assertOk()
+            ->assertSee('value="Ahmed El-Sheikh"', false)
+            ->assertSee('<option value="student" selected', false)
+            ->assertSee('He taught me to look twice before answering.</textarea>', false)
+            ->assertSee('x-data="{ count: 44 }"', false);
+    }
+
+    #[Test]
+    public function sending_without_consent_returns_to_the_preview_with_the_tribute_intact(): void
+    {
+        Notification::fake();
+
+        $response = $this->from('/tributes/preview')
+            ->post(route('tributes.store'), $this->payload(['consent' => null]))
+            ->assertRedirect('/tributes/preview')
+            ->assertSessionHasErrors('consent');
+
+        $this->assertDatabaseCount('tributes', 0);
+
+        // The flashed errors are consumed by the assertion above, so render from a fresh submission.
+        $this->followRedirects($this->from('/tributes/preview')->post(route('tributes.store'), $this->payload(['consent' => null])))
+            ->assertOk()
+            ->assertSee('Please confirm that your tribute may be published.')
+            ->assertSee('aria-current="page"', false)
+            ->assertSee('<input type="hidden" name="name" value="Ahmed El-Sheikh">', false);
     }
 
     #[Test]
@@ -140,7 +233,7 @@ class TributeFormTest extends TestCase
             ->assertSee('Please choose one of the listed relationships.')
             ->assertSee('Your tribute can be at most '.Tribute::MESSAGE_MAX_LENGTH.' characters.')
             ->assertSee('Please enter a valid email address, or leave it empty.')
-            ->assertSee('Please confirm that your tribute may be published.');
+            ->assertDontSee('Please confirm that your tribute may be published.');
     }
 
     #[Test]
@@ -215,7 +308,7 @@ class TributeFormTest extends TestCase
         $this->get(route('tributes.thanks'))
             ->assertOk()
             ->assertSee('<title>Thank you · ', false)
-            ->assertSeeInOrder(['t-label text-brass', 'Tributes', 'rule-brass', 'id="section-title" class="t-quote', Taglines::TRIBUTE_THANKS], false)
+            ->assertSeeInOrder(['t-label text-brass', 'Tributes', 'rule-brass', 'class="seal seal--open" aria-hidden="true" data-rise', 'brand-mark--ring', 'data-size="56" data-tone="ivory"', 'id="section-title" class="t-quote', Taglines::TRIBUTE_THANKS], false)
             ->assertSee('href="'.route('tributes').'"', false)
             ->assertDontSee('livewire', false);
     }

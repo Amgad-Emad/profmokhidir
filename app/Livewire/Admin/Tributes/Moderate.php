@@ -19,8 +19,9 @@ use Livewire\WithPagination;
 
 /**
  * Tribute moderation: Pending, Approved and Rejected tabs; approve, reject,
- * fix typos (the original stays in the audit log) and bulk actions. The
- * visitor's email is shown here, to moderators only, and nowhere else.
+ * feature one approved tribute as the frontispiece of the book, fix typos (the
+ * original stays in the audit log) and bulk actions. The visitor's email is
+ * shown here, to moderators only, and nowhere else.
  */
 class Moderate extends Component
 {
@@ -84,6 +85,33 @@ class Moderate extends Component
         $this->forget((int) $tribute->getKey());
         $this->cancelConfirmation();
         $this->notify('Tribute rejected.');
+    }
+
+    /**
+     * Make an approved tribute the frontispiece of the book (one at a time).
+     */
+    public function feature(int $id): void
+    {
+        $tribute = $this->service()->findOrFail($id);
+        $this->authorize('update', $tribute);
+
+        if (! $tribute->isApproved()) {
+            $this->notify('Only an approved tribute can be featured.');
+
+            return;
+        }
+
+        $this->service()->feature($tribute, auth()->user());
+        $this->notify('Tribute featured. It now opens the book of remembrance.');
+    }
+
+    public function unfeature(int $id): void
+    {
+        $tribute = $this->service()->findOrFail($id);
+        $this->authorize('update', $tribute);
+
+        $this->service()->unfeature($tribute, auth()->user());
+        $this->notify('Tribute no longer featured.');
     }
 
     public function approveSelected(): void

@@ -16,7 +16,7 @@ class TributesPageTest extends TestCase
     use RefreshDatabase;
 
     #[Test]
-    public function the_page_opens_on_evergreen_with_the_label_the_quote_heading_and_a_share_card(): void
+    public function the_page_opens_on_evergreen_with_the_label_the_quote_heading_the_seal_and_a_share_card(): void
     {
         $response = $this->get(route('tributes'))->assertOk();
 
@@ -25,6 +25,7 @@ class TributesPageTest extends TestCase
             ->assertSeeInOrder([
                 'glow-brass on-dark bg-evergreen', 't-label text-brass', Taglines::TRIBUTES_LABEL,
                 'rule-brass', 'id="section-title" class="t-quote', Taglines::TRIBUTES_HEADING,
+                'class="seal seal--open" aria-hidden="true" data-rise', 'brand-mark--ring', 'data-tone="ivory"', 'seal__rule',
                 'href="'.route('tributes.create').'" class="btn-pill-filled">'.Taglines::LEAVE_TRIBUTE,
             ], false)
             ->assertSee('<meta property="og:image" content="'.asset(SocialCards::TRIBUTES).'">', false)
@@ -45,11 +46,12 @@ class TributesPageTest extends TestCase
             ->assertSee('No tributes have been published yet. Yours could be the first.')
             ->assertDontSee('Still waiting for review')
             ->assertDontSee('Turned down')
-            ->assertDontSee('tribute-wall', false);
+            ->assertDontSee('data-book', false)
+            ->assertDontSee('data-featured', false);
     }
 
     #[Test]
-    public function approved_tributes_appear_as_cards_with_message_name_relationship_and_location_but_never_email(): void
+    public function approved_tributes_are_set_as_pages_of_a_book_with_name_relationship_and_location_but_never_email(): void
     {
         Tribute::factory()->approved()->relationship(TributeRelationship::Student)->create([
             'name' => 'Ahmed El-Sheikh', 'location' => 'Khartoum, Sudan', 'message' => 'He taught me to look twice.', 'email' => 'ahmed@example.com', 'sort_order' => 1,
@@ -63,11 +65,17 @@ class TributesPageTest extends TestCase
 
         $response
             ->assertSeeInOrder([
-                'tribute-wall columns-1 gap-6 md:columns-2" data-rise-group',
-                'break-inside-avoid', 'card card-ivory', 'font-display', 'italic', '&ldquo;He taught me to look twice.&rdquo;',
-                'Ahmed El-Sheikh', 't-label text-bronze">Student · Khartoum, Sudan',
-                '&ldquo;A generous colleague.&rdquo;', 'Leila Mahmoud', 't-label text-bronze">Colleague</p>',
+                'class="folio folio--top"', Taglines::TRIBUTES_BOOK_LABEL,
+                '<nav class="book-filters mt-6" aria-label="Filter by relationship">',
+                'class="book-filter smallcaps" aria-current="true">All</a>', 'Students</a>', 'Colleagues</a>', 'Family</a>', 'Friends</a>',
+                '<ol class="book mt-14" data-rise-group data-book>',
+                '<li class="book__leaf">', '<article class="tribute-entry">', '<blockquote class="tribute-entry__text">', '<span class="hang-quote">&ldquo;</span>He taught me to look twice.&rdquo;</p>',
+                '<h3 class="tribute-entry__author smallcaps">Ahmed El-Sheikh</h3>', 't-label text-bronze tribute-entry__meta">Student · Khartoum, Sudan',
+                'role="separator" data-ornament="rule-dot"',
+                '<li class="book__leaf">', 'A generous colleague.&rdquo;</p>', '<h3 class="tribute-entry__author smallcaps">Leila Mahmoud</h3>', 't-label text-bronze tribute-entry__meta">Colleague</p>',
+                'folio folio--bottom',
             ], false)
+            ->assertDontSee('Others</a>', false)
             ->assertDontSee('ahmed@example.com')
             ->assertDontSee('leila@example.com')
             ->assertDontSee('example.com')
@@ -76,7 +84,53 @@ class TributesPageTest extends TestCase
     }
 
     #[Test]
-    public function the_wall_paginates_at_twenty_four(): void
+    public function the_relationship_filters_are_plain_links_that_narrow_the_book(): void
+    {
+        Tribute::factory()->approved()->relationship(TributeRelationship::Student)->create(['name' => 'Zq Student']);
+        Tribute::factory()->approved()->relationship(TributeRelationship::Friend)->create(['name' => 'Zq Friend']);
+
+        $this->get(route('tributes', ['relationship' => 'friend']))
+            ->assertOk()
+            ->assertSee('href="'.route('tributes').'" class="book-filter smallcaps">All</a>', false)
+            ->assertSee('href="'.route('tributes', ['relationship' => 'friend']).'" class="book-filter smallcaps" aria-current="true">Friends</a>', false)
+            ->assertSee('Zq Friend')
+            ->assertDontSee('Zq Student');
+
+        $this->get(route('tributes', ['relationship' => 'family']))
+            ->assertOk()
+            ->assertSee('No tributes from family have been published yet.')
+            ->assertDontSee('Zq Friend');
+    }
+
+    #[Test]
+    public function the_featured_tribute_opens_the_book_set_large_in_the_quote_style(): void
+    {
+        $featured = Tribute::factory()->featured()->relationship(TributeRelationship::Student)->create([
+            'name' => 'Ahmed El-Sheikh', 'location' => 'Khartoum, Sudan', 'message' => 'He never answered a question with an answer.', 'email' => 'ahmed@example.com',
+        ]);
+        Tribute::factory()->approved()->create(['name' => 'Zq Other', 'message' => 'A page of the book.']);
+
+        $response = $this->get(route('tributes'))->assertOk();
+
+        $response
+            ->assertSeeInOrder([
+                'data-featured', '<div class="frontispiece" data-rise-group>', 'class="t-label text-bronze">'.Taglines::TRIBUTES_FEATURED_LABEL,
+                '<blockquote class="frontispiece__quote t-quote text-evergreen">', '<span class="hang-quote">&ldquo;</span>He never answered a question with an answer.&rdquo;',
+                '<p class="frontispiece__author smallcaps">Ahmed El-Sheikh</p>', 't-label text-bronze frontispiece__meta">Student · Khartoum, Sudan',
+                'href="'.route('tributes.card', $featured).'"', 'data-ornament="fleuron"',
+                'data-book', 'Zq Other',
+            ], false)
+            ->assertDontSee('ahmed@example.com');
+
+        // The frontispiece is not repeated among the pages.
+        $this->assertSame(1, substr_count($response->getContent(), 'He never answered a question with an answer.'));
+
+        // Under another relationship the frontispiece stays closed.
+        $this->get(route('tributes', ['relationship' => 'colleague']))->assertOk()->assertDontSee('data-featured', false);
+    }
+
+    #[Test]
+    public function the_book_paginates_at_twenty_four_with_roman_page_numbers_and_plain_links(): void
     {
         Tribute::factory()->approved()->count(PageSizes::TRIBUTES + 1)->create();
 
@@ -84,12 +138,22 @@ class TributesPageTest extends TestCase
 
         $this->get(route('tributes'))
             ->assertOk()
-            ->assertSee('Page 1 of 2')
-            ->assertSee('rel="next"', false);
+            ->assertSee('<nav class="book-pagination" aria-label="Pages of the book">', false)
+            ->assertSee('<span class="sr-only">Page 1 of 2</span>', false)
+            ->assertSee('<span aria-hidden="true">Page I of II</span>', false)
+            ->assertSee('href="'.route('tributes', ['page' => 2]).'" class="book-pagination__link book-pagination__link--next smallcaps" rel="next">Next page</a>', false);
 
         $this->get(route('tributes', ['page' => 2]))
             ->assertOk()
-            ->assertSee('Page 2 of 2');
+            ->assertSee('Page II of II')
+            ->assertSee('rel="prev"', false)
+            ->assertDontSee('data-featured', false);
+
+        // The filter survives in the page links.
+        Tribute::factory()->approved()->relationship(TributeRelationship::Family)->count(PageSizes::TRIBUTES + 1)->create();
+        $this->get(route('tributes', ['relationship' => 'family']))
+            ->assertOk()
+            ->assertSee('href="'.str_replace('&', '&amp;', route('tributes', ['relationship' => 'family', 'page' => 2])).'"', false);
     }
 
     #[Test]

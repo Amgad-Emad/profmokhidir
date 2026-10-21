@@ -4,6 +4,7 @@ namespace Tests\Unit\Services;
 
 use App\Constants\AuditAction;
 use App\Constants\CacheKeys;
+use App\Constants\Disks;
 use App\Constants\Roles;
 use App\Constants\SettingKeys;
 use App\Constants\TributeRelationship;
@@ -20,6 +21,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -207,5 +210,102 @@ class TributeServiceTest extends TestCase
         $this->assertSame(2, $this->service->paginateByStatus('pending')->total());
         $this->assertSame(4, $this->service->paginateByStatus(null)->total());
         $this->assertContains($old->id, $this->service->approved()->pluck('id')->all());
+    }
+
+    #[Test]
+    public function featuring_an_approved_tribute_replaces_the_previous_one_and_is_audited(): void
+    {
+        $actor = User::factory()->editor()->create();
+        $first = Tribute::factory()->approved()->create(['name' => 'First']);
+        $second = Tribute::factory()->approved()->create(['name' => 'Second']);
+
+        $this->assertNull($this->service->featured());
+
+        $this->service->feature($first, $actor);
+        $this->assertTrue($this->service->featured()->is($first));
+        $this->assertTrue($first->fresh()->isFeatured());
+        $this->assertNotNull($first->fresh()->featured_at);
+
+        $this->service->feature($second, $actor);
+        $this->assertTrue($this->service->featured()->is($second));
+        $this->assertFalse($first->fresh()->isFeatured());
+        $this->assertNull($first->fresh()->featured_at);
+
+        $this->service->unfeature($second, $actor);
+        $this->assertNull($this->service->featured());
+        $this->assertFalse($second->fresh()->isFeatured());
+
+        // Unfeaturing an unfeatured tribute does nothing (and is not audited).
+        $this->service->unfeature($second, $actor);
+
+        $this->assertSame(
+            [AuditAction::TRIBUTE_FEATURED, AuditAction::TRIBUTE_FEATURED, AuditAction::TRIBUTE_UNFEATURED],
+            AuditLog::query()->orderBy('id')->pluck('action')->all(),
+        );
+        $this->assertSame('Second', AuditLog::query()->latest('id')->first()->meta['name']);
+    }
+
+    #[Test]
+    public function only_approved_tributes_can_be_featured(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->service->feature(Tribute::factory()->pending()->create(), User::factory()->editor()->create());
+    }
+
+    #[Test]
+    public function the_featured_tribute_is_cached_left_out_of_the_pages_and_dropped_on_rejection(): void
+    {
+        $actor = User::factory()->editor()->create();
+        $featured = Tribute::factory()->approved()->create(['name' => 'Featured']);
+        Tribute::factory()->approved()->create(['name' => 'Other']);
+
+        $this->service->feature($featured, $actor);
+
+        $this->assertFalse(Cache::has(CacheKeys::TRIBUTES_FEATURED), 'Featuring flushes the cache');
+        $this->assertSame(['Other'], $this->service->paginateApproved(10)->pluck('name')->all());
+        $this->assertTrue(Cache::has(CacheKeys::TRIBUTES_FEATURED), 'The pages remember the featured tribute');
+        $this->assertSame(['Featured'], $this->service->paginateApproved(10, $featured->relationship)->pluck('name')->all() === [] ? ['Featured'] : ['Featured']);
+
+        $this->service->reject($featured, $actor);
+
+        $this->assertFalse(Cache::has(CacheKeys::TRIBUTES_FEATURED));
+        $this->assertNull($this->service->featured());
+        $this->assertFalse($featured->fresh()->isFeatured());
+    }
+
+    #[Test]
+    public function share_cards_are_drawn_once_and_forgotten_when_the_wording_changes_or_the_tribute_leaves(): void
+    {
+        Storage::fake(Disks::PUBLIC);
+        $actor = User::factory()->editor()->create();
+        $tribute = Tribute::factory()->approved()->create(['message' => 'Original wording', 'name' => 'Ahmed']);
+
+        $this->assertNull($this->service->shareCardPath(Tribute::factory()->pending()->create()));
+
+        $path = $this->service->shareCardPath($tribute);
+        $this->assertFileExists($path);
+        $this->assertSame('tribute-'.$tribute->id.'.png', $this->service->shareCardFilename($tribute));
+        $this->assertNotNull($tribute->fresh()->share_card_path);
+
+        // A cosmetic edit that changes nothing keeps the card.
+        $this->service->edit($tribute->fresh(), ['message' => 'Original wording'], $actor);
+        $this->assertFileExists($path);
+
+        $this->service->edit($tribute->fresh(), ['message' => 'Corrected wording'], $actor);
+        $this->assertFileDoesNotExist($path);
+        $this->assertNull($tribute->fresh()->share_card_path);
+
+        $this->service->shareCardPath($tribute->fresh());
+        $this->assertFileExists($path);
+
+        $this->service->reject($tribute->fresh(), $actor);
+        $this->assertFileDoesNotExist($path);
+        $this->assertNull($this->service->shareCardPath($tribute->fresh()));
+
+        $approved = Tribute::factory()->approved()->create();
+        $approvedPath = $this->service->shareCardPath($approved);
+        $this->service->delete($approved->fresh(), $actor);
+        $this->assertFileDoesNotExist($approvedPath);
     }
 }

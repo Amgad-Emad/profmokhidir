@@ -65,6 +65,7 @@ class DatabaseSeederTest extends TestCase
         $this->assertSame(3, OtherItem::query()->count());
         $this->assertSame(6, Tribute::query()->withStatus(TributeStatus::Approved)->count());
         $this->assertSame(3, Tribute::query()->withStatus(TributeStatus::Pending)->count());
+        $this->assertSame(1, Tribute::query()->published()->featured()->count());
         $this->assertSame(1, ChatChannel::query()->where('slug', 'general')->count());
         $this->assertGreaterThanOrEqual(3, ChatMessage::query()->count());
     }

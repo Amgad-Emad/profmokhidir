@@ -1,7 +1,7 @@
 @use('App\Constants\TributeStatus')
 @use('App\Constants\DateFormats')
 <div>
-    <x-admin.page-header eyebrow="Tributes" title="Review tributes" intro="Tributes appear on the site only after they are approved. Email addresses are shown here to moderators and never published." />
+    <x-admin.page-header eyebrow="Tributes" title="Review tributes" intro="Tributes appear on the site only after they are approved. One approved tribute can be featured to open the book of remembrance. Email addresses are shown here to moderators and never published." />
 
     <div class="mt-8"><x-admin.flash /></div>
 
@@ -62,11 +62,21 @@
                         </div>
                         <div class="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 text-sm sm:flex-col sm:items-end">
                             <x-admin.status-badge :tone="\App\Constants\StatusTone::forTribute($tribute->status)" :label="$tribute->status->label()" />
+                            @if ($tribute->isFeatured())
+                                <x-admin.status-badge tone="cypress" label="Featured" data-featured-badge />
+                            @endif
                             @if (! $tribute->isApproved())
                                 <button type="button" wire:click="approve({{ $tribute->getKey() }})" class="text-cypress underline-offset-4 hover:underline" data-approve>Approve<span class="sr-only"> tribute from {{ $tribute->name }}</span></button>
                             @endif
                             @if ($tribute->status !== TributeStatus::Rejected)
                                 <button type="button" wire:click="confirm('reject', {{ $tribute->getKey() }})" class="text-bronze underline-offset-4 hover:underline" data-reject>Reject<span class="sr-only"> tribute from {{ $tribute->name }}</span></button>
+                            @endif
+                            @if ($tribute->isApproved())
+                                @if ($tribute->isFeatured())
+                                    <button type="button" wire:click="unfeature({{ $tribute->getKey() }})" class="text-ash underline-offset-4 hover:underline" data-unfeature>Remove from featured<span class="sr-only"> (tribute from {{ $tribute->name }})</span></button>
+                                @else
+                                    <button type="button" wire:click="feature({{ $tribute->getKey() }})" class="text-cypress underline-offset-4 hover:underline" data-feature>Feature on the page<span class="sr-only"> (tribute from {{ $tribute->name }})</span></button>
+                                @endif
                             @endif
                             @if ($editingId !== (int) $tribute->getKey())
                                 <button type="button" wire:click="startEditing({{ $tribute->getKey() }})" class="link-meta" data-edit>Fix typos<span class="sr-only"> in tribute from {{ $tribute->name }}</span></button>

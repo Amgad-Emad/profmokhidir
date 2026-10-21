@@ -32,6 +32,9 @@ class TributeFactory extends Factory
             'published_at' => null,
             'ip_hash' => hash('sha256', fake()->ipv4()),
             'sort_order' => 0,
+            'is_featured' => false,
+            'featured_at' => null,
+            'share_card_path' => null,
         ];
     }
 
@@ -73,6 +76,15 @@ class TributeFactory extends Factory
     public function published(): static
     {
         return $this->approved();
+    }
+
+    /** The frontispiece of the book of remembrance (approved as well). */
+    public function featured(): static
+    {
+        return $this->approved()->state(fn (array $attributes) => [
+            'is_featured' => true,
+            'featured_at' => now(),
+        ]);
     }
 
     public function relationship(TributeRelationship $relationship): static

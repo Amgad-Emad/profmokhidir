@@ -19,6 +19,7 @@ use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Notification;
+use InvalidArgumentException;
 
 /**
  * Visitor tributes: submitted as pending, shown only once an admin or editor
@@ -41,6 +42,7 @@ class TributeService extends AbstractContentService
         CacheRepository $cache,
         private readonly UserRepositoryInterface $users,
         private readonly SettingService $settings,
+        private readonly TributeShareCardService $cards,
     ) {
         parent::__construct($tributes, $audit, $cache);
     }
@@ -52,7 +54,7 @@ class TributeService extends AbstractContentService
 
     protected function cacheKeys(): array
     {
-        return [CacheKeys::TRIBUTES, CacheKeys::TRIBUTES.'.latest'];
+        return [CacheKeys::TRIBUTES, CacheKeys::TRIBUTES.'.latest', CacheKeys::TRIBUTES_FEATURED];
     }
 
     /**
@@ -141,11 +143,15 @@ class TributeService extends AbstractContentService
 
     public function reject(Tribute $tribute, User $actor, ?string $note = null): Tribute
     {
+        $this->cards->forget($tribute);
+
         $tribute = $this->repository->update($tribute, [
             'status' => TributeStatus::Rejected,
             'approved_by' => null,
             'approved_at' => null,
             'published_at' => null,
+            'is_featured' => false,
+            'featured_at' => null,
         ]);
 
         $this->audit->record($actor, AuditAction::TRIBUTE_REJECTED, $tribute, array_filter([
@@ -190,6 +196,7 @@ class TributeService extends AbstractContentService
             return $tribute;
         }
 
+        $this->cards->forget($tribute);
         $tribute = $this->repository->update($tribute, $changes);
 
         $this->audit->record($actor, AuditAction::TRIBUTE_EDITED, $tribute, [
@@ -249,6 +256,7 @@ class TributeService extends AbstractContentService
 
     public function delete($model, ?User $actor = null): bool
     {
+        $this->cards->forget($model);
         $this->audit->record($actor, AuditAction::TRIBUTE_DELETED, $model, ['name' => $model->name]);
 
         $deleted = $this->repository->delete($model);
@@ -268,13 +276,71 @@ class TributeService extends AbstractContentService
     }
 
     /**
-     * Approved tributes for the public page, a page at a time, in display order.
+     * Approved tributes for the public page, a page at a time, in display order,
+     * optionally one relationship only. The featured tribute opens the book, so
+     * it is left out of the pages.
      *
      * @return LengthAwarePaginator<int, Tribute>
      */
-    public function paginateApproved(int $perPage): LengthAwarePaginator
+    public function paginateApproved(int $perPage, ?TributeRelationship $relationship = null): LengthAwarePaginator
     {
-        return $this->repository->paginatePublished($perPage);
+        $featured = $this->featured();
+
+        return $this->tributes()->paginateApproved($relationship, $perPage, $featured?->getKey());
+    }
+
+    /**
+     * The approved tribute editors chose to open the book with (cached).
+     */
+    public function featured(): ?Tribute
+    {
+        return $this->remember(CacheKeys::TRIBUTES_FEATURED, fn (): ?Tribute => $this->tributes()->featured());
+    }
+
+    /**
+     * Make an approved tribute the featured one; only one is featured at a time.
+     */
+    public function feature(Tribute $tribute, User $actor): Tribute
+    {
+        if (! $tribute->isApproved()) {
+            throw new InvalidArgumentException('Only an approved tribute can be featured.');
+        }
+
+        $this->tributes()->clearFeatured((int) $tribute->getKey());
+
+        $tribute = $this->repository->update($tribute, ['is_featured' => true, 'featured_at' => now()]);
+
+        $this->audit->record($actor, AuditAction::TRIBUTE_FEATURED, $tribute, ['name' => $tribute->name]);
+        $this->flushCache();
+
+        return $tribute;
+    }
+
+    public function unfeature(Tribute $tribute, User $actor): Tribute
+    {
+        if (! $tribute->isFeatured()) {
+            return $tribute;
+        }
+
+        $tribute = $this->repository->update($tribute, ['is_featured' => false, 'featured_at' => null]);
+
+        $this->audit->record($actor, AuditAction::TRIBUTE_UNFEATURED, $tribute, ['name' => $tribute->name]);
+        $this->flushCache();
+
+        return $tribute;
+    }
+
+    /**
+     * The share card of an approved tribute (drawn once, then cached), or null.
+     */
+    public function shareCardPath(Tribute $tribute): ?string
+    {
+        return $this->cards->pathFor($tribute);
+    }
+
+    public function shareCardFilename(Tribute $tribute): string
+    {
+        return $this->cards->filename($tribute);
     }
 
     /**

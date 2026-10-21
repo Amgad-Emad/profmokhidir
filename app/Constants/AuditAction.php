@@ -58,6 +58,10 @@ final class AuditAction
 
     public const string TRIBUTE_EDITED = 'tribute.edited';
 
+    public const string TRIBUTE_FEATURED = 'tribute.featured';
+
+    public const string TRIBUTE_UNFEATURED = 'tribute.unfeatured';
+
     public const string MEDIA_UPLOADED = 'media.uploaded';
 
     public const string MEDIA_UPDATED = 'media.updated';
@@ -84,7 +88,7 @@ final class AuditAction
             self::ROLE_ASSIGNED, self::ROLE_REMOVED, self::ROLES_SYNCED, self::USER_DELETED,
             self::USER_INVITED, self::USER_INVITE_RESENT, self::USER_DEACTIVATED, self::USER_REACTIVATED, self::SETTINGS_UPDATED,
             self::CONTENT_CREATED, self::CONTENT_RESTORED, self::CONTENT_PUBLISHED, self::CONTENT_UNPUBLISHED, self::CONTENT_DELETED,
-            self::TRIBUTE_EDITED, self::MEDIA_UPLOADED, self::MEDIA_UPDATED, self::MEDIA_DELETED,
+            self::TRIBUTE_EDITED, self::TRIBUTE_FEATURED, self::TRIBUTE_UNFEATURED, self::MEDIA_UPLOADED, self::MEDIA_UPDATED, self::MEDIA_DELETED,
             self::CHAT_MESSAGE_DELETED, self::CHAT_MESSAGE_REPORTED, self::CHAT_REPORT_RESOLVED, self::ADMIN_LOGIN,
         ];
     }
@@ -121,6 +125,8 @@ final class AuditAction
             self::CONTENT_UNPUBLISHED => 'unpublished content',
             self::CONTENT_DELETED => 'deleted content',
             self::TRIBUTE_EDITED => 'edited a tribute',
+            self::TRIBUTE_FEATURED => 'featured a tribute',
+            self::TRIBUTE_UNFEATURED => 'removed a tribute from the featured place',
             self::MEDIA_UPLOADED => 'uploaded a file',
             self::MEDIA_UPDATED => 'updated image details',
             self::MEDIA_DELETED => 'deleted a file',

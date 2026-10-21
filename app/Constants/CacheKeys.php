@@ -38,6 +38,8 @@ final class CacheKeys
 
     public const string TRIBUTES = 'public.tributes';
 
+    public const string TRIBUTES_FEATURED = 'public.tributes.featured';
+
     public const string HOME_QUOTES = 'public.home_quotes';
 
     /** Site settings (contact details, notification address, mail sender). */
@@ -50,7 +52,7 @@ final class CacheKeys
     {
         return [
             self::PROFILE, self::CV_ENTRIES, self::PUBLICATIONS, self::AWARDS, self::VIDEOS,
-            self::ALBUMS, self::TEACHING_MATERIALS, self::COMMENTARIES, self::OTHER_ITEMS, self::TRIBUTES,
+            self::ALBUMS, self::TEACHING_MATERIALS, self::COMMENTARIES, self::OTHER_ITEMS, self::TRIBUTES, self::TRIBUTES_FEATURED,
             self::HOME_QUOTES, self::SETTINGS,
         ];
     }
