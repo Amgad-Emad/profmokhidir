@@ -82,6 +82,8 @@ export default function formEditor(config = {}) {
                     const html = instance.isEmpty ? '' : instance.getHTML();
                     if (config.model) this.$wire.set(config.model, html, false);
                     else if (this.$refs.value) this.$refs.value.value = html;
+                    // Edit screens listen for this to mark the form as changed.
+                    this.$root.dispatchEvent(new CustomEvent('form-editor-change', { bubbles: true }));
                 },
                 onTransaction: () => this.refresh(),
             });

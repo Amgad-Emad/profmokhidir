@@ -36,6 +36,11 @@ class EloquentAuditLogRepository extends BaseEloquentRepository implements Audit
         return $this->query()->with('user')->orderByDesc('id')->limit($limit)->get();
     }
 
+    public function recentExcept(array $actions, int $limit = 20): Collection
+    {
+        return $this->query()->with(['user', 'subject'])->whereNotIn('action', $actions)->orderByDesc('id')->limit($limit)->get();
+    }
+
     public function forSubject(Model $subject): Collection
     {
         return $this->query()

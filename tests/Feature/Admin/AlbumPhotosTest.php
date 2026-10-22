@@ -87,7 +87,7 @@ class AlbumPhotosTest extends TestCase
             ->assertSee('Ready')
             ->call('save')
             ->assertHasNoErrors()
-            ->assertSee('Album saved.');
+            ->assertSee('Album published. It is on the public site now.');
 
         $this->assertTrue($album->fresh()->isPublished());
 

@@ -1,6 +1,7 @@
 <?php
 
 use App\Constants\ThemeSettings;
+use App\Http\Middleware\EnablePreview;
 use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\EnsureCommunityMember;
 use App\Http\Middleware\EnsureTwoFactorIsEnabled;
@@ -33,6 +34,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // The theme cookie stays plain so the inline head script can read it before the first paint.
         $middleware->encryptCookies(except: [ThemeSettings::COOKIE]);
+
+        // Signed preview links show a draft on its public page; global so it runs before any page service is built.
+        $middleware->prepend(EnablePreview::class);
 
         // Deactivated accounts are signed out on their next request, whatever the page.
         $middleware->web(append: [EnsureAccountIsActive::class]);

@@ -2,12 +2,12 @@
 
 namespace Tests\Feature\Database;
 
+use App\Constants\Archive;
 use App\Constants\CommunityStatus;
 use App\Constants\ContentStatus;
 use App\Constants\Roles;
 use App\Constants\SettingKeys;
 use App\Constants\TributeStatus;
-use App\Constants\Archive;
 use App\Models\Album;
 use App\Models\Award;
 use App\Models\ChatChannel;
@@ -17,6 +17,7 @@ use App\Models\CvEntry;
 use App\Models\OtherItem;
 use App\Models\Profile;
 use App\Models\Publication;
+use App\Models\Revision;
 use App\Models\Setting;
 use App\Models\TeachingMaterial;
 use App\Models\Tribute;
@@ -68,6 +69,7 @@ class DatabaseSeederTest extends TestCase
         $this->assertSame(1, Tribute::query()->published()->featured()->count());
         $this->assertSame(1, ChatChannel::query()->where('slug', 'general')->count());
         $this->assertGreaterThanOrEqual(3, ChatMessage::query()->count());
+        $this->assertSame(1, Revision::query()->where('revisionable_type', (new Profile)->getMorphClass())->count(), 'The profile starts with one version in its history.');
     }
 
     private function assertAccounts(): void

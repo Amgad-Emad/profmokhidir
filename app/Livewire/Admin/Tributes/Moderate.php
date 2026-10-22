@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace App\Livewire\Admin\Tributes;
 
 use App\Constants\AdminNavigation;
+use App\Constants\AdminUx;
 use App\Constants\StatusTone;
 use App\Constants\TributeStatus;
 use App\Http\Requests\Admin\TributeEditRequest;
-use App\Livewire\Admin\Concerns\ConfirmsActions;
+use App\Livewire\Admin\Concerns\NotifiesEditors;
 use App\Models\Tribute;
 use App\Services\TributeService;
 use Illuminate\Contracts\View\View;
@@ -25,11 +26,7 @@ use Livewire\WithPagination;
  */
 class Moderate extends Component
 {
-    use AuthorizesRequests, ConfirmsActions, WithPagination;
-
-    public const string ACTION_REJECT = 'reject';
-
-    public const string ACTION_BULK_REJECT = 'bulk-reject';
+    use AuthorizesRequests, NotifiesEditors, WithPagination;
 
     public const int PER_PAGE = 20;
 
@@ -69,22 +66,39 @@ class Moderate extends Component
 
         $this->service()->approve($tribute, auth()->user());
         $this->forget($id);
-        $this->notify('Tribute approved and published.');
+        $this->notify('Tribute from '.$tribute->name.' approved. It is on the Tributes page now.');
     }
 
-    public function reject(): void
+    /**
+     * Decline at once (it can be approved later, so there is no dialog); the
+     * toast offers Undo for AdminUx::UNDO_SECONDS.
+     */
+    public function decline(int $id): void
     {
-        if (! $this->isConfirming(self::ACTION_REJECT)) {
-            return;
-        }
-
-        $tribute = $this->service()->findOrFail((int) $this->confirmingId);
+        $tribute = $this->service()->findOrFail($id);
         $this->authorize('reject', $tribute);
 
+        $previous = [$id => $tribute->status->value];
         $this->service()->reject($tribute, auth()->user());
-        $this->forget((int) $tribute->getKey());
-        $this->cancelConfirmation();
-        $this->notify('Tribute rejected.');
+        $this->forget($id);
+        $this->toast('Tribute from '.$tribute->name.' declined. It will not appear on the site.', AdminUx::TOAST_SUCCESS, $this->undoWith('restoreStatuses', [$previous]));
+    }
+
+    /**
+     * The Undo of a decline: each tribute goes back to the status it had.
+     *
+     * @param  array<int|string, string>  $statuses
+     */
+    public function restoreStatuses(array $statuses): void
+    {
+        $this->authorize('viewAny', Tribute::class);
+
+        foreach (array_keys($statuses) as $id) {
+            $this->authorize('approve', $this->service()->findOrFail((int) $id));
+        }
+
+        $count = $this->service()->restoreStatuses($statuses, auth()->user());
+        $this->toast($count === 1 ? 'Decline undone.' : 'Declines undone for '.$count.' tributes.');
     }
 
     /**
@@ -123,25 +137,23 @@ class Moderate extends Component
         $this->notify($count === 1 ? '1 tribute approved.' : $count.' tributes approved.');
     }
 
-    public function confirmRejectSelected(): void
-    {
-        if ($this->selected !== []) {
-            $this->confirm(self::ACTION_BULK_REJECT, count($this->selected));
-        }
-    }
-
     public function rejectSelected(): void
     {
-        if (! $this->isConfirming(self::ACTION_BULK_REJECT)) {
-            return;
-        }
-
         $this->authorize('viewAny', Tribute::class);
+
+        $previous = [];
+
+        foreach ($this->selected as $id) {
+            $tribute = $this->service()->find((int) $id);
+
+            if ($tribute !== null && $tribute->status !== TributeStatus::Rejected) {
+                $previous[(int) $id] = $tribute->status->value;
+            }
+        }
 
         $count = $this->service()->rejectMany($this->selected, auth()->user());
         $this->selected = [];
-        $this->cancelConfirmation();
-        $this->notify($count === 1 ? '1 tribute rejected.' : $count.' tributes rejected.');
+        $this->toast($count === 1 ? '1 tribute declined.' : $count.' tributes declined.', AdminUx::TOAST_SUCCESS, $previous === [] ? null : $this->undoWith('restoreStatuses', [$previous]));
     }
 
     public function startEditing(int $id): void
@@ -216,7 +228,7 @@ class Moderate extends Component
 
     private function notify(string $message): void
     {
-        session()->flash('admin.status', $message);
+        $this->toast($message);
     }
 
     /**

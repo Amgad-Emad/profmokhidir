@@ -160,6 +160,11 @@ class MediaService
         return $this->media->countIncompleteImages();
     }
 
+    public function countMissingAltText(): int
+    {
+        return $this->media->countMissingAltText();
+    }
+
     /**
      * Where an image is used: the content type and record it belongs to, with
      * a link to that record's admin screen, so editors can see what a deletion

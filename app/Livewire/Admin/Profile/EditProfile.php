@@ -8,7 +8,6 @@ use App\Constants\ContentStatus;
 use App\Constants\ContentTypes;
 use App\Constants\MediaCollections;
 use App\Constants\MediaTreatment;
-use App\Exceptions\ImagesNotReadyException;
 use App\Http\Requests\Admin\ContentRequest;
 use App\Http\Requests\Admin\ProfileRequest;
 use App\Livewire\Admin\Concerns\ManagesImages;
@@ -74,19 +73,27 @@ class EditProfile extends ContentForm
         return $this->imagesViewData();
     }
 
-    public function save(): void
+    /**
+     * The one profile is created on its first save and updated afterwards.
+     */
+    protected function store(array $data): Model
     {
-        $validated = $this->validate()['form'] ?? [];
+        $profile = app(ProfileService::class)->save($data, auth()->user());
+        $this->recordId = (int) $profile->getKey();
+        $this->form = $this->fromRecord($profile);
+        $this->loadImages();
 
-        try {
-            $profile = app(ProfileService::class)->save($this->transform($validated), auth()->user());
-            $this->recordId = (int) $profile->getKey();
-            $this->form = $this->fromRecord($profile);
-            $this->loadImages();
-            $this->notify('Profile saved.');
-        } catch (ImagesNotReadyException $exception) {
-            $this->addError(self::FIELD_PREFIX.'status', $exception->getMessage());
-        }
+        return $profile;
+    }
+
+    protected function redirectsAfterCreate(): bool
+    {
+        return false;
+    }
+
+    protected function createdMessage(): string
+    {
+        return 'Profile saved.';
     }
 
     public function addKeyFact(): void

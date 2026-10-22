@@ -105,7 +105,7 @@ class DocumentUploadTest extends TestCase
             ->assertHasNoErrors()
             ->assertSee('problem-set.pdf')
             ->assertSee('PDF · 2 MB')
-            ->assertSee('signature=', false);
+            ->assertSee('/download?expires=', false);
 
         $file = $material->fresh()->file();
         $this->assertSame(Disks::PRIVATE, $file->disk);
@@ -116,7 +116,7 @@ class DocumentUploadTest extends TestCase
             ->set('form.access', TeachingAccess::Public->value)
             ->call('save')
             ->assertHasNoErrors()
-            ->assertDontSee('signature=', false);
+            ->assertDontSee('/download?expires=', false);
 
         $this->assertSame(Disks::PUBLIC, $material->fresh()->file()->disk);
     }

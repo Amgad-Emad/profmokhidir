@@ -31,6 +31,7 @@ class DatabaseSeeder extends Seeder
             HomeQuoteSeeder::class,
             TributeSeeder::class,
             ChatSeeder::class,
+            RevisionSeeder::class,
             AuditLogSeeder::class,
         ]);
     }

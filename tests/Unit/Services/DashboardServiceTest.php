@@ -3,8 +3,8 @@
 namespace Tests\Unit\Services;
 
 use App\Constants\AdminNavigation;
-use App\Constants\DashboardGreeting;
 use App\Constants\AuditAction;
+use App\Constants\DashboardGreeting;
 use App\Constants\StatusTone;
 use App\Models\AuditLog;
 use App\Models\Award;
@@ -15,8 +15,8 @@ use App\Models\Tribute;
 use App\Models\User;
 use App\Services\DashboardService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use PHPUnit\Framework\Attributes\Test;
 use Illuminate\Support\Carbon;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class DashboardServiceTest extends TestCase
@@ -132,7 +132,7 @@ class DashboardServiceTest extends TestCase
 
         $summary = $this->service->summary(User::factory()->editor()->create());
 
-        $this->assertSame(['greeting', 'published', 'queues', 'attention', 'activity'], array_keys($summary));
+        $this->assertSame(['cards', 'actions', 'checklist', 'feed', 'greeting', 'published', 'queues', 'attention', 'activity'], array_keys($summary));
         $this->assertContains($summary['greeting']['salutation'], DashboardGreeting::all());
         $this->assertCount(10, $summary['published']);
         $this->assertCount(3, $summary['queues']);

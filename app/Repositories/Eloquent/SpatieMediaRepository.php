@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace App\Repositories\Eloquent;
 
 use App\Constants\Archive;
+use App\Constants\ContentTypes;
 use App\Constants\MediaCollections;
 use App\Constants\MediaProperties;
+use App\Models\Album;
 use App\Repositories\Contracts\MediaRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection;
@@ -115,6 +118,9 @@ final class SpatieMediaRepository implements MediaRepositoryInterface
             ->when(filled($filters[self::FILTER_TREATMENT] ?? null), fn (Builder $query) => $query->where('custom_properties->'.MediaProperties::TREATMENT, $filters[self::FILTER_TREATMENT]))
             ->when(filled($filters[self::FILTER_MODEL] ?? null), fn (Builder $query) => $query->where('model_type', $filters[self::FILTER_MODEL]))
             ->when((bool) ($filters[self::FILTER_INCOMPLETE] ?? false), fn (Builder $query) => $this->whereIncomplete($query))
+            ->when((bool) ($filters[self::FILTER_MISSING_ALT] ?? false), fn (Builder $query) => $this->whereMissing($query, MediaProperties::ALT_TEXT))
+            ->when((bool) ($filters[self::FILTER_UNUSED] ?? false), fn (Builder $query) => $this->whereUnused($query))
+            ->when(filled($filters[self::FILTER_ALBUM] ?? null), fn (Builder $query) => $query->where('model_type', (new Album)->getMorphClass())->where('model_id', (int) $filters[self::FILTER_ALBUM]))
             ->orderByDesc('created_at')
             ->orderByDesc('id')
             ->paginate($perPage)
@@ -126,12 +132,49 @@ final class SpatieMediaRepository implements MediaRepositoryInterface
         return $this->whereIncomplete($this->imagesQuery())->count();
     }
 
+    public function countMissingAltText(): int
+    {
+        return $this->whereMissing($this->imagesQuery(), MediaProperties::ALT_TEXT)->count();
+    }
+
     /**
      * @return Builder<Media>
      */
     private function imagesQuery(): Builder
     {
         return Media::query()->whereIn('collection_name', MediaCollections::images());
+    }
+
+    /**
+     * @param  Builder<Media>  $query
+     * @return Builder<Media>
+     */
+    private function whereMissing(Builder $query, string $property): Builder
+    {
+        $path = 'custom_properties->'.$property;
+
+        return $query->where(fn (Builder $query) => $query->whereNull($path)->orWhere($path, ''));
+    }
+
+    /**
+     * Images whose record no longer exists or sits in the trash: nothing on
+     * the site shows them.
+     *
+     * @param  Builder<Media>  $query
+     * @return Builder<Media>
+     */
+    private function whereUnused(Builder $query): Builder
+    {
+        return $query->where(function (Builder $query): void {
+            foreach (ContentTypes::all() as $type) {
+                /** @var Model $owner */
+                $owner = new $type['model'];
+
+                $query->orWhere(fn (Builder $query) => $query
+                    ->where('model_type', $owner->getMorphClass())
+                    ->whereNotIn('model_id', $owner->newQuery()->select($owner->getKeyName())));
+            }
+        });
     }
 
     /**

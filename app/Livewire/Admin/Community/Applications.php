@@ -9,6 +9,7 @@ use App\Constants\CommunityStatus;
 use App\Constants\StatusTone;
 use App\Exceptions\CommunityApplicationException;
 use App\Http\Requests\Admin\CommunityReviewRequest;
+use App\Livewire\Admin\Concerns\NotifiesEditors;
 use App\Models\User;
 use App\Services\CommunityService;
 use Illuminate\Contracts\View\View;
@@ -25,7 +26,7 @@ use Livewire\WithPagination;
  */
 class Applications extends Component
 {
-    use AuthorizesRequests, WithPagination;
+    use AuthorizesRequests, NotifiesEditors, WithPagination;
 
     public const string ACTION_APPROVE = 'approve';
 
@@ -158,7 +159,7 @@ class Applications extends Component
         $this->cancelDecision();
 
         if ($message !== null) {
-            session()->flash('admin.status', $message);
+            $this->toast($message);
         }
     }
 

@@ -4,17 +4,27 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin;
 
+use App\Constants\AdminUx;
 use App\Constants\ContentStatus;
 use App\Constants\ContentTypes;
+use App\Constants\Placeholders;
+use App\Constants\RevisionKind;
 use App\Exceptions\ImagesNotReadyException;
 use App\Http\Requests\Admin\ContentRequest;
+use App\Livewire\Admin\Concerns\NotifiesEditors;
+use App\Models\Revision;
 use App\Services\AbstractContentService;
+use App\Services\PreviewService;
+use App\Services\RevisionService;
 use BackedEnum;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 
 /**
@@ -25,11 +35,20 @@ use Livewire\Component;
  */
 abstract class ContentForm extends Component
 {
-    use AuthorizesRequests;
+    use AuthorizesRequests, NotifiesEditors;
 
     public const string FIELD_PREFIX = 'form.';
 
     public ?int $recordId = null;
+
+    /** Whether the record existed when the screen opened (an autosave of a new one swaps the address once). */
+    public bool $wasEditing = false;
+
+    /** An earlier version was loaded; the next save is recorded as a restore. */
+    public bool $restoredRevision = false;
+
+    /** The version history drawer is open. */
+    public bool $showHistory = false;
 
     /** @var array<string, mixed> */
     public array $form = [];
@@ -64,6 +83,7 @@ abstract class ContentForm extends Component
 
         $this->authorize('update', $record);
         $this->recordId = (int) $record->getKey();
+        $this->wasEditing = true;
         // Re-read so database defaults (status, sort order) are present on the model.
         $this->form = $this->fromRecord($this->service()->findOrFail($this->recordId));
     }
@@ -153,31 +173,232 @@ abstract class ContentForm extends Component
         }
     }
 
+    /**
+     * Save with the status as it is (Ctrl/Cmd+S): a draft stays a draft, a
+     * published record is updated in place.
+     */
     public function save(): void
     {
-        $validated = $this->validate()['form'] ?? [];
-        $data = $this->transform($validated);
+        $this->persist(null);
+    }
+
+    /**
+     * Publish (or, when already published, update) — Ctrl/Cmd+Enter.
+     */
+    public function publish(): void
+    {
+        $this->persist(ContentStatus::Published);
+    }
+
+    /**
+     * Take a published record off the public site, keeping the edits.
+     */
+    public function unpublish(): void
+    {
+        $this->persist(ContentStatus::Draft);
+    }
+
+    /**
+     * Quietly save a draft (every AdminUx::AUTOSAVE_SECONDS while there are
+     * changes, and when a field is left). Never publishes and never touches a
+     * published record; with invalid fields nothing is saved and the save bar
+     * says why, without marking the fields while the editor is still typing.
+     */
+    public function autosave(): void
+    {
         $record = $this->record();
 
-        try {
-            if ($record === null) {
-                $record = $this->service()->create($data, auth()->user());
-                $this->recordId = (int) $record->getKey();
-                $this->afterCreate($record);
-                session()->flash('admin.status', sprintf('%s created.', $this->singular()));
+        if ($record !== null && $record->getAttribute('status') === ContentStatus::Published) {
+            $this->dispatch(AdminUx::EVENT_SAVED, autosave: false, blocked: 'Published: press Update to put changes live');
 
-                $this->redirectRoute(ContentTypes::editRoute($this->type()), [ContentTypes::routeParameter($this->type()) => $record->getKey()]);
-
-                return;
-            }
-
-            $record = $this->service()->update($record, $data, auth()->user());
-            $this->form = $this->fromRecord($record);
-            $this->afterUpdate($record);
-            $this->notify(sprintf('%s saved.', $this->singular()));
-        } catch (ImagesNotReadyException $exception) {
-            $this->addError(self::FIELD_PREFIX.'status', $exception->getMessage());
+            return;
         }
+
+        $validator = Validator::make(['form' => $this->form], $this->rules(), $this->messages(), $this->validationAttributes());
+
+        if ($validator->fails()) {
+            $this->dispatch(AdminUx::EVENT_SAVED, blocked: 'Not saved yet: '.rtrim((string) $validator->errors()->first(), '.'));
+
+            return;
+        }
+
+        $data = $this->transform($validator->validated()['form'] ?? []);
+        $data['status'] = ContentStatus::Draft->value;
+
+        try {
+            $record = $this->store($data);
+        } catch (ImagesNotReadyException) {
+            return;
+        }
+
+        $this->recordRevision($record, RevisionKind::Autosave);
+
+        if (! $this->wasEditing) {
+            $this->wasEditing = true;
+            $this->dispatch(AdminUx::EVENT_ADDRESS, url: $this->editUrl($record), crumb: $this->recordLabel($record));
+        }
+
+        $this->dispatch(AdminUx::EVENT_SAVED, at: $record->updated_at?->toIso8601String());
+    }
+
+    /**
+     * Load an earlier version into the form. Nothing is saved until the
+     * editor saves; the save bar shows "Unsaved changes" meanwhile.
+     */
+    public function restoreRevision(int $revisionId): void
+    {
+        $record = $this->record();
+
+        if ($record === null) {
+            return;
+        }
+
+        $this->authorize('update', $record);
+        $data = app(RevisionService::class)->dataFor($record, $revisionId);
+
+        if ($data === null) {
+            return;
+        }
+
+        $this->form = array_replace($this->form, array_intersect_key($data, $this->defaults()));
+        $this->restoredRevision = true;
+        $this->showHistory = false;
+        $this->resetErrorBag();
+        $this->dispatch(AdminUx::EVENT_CHANGED);
+        $this->toast('Earlier version loaded into the form. Save to keep it, or leave without saving to discard it.', AdminUx::TOAST_INFO);
+    }
+
+    public function toggleHistory(): void
+    {
+        $this->showHistory = ! $this->showHistory;
+    }
+
+    /**
+     * Validate, store and report a manual save, publish or unpublish.
+     */
+    protected function persist(?ContentStatus $status): void
+    {
+        $previousStatus = $this->form['status'] ?? ContentStatus::Draft->value;
+
+        if ($status !== null) {
+            $this->form['status'] = $status->value;
+        }
+
+        try {
+            $validated = $this->validate()['form'] ?? [];
+        } catch (ValidationException $exception) {
+            $this->form['status'] = $previousStatus;
+            $this->toast('Not saved: some fields need attention. They are listed at the top of the form.', AdminUx::TOAST_ERROR);
+
+            throw $exception;
+        }
+
+        $isNew = $this->record() === null;
+        $wasPublished = $this->record()?->getAttribute('status') === ContentStatus::Published;
+
+        try {
+            $record = $this->store($this->transform($validated));
+        } catch (ImagesNotReadyException $exception) {
+            $this->form['status'] = $previousStatus;
+            $this->addError(self::FIELD_PREFIX.'status', $exception->getMessage());
+            $this->toast($exception->getMessage(), AdminUx::TOAST_ERROR);
+
+            return;
+        }
+
+        $isPublished = $record->getAttribute('status') === ContentStatus::Published;
+        $this->recordRevision($record, match (true) {
+            $isPublished && ! $wasPublished => RevisionKind::Publish,
+            $this->restoredRevision => RevisionKind::Restore,
+            default => RevisionKind::Save,
+        });
+        $this->restoredRevision = false;
+
+        $message = match (true) {
+            $isPublished && ! $wasPublished => sprintf('%s published. It is on the public site now.', $this->singular()),
+            ! $isPublished && $wasPublished => sprintf('%s moved back to draft. Visitors no longer see it.', $this->singular()),
+            $isNew => $this->createdMessage(),
+            default => sprintf('%s saved.', $this->singular()),
+        };
+
+        if ($isNew && $this->redirectsAfterCreate()) {
+            session()->flash('admin.status', $message);
+            $this->redirect($this->editUrl($record));
+
+            return;
+        }
+
+        $this->toast($message);
+        $this->dispatch(AdminUx::EVENT_SAVED, at: $record->updated_at?->toIso8601String(), autosave: ! $isPublished);
+    }
+
+    /**
+     * Create or update the record from validated, transformed data and keep
+     * the form in step with what was stored.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    protected function store(array $data): Model
+    {
+        $record = $this->record();
+
+        if ($record === null) {
+            $record = $this->service()->create($data, auth()->user());
+            $this->recordId = (int) $record->getKey();
+            $this->afterCreate($record);
+        } else {
+            $record = $this->service()->update($record, $data, auth()->user());
+            $this->afterUpdate($record);
+        }
+
+        $this->form = $this->fromRecord($record);
+
+        return $record;
+    }
+
+    protected function createdMessage(): string
+    {
+        return sprintf('%s created.', $this->singular());
+    }
+
+    /**
+     * New records open their edit screen after the first manual save.
+     */
+    protected function redirectsAfterCreate(): bool
+    {
+        return true;
+    }
+
+    protected function recordRevision(Model $record, RevisionKind $kind): void
+    {
+        app(RevisionService::class)->record($record, $this->form, $kind, auth()->user());
+    }
+
+    protected function editUrl(Model $record): string
+    {
+        return $this->type() === ContentTypes::PROFILE
+            ? route(ContentTypes::editRoute($this->type()))
+            : route(ContentTypes::editRoute($this->type()), [ContentTypes::routeParameter($this->type()) => $record->getKey()]);
+    }
+
+    /**
+     * Signed link to the record's public page with this draft shown (see PreviewService).
+     */
+    public function previewUrl(): ?string
+    {
+        $record = $this->record();
+
+        return $record === null ? null : app(PreviewService::class)->url($this->type(), $record);
+    }
+
+    /**
+     * Form fields whose value still holds the seeders' placeholder copy.
+     *
+     * @return list<string>
+     */
+    public function placeholderFields(): array
+    {
+        return array_keys(array_filter($this->form, fn ($value): bool => Placeholders::contains($value)));
     }
 
     public function publicUrl(): ?string
@@ -212,7 +433,39 @@ abstract class ContentForm extends Component
             'publicUrl' => $this->publicUrl(),
             'indexUrl' => $this->indexUrl(),
             'statusOptions' => ContentStatus::labels(),
-        ])->layout('components.layouts.admin', ['title' => ($record === null ? 'New ' : 'Edit ').strtolower($type['singular'])]);
+            'editor' => $this->editorState($record),
+        ])->layout('components.layouts.admin', [
+            'title' => ($record === null ? 'New ' : 'Edit ').strtolower($type['singular']),
+            'crumb' => $record === null ? 'New '.strtolower($type['singular']) : $this->recordLabel($record),
+        ]);
+    }
+
+    /**
+     * What the save bar, the version history and the placeholder summary need.
+     *
+     * @return array{status: ContentStatus, savedAt: ?string, previewUrl: ?string, publicUrl: ?string, revisions: Collection<int, Revision>, revisionCount: int, placeholders: list<string>, singular: string}
+     */
+    protected function editorState(?Model $record): array
+    {
+        $status = $record?->getAttribute('status');
+
+        return [
+            'status' => $status instanceof ContentStatus ? $status : ContentStatus::Draft,
+            'savedAt' => $record?->getAttribute('updated_at')?->toIso8601String(),
+            'previewUrl' => $this->previewUrl(),
+            'publicUrl' => $this->publicUrl(),
+            'revisions' => $record !== null && $this->showHistory ? app(RevisionService::class)->history($record) : collect(),
+            'revisionCount' => $record === null ? 0 : app(RevisionService::class)->count($record),
+            'placeholders' => $this->placeholderFields(),
+            'singular' => strtolower(ContentTypes::get($this->type())['singular']),
+        ];
+    }
+
+    protected function recordLabel(Model $record): string
+    {
+        $label = $record->getAttribute('title') ?? $record->getAttribute('name') ?? $record->getAttribute('quote');
+
+        return $label === null ? ContentTypes::get($this->type())['singular'] : Str::limit(strip_tags((string) $label), 60);
     }
 
     /** Blade view of the concrete form. */
@@ -290,6 +543,6 @@ abstract class ContentForm extends Component
 
     protected function notify(string $message): void
     {
-        session()->flash('admin.status', $message);
+        $this->toast($message);
     }
 }

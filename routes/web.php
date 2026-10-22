@@ -1,6 +1,7 @@
 <?php
 
 use App\Constants\AdminNavigation;
+use App\Constants\AdminUx;
 use App\Constants\ContentTypes;
 use App\Constants\Permissions;
 use App\Constants\RateLimits;
@@ -12,6 +13,7 @@ use App\Constants\ThemeSettings;
 use App\Constants\TributeCards;
 use App\Http\Controllers\AboutController;
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\Admin\AdminSearchController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\AwardController;
 use App\Http\Controllers\ChatController;
@@ -154,6 +156,11 @@ Route::middleware(['auth', 'verified', 'role:'.implode('|', Roles::staff()), 'tw
     ->name(AdminNavigation::ROUTE_PREFIX)
     ->group(function () {
         Route::get('/', DashboardController::class)->name('dashboard');
+
+        // The command palette's content search (JSON).
+        Route::get(AdminUx::SEARCH_PATH, AdminSearchController::class)
+            ->middleware(['permission:'.Permissions::MANAGE_CONTENT, 'throttle:60,1'])
+            ->name(substr(AdminUx::SEARCH_ROUTE, strlen(AdminNavigation::ROUTE_PREFIX)));
 
         // Content screens (Livewire): one index with create and edit forms per type,
         // the single profile form and the media library. Each route takes the

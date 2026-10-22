@@ -7,6 +7,7 @@ namespace App\Livewire\Admin\Settings;
 use App\Constants\AdminNavigation;
 use App\Constants\SettingKeys;
 use App\Http\Requests\Admin\SiteSettingsRequest;
+use App\Livewire\Admin\Concerns\NotifiesEditors;
 use App\Models\Setting;
 use App\Services\SettingService;
 use Illuminate\Contracts\View\View;
@@ -19,7 +20,7 @@ use Livewire\Component;
  */
 class SiteSettings extends Component
 {
-    use AuthorizesRequests;
+    use AuthorizesRequests, NotifiesEditors;
 
     public const string FIELD_PREFIX = 'form.';
 
@@ -50,7 +51,7 @@ class SiteSettings extends Component
         }
 
         $this->form = $this->settings()->update($values, auth()->user());
-        session()->flash('admin.status', 'Site settings saved.');
+        $this->toast('Site settings saved.');
     }
 
     public function render(): View

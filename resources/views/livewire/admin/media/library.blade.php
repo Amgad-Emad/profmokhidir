@@ -1,49 +1,64 @@
 @use('App\Constants\MediaProperties')
+@use('App\Livewire\Admin\Media\Library')
 <div>
-    <x-admin.page-header eyebrow="Media" title="Media library" intro="Every image on the site. Each needs alt text, a caption, a place and a year before it can be published.">
-        @if ($incompleteCount > 0)
-            <x-admin.status-badge tone="bronze" :label="$incompleteCount.' '.\Illuminate\Support\Str::plural('image', $incompleteCount).' need details'" />
-        @endif
-    </x-admin.page-header>
-
-    <div class="mt-8"><x-admin.flash /></div>
+    <x-admin.page-header eyebrow="Media" title="Media library" intro="Every photograph on the site. Each needs alt text (a sentence describing it for people who cannot see it), a caption, a place and a year before its page can be published." />
+    <x-admin.flash />
 
     {{-- Upload --}}
-    <section class="mt-4 rounded-card border border-rule bg-surface-panel p-5" aria-labelledby="upload-heading" data-upload>
-        <h2 id="upload-heading" class="font-display text-2xl font-light">Upload images</h2>
-        <div class="mt-4 grid gap-4 md:grid-cols-[minmax(0,18rem)_1fr]">
+    <section id="upload" class="mt-10 rounded-card border border-rule bg-surface-panel p-5 sm:p-6" aria-labelledby="upload-heading" data-upload>
+        <h2 id="upload-heading" class="font-display text-2xl font-light">Upload photos</h2>
+        <p class="mt-1 text-sm font-light text-ink-muted">Choose the album first, then drop up to 20 photos at once. They upload one batch at a time; the line shows how far it has got.</p>
+        <div class="mt-5 grid gap-4 md:grid-cols-[minmax(0,18rem)_1fr]">
             <x-form.combobox model="uploadAlbumId" label="Into album" :options="$albums" placeholder="Type to find an album" required />
-            <x-form.upload model="uploads" label="Images" :hint="$uploadHint" :accept="$uploadAccept" multiple image />
+            <x-form.upload model="uploads" label="Photos" :hint="$uploadHint" :accept="$uploadAccept" multiple image />
         </div>
     </section>
 
-    {{-- Search and filters --}}
-    <form class="mt-8 grid gap-4 md:grid-cols-4" wire:submit.prevent role="search" aria-label="Search images">
-        <x-form.input type="search" model="search" id="search" live label="Search" :optional="false" loading="search" class="md:col-span-2" placeholder="File name, alt text, caption or place" autocomplete="off" />
-        <x-form.select model="collection" id="filter-collection" live label="Used as" :optional="false" placeholder="All" :options="$collections" />
-        <x-form.select model="treatment" id="filter-treatment" live label="Treatment" :optional="false" placeholder="All" :options="$treatments" />
-        <x-form.checkbox model="incomplete" live class="md:col-span-4">Only images that still need details</x-form.checkbox>
-    </form>
+    {{-- Show, search and filters --}}
+    <div class="list-tools mt-10">
+        <div class="filter-chips" role="group" aria-label="Show" data-filter="show">
+            <span class="filter-chips__label t-label" aria-hidden="true">Show</span>
+            @foreach ($showOptions as $value => $label)
+                <button type="button" class="filter-chip" wire:click="show('{{ $value }}')" aria-pressed="{{ $this->showing() === $value ? 'true' : 'false' }}" data-show="{{ $value === '' ? 'all' : $value }}">
+                    {{ $label }}
+                    @if ($value === Library::SHOW_MISSING_ALT && $missingAltCount > 0)<span class="admin-count admin-count--quiet">{{ $missingAltCount }}</span>@endif
+                    @if ($value === Library::SHOW_INCOMPLETE && $incompleteCount > 0)<span class="admin-count admin-count--quiet">{{ $incompleteCount }}</span>@endif
+                </button>
+            @endforeach
+        </div>
+        <form class="grid gap-4 md:grid-cols-4" wire:submit.prevent role="search" aria-label="Search images">
+            <x-form.input type="search" model="search" id="search" live label="Search" :optional="false" loading="search" class="md:col-span-2" placeholder="File name, alt text, caption or place" autocomplete="off" data-shortcut="search" />
+            <x-form.select model="album" id="filter-album" live label="Album" :optional="false" placeholder="All albums" :options="$albums" data-filter="album" />
+            <x-form.select model="collection" id="filter-collection" live label="Used as" :optional="false" placeholder="Anything" :options="$collections" />
+        </form>
+    </div>
 
     @if ($images->isEmpty())
-        <x-empty-state :message="trim($search) !== '' || $collection !== '' || $treatment !== '' || $incomplete ? 'No images match these filters.' : 'No images have been uploaded yet.'" />
+        <x-admin.list-empty class="mt-8" title="No photographs yet" text="Photographs uploaded here are filed in albums for the Pictures page. Portraits and video posters appear here too." :filtered="$filtered" />
     @else
-        <ul class="photo-grid mt-8" data-library>
+        <ul class="library-grid mt-8" data-library>
             @foreach ($images as $image)
-                @php $id = (int) $image->getKey(); $usage = $usages[$id]; $needs = $missing[$id]; @endphp
-                <li wire:key="media-{{ $id }}" class="flex flex-col gap-2 rounded-card border border-rule bg-surface-panel p-3" data-media="{{ $id }}">
-                    <img src="{{ $image->getUrl() }}" alt="{{ $image->getCustomProperty(MediaProperties::ALT_TEXT) ?: '' }}" class="photo-grid__thumb" loading="lazy">
-                    <p class="truncate text-sm font-medium text-ink" title="{{ $image->getCustomProperty(MediaProperties::CAPTION) ?: $image->file_name }}">{{ $image->getCustomProperty(MediaProperties::CAPTION) ?: $image->file_name }}</p>
-                    <p class="text-xs font-light text-ink-muted">{{ $usage['type_label'] }} · {{ $usage['label'] }}{{ $usage['trashed'] ? ' (in trash)' : '' }}</p>
-                    <div class="flex flex-wrap gap-1">
-                        <x-admin.status-badge :tone="$needs === [] ? 'cypress' : 'bronze'" :label="$needs === [] ? 'Ready' : 'Needs details'" class="px-2 py-0.5 text-[0.625rem]" />
-                    </div>
-                    <div class="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 text-sm">
-                        <button type="button" wire:click="edit({{ $id }})" class="link-meta">Details<span class="sr-only"> of {{ $image->file_name }}</span></button>
-                        @if ($usage['url'])
-                            <a href="{{ $usage['url'] }}" class="link-meta">Open {{ strtolower($usage['type_label']) }}</a>
+                @php
+                    $id = (int) $image->getKey();
+                    $usage = $usages[$id];
+                    $needs = $missing[$id];
+                    $alt = $image->getCustomProperty(MediaProperties::ALT_TEXT);
+                    $caption = $image->getCustomProperty(MediaProperties::CAPTION) ?: $image->file_name;
+                @endphp
+                <li wire:key="media-{{ $id }}" class="library-tile" data-media="{{ $id }}">
+                    <button type="button" class="library-tile__open" wire:click="edit({{ $id }})" aria-label="Details of {{ $caption }}">
+                        <img src="{{ $image->getUrl() }}" alt="" loading="lazy" decoding="async">
+                    </button>
+                    <div class="library-tile__body">
+                        <p class="library-tile__name" title="{{ $caption }}">{{ $caption }}</p>
+                        <p class="library-tile__meta">{{ $usage['type_label'] }} · {{ $usage['label'] }}{{ $usage['trashed'] ? ' (in trash)' : '' }}</p>
+                        @if (blank($alt))
+                            <p class="library-tile__flag"><x-icon name="warning" class="size-3.5" />Needs alt text</p>
+                        @elseif ($needs !== [])
+                            <p class="library-tile__flag"><x-icon name="clock" class="size-3.5" />Needs details</p>
+                        @else
+                            <p class="library-tile__flag library-tile__flag--ready"><x-icon name="check" class="size-3.5" />Ready</p>
                         @endif
-                        <button type="button" wire:click="confirm('delete', {{ $id }})" class="text-danger-tone underline-offset-4 hover:underline" data-delete>Delete<span class="sr-only"> {{ $image->file_name }}</span></button>
                     </div>
                 </li>
             @endforeach
@@ -51,32 +66,34 @@
         {{ $images->links('components.admin.pagination') }}
     @endif
 
-    {{-- Details panel --}}
-    @if ($editing)
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-surface-overlay p-4" x-data x-trap.noscroll.inert="true" x-on:keydown.escape.window="$wire.cancelEdit()" data-details-dialog>
-            <div role="dialog" aria-modal="true" aria-labelledby="details-title" class="max-h-full w-full max-w-2xl overflow-y-auto rounded-card border border-rule bg-surface-panel p-6 sm:p-8">
-                <div class="flex items-start justify-between gap-4">
-                    <div>
-                        <h2 id="details-title" class="font-display text-3xl font-light leading-tight">Image details</h2>
-                        <p class="mt-1 font-mono text-xs text-ink-muted">{{ $editing->file_name }} · {{ \App\Support\FileSize::format((int) $editing->size) }}</p>
-                    </div>
-                    <img src="{{ $editing->getUrl() }}" alt="" class="size-24 rounded-card border border-rule object-cover">
-                </div>
+    {{-- Details drawer --}}
+    <x-admin.drawer :show="$editing !== null" title="Image details" close="cancelEdit" id="details" :description="$editing ? $editing->file_name.' · '.\App\Support\FileSize::format((int) $editing->size) : null">
+        @if ($editing)
+            @php $editingUsage = $usages[(int) $editing->getKey()] ?? app(\App\Services\MediaService::class)->usage($editing); @endphp
+            <div data-details-dialog>
+                <img src="{{ $editing->getUrl() }}" alt="" class="w-full rounded-card border border-rule object-contain" style="max-height: 16rem">
+                <p class="mt-3 text-sm font-light text-ink-muted">
+                    Used by {{ $editingUsage['type_label'] }}: {{ $editingUsage['label'] }}{{ $editingUsage['trashed'] ? ' (in the trash)' : '' }}.
+                    @if ($editingUsage['url'])<a href="{{ $editingUsage['url'] }}" class="link-meta">Open it</a>@endif
+                </p>
                 @if ($editingRequired)
                     <x-alert tone="bronze" class="mt-4">This image is on a published page, so every detail is required.</x-alert>
                 @endif
                 <form wire:submit="saveDetails" class="mt-6 space-y-4" novalidate>
                     <x-admin.image-details prefix="details" :required="$editingRequired" />
-                    <div class="flex flex-wrap justify-end gap-3 pt-2">
-                        <x-button type="button" variant="outline" wire:click="cancelEdit">Cancel</x-button>
-                        <x-button type="submit" wire:loading.attr="disabled">Save details</x-button>
+                    <div class="flex flex-wrap items-center justify-between gap-3 border-t border-rule pt-5">
+                        <button type="button" wire:click="confirm('delete', {{ (int) $editing->getKey() }})" class="save-bar__link save-bar__link--danger" data-delete><x-icon name="trash" class="size-4" />Delete image</button>
+                        <div class="flex flex-wrap gap-3">
+                            <x-button type="button" variant="outline" wire:click="cancelEdit">Cancel</x-button>
+                            <x-button type="submit" variant="primary" wire:loading.attr="disabled">Save details</x-button>
+                        </div>
                     </div>
                 </form>
             </div>
-        </div>
-    @endif
+        @endif
+    </x-admin.drawer>
 
-    <x-admin.confirm-dialog :show="$confirming !== null" title="Delete this image?" action="delete" confirm-label="Delete image">
+    <x-admin.confirm-dialog :show="$confirming !== null" title="Delete this image for good?" action="delete" confirm-label="Delete image">
         @if ($confirming)
             @php
                 $role = match ($confirmingUsage['collection']) {

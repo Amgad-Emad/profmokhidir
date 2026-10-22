@@ -222,6 +222,56 @@ class TributeService extends AbstractContentService
     /**
      * @param  list<int>  $ids
      */
+    /**
+     * Put a tribute back into the review queue (the Undo of a decline or approval).
+     */
+    public function reopen(Tribute $tribute, User $actor): Tribute
+    {
+        $this->cards->forget($tribute);
+
+        $tribute = $this->repository->update($tribute, [
+            'status' => TributeStatus::Pending,
+            'approved_by' => null,
+            'approved_at' => null,
+            'published_at' => null,
+            'is_featured' => false,
+            'featured_at' => null,
+        ]);
+
+        $this->audit->record($actor, AuditAction::TRIBUTE_REOPENED, $tribute, ['name' => $tribute->name]);
+        $this->flushCache();
+
+        return $tribute;
+    }
+
+    /**
+     * Return tributes to the statuses they had before a decline (the toast's Undo).
+     *
+     * @param  array<int|string, string>  $statuses  id => TributeStatus value
+     */
+    public function restoreStatuses(array $statuses, User $actor): int
+    {
+        $count = 0;
+
+        foreach ($statuses as $id => $status) {
+            $tribute = $this->repository->find((int) $id);
+            $target = TributeStatus::tryFrom((string) $status);
+
+            if ($tribute === null || $target === null || $tribute->status === $target) {
+                continue;
+            }
+
+            match ($target) {
+                TributeStatus::Approved => $this->approve($tribute, $actor),
+                TributeStatus::Rejected => $this->reject($tribute, $actor),
+                TributeStatus::Pending => $this->reopen($tribute, $actor),
+            };
+            $count++;
+        }
+
+        return $count;
+    }
+
     public function rejectMany(array $ids, User $actor): int
     {
         return $this->moderateMany($ids, $actor, fn (Tribute $tribute) => $this->reject($tribute, $actor), TributeStatus::Rejected);

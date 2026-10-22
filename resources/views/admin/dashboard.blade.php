@@ -1,93 +1,100 @@
-@use('App\Constants\AuditAction')
+{{--
+    The dashboard home, task first: what needs attention now (one card per queue, with the action),
+    the quick actions, the "Before launch" checklist, recent activity in plain language, and the
+    published count per section. Data from DashboardService::summary().
+--}}
 <x-layouts.admin title="Dashboard">
     <header class="flex flex-col gap-2">
         <p class="t-label text-accent-text">Dashboard</p>
         <h1 class="t-heading">{{ $greeting['salutation'] }}, {{ auth()->user()->name }}</h1>
         <p class="smallcaps text-xl text-ink-muted" data-greeting-date><time datetime="{{ $greeting['datetime'] }}">{{ $greeting['date'] }}</time></p>
-        <p class="mt-2 max-w-2xl text-base font-light text-ink-muted">Signed in as {{ auth()->user()->primaryRoleLabel() }}. Here is what is published and what is waiting for review.</p>
     </header>
 
-    {{-- Needs attention --}}
+    {{-- Needs your attention --}}
     <section class="mt-12" aria-labelledby="attention-heading" data-section="attention">
-        <div class="flex items-center justify-between gap-4">
-            <h2 id="attention-heading" class="font-display text-3xl font-light">Needs attention</h2>
+        <div class="dashboard-heading">
+            <h2 id="attention-heading" class="dashboard-heading__title">Needs your attention</h2>
             <hr class="rule-brass flex-1" data-rule>
         </div>
 
-        @if ($attention === [])
-            <x-empty-state message="Nothing is waiting for review." class="py-8" />
+        @if ($cards === [])
+            <p class="dashboard-calm" data-attention-empty><x-icon name="check" class="size-5" />Nothing is waiting for review. Everything is up to date.</p>
         @else
-            <ul class="mt-6 divide-y divide-rule rounded-card border border-rule bg-surface-panel">
-                @foreach ($attention as $key => $queue)
+            <div class="attention-grid mt-6">
+                @foreach ($cards as $card)
+                    <x-admin.attention-card :card="$card" />
+                @endforeach
+            </div>
+        @endif
+    </section>
+
+    {{-- Quick actions --}}
+    @if ($actions !== [])
+        <section class="mt-14" aria-labelledby="actions-heading" data-section="actions">
+            <div class="dashboard-heading">
+                <h2 id="actions-heading" class="dashboard-heading__title">Start something</h2>
+                <hr class="rule-brass flex-1" data-rule>
+            </div>
+            <ul class="quick-actions mt-6">
+                @foreach ($actions as $action)
                     <li>
-                        <a href="{{ route($queue['route']) }}" class="flex items-center justify-between gap-4 px-5 py-4 no-underline hover:bg-surface-sunken hover:no-underline" data-queue="{{ $key }}">
-                            <span class="flex items-center gap-3">
-                                <x-icon :name="$queue['tone']->icon()" class="size-5 {{ $queue['tone']->textClass() }}" />
-                                <span class="font-medium">{{ $queue['label'] }}</span>
-                            </span>
-                            <span class="flex items-center gap-3 text-sm text-ink-muted">
-                                <span>{{ $queue['count'] }} {{ \Illuminate\Support\Str::plural($queue['noun'], $queue['count']) }}</span>
-                                <x-icon name="arrow" class="size-4 text-accent-text" />
-                            </span>
+                        <a href="{{ $action['url'] }}" class="quick-action" data-quick-action="{{ $action['key'] }}">
+                            <x-icon :name="$action['icon']" class="quick-action__icon size-6" />
+                            <span class="quick-action__label">{{ $action['label'] }}</span>
+                            <span class="quick-action__hint">{{ $action['hint'] }}</span>
                         </a>
                     </li>
                 @endforeach
             </ul>
-        @endif
-    </section>
+        </section>
+    @endif
 
-    {{-- Queues --}}
-    <section class="mt-12" aria-labelledby="queues-heading" data-section="queues">
-        <div class="flex items-center justify-between gap-4">
-            <h2 id="queues-heading" class="font-display text-3xl font-light">Review queues</h2>
-            <hr class="rule-brass flex-1" data-rule>
-        </div>
-        <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            @foreach ($queues as $key => $queue)
-                <x-admin.stat-card :label="$queue['label']" :count="$queue['count']" :tone="$queue['tone']" :noun="$queue['noun']"
-                                   :href="auth()->user()->can($queue['permission']) ? route($queue['route']) : null" data-stat="{{ $key }}" />
-            @endforeach
-        </div>
-    </section>
+    <div class="dashboard-columns mt-14">
+        {{-- Before launch --}}
+        @if ($checklist !== null)
+            <section aria-labelledby="launch-heading" data-section="launch">
+                <div class="dashboard-heading">
+                    <h2 id="launch-heading" class="dashboard-heading__title">Before launch</h2>
+                    <hr class="rule-brass flex-1" data-rule>
+                </div>
+                <p class="mt-3 text-base font-light text-ink-muted">What still needs doing before the site is announced. Each line updates as the work is done.</p>
+                <x-admin.launch-checklist :checklist="$checklist" class="mt-6" />
+            </section>
+        @endif
+
+        {{-- Recent activity --}}
+        <section aria-labelledby="activity-heading" data-section="activity">
+            <div class="dashboard-heading">
+                <h2 id="activity-heading" class="dashboard-heading__title">Recent activity</h2>
+                <hr class="rule-brass flex-1" data-rule>
+            </div>
+
+            @if ($feed === [])
+                <x-empty-state message="No activity has been recorded yet." class="py-8" />
+            @else
+                <ol class="activity-feed mt-6" data-activity>
+                    @foreach ($feed as $entry)
+                        <li class="activity-feed__item">
+                            <p>{{ $entry['sentence'] }}</p>
+                            <time datetime="{{ $entry['at']->toIso8601String() }}" title="{{ $entry['at']->format(\App\Constants\DateFormats::LONG.', H:i') }}">{{ $entry['at']->diffForHumans() }}</time>
+                        </li>
+                    @endforeach
+                </ol>
+            @endif
+        </section>
+    </div>
 
     {{-- Published per section --}}
-    <section class="mt-12" aria-labelledby="published-heading" data-section="published">
-        <div class="flex items-center justify-between gap-4">
-            <h2 id="published-heading" class="font-display text-3xl font-light">Published</h2>
+    <section class="mt-14" aria-labelledby="published-heading" data-section="published">
+        <div class="dashboard-heading">
+            <h2 id="published-heading" class="dashboard-heading__title">On the site now</h2>
             <hr class="rule-brass flex-1" data-rule>
         </div>
-        <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
             @foreach ($published as $key => $card)
                 <x-admin.stat-card :label="$card['label']" :count="$card['count']" caption="published"
                                    :href="auth()->user()->can($card['permission']) ? route($card['route']) : null" data-stat="{{ $key }}" />
             @endforeach
         </div>
-    </section>
-
-    {{-- Recent activity --}}
-    <section class="mt-12" aria-labelledby="activity-heading" data-section="activity">
-        <div class="flex items-center justify-between gap-4">
-            <h2 id="activity-heading" class="font-display text-3xl font-light">Recent activity</h2>
-            <hr class="rule-brass flex-1" data-rule>
-        </div>
-
-        @if ($activity->isEmpty())
-            <x-empty-state message="No activity has been recorded yet." class="py-8" />
-        @else
-            <ol class="mt-6 divide-y divide-rule rounded-card border border-rule bg-surface-panel" data-activity>
-                @foreach ($activity as $log)
-                    <li class="flex flex-col gap-1 px-5 py-4 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
-                        <p class="text-base">
-                            <span class="font-medium">{{ $log->user?->name ?? 'Visitor' }}</span>
-                            <span class="font-light">{{ AuditAction::label($log->action) }}</span>
-                            @if (is_array($log->meta) && isset($log->meta['label']))
-                                <span class="font-light text-ink-muted">· {{ $log->meta['label'] }}</span>
-                            @endif
-                        </p>
-                        <time datetime="{{ $log->created_at->toIso8601String() }}" class="shrink-0 text-sm font-light text-ink-muted" title="{{ $log->created_at->format(\App\Constants\DateFormats::LONG.', H:i') }}">{{ $log->created_at->diffForHumans() }}</time>
-                    </li>
-                @endforeach
-            </ol>
-        @endif
     </section>
 </x-layouts.admin>

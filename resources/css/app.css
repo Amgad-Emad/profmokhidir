@@ -19,6 +19,7 @@
 @import './auth.css';
 @import './chat.css';
 @import './theme.css';
+@import './admin.css';
 
 /*
  | Brand design system — see CLAUDE.md "Brand (follow exactly)".
@@ -665,30 +666,6 @@
     .prose-bio strong {
         font-weight: 500;
     }
-}
-
-/* Admin sidebar links (an on-dark region): the band ink on 40px rows; the active item carries a 1px accent rule, as in the header. */
-.admin-nav-link {
-    display: block;
-    padding: 0.5rem 0.75rem;
-    border-left: 1px solid transparent;
-    font-size: 1rem;
-    font-weight: 300;
-    line-height: 1.5;
-    color: var(--ink);
-    text-decoration: none;
-    transition: color 300ms var(--ease-rise), border-color 300ms var(--ease-rise);
-}
-
-.admin-nav-link:hover {
-    color: var(--ink-strong);
-    text-decoration: none;
-}
-
-.admin-nav-link--active {
-    border-left-color: var(--accent-line);
-    color: var(--ink-strong);
-    font-weight: 400;
 }
 
 /* Fortify's QR code SVG scales to its box. */

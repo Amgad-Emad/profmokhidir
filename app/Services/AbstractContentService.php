@@ -10,6 +10,7 @@ use App\Constants\ContentStatus;
 use App\Models\User;
 use App\Repositories\Contracts\ContentRepositoryInterface;
 use Closure;
+use DateTimeInterface;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
@@ -100,6 +101,36 @@ abstract class AbstractContentService
     public function countPublished(): int
     {
         return $this->repository->countPublished();
+    }
+
+    /**
+     * Records still holding the seeders' placeholder copy (see Placeholders::MARKER).
+     */
+    public function countContaining(string $needle): int
+    {
+        return $this->repository->countContaining($needle);
+    }
+
+    /**
+     * @return Collection<int, TModel>
+     */
+    public function staleDrafts(DateTimeInterface $before, int $limit = 5): Collection
+    {
+        return $this->repository->staleDrafts($before, $limit);
+    }
+
+    public function countStaleDrafts(DateTimeInterface $before): int
+    {
+        return $this->repository->countStaleDrafts($before);
+    }
+
+    /**
+     * @param  list<int>  $ids
+     * @return Collection<int, TModel>
+     */
+    public function findMany(array $ids): Collection
+    {
+        return $this->repository->findMany($ids);
     }
 
     /**

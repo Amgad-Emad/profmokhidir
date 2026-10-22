@@ -1,5 +1,6 @@
 <?php
 
+use App\Constants\CacheSerializable;
 use Illuminate\Support\Str;
 
 return [
@@ -35,6 +36,13 @@ return [
     'stores' => [
 
         'array' => [
+            'driver' => 'array',
+            'serialize' => false,
+        ],
+
+        // Signed draft previews render with their own in-memory store (App\Http\Middleware\EnablePreview),
+        // so a preview never reads or fills the cache that visitors are served from.
+        'preview' => [
             'driver' => 'array',
             'serialize' => false,
         ],
@@ -131,6 +139,6 @@ return [
     |
     */
 
-    'serializable_classes' => \App\Constants\CacheSerializable::classes(),
+    'serializable_classes' => CacheSerializable::classes(),
 
 ];

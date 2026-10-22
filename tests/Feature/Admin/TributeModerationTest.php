@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Constants\AdminUx;
 use App\Constants\AuditAction;
 use App\Constants\TributeStatus;
 use App\Livewire\Admin\Tributes\Moderate;
@@ -59,21 +60,30 @@ class TributeModerationTest extends TestCase
 
         Livewire::actingAs($this->editor)->test(Moderate::class)
             ->call('approve', $tribute->getKey())
-            ->assertSee('Tribute approved and published.')
+            ->assertSee('Tribute from Amna approved. It is on the Tributes page now.')
             ->assertSee('Nothing is waiting for review.');
 
         $this->assertSame(TributeStatus::Approved, $tribute->fresh()->status);
         $this->assertSame($this->editor->getKey(), $tribute->fresh()->approved_by);
 
-        Livewire::actingAs($this->editor)->test(Moderate::class, ['tab' => 'approved'])
-            ->call('reject') // nothing confirmed
-            ->call('confirm', 'reject', $tribute->getKey())
-            ->assertSee('Reject this tribute?')
-            ->call('reject')
-            ->assertSee('Tribute rejected.');
+        // Declining is reversible, so it needs no dialog: the toast offers Undo instead.
+        $component = Livewire::actingAs($this->editor)->test(Moderate::class, ['tab' => 'approved'])
+            ->assertDontSee('data-confirm-dialog', false)
+            ->call('decline', $tribute->getKey())
+            ->assertSee('Tribute from Amna declined.')
+            ->assertDispatched(AdminUx::EVENT_TOAST, fn (string $name, array $params): bool => $params['undo']['method'] === 'restoreStatuses'
+                && $params['undo']['args'] === [[$tribute->getKey() => TributeStatus::Approved->value]]);
 
         $this->assertSame(TributeStatus::Rejected, $tribute->fresh()->status);
-        $this->assertSame([AuditAction::TRIBUTE_APPROVED, AuditAction::TRIBUTE_REJECTED], AuditLog::query()->orderBy('id')->pluck('action')->all());
+
+        $component->call('restoreStatuses', [$tribute->getKey() => TributeStatus::Approved->value])
+            ->assertSee('Decline undone.');
+
+        $this->assertSame(TributeStatus::Approved, $tribute->fresh()->status);
+        $this->assertSame(
+            [AuditAction::TRIBUTE_APPROVED, AuditAction::TRIBUTE_REJECTED, AuditAction::TRIBUTE_APPROVED],
+            AuditLog::query()->orderBy('id')->pluck('action')->all(),
+        );
     }
 
     #[Test]
@@ -92,10 +102,9 @@ class TributeModerationTest extends TestCase
             ->assertSee('2 tributes approved.')
             ->assertSet('selected', [])
             ->set('selected', [$tributes[2]->getKey()])
-            ->call('confirmRejectSelected')
-            ->assertSee('Reject the selected tributes?')
             ->call('rejectSelected')
-            ->assertSee('1 tribute rejected.');
+            ->assertSee('1 tribute declined.')
+            ->assertDispatched(AdminUx::EVENT_TOAST, fn (string $name, array $params): bool => $params['undo']['args'] === [[$tributes[2]->getKey() => TributeStatus::Pending->value]]);
 
         $this->assertSame(2, Tribute::query()->withStatus(TributeStatus::Approved)->count());
         $this->assertSame(1, Tribute::query()->withStatus(TributeStatus::Rejected)->count());
@@ -192,8 +201,7 @@ class TributeModerationTest extends TestCase
 
         Livewire::actingAs($this->editor)->test(Moderate::class, ['tab' => 'approved'])
             ->assertSee('data-featured-badge', false)
-            ->call('confirm', 'reject', $featured->getKey())
-            ->call('reject');
+            ->call('decline', $featured->getKey());
 
         $this->assertFalse($featured->fresh()->isFeatured());
         $this->get(route('tributes'))->assertOk()->assertDontSee('data-featured', false);

@@ -53,7 +53,8 @@ class ContentScreensTest extends TestCase
         $this->actingAs($editor)->get(route(ContentTypes::createRoute($type)))
             ->assertOk()
             ->assertSee('New '.strtolower($definition['singular']))
-            ->assertSee('data-status-field', false);
+            ->assertSee('data-save-bar', false)
+            ->assertSee('data-edit-screen', false);
 
         $this->actingAs($editor)->get(route(ContentTypes::editRoute($type), [$parameter => $record->getKey()]))
             ->assertOk()
@@ -77,7 +78,7 @@ class ContentScreensTest extends TestCase
         $editor = User::factory()->editor()->create();
 
         $this->actingAs($editor)->get(route(ContentTypes::indexRoute(ContentTypes::PROFILE)))->assertOk()->assertSee('About & profile')->assertSee('Portrait');
-        $this->actingAs($editor)->get(route(AdminNavigation::routeFor(AdminNavigation::MEDIA_LIBRARY)))->assertOk()->assertSee('Media library')->assertSee('Upload images');
+        $this->actingAs($editor)->get(route(AdminNavigation::routeFor(AdminNavigation::MEDIA_LIBRARY)))->assertOk()->assertSee('Media library')->assertSee('Upload photos');
         $this->actingAs($editor)->get(route(AdminNavigation::routeFor(AdminNavigation::TRIBUTES)))->assertOk()->assertSee('Review tributes')->assertSee('data-tab="pending"', false);
     }
 

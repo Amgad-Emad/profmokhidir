@@ -76,7 +76,7 @@ class ContentFormComponentTest extends TestCase
             ->set('form.status', ContentStatus::Published->value)
             ->call('save')
             ->assertHasNoErrors()
-            ->assertSee('Award saved.')
+            ->assertSee('Award published. It is on the public site now.')
             ->assertSee('data-view-on-site', false)
             ->assertSee(route('awards'), false);
 
@@ -89,7 +89,7 @@ class ContentFormComponentTest extends TestCase
     public function cv_entries_check_the_year_range_and_offer_every_section(): void
     {
         Livewire::actingAs($this->editor)->test(CvEntryForm::class)
-            ->assertSee('data-status-field', false)
+            ->assertSee('data-save-bar', false)
             ->assertSee(CvSection::Education->label())
             ->set('form.section', 'education')
             ->set('form.title', 'BSc Agriculture')

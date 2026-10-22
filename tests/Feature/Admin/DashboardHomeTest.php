@@ -3,6 +3,7 @@
 namespace Tests\Feature\Admin;
 
 use App\Constants\AdminNavigation;
+use App\Constants\AdminUx;
 use App\Constants\AuditAction;
 use App\Models\AuditLog;
 use App\Models\ChatReport;
@@ -27,16 +28,17 @@ class DashboardHomeTest extends TestCase
             ->get(route(AdminNavigation::DASHBOARD_ROUTE))
             ->assertOk()
             ->assertViewIs('admin.dashboard')
-            ->assertViewHasAll(['published', 'queues', 'attention', 'activity']);
+            ->assertViewHasAll(['published', 'queues', 'attention', 'activity', 'cards', 'actions', 'checklist', 'feed']);
 
         $response
             ->assertSee('data-stat="publications"', false)
             ->assertSee('data-stat="tributes"', false)
-            ->assertSee('data-stat="applications"', false)
-            ->assertSee('data-stat="chat-reports"', false)
+            ->assertSee('data-queue="tributes"', false)
             ->assertSee('Tributes pending review')
-            ->assertSee('Community applications pending')
-            ->assertSee('Chat reports open');
+            ->assertDontSee('data-queue="applications"', false)
+            ->assertSee('data-section="launch"', false)
+            ->assertSee('data-quick-action="new-publication"', false)
+            ->assertSee(route('admin.content.publications.create'), false);
 
         $this->assertSame(4, $response->viewData('published')[AdminNavigation::PUBLICATIONS]['count']);
         $this->assertSame(2, $response->viewData('queues')[AdminNavigation::TRIBUTES]['count']);
@@ -64,8 +66,8 @@ class DashboardHomeTest extends TestCase
             ->assertDontSee('data-queue="applications"', false)
             ->assertSee(route(AdminNavigation::routeFor(AdminNavigation::TRIBUTES)))
             ->assertSee(route(AdminNavigation::routeFor(AdminNavigation::CHAT_REPORTS)))
-            ->assertSee('1 tribute')
-            ->assertSee('1 report');
+            ->assertSee('Review tributes')
+            ->assertSee('Open reports');
     }
 
     #[Test]
@@ -103,12 +105,36 @@ class DashboardHomeTest extends TestCase
             ->get(route(AdminNavigation::DASHBOARD_ROUTE))
             ->assertOk()
             ->assertSee('data-activity', false)
-            ->assertSee('Content Editor')
-            ->assertSee('published content')
-            ->assertSee('Soil Fertility Handbook')
-            ->assertSee('approved a tribute')
+            ->assertSee('Content Editor published “Soil Fertility Handbook”')
+            ->assertSee('Content Editor approved a tribute')
             ->getContent();
 
-        $this->assertLessThan(strpos($content, 'published content'), strpos($content, 'approved a tribute'));
+        $this->assertLessThan(strpos($content, 'published “Soil'), strpos($content, 'approved a tribute'));
+    }
+
+    #[Test]
+    public function images_without_alt_text_and_old_drafts_need_attention_with_a_link_to_each(): void
+    {
+        $old = Publication::factory()->draft()->create(['title' => 'Unfinished paper']);
+        $old->forceFill(['updated_at' => now()->subDays(AdminUx::STALE_DRAFT_DAYS + 3)])->saveQuietly();
+        Publication::factory()->draft()->create(['title' => 'Fresh draft']);
+
+        $this->actingAs(User::factory()->editor()->create())
+            ->get(route(AdminNavigation::DASHBOARD_ROUTE))
+            ->assertOk()
+            ->assertSee('data-queue="stale-drafts"', false)
+            ->assertSee('Unfinished paper')
+            ->assertDontSee('Fresh draft')
+            ->assertSee(route('admin.content.publications.edit', ['publication' => $old->getKey()]), false);
+    }
+
+    #[Test]
+    public function content_staff_see_the_launch_checklist_and_quick_actions(): void
+    {
+        $this->actingAs(User::factory()->admin()->create())
+            ->get(route(AdminNavigation::DASHBOARD_ROUTE))
+            ->assertOk()
+            ->assertSee('Before launch')
+            ->assertSee('Start something');
     }
 }

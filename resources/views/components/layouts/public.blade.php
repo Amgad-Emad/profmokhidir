@@ -47,6 +47,7 @@
 <body class="bg-surface text-ink">
     <x-duotone-filter />
     <a href="#main" class="skip-link">Skip to content</a>
+    <x-site.preview-banner />
 
     <x-site.header :hero="$hero" />
 

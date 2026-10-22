@@ -24,6 +24,14 @@ interface AuditLogRepositoryInterface extends BaseRepositoryInterface
     public function recent(int $limit = 20): Collection;
 
     /**
+     * Latest entries leaving out the given actions (e.g. sign-ins), with their user and subject.
+     *
+     * @param  list<string>  $actions
+     * @return Collection<int, AuditLog>
+     */
+    public function recentExcept(array $actions, int $limit = 20): Collection;
+
+    /**
      * @return Collection<int, AuditLog>
      */
     public function forSubject(Model $subject): Collection;

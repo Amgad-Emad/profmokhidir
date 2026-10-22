@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Components;
 
+use App\Constants\ContentStatus;
 use App\Constants\FormControls;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\View;
@@ -59,7 +60,10 @@ class FormChooserComponentsTest extends TestCase
     #[Test]
     public function the_segmented_variant_binds_live_and_shows_icons(): void
     {
-        $html = $this->render('<x-admin.status-field />');
+        $html = $this->render('<x-form.radio-group model="form.status" label="Status" :options="$options" :icons="$icons" variant="segmented" required data-status-field />', [], [
+            'options' => ContentStatus::labels(),
+            'icons' => ['draft' => 'clock', 'published' => 'check'],
+        ]);
 
         $this->assertStringContainsString('<div class="form-segmented" data-status-field="data-status-field">', $html);
         $this->assertSame(2, substr_count($html, 'wire:model.live="form.status"'));

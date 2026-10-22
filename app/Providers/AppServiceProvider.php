@@ -9,6 +9,7 @@ use App\Http\Middleware\EnsureCommunityMember;
 use App\Models\User;
 use App\Services\SettingService;
 use App\Services\TypesetterService;
+use App\Support\PreviewContext;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -22,7 +23,8 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
+        // The draft shown by a signed preview link lives for one request only.
+        $this->app->scoped(PreviewContext::class);
     }
 
     public function boot(): void

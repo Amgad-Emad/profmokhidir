@@ -1,26 +1,32 @@
 <div>
-    <x-admin.page-header eyebrow="Content" :title="$isNew ? 'New item' : 'Edit item'" />
-    <div class="mt-8"><x-admin.flash /></div>
+    <x-admin.page-header eyebrow="Content" :title="$isNew ? 'New item' : 'Edit item'" intro="Something that belongs on the record but fits no other section: an interview, a dedication, an event. Items are grouped by category." />
+    <x-admin.flash />
 
-    <form wire:submit="save" class="mt-4 max-w-3xl space-y-8" novalidate>
-        <x-form.error-summary after-save :intro="\App\Constants\FormControls::ERROR_SUMMARY_INTRO" />
-        <x-form.input model="form.title" label="Title" required />
-        <div class="grid gap-6 sm:grid-cols-3">
-            <x-form.input model="form.category" label="Category" hint="Items are grouped by category." />
-            <x-form.input model="form.item_type" label="Type" hint="e.g. interview, article, event" />
-            <x-form.date model="form.date" label="Date" />
-        </div>
-        <x-form.textarea model="form.summary" label="Summary" rows="3" />
-        <x-form.textarea model="form.body" label="Body" rows="8" hint="Shown on the item's own page when there is no destination link." />
-        <x-form.input model="form.destination_url" label="Destination link" type="url" placeholder="https://" hint="When set, the item links out instead of opening its own page." />
-        @unless ($isNew)
-            <x-form.input model="form.slug" label="Slug" class="font-mono" />
-        @endunless
-        <x-admin.status-field :public-url="$publicUrl" />
-        <x-admin.form-actions :index-url="$indexUrl" :public-url="$publicUrl" />
-    </form>
+    <x-admin.edit-layout :editor="$editor" :sections="['item' => 'The item', 'text' => 'Text & link', 'images' => 'Images']" class="mt-10">
+        <x-admin.form-section id="item" title="The item">
+            <x-form.input model="form.title" label="Title" required hint="The heading readers see." />
+            <div class="grid gap-6 sm:grid-cols-3">
+                <x-form.input model="form.category" label="Category" hint="Items with the same category are shown together." />
+                <x-form.input model="form.item_type" label="Type" hint="For example interview, article or event." />
+                <x-form.date model="form.date" label="Date" hint="When it happened." />
+            </div>
+            <x-form.textarea model="form.summary" label="Summary" rows="3" hint="One or two sentences for the list." />
+        </x-admin.form-section>
+        <x-admin.form-section id="text" title="Text & link">
+            <x-form.textarea model="form.body" label="Body" rows="8" hint="Shown on the item's own page. Not needed when the item links elsewhere." />
+            <x-form.input model="form.destination_url" label="Destination link" type="url" placeholder="https://" hint="When set, the item links out to this address instead of opening its own page." />
+            @unless ($isNew)
+                <x-form.input model="form.slug" label="Web address" hint="The last part of the page's address. Leave it as it is unless the link must change." class="font-mono" />
+            @endunless
+        </x-admin.form-section>
 
-    <div class="mt-14 max-w-3xl">
-        <x-admin.image-grid :media="$media" :missing="$missing" :images="$images" :details-required="$detailsRequired" :accept="$imageAccept" :hint="$imageHint" multiple :confirming-id="$confirmingImageId" :can-upload="! $isNew" />
-    </div>
+        <x-admin.form-section id="images" title="Images" :form="false">
+            <x-admin.image-grid :media="$media" :missing="$missing" :images="$images" :details-required="$detailsRequired" :accept="$imageAccept" :hint="$imageHint" multiple :confirming-id="$confirmingImageId" :can-upload="! $isNew" />
+            @if ($isNew)
+                <p class="text-sm font-light text-ink-muted">Images can be added once the item has a title and has been saved once.</p>
+            @endif
+        </x-admin.form-section>
+    </x-admin.edit-layout>
+
+    <x-admin.revisions :editor="$editor" :show="$showHistory" />
 </div>

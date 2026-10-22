@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace App\Repositories\Eloquent;
 
+use App\Constants\ContentStatus;
+use App\Constants\Placeholders;
 use App\Repositories\Contracts\ContentRepositoryInterface;
+use DateTimeInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
@@ -51,6 +55,14 @@ abstract class BaseContentRepository extends BaseEloquentRepository implements C
      * @var list<string>
      */
     protected array $publishedWith = [];
+
+    /**
+     * Text columns checked for placeholder copy besides the search columns
+     * (long bodies and JSON lists that search() does not cover).
+     *
+     * @var list<string>
+     */
+    protected array $placeholderColumns = [];
 
     public function search(?string $term = null, array $filters = [], int $perPage = 20, ?string $sortBy = null, string $sortDirection = self::SORT_ASC): LengthAwarePaginator
     {
@@ -157,6 +169,49 @@ abstract class BaseContentRepository extends BaseEloquentRepository implements C
         return $this->query()->published()->count();
     }
 
+    public function countContaining(string $needle): int
+    {
+        return $this->whereContains($this->query(), $needle)->count();
+    }
+
+    /**
+     * @param  Builder<TModel>  $query
+     * @return Builder<TModel>
+     */
+    protected function whereContains(Builder $query, string $needle): Builder
+    {
+        $columns = array_values(array_unique(array_merge($this->searchColumns, $this->placeholderColumns)));
+
+        return $query->where(function (Builder $query) use ($columns, $needle): void {
+            foreach ($columns as $column) {
+                $query->orWhere($column, 'like', '%'.$this->escapeLike($needle).'%');
+            }
+        });
+    }
+
+    public function staleDrafts(DateTimeInterface $before, int $limit = 5): Collection
+    {
+        return $this->staleDraftQuery($before)->orderBy('updated_at')->orderBy($this->model->getKeyName())->limit($limit)->get();
+    }
+
+    public function countStaleDrafts(DateTimeInterface $before): int
+    {
+        return $this->staleDraftQuery($before)->count();
+    }
+
+    public function findMany(array $ids): Collection
+    {
+        return $this->query()->whereKey(array_map('intval', $ids))->ordered()->get();
+    }
+
+    /**
+     * @return Builder<TModel>
+     */
+    protected function staleDraftQuery(DateTimeInterface $before): Builder
+    {
+        return $this->query()->where('status', ContentStatus::Draft->value)->where('updated_at', '<', $before);
+    }
+
     protected function publishedQuery(): Builder
     {
         return parent::publishedQuery()->with($this->publishedWith);
@@ -179,6 +234,7 @@ abstract class BaseContentRepository extends BaseEloquentRepository implements C
                     }
                 });
             })
+            ->when((bool) ($filters[self::FILTER_PLACEHOLDER] ?? false), fn (Builder $query) => $this->whereContains($query, Placeholders::MARKER))
             ->when($filters !== [], function (Builder $query) use ($filters): void {
                 foreach ($filters as $column => $value) {
                     if ($value === null || $value === '' || ! in_array($column, $this->filterColumns, true)) {

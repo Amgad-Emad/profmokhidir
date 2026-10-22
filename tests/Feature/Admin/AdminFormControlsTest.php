@@ -42,8 +42,8 @@ class AdminFormControlsTest extends TestCase
             ->assertSeeHtml('<span class="form-hint__requirement">'.FormControls::OPTIONAL.'</span>')
             ->assertSeeHtml('wire:model.live.blur="form.year"')
             ->assertSeeHtml('inputmode="numeric" pattern="[0-9]{4}"')
-            ->assertSeeHtml('wire:model.live="form.status"')
-            ->assertSeeHtml('class="form-segmented"')
+            ->assertSeeHtml('wire:click="save"')
+            ->assertSeeHtml('wire:click="publish"')
             ->assertSeeHtml('x-on:form-invalid.window="shown = true"')
             ->assertDontSeeHtml('<span aria-hidden="true">*</span>');
     }

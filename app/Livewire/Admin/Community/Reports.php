@@ -7,6 +7,7 @@ namespace App\Livewire\Admin\Community;
 use App\Constants\AdminNavigation;
 use App\Http\Requests\Admin\CommunityReviewRequest;
 use App\Livewire\Admin\Concerns\ConfirmsActions;
+use App\Livewire\Admin\Concerns\NotifiesEditors;
 use App\Models\ChatReport;
 use App\Services\ChatService;
 use Illuminate\Contracts\View\View;
@@ -23,7 +24,7 @@ use Livewire\WithPagination;
  */
 class Reports extends Component
 {
-    use AuthorizesRequests, ConfirmsActions, WithPagination;
+    use AuthorizesRequests, ConfirmsActions, NotifiesEditors, WithPagination;
 
     public const string TAB_OPEN = 'open';
 
@@ -63,7 +64,7 @@ class Reports extends Component
         $this->authorize('resolve', $report);
 
         $this->service()->resolveReport($report, auth()->user());
-        session()->flash('admin.status', 'Report resolved.');
+        $this->toast('Report resolved.');
     }
 
     public function deleteMessage(): void
@@ -77,7 +78,7 @@ class Reports extends Component
 
         $this->service()->deleteReportedMessage($report, auth()->user());
         $this->cancelConfirmation();
-        session()->flash('admin.status', 'Message removed and report resolved.');
+        $this->toast('Message removed and report resolved.');
     }
 
     public function suspendAuthor(): void
@@ -95,7 +96,7 @@ class Reports extends Component
         $this->service()->suspendReportedAuthor($report, auth()->user(), filled($validated['note'] ?? null) ? trim((string) $validated['note']) : null);
         $this->cancelConfirmation();
         $this->note = '';
-        session()->flash('admin.status', 'Author suspended and report resolved.');
+        $this->toast('Author suspended and report resolved.');
     }
 
     public function render(): View

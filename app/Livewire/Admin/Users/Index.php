@@ -10,6 +10,7 @@ use App\Constants\Roles;
 use App\Exceptions\UserManagementException;
 use App\Http\Requests\Admin\StaffInviteRequest;
 use App\Http\Requests\Admin\StaffRoleRequest;
+use App\Livewire\Admin\Concerns\NotifiesEditors;
 use App\Models\User;
 use App\Services\RoleService;
 use App\Services\UserService;
@@ -29,7 +30,7 @@ use Livewire\WithPagination;
  */
 class Index extends Component
 {
-    use AuthorizesRequests, WithPagination;
+    use AuthorizesRequests, NotifiesEditors, WithPagination;
 
     public const int PER_PAGE = 15;
 
@@ -132,7 +133,7 @@ class Index extends Component
         $user = $this->users()->invite($validated, auth()->user());
 
         $this->inviting = false;
-        session()->flash('admin.status', $user->name.' has been invited as '.mb_strtolower(Roles::labels()[$validated['role']]).'. They have been emailed a link to set their password.');
+        $this->toast($user->name.' has been invited as '.mb_strtolower(Roles::labels()[$validated['role']]).'. They have been emailed a link to set their password.');
     }
 
     // Roles -------------------------------------------------------------------
@@ -183,7 +184,7 @@ class Index extends Component
         }
 
         $this->cancelRole();
-        session()->flash('admin.status', $user->name.' is now '.($role === null ? 'without dashboard access' : mb_strtolower(Roles::labels()[$role])).'.');
+        $this->toast($user->name.' is now '.($role === null ? 'without dashboard access' : mb_strtolower(Roles::labels()[$role])).'.');
     }
 
     // Deactivate, reactivate, resend --------------------------------------------
@@ -243,7 +244,7 @@ class Index extends Component
             return;
         }
 
-        session()->flash('admin.status', $message);
+        $this->toast($message);
     }
 
     public function render(): View

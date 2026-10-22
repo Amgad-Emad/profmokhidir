@@ -1,12 +1,23 @@
 {{--
-    Admin dashboard layout: the dark sidebar band (collapsible below lg), main area on the sunken
-    surface with panels on it. The only layout (with /community/chat) that loads Livewire assets.
-    Alpine comes bundled with Livewire, so the sidebar toggle needs no extra script. The theme
-    control sits in both top bars; <x-theme.head> carries the CSRF token and the theme metas.
+    Admin dashboard layout. The evergreen sidebar (an on-dark band: a drawer below lg, collapsible
+    to icons above it), the top bar (breadcrumbs, the command palette, theme, View site, the user
+    menu) and the main area on the sunken surface. Around every screen: the command palette
+    (Ctrl/Cmd+K), the toast stack (one live region), the shortcuts sheet ("?") and the
+    "Leave without saving?" guard. The only layout (with /community/chat) that loads Livewire;
+    Alpine comes bundled with it. `crumb` names the record in the breadcrumb trail (defaults to
+    the title). Frame data comes from App\Services\AdminShellService.
 --}}
-@props(['title' => 'Dashboard', 'eyebrow' => null])
+@props(['title' => 'Dashboard', 'eyebrow' => null, 'crumb' => null])
 @inject('themes', 'App\Services\ThemeService')
-@php $theme = $themes->current(request()); @endphp
+@inject('shell', 'App\Services\AdminShellService')
+@php
+    $theme = $themes->current(request());
+    $user = auth()->user();
+    $route = request()->route()?->getName();
+    $nav = $shell->sidebar($user, $route);
+    $crumbs = $shell->breadcrumbs($route, $crumb ?? $title);
+    $flash = session('admin.status');
+@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" {{ $themes->htmlAttributes($theme) }}>
 <head>
@@ -20,49 +31,27 @@
     @vite(['resources/css/app.css', 'resources/js/admin.js'])
     @livewireStyles
 </head>
-<body class="min-h-screen bg-surface-sunken text-ink tabular-nums">
+<body class="admin-body min-h-screen bg-surface-sunken text-ink tabular-nums" data-placeholder-marker="{{ \App\Constants\Placeholders::MARKER }}" data-placeholder-flag="{{ \App\Constants\Placeholders::FLAG }}" data-placeholder-hint="{{ \App\Constants\Placeholders::FLAG_HINT }}">
     <x-duotone-filter />
     <a href="#main" class="skip-link">Skip to content</a>
 
-    <div class="admin-shell lg:flex lg:min-h-screen" x-data="{ open: false }" x-on:keydown.escape.window="open = false">
-        {{-- Mobile top bar --}}
-        <header class="on-dark sticky top-0 z-30 flex h-16 items-center justify-between bg-surface px-4 text-ink lg:hidden">
-            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2 no-underline hover:no-underline">
-                <x-brand.mark :size="28" decorative />
-                <span class="t-label text-accent-text">Admin</span>
-            </a>
-            <div class="flex items-center gap-1">
-                <x-theme.switch id="theme-switch-admin-bar" />
-                <button type="button" class="inline-flex size-11 items-center justify-center rounded-full border border-ink text-ink hover:border-ink-strong hover:text-ink-strong"
-                        x-on:click="open = !open" x-bind:aria-expanded="open.toString()" aria-controls="admin-sidebar">
-                    <span class="sr-only" x-text="open ? 'Close menu' : 'Open menu'">Open menu</span>
-                    <x-icon name="menu" x-show="!open" />
-                    <x-icon name="close" x-show="open" x-cloak />
-                </button>
-            </div>
-        </header>
-
-        {{-- Backdrop on mobile --}}
+    <div class="admin-shell lg:flex lg:min-h-screen" x-data="adminShell" x-bind:data-collapsed="collapsed ? 'true' : 'false'" data-collapsed="false"
+         x-on:keydown.escape.window="open = false">
+        {{-- Backdrop of the mobile drawer --}}
         <div class="fixed inset-0 z-30 bg-surface-overlay lg:hidden" x-show="open" x-cloak x-on:click="open = false" aria-hidden="true"></div>
 
         <aside id="admin-sidebar"
-               class="admin-sidebar on-dark fixed inset-y-0 left-0 z-40 w-72 -translate-x-full bg-surface text-ink transition-transform duration-300 ease-out motion-reduce:transition-none lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:shrink-0"
+               class="admin-sidebar on-dark fixed inset-y-0 left-0 z-40 -translate-x-full bg-surface text-ink transition-transform duration-300 ease-out motion-reduce:transition-none lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:shrink-0"
                x-bind:class="{ '-translate-x-full': !open, 'translate-x-0': open }"
-               x-on:click.away="open = false"
-               x-trap.noscroll="open">
-            <x-admin.sidebar />
+               x-trap.noscroll="open"
+               aria-label="Dashboard menu">
+            <x-admin.sidebar :nav="$nav" :user="$user" />
         </aside>
 
-        <div class="min-w-0 flex-1">
-            <header class="hidden h-16 items-center justify-end gap-4 border-b border-rule bg-surface-panel px-8 lg:flex">
-                <a href="{{ route(\App\Constants\AdminNavigation::ACCOUNT_ROUTE) }}" class="flex items-center gap-2 text-sm text-ink-muted hover:text-ink">
-                    <x-icon name="user" class="size-4" />
-                    <span>{{ auth()->user()->name }}</span>
-                </a>
-                <x-theme.switch id="theme-switch-admin" />
-            </header>
+        <div class="admin-frame min-w-0 flex-1">
+            <x-admin.topbar :crumbs="$crumbs" :user="$user" />
 
-            <main id="main" tabindex="-1" class="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-10 lg:py-12">
+            <main id="main" tabindex="-1" class="admin-main mx-auto w-full max-w-6xl px-4 pt-8 pb-16 sm:px-6 lg:px-10 lg:pt-10">
                 @if (session('status') && ! in_array(session('status'), \App\Constants\AuthStatus::all(), true))
                     <x-alert tone="cypress" class="mb-8">{{ session('status') }}</x-alert>
                 @endif
@@ -71,6 +60,11 @@
             </main>
         </div>
     </div>
+
+    <x-admin.command-palette :entries="$shell->paletteEntries($user)" />
+    <x-admin.toasts :initial="is_string($flash) ? $flash : null" />
+    <x-admin.shortcuts-sheet />
+    <x-admin.leave-guard />
 
     @livewireScripts
 </body>

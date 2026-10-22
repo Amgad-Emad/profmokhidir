@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Repositories\Contracts;
 
+use DateTimeInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -19,6 +21,9 @@ interface ContentRepositoryInterface extends BaseRepositoryInterface
     public const string SORT_ASC = 'asc';
 
     public const string SORT_DESC = 'desc';
+
+    /** Pseudo filter for search(): true keeps records still holding Placeholders::MARKER. */
+    public const string FILTER_PLACEHOLDER = 'placeholder';
 
     /**
      * Admin listing: optional free-text term over the type's search columns,
@@ -87,4 +92,27 @@ interface ContentRepositoryInterface extends BaseRepositoryInterface
     public function nextSortOrder(): int;
 
     public function countPublished(): int;
+
+    /**
+     * Records (trashed ones excluded) whose text still contains the given marker
+     * in any searchable or placeholder column.
+     */
+    public function countContaining(string $needle): int;
+
+    /**
+     * Drafts last changed before the given moment, oldest first.
+     *
+     * @return Collection<int, TModel>
+     */
+    public function staleDrafts(DateTimeInterface $before, int $limit = 5): Collection;
+
+    public function countStaleDrafts(DateTimeInterface $before): int;
+
+    /**
+     * Records whose ids are given (trashed ones excluded), in display order.
+     *
+     * @param  list<int>  $ids
+     * @return Collection<int, TModel>
+     */
+    public function findMany(array $ids): Collection;
 }

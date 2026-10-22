@@ -2,8 +2,10 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Constants\AdminUx;
 use App\Constants\AuditAction;
 use App\Constants\ContentStatus;
+use App\Constants\ContentTypes;
 use App\Constants\PublicationType;
 use App\Livewire\Admin\Awards\Index as AwardIndex;
 use App\Livewire\Admin\Publications\Index as PublicationIndex;
@@ -11,6 +13,7 @@ use App\Models\AuditLog;
 use App\Models\Award;
 use App\Models\Publication;
 use App\Models\User;
+use App\Repositories\Contracts\ContentRepositoryInterface;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\Test;
@@ -64,7 +67,8 @@ class ContentIndexComponentTest extends TestCase
             ->assertSet('sort', 'name')
             ->call('clearSort')
             ->assertSet('sort', '')
-            ->assertSee('data-move-buttons', false);
+            ->assertSee('data-move="up"', false)
+            ->assertSee('data-move="down"', false);
     }
 
     #[Test]
@@ -86,38 +90,108 @@ class ContentIndexComponentTest extends TestCase
     }
 
     #[Test]
-    public function deleting_needs_confirmation_moves_to_the_trash_and_can_be_restored(): void
+    public function moving_to_the_trash_needs_no_dialog_offers_undo_and_can_be_restored(): void
     {
         $award = Award::factory()->published()->create(['name' => 'Gold medal']);
 
         $component = Livewire::actingAs($this->editor)->test(AwardIndex::class)
             ->assertDontSee('data-confirm-dialog', false)
-            ->call('delete') // nothing confirmed yet
-            ->call('confirm', 'delete', $award->getKey())
-            ->assertSee('data-confirm-dialog', false)
-            ->assertSee('Move to the trash?')
-            ->call('cancelConfirmation')
-            ->assertDontSee('data-confirm-dialog', false);
+            ->call('trash', $award->getKey())
+            ->assertDontSee('data-confirm-dialog', false)
+            ->assertDispatched(AdminUx::EVENT_TOAST, fn (string $name, array $params): bool => $params['message'] === 'Award moved to the trash.'
+                && $params['undo']['method'] === 'restoreMany'
+                && $params['undo']['args'] === [[$award->getKey()]]
+                && $params['seconds'] === AdminUx::UNDO_SECONDS)
+            ->assertDontSee('Gold medal')
+            ->assertSee('Trash<span class="ml-2 text-xs text-ink-muted">1</span>', false);
 
+        $this->assertNotNull($award->fresh()->deleted_at);
+
+        // The toast's Undo calls restoreMany with the id.
+        $component->call('restoreMany', [$award->getKey()])
+            ->assertSee('Award restored.')
+            ->assertSee('Gold medal');
         $this->assertNull($award->fresh()->deleted_at);
 
-        $component->call('confirm', 'delete', $award->getKey())
-            ->call('delete')
-            ->assertSee('moved to the trash')
-            ->assertDontSee('Gold medal')
-            ->assertSee('Trash<span class="ml-2 font-mono text-xs text-ink-muted">1</span>', false)
+        $component->call('trash', $award->getKey())
             ->call('showTrash')
             ->assertSet('view', 'trash')
             ->assertSee('Gold medal')
             ->assertSee('data-restore', false)
-            ->call('restore', $award->getKey())
-            ->assertSee('Award restored.')
+            ->call('restoreMany', [$award->getKey()])
             ->assertSee('The trash is empty.')
             ->call('showActive')
             ->assertSee('Gold medal');
 
         $this->assertNull($award->fresh()->deleted_at);
-        $this->assertSame([AuditAction::CONTENT_DELETED, AuditAction::CONTENT_RESTORED], AuditLog::query()->orderBy('id')->pluck('action')->all());
+        $this->assertSame(
+            [AuditAction::CONTENT_DELETED, AuditAction::CONTENT_RESTORED, AuditAction::CONTENT_DELETED, AuditAction::CONTENT_RESTORED],
+            AuditLog::query()->orderBy('id')->pluck('action')->all(),
+        );
+    }
+
+    #[Test]
+    public function ticked_rows_are_published_unpublished_or_trashed_together_from_the_bulk_bar(): void
+    {
+        $a = Award::factory()->draft()->create(['name' => 'Alpha prize']);
+        $b = Award::factory()->draft()->create(['name' => 'Beta prize']);
+        $c = Award::factory()->published()->create(['name' => 'Gamma prize']);
+
+        $component = Livewire::actingAs($this->editor)->test(AwardIndex::class)
+            ->assertDontSee('data-bulk-bar', false)
+            ->set('selected', [$a->getKey(), $b->getKey()])
+            ->assertSee('data-bulk-bar', false)
+            ->assertSee('2</span> selected', false)
+            ->call('bulkPublish')
+            ->assertSet('selected', [])
+            ->assertSee('2 awards published.');
+
+        $this->assertTrue($a->fresh()->isPublished());
+        $this->assertTrue($b->fresh()->isPublished());
+
+        $component->call('selectPage', [$a->getKey(), $c->getKey()])
+            ->assertSet('selected', [$a->getKey(), $c->getKey()])
+            ->call('bulkUnpublish')
+            ->assertSee('2 moved back to draft.');
+
+        $this->assertTrue($a->fresh()->isDraft());
+        $this->assertTrue($c->fresh()->isDraft());
+
+        $component->set('selected', [$a->getKey(), $b->getKey(), $c->getKey()])
+            ->call('bulkTrash')
+            ->assertDispatched(AdminUx::EVENT_TOAST, fn (string $name, array $params): bool => $params['undo']['method'] === 'restoreMany' && count($params['undo']['args'][0]) === 3)
+            ->assertSee('No awards yet');
+
+        $this->assertSame(3, Award::onlyTrashed()->count());
+
+        $component->call('restoreMany', [$a->getKey(), $b->getKey(), $c->getKey()])->assertSee('3 restored.');
+        $this->assertSame(0, Award::onlyTrashed()->count());
+    }
+
+    #[Test]
+    public function filter_chips_set_and_clear_filters_in_the_address(): void
+    {
+        Award::factory()->published()->create(['name' => 'Gold medal', 'organisation' => 'Royal Society', 'description' => null]);
+        Award::factory()->draft()->create(['name' => '[Placeholder] Silver medal']);
+
+        Livewire::actingAs($this->editor)->test(AwardIndex::class)
+            ->assertSee('aria-pressed="true"', false)
+            ->call('setFilter', 'status', ContentStatus::Draft->value)
+            ->assertSet('filters', ['status' => 'draft'])
+            ->assertDontSee('Gold medal')->assertSee('Silver medal')
+            ->call('setFilter', 'status')
+            ->assertSet('filters', [])
+            ->call('setFilter', ContentRepositoryInterface::FILTER_PLACEHOLDER, '1')
+            ->assertDontSee('Gold medal')->assertSee('Silver medal')
+            ->call('setFilter', 'password', 'x')
+            ->assertSet('filters', [ContentRepositoryInterface::FILTER_PLACEHOLDER => '1'])
+            ->set('search', 'nothing like this')
+            ->assertSee('Nothing matches')
+            ->assertSee('Clear search and filters')
+            ->call('clearFilters')
+            ->assertSet('filters', [])
+            ->assertSet('search', '')
+            ->assertSee('Gold medal');
     }
 
     #[Test]
@@ -174,7 +248,9 @@ class ContentIndexComponentTest extends TestCase
     public function the_empty_state_invites_the_first_record(): void
     {
         Livewire::actingAs($this->editor)->test(AwardIndex::class)
-            ->assertSee('No awards yet. Create the first one.')
+            ->assertSee('No awards yet')
+            ->assertSee(ContentTypes::emptyText(ContentTypes::AWARD))
+            ->assertSee('Add the first award')
             ->assertSee(route('admin.content.awards.create'), false);
     }
 }

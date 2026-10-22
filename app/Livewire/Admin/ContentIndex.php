@@ -4,17 +4,19 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin;
 
+use App\Constants\AdminUx;
 use App\Constants\ContentStatus;
 use App\Constants\ContentTypes;
 use App\Constants\DateFormats;
 use App\Constants\StatusTone;
 use App\Exceptions\ImagesNotReadyException;
-use App\Livewire\Admin\Concerns\ConfirmsActions;
+use App\Livewire\Admin\Concerns\NotifiesEditors;
 use App\Repositories\Contracts\ContentRepositoryInterface;
 use App\Services\AbstractContentService;
 use BackedEnum;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Url;
@@ -24,18 +26,17 @@ use Livewire\WithPagination;
 /**
  * The index table every content type shares: search, filters, sortable
  * columns, drag-and-drop reordering (with move up/down buttons as the keyboard
- * alternative), publish/unpublish, trash with confirmation and a Trash view to
+ * alternative), publish/unpublish (one or a ticked selection), trash with Undo
+ * (no dialog: the trash is reversible) and a Trash view to
  * restore from. Subclasses name the type, its service and its columns.
  */
 abstract class ContentIndex extends Component
 {
-    use AuthorizesRequests, ConfirmsActions, WithPagination;
+    use AuthorizesRequests, NotifiesEditors, WithPagination;
 
     public const string VIEW_ACTIVE = 'active';
 
     public const string VIEW_TRASH = 'trash';
-
-    public const string ACTION_DELETE = 'delete';
 
     public const int PER_PAGE = 20;
 
@@ -54,6 +55,15 @@ abstract class ContentIndex extends Component
 
     #[Url(except: 'active')]
     public string $view = self::VIEW_ACTIVE;
+
+    /** Ids ticked for a bulk action (on any page). @var list<int> */
+    public array $selected = [];
+
+    /** Columns whose first click sorts newest first. */
+    public const array NEWEST_FIRST = ['updated_at', 'published_at'];
+
+    /** Filters with more options than this are a select rather than chips. */
+    public const int MAX_CHIPS = 8;
 
     /** ContentTypes key of the type this screen manages. */
     abstract protected function type(): string;
@@ -93,7 +103,34 @@ abstract class ContentIndex extends Component
             $this->sort = '';
         }
 
-        $this->filters = array_intersect_key($this->filters, array_flip($this->service()->filterColumns()));
+        $this->filters = array_intersect_key($this->filters, array_flip([...$this->service()->filterColumns(), ContentRepositoryInterface::FILTER_PLACEHOLDER]));
+    }
+
+    /**
+     * A filter chip: set one filter to a value, or clear it with null.
+     */
+    public function setFilter(string $field, ?string $value = null): void
+    {
+        if (! in_array($field, [...$this->service()->filterColumns(), ContentRepositoryInterface::FILTER_PLACEHOLDER], true)) {
+            return;
+        }
+
+        if ($value === null || $value === '') {
+            unset($this->filters[$field]);
+        } else {
+            $this->filters[$field] = $value;
+        }
+
+        $this->selected = [];
+        $this->resetPage();
+    }
+
+    public function clearFilters(): void
+    {
+        $this->filters = [];
+        $this->search = '';
+        $this->selected = [];
+        $this->resetPage();
     }
 
     public function updatedSearch(): void
@@ -118,7 +155,8 @@ abstract class ContentIndex extends Component
                 : ContentRepositoryInterface::SORT_ASC;
         } else {
             $this->sort = $column;
-            $this->direction = ContentRepositoryInterface::SORT_ASC;
+            // Dates read best newest first; names and titles from A.
+            $this->direction = in_array($column, self::NEWEST_FIRST, true) ? ContentRepositoryInterface::SORT_DESC : ContentRepositoryInterface::SORT_ASC;
         }
 
         $this->resetPage();
@@ -164,18 +202,118 @@ abstract class ContentIndex extends Component
         $this->notify(sprintf('%s moved back to draft.', $this->singular()));
     }
 
-    public function delete(): void
+    /**
+     * Move one record to the trash at once; the toast offers Undo for
+     * AdminUx::UNDO_SECONDS (trash is reversible, so there is no dialog).
+     */
+    public function trash(int $id): void
     {
-        if (! $this->isConfirming(self::ACTION_DELETE)) {
-            return;
-        }
-
-        $model = $this->service()->findOrFail((int) $this->confirmingId);
+        $model = $this->service()->findOrFail($id);
         $this->authorize('delete', $model);
 
         $this->service()->delete($model, auth()->user());
-        $this->cancelConfirmation();
-        $this->notify(sprintf('%s moved to the trash.', $this->singular()));
+        $this->selected = array_values(array_diff($this->selected, [$id]));
+        $this->toast(sprintf('%s moved to the trash.', $this->singular()), AdminUx::TOAST_SUCCESS, $this->undoWith('restoreMany', [[$id]]));
+    }
+
+    /**
+     * @param  list<int|string>  $ids
+     */
+    public function selectPage(array $ids): void
+    {
+        $this->selected = array_values(array_unique([...$this->selected, ...array_map('intval', $ids)]));
+    }
+
+    public function clearSelection(): void
+    {
+        $this->selected = [];
+    }
+
+    public function bulkPublish(): void
+    {
+        $published = 0;
+        $refused = [];
+
+        foreach ($this->selectedRecords() as $model) {
+            if ($model->getAttribute('status') === ContentStatus::Published) {
+                continue;
+            }
+
+            $this->authorize('publish', $model);
+
+            try {
+                $this->service()->publish($model, auth()->user());
+                $published++;
+            } catch (ImagesNotReadyException) {
+                $refused[] = $this->cell($model, array_key_first($this->columns()))['text'];
+            }
+        }
+
+        $this->selected = [];
+
+        if ($refused !== []) {
+            $this->toast(sprintf('%d published. Not published yet, because images still need details: %s.', $published, implode(', ', $refused)), AdminUx::TOAST_ERROR);
+
+            return;
+        }
+
+        $this->toast(sprintf('%d %s published.', $published, $published === 1 ? strtolower($this->singular()) : strtolower(ContentTypes::get($this->type())['plural'])));
+    }
+
+    public function bulkUnpublish(): void
+    {
+        $count = 0;
+
+        foreach ($this->selectedRecords() as $model) {
+            if ($model->getAttribute('status') !== ContentStatus::Published) {
+                continue;
+            }
+
+            $this->authorize('publish', $model);
+            $this->service()->unpublish($model, auth()->user());
+            $count++;
+        }
+
+        $this->selected = [];
+        $this->toast(sprintf('%d moved back to draft.', $count));
+    }
+
+    public function bulkTrash(): void
+    {
+        $ids = [];
+
+        foreach ($this->selectedRecords() as $model) {
+            $this->authorize('delete', $model);
+            $this->service()->delete($model, auth()->user());
+            $ids[] = (int) $model->getKey();
+        }
+
+        $this->selected = [];
+        $this->toast(sprintf('%d moved to the trash.', count($ids)), AdminUx::TOAST_SUCCESS, $this->undoWith('restoreMany', [$ids]));
+    }
+
+    /**
+     * Undo of a move to the trash (one record or a bulk selection).
+     *
+     * @param  list<int|string>  $ids
+     */
+    public function restoreMany(array $ids): void
+    {
+        $this->authorize('create', ContentTypes::get($this->type())['model']);
+
+        foreach ($ids as $id) {
+            $this->service()->restore((int) $id, auth()->user());
+        }
+
+        $this->toast(count($ids) === 1 ? sprintf('%s restored.', $this->singular()) : sprintf('%d restored.', count($ids)));
+    }
+
+    /**
+     * @return Collection<int, Model>
+     */
+    protected function selectedRecords(): Collection
+    {
+        return $this->service()->findMany(array_map('intval', $this->selected));
     }
 
     public function restore(int $id): void
@@ -247,6 +385,10 @@ abstract class ContentIndex extends Component
             'editRoute' => ContentTypes::editRoute($this->type()),
             'routeParameter' => ContentTypes::routeParameter($this->type()),
             'singular' => $this->singular(),
+            'emptyText' => ContentTypes::emptyText($this->type()),
+            'hasFilters' => trim($this->search) !== '' || array_filter($this->filters, fn ($value): bool => $value !== null && $value !== '') !== [],
+            'placeholderFilter' => ContentRepositoryInterface::FILTER_PLACEHOLDER,
+            'maxChips' => self::MAX_CHIPS,
         ])->layout('components.layouts.admin', ['title' => $type['plural']]);
     }
 
@@ -307,6 +449,6 @@ abstract class ContentIndex extends Component
 
     protected function notify(string $message): void
     {
-        session()->flash('admin.status', $message);
+        $this->toast($message);
     }
 }

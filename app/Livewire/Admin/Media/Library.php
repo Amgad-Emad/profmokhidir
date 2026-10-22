@@ -14,6 +14,7 @@ use App\Constants\Uploads;
 use App\Http\Requests\Admin\ImageDetailsRequest;
 use App\Http\Requests\Admin\ImageUploadRequest;
 use App\Livewire\Admin\Concerns\ConfirmsActions;
+use App\Livewire\Admin\Concerns\NotifiesEditors;
 use App\Models\Album;
 use App\Repositories\Contracts\MediaRepositoryInterface;
 use App\Services\AlbumService;
@@ -35,7 +36,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  */
 class Library extends Component
 {
-    use AuthorizesRequests, ConfirmsActions, WithFileUploads, WithPagination;
+    use AuthorizesRequests, ConfirmsActions, NotifiesEditors, WithFileUploads, WithPagination;
 
     public const string ACTION_DELETE = 'delete';
 
@@ -52,6 +53,23 @@ class Library extends Component
 
     #[Url(except: false)]
     public bool $incomplete = false;
+
+    #[Url(as: 'missing_alt', except: false)]
+    public bool $missingAlt = false;
+
+    #[Url(except: false)]
+    public bool $unused = false;
+
+    #[Url(except: '')]
+    public string $album = '';
+
+    public const string SHOW_ALL = '';
+
+    public const string SHOW_MISSING_ALT = 'missing-alt';
+
+    public const string SHOW_INCOMPLETE = 'incomplete';
+
+    public const string SHOW_UNUSED = 'unused';
 
     public ?int $editingId = null;
 
@@ -86,6 +104,34 @@ class Library extends Component
     public function updatedIncomplete(): void
     {
         $this->resetPage();
+    }
+
+    public function updatedAlbum(): void
+    {
+        $this->uploadAlbumId = $this->album === '' ? $this->uploadAlbumId : (int) $this->album;
+        $this->resetPage();
+    }
+
+    /**
+     * The "Show" chips: everything, images without alt text, images still
+     * missing a detail, or images nothing on the site uses.
+     */
+    public function show(string $which = self::SHOW_ALL): void
+    {
+        $this->missingAlt = $which === self::SHOW_MISSING_ALT;
+        $this->incomplete = $which === self::SHOW_INCOMPLETE;
+        $this->unused = $which === self::SHOW_UNUSED;
+        $this->resetPage();
+    }
+
+    public function showing(): string
+    {
+        return match (true) {
+            $this->missingAlt => self::SHOW_MISSING_ALT,
+            $this->incomplete => self::SHOW_INCOMPLETE,
+            $this->unused => self::SHOW_UNUSED,
+            default => self::SHOW_ALL,
+        };
     }
 
     public function edit(int $id): void
@@ -131,7 +177,7 @@ class Library extends Component
 
         $this->media()->updateProperties($media, $this->details, auth()->user());
         $this->cancelEdit();
-        session()->flash('admin.status', 'Image details saved.');
+        $this->toast('Image details saved.');
     }
 
     public function updatedUploads(): void
@@ -166,8 +212,9 @@ class Library extends Component
         }
 
         $this->uploads = [];
-        $this->resetPage();
-        session()->flash('admin.status', count($files) === 1 ? 'Image uploaded. Add its details before publishing.' : count($files).' images uploaded. Add their details before publishing.');
+        $this->album = (string) $album->getKey();
+        $this->show();
+        $this->toast(count($files) === 1 ? 'Image uploaded to '.$album->title.'. Open it to add alt text and a caption.' : count($files).' images uploaded to '.$album->title.'. Open each to add alt text and a caption.');
     }
 
     public function delete(): void
@@ -186,7 +233,7 @@ class Library extends Component
             $this->cancelEdit();
         }
 
-        session()->flash('admin.status', 'Image deleted.');
+        $this->toast('Image deleted.');
     }
 
     public function render(): View
@@ -195,6 +242,9 @@ class Library extends Component
             MediaRepositoryInterface::FILTER_COLLECTION => $this->collection,
             MediaRepositoryInterface::FILTER_TREATMENT => $this->treatment,
             MediaRepositoryInterface::FILTER_INCOMPLETE => $this->incomplete,
+            MediaRepositoryInterface::FILTER_MISSING_ALT => $this->missingAlt,
+            MediaRepositoryInterface::FILTER_UNUSED => $this->unused,
+            MediaRepositoryInterface::FILTER_ALBUM => $this->album === '' ? null : (int) $this->album,
         ];
 
         $images = $this->media()->library($this->search, $filters, self::PER_PAGE);
@@ -220,6 +270,14 @@ class Library extends Component
             'treatments' => MediaTreatment::labels(),
             'albums' => app(AlbumService::class)->search(null, [], 100)->getCollection()->pluck('title', 'id')->all(),
             'incompleteCount' => $this->media()->countIncompleteImages(),
+            'missingAltCount' => $this->media()->countMissingAltText(),
+            'showOptions' => [
+                self::SHOW_ALL => 'All images',
+                self::SHOW_MISSING_ALT => 'Missing alt text',
+                self::SHOW_INCOMPLETE => 'Missing details',
+                self::SHOW_UNUSED => 'Not used on the site',
+            ],
+            'filtered' => trim($this->search) !== '' || $this->collection !== '' || $this->treatment !== '' || $this->album !== '' || $this->showing() !== self::SHOW_ALL,
             'uploadAccept' => '.'.implode(',.', Uploads::IMAGE_EXTENSIONS),
             'uploadHint' => 'JPEG, PNG or WebP up to '.Uploads::imageMaxLabel(),
         ])->layout('components.layouts.admin', ['title' => AdminNavigation::get(AdminNavigation::MEDIA_LIBRARY)['label']]);

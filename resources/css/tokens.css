@@ -157,10 +157,26 @@
     --surface-field-on-raised: var(--brand-evergreen);
 }
 
-/* Raised surfaces: brass cannot carry a label, a focus ring or a strong rule on cypress, and a field sinks to evergreen. */
+/* Raised surfaces (and the admin panels drawn on them in admin.css): brass cannot carry a label, a focus ring or a strong rule on cypress, and a field sinks to evergreen. */
 .card,
 .bg-surface-raised,
-.bg-surface-panel {
+.bg-surface-panel,
+.admin-topbar,
+.admin-table-wrap,
+.admin-dialog,
+.admin-drawer,
+.admin-toast,
+.admin-user-menu__panel,
+.row-menu__panel,
+.palette,
+.save-bar,
+.bulk-bar,
+.list-empty,
+.attention-card,
+.quick-action,
+.launch-checklist__list,
+.activity-feed,
+.library-tile {
     --accent-text: var(--accent-text-on-raised);
     --danger-tone: var(--accent-text-on-raised);
     --pending-tone: var(--accent-text-on-raised);

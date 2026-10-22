@@ -28,7 +28,7 @@
             <p class="mt-4 text-sm"><button type="button" wire:click="clearFilters" class="text-accent-text underline-offset-4 hover:underline">Clear the search and filters</button></p>
         @endif
     @else
-        <div class="mt-6 overflow-x-auto rounded-card border border-rule bg-surface-panel">
+        <div class="relative mt-6 overflow-x-auto rounded-card border border-rule bg-surface-panel">
             <table class="admin-table w-full text-left text-sm" data-users>
                 <caption class="sr-only">Users</caption>
                 <thead>

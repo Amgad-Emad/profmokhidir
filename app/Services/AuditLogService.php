@@ -37,6 +37,15 @@ class AuditLogService
     }
 
     /**
+     * @param  list<string>  $actions
+     * @return Collection<int, AuditLog>
+     */
+    public function recentExcept(array $actions, int $limit = 20): Collection
+    {
+        return $this->logs->recentExcept($actions, $limit);
+    }
+
+    /**
      * @return Collection<int, AuditLog>
      */
     public function forSubject(Model $subject): Collection

@@ -2,11 +2,27 @@
 // @livewireScripts; the components below register on alpine:init.
 import './theme';
 import { initForms, registerForms } from './forms';
+import { adminShell } from './admin/shell';
+import { commandPalette } from './admin/palette';
+import { adminToasts } from './admin/toasts';
+import { editScreen, leaveGuard, sectionNav } from './admin/editing';
+import { watchPlaceholders } from './admin/placeholders';
+import { initShortcuts } from './admin/shortcuts';
 
 initForms();
+initShortcuts();
+// The marker and the flag's wording come from App\Constants\Placeholders (on <body>).
+watchPlaceholders(document.body.dataset);
 
 document.addEventListener('alpine:init', () => {
     registerForms(Alpine);
+
+    Alpine.data('adminShell', adminShell);
+    Alpine.data('commandPalette', commandPalette);
+    Alpine.data('adminToasts', adminToasts);
+    Alpine.data('editScreen', editScreen);
+    Alpine.data('leaveGuard', leaveGuard);
+    Alpine.data('sectionNav', sectionNav);
 
     /*
      | Drag-and-drop reordering of table rows (native HTML5 drag events). Rows are

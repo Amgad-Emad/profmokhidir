@@ -74,4 +74,36 @@ class TributeModerationServiceTest extends TestCase
         $this->assertSame(1, $this->service->countByStatus(TributeStatus::Rejected));
         $this->assertNull($pending[0]->fresh()->published_at);
     }
+
+    #[Test]
+    public function reopen_puts_a_tribute_back_in_the_review_queue_and_off_the_site(): void
+    {
+        $tribute = Tribute::factory()->featured()->create();
+
+        $this->service->reopen($tribute, $this->editor);
+
+        $tribute = $tribute->fresh();
+        $this->assertSame(TributeStatus::Pending, $tribute->status);
+        $this->assertNull($tribute->published_at);
+        $this->assertFalse($tribute->isFeatured());
+        $this->assertSame(1, AuditLog::query()->where('action', AuditAction::TRIBUTE_REOPENED)->count());
+    }
+
+    #[Test]
+    public function restore_statuses_returns_each_tribute_to_where_it_was(): void
+    {
+        $wasApproved = Tribute::factory()->approved()->create();
+        $wasPending = Tribute::factory()->pending()->create();
+        $this->service->rejectMany([$wasApproved->getKey(), $wasPending->getKey()], $this->editor);
+
+        $count = $this->service->restoreStatuses([
+            $wasApproved->getKey() => TributeStatus::Approved->value,
+            $wasPending->getKey() => TributeStatus::Pending->value,
+            999 => TributeStatus::Approved->value,
+        ], $this->editor);
+
+        $this->assertSame(2, $count);
+        $this->assertSame(TributeStatus::Approved, $wasApproved->fresh()->status);
+        $this->assertSame(TributeStatus::Pending, $wasPending->fresh()->status);
+    }
 }

@@ -47,12 +47,16 @@ class MediaLibraryTest extends TestCase
         $portrait = $this->app->make(ProfileService::class)->setPortrait($profile, PlaceholderImage::grey(40, 50));
 
         Livewire::actingAs($this->editor)->test(Library::class)
-            ->assertSee('1 image need details')
+            ->assertSee('Needs alt text')
             ->assertSee('Album · Field days')
             ->assertSee('Profile · Prof')
             ->assertSee('Harvest time')
+            ->call('edit', $ready->getKey())
             ->assertSee(route('admin.media.albums.edit', ['album' => $album->getKey()]), false)
+            ->call('cancelEdit')
+            ->call('edit', $portrait->getKey())
             ->assertSee(route('admin.content.profile'), false)
+            ->call('cancelEdit')
             ->set('incomplete', true)
             ->assertDontSee('Harvest time')
             ->assertSee('Profile · Prof')
@@ -88,7 +92,7 @@ class MediaLibraryTest extends TestCase
             ->assertHasNoErrors()
             ->assertSee('Image details saved.')
             ->assertDontSee('data-details-dialog', false)
-            ->assertDontSee('image need details');
+            ->assertDontSee('Needs details');
 
         $photo = $photo->fresh();
         $this->assertSame('Practical class', $photo->getCustomProperty(MediaProperties::CAPTION));
@@ -130,12 +134,12 @@ class MediaLibraryTest extends TestCase
 
         Livewire::actingAs($this->editor)->test(Library::class)
             ->call('confirm', 'delete', $photo->getKey())
-            ->assertSee('Delete this image?')
+            ->assertSee('Delete this image for good?')
             ->assertSee('is used by')
             ->assertSee('Album: Field days')
             ->call('delete')
             ->assertSee('Image deleted.')
-            ->assertSee('No images have been uploaded yet.');
+            ->assertSee('No photographs yet');
 
         $this->assertNull(Media::query()->find($photo->getKey()));
         $this->assertSame(1, AuditLog::query()->where('action', AuditAction::MEDIA_DELETED)->count());

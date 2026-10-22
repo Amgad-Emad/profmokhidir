@@ -14,6 +14,18 @@ use App\Models\Profile;
 use App\Models\Publication;
 use App\Models\TeachingMaterial;
 use App\Models\Video;
+use App\Services\AbstractContentService;
+use App\Services\AlbumService;
+use App\Services\AwardService;
+use App\Services\CommentaryService;
+use App\Services\CvEntryService;
+use App\Services\HomeQuoteService;
+use App\Services\OtherItemService;
+use App\Services\ProfileService;
+use App\Services\PublicationService;
+use App\Services\TeachingMaterialService;
+use App\Services\VideoService;
+use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
 
 /**
@@ -64,6 +76,46 @@ final class ContentTypes
             self::COMMENTARY => self::type(Commentary::class, 'Commentary', 'Commentaries', AdminNavigation::COMMENTARY, 'commentary.show', 'slug'),
             self::OTHER_ITEM => self::type(OtherItem::class, 'Other item', 'Other information', AdminNavigation::OTHER, 'other.show', 'slug'),
             self::HOME_QUOTE => self::type(HomeQuote::class, 'Home quote', 'Home quotes', AdminNavigation::HOME_QUOTES, 'home'),
+        ];
+    }
+
+    /**
+     * What goes in each type's list, in plain words, for its empty state.
+     */
+    public static function emptyText(string $key): string
+    {
+        return match ($key) {
+            self::CV_ENTRY => 'CV entries are the lines of his CV: degrees, posts, memberships. Each one appears on the CV page under its section.',
+            self::PUBLICATION => 'Publications are his papers, books and chapters. Each can carry a PDF of the full text, and readers can filter them by type and year.',
+            self::AWARD => 'Awards are the honours and prizes he received, with the organisation and the year.',
+            self::VIDEO => 'Videos are recordings of lectures, interviews and ceremonies, linked from YouTube or Vimeo or uploaded.',
+            self::ALBUM => 'Albums group photographs for the Pictures page. Each photo has a caption with place and year.',
+            self::TEACHING_MATERIAL => 'Teaching materials are lecture notes, syllabi and problem sets, grouped by course on the Teaching page.',
+            self::COMMENTARY => 'Commentaries are essays and notes for the Commentary Corner, each on its own page.',
+            self::OTHER_ITEM => 'Other information holds anything that fits no other section: interviews, dedications, events.',
+            self::HOME_QUOTE => 'Home quotes are short lines in his words, shown between the chapters of the home page.',
+            default => 'Nothing has been added here yet.',
+        };
+    }
+
+    /**
+     * Type key => the content service that manages it.
+     *
+     * @return array<string, class-string<AbstractContentService<Model>>>
+     */
+    public static function services(): array
+    {
+        return [
+            self::PROFILE => ProfileService::class,
+            self::CV_ENTRY => CvEntryService::class,
+            self::PUBLICATION => PublicationService::class,
+            self::AWARD => AwardService::class,
+            self::VIDEO => VideoService::class,
+            self::ALBUM => AlbumService::class,
+            self::TEACHING_MATERIAL => TeachingMaterialService::class,
+            self::COMMENTARY => CommentaryService::class,
+            self::OTHER_ITEM => OtherItemService::class,
+            self::HOME_QUOTE => HomeQuoteService::class,
         ];
     }
 

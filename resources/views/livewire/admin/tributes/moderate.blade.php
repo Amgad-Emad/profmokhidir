@@ -3,12 +3,12 @@
 <div>
     <x-admin.page-header eyebrow="Tributes" title="Review tributes" intro="Tributes appear on the site only after they are approved. One approved tribute can be featured to open the book of remembrance. Email addresses are shown here to moderators and never published." />
 
-    <div class="mt-8"><x-admin.flash /></div>
+    <x-admin.flash />
 
-    <div class="flex flex-wrap items-center gap-2 border-b border-rule" role="tablist" aria-label="Tribute status">
+    <div class="mt-10 flex flex-wrap items-center gap-2 border-b border-rule" role="tablist" aria-label="Tribute status">
         @foreach ($tabs as $value => $tabInfo)
             <button type="button" role="tab" wire:click="showTab('{{ $value }}')" aria-selected="{{ $tab === $value ? 'true' : 'false' }}" class="admin-tab inline-flex items-center gap-2" data-tab="{{ $value }}">
-                <x-icon :name="$tabInfo['tone']->icon()" class="size-4" />{{ $tabInfo['label'] }}<span class="font-mono text-xs text-ink-muted">{{ $tabInfo['count'] }}</span>
+                <x-icon :name="$tabInfo['tone']->icon()" class="size-4" />{{ $tabInfo['label'] }}<span class="text-xs text-ink-muted">{{ $tabInfo['count'] }}</span>
             </button>
         @endforeach
     </div>
@@ -21,10 +21,10 @@
             <x-form.checkbox id="select-all" wire:click="toggleAll" :checked="$pageIds !== [] && array_diff($pageIds, $selected) === []">Select all on this page</x-form.checkbox>
             <span class="font-light text-ink-muted">{{ count($selected) }} selected</span>
             @if ($current !== TributeStatus::Approved)
-                <button type="button" wire:click="approveSelected" @disabled($selected === []) class="text-success-tone underline-offset-4 hover:underline disabled:opacity-40" data-bulk-approve>Approve selected</button>
+                <button type="button" wire:click="approveSelected" @disabled($selected === []) class="save-bar__link disabled:opacity-40" data-bulk-approve>Approve selected</button>
             @endif
             @if ($current !== TributeStatus::Rejected)
-                <button type="button" wire:click="confirmRejectSelected" @disabled($selected === []) class="text-danger-tone underline-offset-4 hover:underline disabled:opacity-40" data-bulk-reject>Reject selected</button>
+                <button type="button" wire:click="rejectSelected" @disabled($selected === []) class="save-bar__link save-bar__link--danger disabled:opacity-40" data-bulk-reject>Decline selected</button>
             @endif
         </div>
 
@@ -63,20 +63,24 @@
                                 <x-admin.status-badge tone="cypress" label="Featured" data-featured-badge />
                             @endif
                             @if (! $tribute->isApproved())
-                                <button type="button" wire:click="approve({{ $tribute->getKey() }})" class="text-success-tone underline-offset-4 hover:underline" data-approve>Approve<span class="sr-only"> tribute from {{ $tribute->name }}</span></button>
+                                <x-button type="button" variant="primary" wire:click="approve({{ $tribute->getKey() }})" class="btn-pill--small" data-approve>Approve<span class="sr-only"> tribute from {{ $tribute->name }}</span></x-button>
                             @endif
                             @if ($tribute->status !== TributeStatus::Rejected)
-                                <button type="button" wire:click="confirm('reject', {{ $tribute->getKey() }})" class="text-danger-tone underline-offset-4 hover:underline" data-reject>Reject<span class="sr-only"> tribute from {{ $tribute->name }}</span></button>
+                                <button type="button" wire:click="decline({{ $tribute->getKey() }})" class="save-bar__link" data-reject>Decline<span class="sr-only"> tribute from {{ $tribute->name }}</span></button>
                             @endif
-                            @if ($tribute->isApproved())
-                                @if ($tribute->isFeatured())
-                                    <button type="button" wire:click="unfeature({{ $tribute->getKey() }})" class="text-ink-muted underline-offset-4 hover:underline" data-unfeature>Remove from featured<span class="sr-only"> (tribute from {{ $tribute->name }})</span></button>
-                                @else
-                                    <button type="button" wire:click="feature({{ $tribute->getKey() }})" class="text-success-tone underline-offset-4 hover:underline" data-feature>Feature on the page<span class="sr-only"> (tribute from {{ $tribute->name }})</span></button>
-                                @endif
-                            @endif
-                            @if ($editingId !== (int) $tribute->getKey())
-                                <button type="button" wire:click="startEditing({{ $tribute->getKey() }})" class="link-meta" data-edit>Fix typos<span class="sr-only"> in tribute from {{ $tribute->name }}</span></button>
+                            @if ($tribute->isApproved() || $editingId !== (int) $tribute->getKey())
+                                <x-admin.row-menu :label="'tribute from '.$tribute->name">
+                                    @if ($tribute->isApproved())
+                                        @if ($tribute->isFeatured())
+                                            <button type="button" wire:click="unfeature({{ $tribute->getKey() }})" class="row-menu__item" data-unfeature><x-icon name="minus" class="size-4" />Remove from featured</button>
+                                        @else
+                                            <button type="button" wire:click="feature({{ $tribute->getKey() }})" class="row-menu__item" data-feature><x-icon name="check" class="size-4" />Feature on the page</button>
+                                        @endif
+                                    @endif
+                                    @if ($editingId !== (int) $tribute->getKey())
+                                        <button type="button" wire:click="startEditing({{ $tribute->getKey() }})" class="row-menu__item" data-edit><x-icon name="feather" class="size-4" />Fix typos</button>
+                                    @endif
+                                </x-admin.row-menu>
                             @endif
                         </div>
                     </div>
@@ -86,10 +90,4 @@
         {{ $tributes->links('components.admin.pagination') }}
     @endif
 
-    <x-admin.confirm-dialog :show="$this->isConfirming('reject')" title="Reject this tribute?" action="reject" confirm-label="Reject">
-        It will not appear on the site. You can approve it later from the Rejected tab.
-    </x-admin.confirm-dialog>
-    <x-admin.confirm-dialog :show="$this->isConfirming('bulk-reject')" title="Reject the selected tributes?" action="rejectSelected" confirm-label="Reject selected">
-        {{ count($selected) }} {{ \Illuminate\Support\Str::plural('tribute', count($selected)) }} will be rejected. They can be approved later from the Rejected tab.
-    </x-admin.confirm-dialog>
 </div>

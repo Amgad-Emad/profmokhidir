@@ -1,19 +1,22 @@
 <div>
-    <x-admin.page-header eyebrow="Content" :title="$isNew ? 'New CV entry' : 'Edit CV entry'" />
-    <div class="mt-8"><x-admin.flash /></div>
+    <x-admin.page-header eyebrow="Content" :title="$isNew ? 'New CV entry' : 'Edit CV entry'" intro="One line of the CV: a degree, a post, a membership. The CV page groups entries by section." />
+    <x-admin.flash />
 
-    <form wire:submit="save" class="mt-4 max-w-3xl space-y-8" novalidate>
-        <x-form.error-summary after-save :intro="\App\Constants\FormControls::ERROR_SUMMARY_INTRO" />
-        <x-form.select model="form.section" label="Section" :options="$sections" required />
-        <x-form.input model="form.title" label="Title" required hint="The degree, position or achievement." />
-        <x-form.input model="form.organisation" label="Organisation" />
-        <x-form.textarea model="form.role_description" label="Description" rows="4" />
-        <div class="grid gap-6 sm:grid-cols-3">
-            <x-form.year model="form.start_year" label="Start year" />
-            <x-form.year model="form.end_year" label="End year" hint="Leave empty for an ongoing entry." />
-            <x-form.date model="form.last_updated_at" label="Last updated" />
-        </div>
-        <x-admin.status-field :public-url="$publicUrl" />
-        <x-admin.form-actions :index-url="$indexUrl" :public-url="$publicUrl" />
-    </form>
+    <x-admin.edit-layout :editor="$editor" class="mt-10">
+        <x-admin.form-section id="entry" title="The entry">
+            <x-form.select model="form.section" label="Section" :options="$sections" required hint="Where on the CV page this belongs." />
+            <x-form.input model="form.title" label="Title" required hint="The degree, position or achievement, for example PhD in Agronomy." />
+            <x-form.input model="form.organisation" label="Organisation" hint="The university, ministry or society." />
+            <x-form.textarea model="form.role_description" label="Description" rows="4" hint="A sentence or two about the role, if it needs explaining." />
+        </x-admin.form-section>
+        <x-admin.form-section id="dates" title="Dates">
+            <div class="grid gap-6 sm:grid-cols-3">
+                <x-form.year model="form.start_year" label="Start year" hint="Four digits." />
+                <x-form.year model="form.end_year" label="End year" hint="Leave empty while it is ongoing." />
+                <x-form.date model="form.last_updated_at" label="Last updated" hint="Only for long-running entries." />
+            </div>
+        </x-admin.form-section>
+    </x-admin.edit-layout>
+
+    <x-admin.revisions :editor="$editor" :show="$showHistory" />
 </div>

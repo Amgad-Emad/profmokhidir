@@ -15,6 +15,8 @@ class EloquentOtherItemRepository extends BaseContentRepository implements Other
 {
     protected array $searchColumns = ['title', 'summary', 'category'];
 
+    protected array $placeholderColumns = ['body'];
+
     protected array $sortableColumns = ['title', 'date', 'category'];
 
     protected array $filterColumns = ['status', 'item_type', 'category'];

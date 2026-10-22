@@ -60,7 +60,7 @@ class AdminLayoutTest extends TestCase
 
         $this->actingAs($admin)->get(route(AdminNavigation::DASHBOARD_ROUTE))
             ->assertOk()
-            ->assertSee('class="admin-nav-link admin-nav-link--active" aria-current="page" data-nav-item="dashboard">Dashboard', false);
+            ->assertSee('class="admin-nav-link admin-nav-link--active" aria-current="page" data-nav-item="dashboard" title="Dashboard">', false);
 
         $this->actingAs($admin)->get(route(AdminNavigation::routeFor(AdminNavigation::TRIBUTES)))
             ->assertOk()

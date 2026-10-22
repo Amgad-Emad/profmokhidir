@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Concerns;
 
 use App\Constants\ContentStatus;
+use App\Support\PreviewContext;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -32,10 +33,24 @@ trait Publishable
         return property_exists($this, 'orderDateColumn') ? $this->orderDateColumn : 'published_at';
     }
 
+    /**
+     * Published records; while a signed preview of one of this type's drafts is
+     * being shown (PreviewContext), that draft too.
+     */
     #[Scope]
     protected function published(Builder $query): void
     {
-        $query->where($this->qualifyColumn('status'), ContentStatus::Published->value);
+        $previewId = app(PreviewContext::class)->idFor($this);
+
+        if ($previewId === null) {
+            $query->where($this->qualifyColumn('status'), ContentStatus::Published->value);
+
+            return;
+        }
+
+        $query->where(fn (Builder $query) => $query
+            ->where($this->qualifyColumn('status'), ContentStatus::Published->value)
+            ->orWhere($this->getQualifiedKeyName(), $previewId));
     }
 
     #[Scope]

@@ -27,6 +27,15 @@ interface MediaRepositoryInterface
     /** Filter key for searchImages(): true keeps only images missing a required property. */
     public const string FILTER_INCOMPLETE = 'incomplete';
 
+    /** Filter key for searchImages(): true keeps only images without alt text. */
+    public const string FILTER_MISSING_ALT = 'missing_alt';
+
+    /** Filter key for searchImages(): true keeps only images whose record is gone or in the trash. */
+    public const string FILTER_UNUSED = 'unused';
+
+    /** Filter key for searchImages(): album id. */
+    public const string FILTER_ALBUM = 'album';
+
     public function find(int $id): ?Media;
 
     public function findOrFail(int $id): Media;
@@ -88,4 +97,9 @@ interface MediaRepositoryInterface
      * Number of images still missing one of the properties required for publishing.
      */
     public function countIncompleteImages(): int;
+
+    /**
+     * Number of images with no alt text.
+     */
+    public function countMissingAltText(): int;
 }
