@@ -13,6 +13,9 @@
 @import './wayfinding.css';
 @import './masthead.css';
 @import './site-menu.css';
+@import './forms.css';
+@import './form-controls.css';
+@import './form-editor.css';
 @import './auth.css';
 @import './chat.css';
 @import './theme.css';
@@ -536,36 +539,6 @@
         border-color: var(--rule);
     }
 
-    /* Selects in filter forms: quiet, pill shaped, on the field surface. Wrap in .select-wrap with a .select-chevron beside. */
-    .filter-select {
-        @apply min-h-11 w-full rounded-full border border-rule bg-surface-field px-4 pr-10 font-sans text-sm font-medium text-ink;
-        appearance: none;
-    }
-
-    /* Selects in forms: same box as inputs. Wrap in .select-wrap with a .select-chevron beside. */
-    .form-select {
-        appearance: none;
-        padding-right: 2.75rem;
-    }
-
-    /* The chevron beside a select: a masked shape in the current ink, so it follows the theme. */
-    .select-wrap {
-        position: relative;
-        display: block;
-    }
-
-    .select-chevron {
-        position: absolute;
-        top: 50%;
-        right: 1rem;
-        width: 0.625rem;
-        height: 0.625rem;
-        transform: translateY(-50%);
-        pointer-events: none;
-        background-color: currentColor;
-        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10' fill='none' stroke='black' stroke-width='1'%3E%3Cpath d='M1 3.5 5 7.5 9 3.5'/%3E%3C/svg%3E") center / contain no-repeat;
-    }
-
     /* Honeypot field: out of sight and out of the tab order, never display:none so bots still fill it. */
     .form-honeypot {
         position: absolute;
@@ -825,93 +798,6 @@
 
 .admin-table tr.is-dragging {
     opacity: 0.5;
-}
-
-.status-option:focus-within {
-    outline: 2px solid var(--focus);
-    outline-offset: 2px;
-}
-
-.rich-text__toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.5rem;
-    border-bottom: 1px solid var(--rule);
-}
-
-.rich-text__toolbar > button {
-    min-width: 2.25rem;
-    height: 2.25rem;
-    padding: 0 0.5rem;
-    border-radius: var(--radius-card);
-    font-family: var(--font-sans);
-    font-size: 0.875rem;
-    color: var(--ink);
-}
-
-.rich-text__toolbar > button:hover {
-    background: var(--surface-sunken);
-}
-
-.rich-text__toolbar > button[aria-pressed='true'] {
-    background: var(--fill);
-    color: var(--fill-ink);
-}
-
-.rich-text__link {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem;
-    width: 100%;
-    padding-top: 0.5rem;
-}
-
-.rich-text__link input {
-    flex: 1 1 12rem;
-    padding: 0.5rem 0.75rem;
-    border: 1px solid var(--rule-strong);
-    border-radius: var(--radius-card);
-    background: var(--surface-field);
-    font-size: 0.875rem;
-}
-
-.rich-text__link button {
-    font-size: 0.875rem;
-    color: var(--accent-text);
-    text-decoration: underline;
-    text-underline-offset: 4px;
-}
-
-.rich-text__content {
-    padding: 1rem 1.25rem;
-    min-height: 16rem;
-}
-
-.rich-text__editable {
-    outline: none;
-    min-height: 14rem;
-}
-
-/* The editable itself shows the focus ring (the wrapper's border also takes the focus colour). */
-.rich-text__editable:focus-visible {
-    outline: 2px solid var(--focus);
-    outline-offset: -2px;
-    border-radius: var(--radius-card);
-}
-
-.rich-text__editable p.is-editor-empty:first-child::before {
-    content: 'Start writing…';
-    color: var(--ink-muted);
-    float: left;
-    pointer-events: none;
-    height: 0;
-}
-
-.rich-text:focus-within {
-    border-color: var(--focus);
 }
 
 .photo-grid {

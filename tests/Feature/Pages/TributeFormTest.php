@@ -47,23 +47,25 @@ class TributeFormTest extends TestCase
             ->assertSeeInOrder(['<p class="tribute-steps mt-8" data-rise data-step="write">', '<span class="sr-only">Step 1 of 2</span>', 'Step I of II', 'aria-current="step">Write</span>', '>Preview</span>'], false)
             ->assertSee('action="'.route('tributes.preview').'"', false)
             ->assertSee('name="_token"', false)
-            ->assertSee('id="name" name="name" type="text"', false)
+            ->assertSee('class="form-style-underline mt-12 space-y-10" data-rise', false)
+            ->assertSee('id="name" name="name" required="required"', false)
             ->assertSee(TributeForm::hint('name'))
-            ->assertSee('<select id="relationship" name="relationship"', false)
+            ->assertSee('<select class="form-control__input" id="relationship" name="relationship" required="required"', false)
             ->assertSee('<option value="student"', false)
             ->assertSee('<option value="other"', false)
             ->assertSee('id="location" name="location"', false)
             ->assertSee(TributeForm::hint('location'))
-            ->assertSee('x-data="{ count: 0 }"', false)
-            ->assertSee('<textarea id="message" name="message" rows="8"', false)
+            ->assertSee('<textarea class="form-control__input" id="message" name="message" required="required"', false)
+            ->assertSee('rows="8"', false)
             ->assertSee('Share a memory, a lesson or a moment.')
             ->assertSee('maxlength="'.Tribute::MESSAGE_MAX_LENGTH.'"', false)
-            ->assertSee('<span x-text="count">0</span> / '.Tribute::MESSAGE_MAX_LENGTH.' characters', false)
-            ->assertSee('id="email" name="email" type="email"', false)
+            ->assertSee('data-form-counter data-max="'.Tribute::MESSAGE_MAX_LENGTH.'"', false)
+            ->assertSee('0 / '.Tribute::MESSAGE_MAX_LENGTH.' characters</p>', false)
+            ->assertSee('id="email" name="email"', false)
             ->assertSee('never shown publicly')
             ->assertSee('class="form-honeypot" aria-hidden="true"', false)
             ->assertSee('name="'.StoreTributeRequest::HONEYPOT.'" tabindex="-1" autocomplete="off"', false)
-            ->assertDontSee('type="checkbox" name="consent"', false)
+            ->assertDontSee('name="consent"', false)
             ->assertSee('Preview your tribute')
             ->assertDontSee('livewire', false);
     }
@@ -88,7 +90,7 @@ class TributeFormTest extends TestCase
                 '<input type="hidden" name="message" value="He taught me to look twice before answering.">',
                 '<input type="hidden" name="email" value="ahmed@example.com">',
                 'class="form-honeypot" aria-hidden="true"',
-                'type="checkbox" name="consent"', TributeForm::CONSENT,
+                'id="consent" name="consent" required="required"', TributeForm::CONSENT,
                 'Send tribute', 'formaction="'.route('tributes.edit').'"', 'formnovalidate', 'Change something',
             ], false)
             ->assertDontSee('tribute-entry__card', false)
@@ -133,7 +135,7 @@ class TributeFormTest extends TestCase
             ->assertSee('value="Ahmed El-Sheikh"', false)
             ->assertSee('<option value="student" selected', false)
             ->assertSee('He taught me to look twice before answering.</textarea>', false)
-            ->assertSee('x-data="{ count: 44 }"', false);
+            ->assertSee('44 / '.Tribute::MESSAGE_MAX_LENGTH.' characters</p>', false);
     }
 
     #[Test]
@@ -151,7 +153,7 @@ class TributeFormTest extends TestCase
         // The flashed errors are consumed by the assertion above, so render from a fresh submission.
         $this->followRedirects($this->from('/tributes/preview')->post(route('tributes.store'), $this->payload(['consent' => null])))
             ->assertOk()
-            ->assertSee('Please confirm that your tribute may be published.')
+            ->assertSee('Tick the box to agree that your tribute may be published.')
             ->assertSee('aria-current="page"', false)
             ->assertSee('<input type="hidden" name="name" value="Ahmed El-Sheikh">', false);
     }
@@ -229,11 +231,11 @@ class TributeFormTest extends TestCase
         // The flashed errors are consumed by the assertion above, so render from a fresh submission.
         $this->followRedirects($this->from(route('tributes.create'))->post(route('tributes.store'), $invalid))
             ->assertOk()
-            ->assertSee('Please tell us your name.')
+            ->assertSee('Enter your name.')
             ->assertSee('Please choose one of the listed relationships.')
-            ->assertSee('Your tribute can be at most '.Tribute::MESSAGE_MAX_LENGTH.' characters.')
-            ->assertSee('Please enter a valid email address, or leave it empty.')
-            ->assertDontSee('Please confirm that your tribute may be published.');
+            ->assertSee('Shorten your tribute to '.Tribute::MESSAGE_MAX_LENGTH.' characters or fewer.')
+            ->assertSee('Enter an email address in the form name@example.com, or leave it empty.')
+            ->assertDontSee('Tick the box to agree that your tribute may be published.');
     }
 
     #[Test]

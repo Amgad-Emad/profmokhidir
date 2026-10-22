@@ -33,7 +33,7 @@ class CvEntryRequest extends ContentRequest
     {
         return parent::messages() + [
             'section.Illuminate\Validation\Rules\Enum' => 'Choose one of the CV sections.',
-            'end_year.gte' => 'The end year cannot be before the start year.',
+            'end_year.gte' => 'Enter an end year no earlier than the start year.',
         ];
     }
 

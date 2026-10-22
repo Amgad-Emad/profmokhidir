@@ -17,22 +17,24 @@
             @endforeach
         </p>
 
-        <form method="POST" action="{{ $previewUrl }}" class="mt-12 space-y-10" data-rise>
+        <form method="POST" action="{{ $previewUrl }}" class="form-style-underline mt-12 space-y-10" data-rise>
             @csrf
+
+            <x-form.error-summary :intro="\App\Constants\FormControls::ERROR_SUMMARY_INTRO" :except="[\App\Http\Controllers\TributeController::LIMIT_ERROR, 'consent']" />
 
             @error(\App\Http\Controllers\TributeController::LIMIT_ERROR)
                 <p class="rounded-card border border-rule bg-surface-raised px-4 py-3 text-base font-light text-danger-tone" role="alert">{{ $message }}</p>
             @enderror
 
-            <x-input name="name" :label="$fields['name']['label']" :hint="$fields['name']['hint']" required autocomplete="name" />
+            <x-form.input name="name" :label="$fields['name']['label']" :hint="$fields['name']['hint']" required autocomplete="name" />
 
-            <x-select name="relationship" :label="$fields['relationship']['label']" :hint="$fields['relationship']['hint']" :options="$relationships" placeholder="Choose one" required />
+            <x-form.select name="relationship" :label="$fields['relationship']['label']" :hint="$fields['relationship']['hint']" :options="$relationships" :placeholder="\App\Constants\FormControls::SELECT_PLACEHOLDER" required />
 
-            <x-input name="location" :label="$fields['location']['label']" :hint="$fields['location']['hint']" autocomplete="address-level2" />
+            <x-form.input name="location" :label="$fields['location']['label']" :hint="$fields['location']['hint']" autocomplete="address-level2" />
 
-            <x-textarea name="message" :label="$fields['message']['label']" :hint="$fields['message']['hint']" required :maxlength="$messageMaxLength" rows="8" />
+            <x-form.textarea name="message" :label="$fields['message']['label']" :hint="$fields['message']['hint']" required :maxlength="$messageMaxLength" rows="8" />
 
-            <x-input name="email" :label="$fields['email']['label']" :hint="$fields['email']['hint']" type="email" autocomplete="email" />
+            <x-form.input name="email" :label="$fields['email']['label']" :hint="$fields['email']['hint']" type="email" autocomplete="email" />
 
             {{-- Honeypot: hidden from people, filled by bots, never validated. --}}
             <div class="form-honeypot" aria-hidden="true">

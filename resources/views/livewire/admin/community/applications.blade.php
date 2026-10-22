@@ -97,7 +97,7 @@
                 <h2 id="decision-title" class="font-display text-3xl font-light leading-tight">{{ $dialog['title'] }}</h2>
                 <p id="decision-description" class="mt-3 text-base font-light text-ink">{{ $deciding->name }} · {{ $deciding->email }}. {{ $dialog['body'] }}</p>
                 <div class="mt-6">
-                    <x-admin.textarea-field name="note" label="Note to the applicant (optional)" rows="4" hint="Included in the email and kept in the audit log." />
+                    <x-form.textarea model="note" label="Note to the applicant (optional)" rows="4" hint="Included in the email and kept in the audit log." />
                 </div>
                 <div class="mt-8 flex flex-wrap justify-end gap-3">
                     <x-button type="button" variant="outline" wire:click="cancelDecision">Cancel</x-button>

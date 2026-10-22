@@ -11,8 +11,9 @@
     </div>
     <div class="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
         <form x-ref="form" method="get" action="{{ $searchUrl }}" role="search" class="site-search__form" @submit="submit($event)">
-            <label for="site-search-input" class="sr-only">{{ Search::LABEL }}</label>
-            <input x-ref="input" id="site-search-input" type="search" name="{{ $searchParam }}" x-model="query" @input.debounce.250ms="lookup()" placeholder="{{ Search::PLACEHOLDER }}" autocomplete="off" spellcheck="false" maxlength="{{ Search::MAX_LENGTH }}" aria-controls="site-search-results" aria-describedby="site-search-hint" class="site-search__input">
+            <x-form.input type="search" :name="$searchParam" id="site-search-input" :label="Search::LABEL" hide-label :optional="false" size="display" class="form-style-underline"
+                          :placeholder="Search::PLACEHOLDER" autocomplete="off" spellcheck="false" :maxlength="Search::MAX_LENGTH"
+                          :control="['x-ref' => 'input', 'x-model' => 'query', 'x-on:input.debounce.250ms' => 'lookup()', 'aria-controls' => 'site-search-results', 'aria-describedby' => 'site-search-hint']" />
             <p id="site-search-hint" class="site-search__hint smallcaps">Enter for every result<span aria-hidden="true">{{ \App\Constants\DateFormats::META_SEPARATOR }}</span><span class="sr-only">, </span>Escape to close</p>
         </form>
 

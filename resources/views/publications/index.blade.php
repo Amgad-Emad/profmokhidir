@@ -60,59 +60,25 @@
 
                     <form method="get" action="{{ $clearUrl }}" class="catalogue__form">
                         @if ($types !== [])
-                            <fieldset>
-                                <legend class="catalogue__legend">Type</legend>
-                                <ul class="catalogue__options">
-                                    <li><label class="catalogue__option"><input type="radio" name="type" value="" @checked($active['type'] === null)> <span>All types</span></label></li>
-                                    @foreach ($types as $type)
-                                        <li><label class="catalogue__option"><input type="radio" name="type" value="{{ $type['value'] }}" @checked($type['active'])> <span>{{ $type['label'] }}</span></label></li>
-                                    @endforeach
-                                </ul>
-                            </fieldset>
+                            <x-form.radio-group name="type" label="Type" :optional="false" :value="$active['type']?->value ?? ''"
+                                                :options="['' => 'All types'] + collect($types)->mapWithKeys(fn ($type) => [$type['value'] => $type['label']])->all()" />
                         @endif
 
                         @if ($years !== [])
-                            <fieldset>
-                                <legend class="catalogue__legend">Years</legend>
+                            <fieldset class="form-fieldset">
+                                <legend class="t-label form-label">Years</legend>
                                 <div class="catalogue__range">
-                                    <div>
-                                        <label for="filter-from" class="catalogue__sublabel">From</label>
-                                        <span class="select-wrap">
-                                            <select id="filter-from" name="from" class="filter-select">
-                                                <option value="">Earliest</option>
-                                                @foreach (array_reverse($years) as $year)
-                                                    <option value="{{ $year }}" @selected($active['from'] === $year)>{{ $year }}</option>
-                                                @endforeach
-                                            </select>
-                                            <span class="select-chevron" aria-hidden="true"></span>
-                                        </span>
-                                    </div>
-                                    <div>
-                                        <label for="filter-to" class="catalogue__sublabel">To</label>
-                                        <span class="select-wrap">
-                                            <select id="filter-to" name="to" class="filter-select">
-                                                <option value="">Latest</option>
-                                                @foreach ($years as $year)
-                                                    <option value="{{ $year }}" @selected($active['to'] === $year)>{{ $year }}</option>
-                                                @endforeach
-                                            </select>
-                                            <span class="select-chevron" aria-hidden="true"></span>
-                                        </span>
-                                    </div>
+                                    <x-form.select name="from" id="filter-from" label="From" :optional="false" size="compact" :value="$active['from']"
+                                                   placeholder="Earliest" :options="array_combine(array_reverse($years), array_reverse($years))" />
+                                    <x-form.select name="to" id="filter-to" label="To" :optional="false" size="compact" :value="$active['to']"
+                                                   placeholder="Latest" :options="array_combine($years, $years)" />
                                 </div>
                             </fieldset>
                         @endif
 
                         @if ($topics !== [])
-                            <fieldset>
-                                <legend class="catalogue__legend">Topic</legend>
-                                <ul class="catalogue__options">
-                                    <li><label class="catalogue__option"><input type="radio" name="topic" value="" @checked($active['topic'] === null)> <span>All topics</span></label></li>
-                                    @foreach ($topics as $topic)
-                                        <li><label class="catalogue__option"><input type="radio" name="topic" value="{{ $topic }}" @checked($active['topic'] === $topic)> <span>{{ $topic }}</span></label></li>
-                                    @endforeach
-                                </ul>
-                            </fieldset>
+                            <x-form.radio-group name="topic" label="Topic" :optional="false" :value="$active['topic'] ?? ''"
+                                                :options="['' => 'All topics'] + array_combine($topics, $topics)" />
                         @endif
 
                         <div class="flex flex-wrap items-center gap-3">

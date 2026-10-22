@@ -6,8 +6,9 @@ use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 /**
- * Regression guards for resources/js/admin.js, found in the browser check:
- * both bugs broke the dashboard silently, with no server-side symptom.
+ * Regression guards for resources/js/admin.js and the editor it registers
+ * (resources/js/forms/editor.js), found in the browser check: both bugs broke
+ * the dashboard silently, with no server-side symptom.
  */
 class AdminScriptTest extends TestCase
 {
@@ -37,12 +38,15 @@ class AdminScriptTest extends TestCase
     {
         // An Editor stored on `this` is wrapped in an Alpine proxy and every
         // toolbar command fails with "Applying a mismatched transaction".
-        $richText = $this->alpineComponent('richText');
+        $editor = (string) file_get_contents(resource_path('js/forms/editor.js'));
 
-        $this->assertStringNotContainsString('this.editor', $richText);
-        $this->assertDoesNotMatchRegularExpression('/^\s*editor\s*:/m', $richText);
-        $this->assertMatchesRegularExpression('/let editor = null;/', $richText);
-        $this->assertStringContainsString('editor = new Editor(', $richText);
+        $this->assertStringContainsString('export default function formEditor(', $editor);
+        $this->assertStringNotContainsString('this.editor', $editor);
+        $this->assertDoesNotMatchRegularExpression('/^\s*editor\s*:/m', $editor);
+        $this->assertMatchesRegularExpression('/let editor = null;/', $editor);
+        $this->assertStringContainsString('editor = new Editor(', $editor);
+        $this->assertStringContainsString("Alpine.data('formEditor', formEditor)", (string) file_get_contents(resource_path('js/forms.js')));
+        $this->assertStringContainsString('registerForms(Alpine)', $this->js);
     }
 
     #[Test]

@@ -74,7 +74,7 @@
                 <h2 id="suspend-title" class="font-display text-3xl font-light leading-tight">Suspend the author?</h2>
                 <p class="mt-3 text-base font-light text-ink">Their chat access ends immediately, they will be emailed, and this report is resolved.</p>
                 <div class="mt-6">
-                    <x-admin.textarea-field name="note" label="Note to the member (optional)" rows="3" />
+                    <x-form.textarea model="note" label="Note to the member (optional)" rows="3" />
                 </div>
                 <div class="mt-8 flex flex-wrap justify-end gap-3">
                     <x-button type="button" variant="outline" wire:click="cancelConfirmation">Cancel</x-button>

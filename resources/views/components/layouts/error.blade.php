@@ -39,9 +39,9 @@
         <p class="t-quote max-w-xl">{{ $page['line'] }}</p>
 
         <form method="get" action="{{ route(Search::ROUTE) }}" role="search" class="search-form search-form--ivory w-full max-w-xl text-left">
-            <label for="error-search" class="t-label block text-accent-text">{{ ErrorPages::SEARCH_LABEL }}</label>
-            <div class="search-form__row mt-3">
-                <input id="error-search" name="{{ Search::PARAM }}" type="search" placeholder="{{ Search::PLACEHOLDER }}" autocomplete="off" maxlength="{{ Search::MAX_LENGTH }}" class="search-form__input">
+            <div class="search-form__row form-style-underline">
+                <x-form.input type="search" :name="Search::PARAM" id="error-search" :label="ErrorPages::SEARCH_LABEL" :optional="false" size="display" class="search-form__field"
+                              :placeholder="Search::PLACEHOLDER" autocomplete="off" :maxlength="Search::MAX_LENGTH" />
                 <button type="submit" class="btn-pill-outline">{{ Search::BUTTON_LABEL }}</button>
             </div>
         </form>

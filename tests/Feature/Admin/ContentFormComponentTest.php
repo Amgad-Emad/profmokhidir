@@ -97,7 +97,7 @@ class ContentFormComponentTest extends TestCase
             ->set('form.end_year', '1960')
             ->call('save')
             ->assertHasErrors(['form.end_year'])
-            ->assertSee('cannot be before the start year')
+            ->assertSee('Enter an end year no earlier than the start year.')
             ->set('form.end_year', '1969')
             ->call('save')
             ->assertHasNoErrors();

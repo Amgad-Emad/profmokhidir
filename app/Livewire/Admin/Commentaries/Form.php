@@ -58,6 +58,16 @@ class Form extends ContentForm
         return 'livewire.admin.commentaries.form';
     }
 
+    /**
+     * Topics already in use, offered as the editor types a tag.
+     *
+     * @return array<string, mixed>
+     */
+    protected function viewData(): array
+    {
+        return ['tagSuggestions' => app(CommentaryService::class)->tags()];
+    }
+
     protected function fromRecord(Model $record): array
     {
         $form = parent::fromRecord($record);

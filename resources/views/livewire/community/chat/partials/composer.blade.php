@@ -14,13 +14,17 @@
         </div>
 
         <div class="chat-composer__field">
-            <label for="chat-draft" class="sr-only">{{ ChatCopy::COMPOSER_LABEL }}</label>
-            <textarea id="chat-draft" name="body" rows="1" class="chat-composer__input" placeholder="{{ ChatCopy::COMPOSER_PLACEHOLDER }}"
-                      x-model="draft" :maxlength="config.bodyMaxLength" x-ref="draft"
-                      x-on:input="grow()"
-                      x-on:keydown.enter="onEnter($event)"
-                      x-bind:disabled="expired || accessLost"
-                      aria-describedby="chat-composer-hint"></textarea>
+            <x-form.textarea name="body" id="chat-draft" :label="ChatCopy::COMPOSER_LABEL" hide-label :optional="false" :counter="false" :autogrow="false" rows="1"
+                             class="form-style-underline min-w-0 flex-1" control-class="chat-composer__input" :placeholder="ChatCopy::COMPOSER_PLACEHOLDER"
+                             :control="[
+                                 'x-model' => 'draft',
+                                 ':maxlength' => 'config.bodyMaxLength',
+                                 'x-ref' => 'draft',
+                                 'x-on:input' => 'grow()',
+                                 'x-on:keydown.enter' => 'onEnter($event)',
+                                 'x-bind:disabled' => 'expired || accessLost',
+                                 'aria-describedby' => 'chat-composer-hint',
+                             ]" />
             <button type="submit" class="chat-send" x-bind:disabled="sending || expired || accessLost || draft.trim() === ''" data-send>
                 <span x-show="!sending">{{ ChatCopy::SEND }}</span>
                 <span x-show="sending" x-cloak x-text="config.copy.sending + '…'"></span>

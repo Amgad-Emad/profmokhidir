@@ -1,0 +1,416 @@
+/*
+ | The form-control system (resources/views/components/form, App\Constants\FormControls).
+ |
+ | One field anatomy everywhere: the label in the label style, the hint directly under it
+ | ("Required" or "Optional" first), the control, then the error or the counter.
+ |
+ | One control frame: `.form-control` draws the rule (a box in the admin, an underline in
+ | the reading-room forms, `.form-style-underline`); the input inside it never draws its
+ | own. Every state is defined here once, with tokens only (App\Constants\FormStates):
+ |
+ |   default   1px strong rule            hover     the rule turns to ink
+ |   focus     the rule turns to the strong ink and thickens 1px → 2px, no outer box
+ |   keyboard  as focus, plus a 2px ring offset 2px around the control (never the label)
+ |   filled    the rule stays ink         invalid   danger tone and a message naming the fix
+ |   valid     after a correction only    disabled  dotted rule, quiet ink
+ |   read-only sunken surface             loading   a hairline drawing along the foot
+ |
+ | Pointer or keyboard: resources/js/forms.js sets <html data-modality="pointer|keyboard">.
+ | Text inputs match :focus-visible even on a click, so the ring is withheld while the
+ | modality is pointer. Without the script the ring always shows (the accessible default).
+ | Nested editables (the editor's ProseMirror area, the tags and combobox inputs) never
+ | draw an outline of their own: the frame carries the single ring.
+ */
+
+@layer components {
+    /* ------------------------------------------------------------ anatomy */
+    .form-field {
+        position: relative;
+        min-width: 0;
+    }
+
+    .form-label {
+        display: block;
+        color: var(--accent-text);
+    }
+
+    .form-label--hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
+
+    .form-hint {
+        margin-top: 0.25rem;
+        font-size: 0.9375rem; /* 15px */
+        font-weight: 300;
+        line-height: 1.5rem;
+        color: var(--ink-muted);
+    }
+
+    .form-hint__requirement {
+        font-weight: 500;
+        color: var(--ink);
+    }
+
+    /* 12px below the hint keeps the ring (2px, offset 2px) well clear of the label and hint. */
+    .form-field__control {
+        position: relative;
+        margin-top: 0.75rem;
+    }
+
+    .form-field--bare .form-field__control {
+        margin-top: 0;
+    }
+
+    .form-message {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+        font-size: 0.9375rem;
+        font-weight: 400;
+        line-height: 1.5rem;
+    }
+
+    .form-message:empty,
+    .form-message[hidden] {
+        display: none;
+    }
+
+    .form-error {
+        color: var(--danger-tone);
+    }
+
+    .form-note,
+    .form-counter {
+        color: var(--ink-muted);
+        font-weight: 300;
+    }
+
+    .form-counter {
+        justify-content: flex-end;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .form-counter[data-near='true'] {
+        color: var(--ink);
+        font-weight: 400;
+    }
+
+    .form-counter[data-over='true'] {
+        color: var(--danger-tone);
+        font-weight: 500;
+    }
+
+    .form-fieldset {
+        min-width: 0;
+        margin: 0;
+        padding: 0;
+        border: 0;
+    }
+
+    .form-fieldset > legend {
+        padding: 0;
+    }
+
+    /* ------------------------------------------------------------ the control frame */
+    .form-control {
+        --form-rule: var(--rule-strong);
+        --form-rule-width: 0px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        width: 100%;
+        min-height: 3rem; /* FormControls::MIN_HEIGHT_PX */
+        border: 1px solid var(--form-rule);
+        border-radius: var(--radius-card);
+        background-color: var(--surface-field);
+        color: var(--ink);
+        /* The second pixel of the focused rule is an inset shadow, so nothing shifts. */
+        box-shadow: inset 0 0 0 var(--form-rule-width) var(--form-rule);
+        transition:
+            border-color 300ms var(--ease-rise),
+            box-shadow 300ms var(--ease-rise),
+            background-color 300ms var(--ease-rise);
+    }
+
+    .form-control__input {
+        flex: 1 1 auto;
+        min-width: 0;
+        width: 100%;
+        min-height: calc(3rem - 2px);
+        padding: 0.6875rem 1rem;
+        border: 0;
+        border-radius: inherit;
+        background: transparent;
+        font-family: var(--font-sans);
+        font-size: 1.125rem; /* FormControls::TEXT_SIZE_PX: 16px or more, so iOS never zooms */
+        font-weight: 300;
+        line-height: 1.5rem;
+        color: inherit;
+        appearance: none;
+    }
+
+    .form-control__input::placeholder {
+        color: var(--ink-quiet);
+        opacity: 1;
+    }
+
+    /* The frame carries the only focus indication: nothing inside it draws an outline. */
+    .form-control__input:focus,
+    .form-control__input:focus-visible,
+    .form-control .ProseMirror:focus,
+    .form-control .ProseMirror:focus-visible {
+        outline: none;
+    }
+
+    textarea.form-control__input {
+        min-height: 7.5rem;
+        resize: vertical;
+        field-sizing: content; /* auto-grow where supported; forms.js grows the rest */
+        max-height: 40rem;
+    }
+
+    textarea.form-control__input[data-autogrow] {
+        resize: none;
+        overflow-y: auto;
+    }
+
+    .form-control__input--mono {
+        font-family: var(--font-mono);
+        font-size: 1rem;
+    }
+
+    /* A trailing button inside the frame (show password, clear): a 44px target. */
+    .form-control__action {
+        flex: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 2.75rem;
+        min-height: 2.75rem;
+        margin-right: 0.125rem;
+        border-radius: var(--radius-card);
+        color: var(--ink-muted);
+        transition: color 300ms var(--ease-rise);
+    }
+
+    .form-control__action:hover,
+    .form-control__action[aria-pressed='true'] {
+        color: var(--ink);
+    }
+
+    .form-control__affix {
+        flex: none;
+        padding-inline: 1rem 0;
+        color: var(--ink-muted);
+        font-size: 1rem;
+    }
+
+    .form-control__status {
+        display: none;
+        flex: none;
+        margin-right: 0.75rem;
+        color: var(--success-tone);
+    }
+
+    /* hover (data-demo-state pins a state on the style guide) */
+    .form-control:hover,
+    .form-control[data-demo-state='hover'] {
+        --form-rule: var(--ink);
+    }
+
+    /* filled */
+    .form-control:has(.form-control__input:not(:placeholder-shown)),
+    .form-control:has(select.form-control__input option:checked:not([value=''])),
+    .form-control[data-filled='true'] {
+        --form-rule: var(--ink);
+    }
+
+    /* focus (any pointer): the strong ink, 2px */
+    .form-control:focus-within,
+    .form-control[data-demo-state^='focus'] {
+        --form-rule: var(--ink-strong);
+        --form-rule-width: 1px;
+    }
+
+    /* keyboard focus: the ring around the frame only */
+    .form-control:has(.form-control__input:focus-visible),
+    .form-control:has(.ProseMirror:focus-visible),
+    .form-control[data-demo-state='focus-keyboard'] {
+        outline: 2px solid var(--focus); /* FormControls::FOCUS_RING_PX */
+        outline-offset: 2px; /* FormControls::FOCUS_OFFSET_PX */
+    }
+
+    html[data-modality='pointer'] .form-control:has(.form-control__input:focus-visible),
+    html[data-modality='pointer'] .form-control:has(.ProseMirror:focus-visible) {
+        outline: none;
+    }
+
+    /* invalid */
+    .form-control:has([aria-invalid='true']),
+    .form-control[aria-invalid='true'] {
+        --form-rule: var(--danger-tone);
+    }
+
+    /* Composite controls (editor, tags, upload) take the state from their field's message. */
+    .form-field:has(> [data-form-error]:not(:empty)) > .form-field__control > .form-control {
+        --form-rule: var(--danger-tone);
+    }
+
+    .form-control:has([aria-invalid='true']):focus-within {
+        --form-rule: var(--danger-tone);
+        --form-rule-width: 1px;
+    }
+
+    /* valid, only once a field that was wrong has been put right (forms.js sets data-corrected) */
+    .form-control:has([data-corrected]:not([aria-invalid='true'])) {
+        --form-rule: var(--success-tone);
+    }
+
+    .form-control:has([data-corrected]:not([aria-invalid='true'])) .form-control__status {
+        display: inline-flex;
+    }
+
+    /* disabled */
+    .form-control:has(.form-control__input:disabled),
+    .form-control[aria-disabled='true'] {
+        --form-rule: var(--rule-strong);
+        border-style: dashed;
+        background-color: transparent;
+        color: var(--ink-quiet);
+        cursor: not-allowed;
+    }
+
+    .form-control__input:disabled {
+        cursor: not-allowed;
+        -webkit-text-fill-color: var(--ink-quiet);
+    }
+
+    /* read-only */
+    .form-control:has(.form-control__input[readonly]) {
+        --form-rule: var(--rule);
+        border-style: dotted;
+        background-color: var(--surface-sunken);
+    }
+
+    .form-control:has(.form-control__input[readonly]):focus-within {
+        --form-rule: var(--rule-strong);
+        --form-rule-width: 0px;
+    }
+
+    /* loading: muted ink and a hairline drawing along the foot (static under reduced motion) */
+    .form-control[data-loading],
+    .form-control:has([data-loading]) {
+        color: var(--ink-muted);
+        cursor: progress;
+    }
+
+    .form-control[data-loading]::after,
+    .form-control:has([data-loading])::after {
+        content: '';
+        position: absolute;
+        right: 0.5rem;
+        bottom: -1px;
+        left: 0.5rem;
+        height: 1px;
+        background-color: var(--ink);
+        transform-origin: left center;
+        animation: form-draw 1600ms ease-in-out infinite alternate;
+    }
+
+    @keyframes form-draw {
+        from {
+            transform: scaleX(0);
+        }
+
+        to {
+            transform: scaleX(1);
+        }
+    }
+
+    /* ------------------------------------------------------------ underline style (sign-in, application, tributes) */
+    .form-style-underline .form-control {
+        border-width: 0 0 1px;
+        border-radius: 0;
+        background-color: transparent;
+        box-shadow: inset 0 calc(var(--form-rule-width) * -1) 0 var(--form-rule);
+    }
+
+    .form-style-underline .form-control__input {
+        padding-inline: 0;
+    }
+
+    .form-style-underline .form-control__affix {
+        padding-inline: 0 0.5rem;
+    }
+
+    .form-style-underline .form-control:has(.form-control__input[readonly]) {
+        padding-inline: 0.75rem;
+    }
+
+    .form-style-underline .form-control__input:-webkit-autofill {
+        box-shadow: 0 0 0 1000px var(--surface) inset;
+    }
+
+    /* ------------------------------------------------------------ select */
+    .form-control--select::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        right: 1rem;
+        width: 0.625rem;
+        height: 0.625rem;
+        transform: translateY(-50%);
+        pointer-events: none;
+        background-color: currentColor;
+        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10' fill='none' stroke='black' stroke-width='1'%3E%3Cpath d='M1 3.5 5 7.5 9 3.5'/%3E%3C/svg%3E") center / contain no-repeat;
+    }
+
+    .form-style-underline .form-control--select::after {
+        right: 0.25rem;
+    }
+
+    .form-control--select .form-control__input {
+        padding-right: 2.75rem;
+        cursor: pointer;
+    }
+
+    .form-control--select .form-control__input option {
+        background-color: var(--surface);
+        color: var(--ink);
+    }
+
+    /* Compact controls for filter bars: the same frame at 44px with 16px text. */
+    .form-control--compact {
+        min-height: 2.75rem;
+    }
+
+    .form-control--compact .form-control__input {
+        min-height: calc(2.75rem - 2px);
+        padding-block: 0.5rem;
+        font-size: 1rem;
+    }
+
+    /* Display search fields (the search dialog, the search page, the error pages): Cormorant at reading-room size. */
+    .form-control--display .form-control__input {
+        min-height: 3.25rem;
+        font-family: var(--font-display);
+        font-size: clamp(1.5rem, 1.125rem + 1.5vw, 2.25rem);
+        line-height: 1.2;
+        color: var(--ink-strong);
+    }
+
+    .form-control--display .form-control__input::placeholder {
+        color: var(--ink-muted);
+        font-style: italic;
+    }
+
+    .form-control__input[type='search']::-webkit-search-cancel-button {
+        appearance: none;
+    }
+}

@@ -21,7 +21,9 @@ class CommentaryFormTest extends TestCase
 
         Livewire::actingAs($editor)->test(CommentaryForm::class)
             ->assertSee('data-rich-text', false)
-            ->assertSee('richText(\'form.body\')', false)
+            ->assertSee('x-data="formEditor(', false)
+            ->assertSee('wire:ignore', false)
+            ->assertSee('x-modelable="value" wire:model="form.tags"', false)
             ->set('form.title', 'On teaching')
             ->set('form.body', '<h2 id="a">Heading</h2><p>Text <em>em</em> <a href="https://example.org" onclick="x()">link</a></p><ul><li>One</li></ul><blockquote><p>Q</p></blockquote><img src="x">')
             ->set('form.tags', 'Teaching, mentoring , teaching,, Agronomy')

@@ -40,15 +40,7 @@
                 <input type="text" id="{{ \App\Http\Requests\StoreTributeRequest::HONEYPOT }}" name="{{ \App\Http\Requests\StoreTributeRequest::HONEYPOT }}" tabindex="-1" autocomplete="off" value="">
             </div>
 
-            <div>
-                <label class="flex items-start gap-3 text-base font-light text-ink-muted">
-                    <input type="checkbox" name="consent" value="1" required class="mt-1.5 size-4 shrink-0 rounded-sm border-rule-strong accent-ink" @checked(old('consent'))>
-                    <span>{{ $consent }}</span>
-                </label>
-                @error('consent')
-                    <p class="mt-2 text-sm text-danger-tone" role="alert">{{ $message }}</p>
-                @enderror
-            </div>
+            <x-form.checkbox name="consent" required>{{ $consent }}</x-form.checkbox>
 
             <div class="flex flex-wrap items-center gap-4">
                 <x-button>Send tribute</x-button>

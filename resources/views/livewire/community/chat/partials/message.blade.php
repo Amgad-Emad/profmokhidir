@@ -29,9 +29,15 @@
 
     <template x-if="editing && editing.key === m.key">
         <form class="chat-edit" x-on:submit.prevent="saveEdit()">
-            <label class="sr-only" :for="'edit-' + m.key">Edit message</label>
-            <textarea :id="'edit-' + m.key" class="chat-edit__input" rows="3" x-model="editing.body" :maxlength="config.bodyMaxLength" x-on:keydown.enter.prevent="if (!$event.shiftKey) saveEdit(); else insertNewline($event)" x-on:keydown.escape.prevent.stop="cancelEdit()" x-init="$el.focus()"></textarea>
-            <p class="text-sm text-accent-text" x-show="editing.error" x-text="editing.error" role="alert"></p>
+            <x-form.textarea name="edit" id="chat-edit" :label="ChatCopy::EDIT_LABEL" hide-label :optional="false" :counter="false" rows="3"
+                             :control="[
+                                 'x-model' => 'editing.body',
+                                 ':maxlength' => 'config.bodyMaxLength',
+                                 'x-on:keydown.enter.prevent' => 'if (!$event.shiftKey) saveEdit(); else insertNewline($event)',
+                                 'x-on:keydown.escape.prevent.stop' => 'cancelEdit()',
+                                 'x-init' => '$el.focus()',
+                             ]" />
+            <p class="form-message form-error" x-show="editing.error" role="alert"><x-icon name="warning" class="mt-1 size-4 shrink-0" /><span x-text="editing.error"></span></p>
             <div class="flex flex-wrap gap-4">
                 <button type="submit" class="chat-action" x-bind:disabled="editing.saving">Save</button>
                 <button type="button" class="chat-action" x-on:click="cancelEdit()">Cancel</button>

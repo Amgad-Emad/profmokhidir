@@ -203,7 +203,8 @@ class MastheadTest extends TestCase
         $menu = $menu[1];
 
         $this->assertMatchesRegularExpression('/<div id="'.Masthead::MENU_ID.'" x-ref="panel" x-show="open" x-cloak[^>]*role="dialog" aria-modal="true" aria-label="'.Masthead::MENU_DIALOG_LABEL.'" tabindex="-1" @keydown\.tab="trap\(\$event\)"/', $this->html);
-        $this->assertMatchesRegularExpression('/<form method="get" action="'.preg_quote(route(Search::ROUTE), '/').'" role="search" class="site-menu__search">\s*<label for="site-menu-search" class="sr-only">'.Search::LABEL.'<\/label>\s*<input id="site-menu-search" type="search" name="'.Search::PARAM.'"/', $menu);
+        $this->assertMatchesRegularExpression('/<form method="get" action="'.preg_quote(route(Search::ROUTE), '/').'" role="search" class="site-menu__search">\s*<div class="form-field[^"]*form-style-underline[^"]*" data-form-field\s*>\s*<label id="site-menu-search-label" for="site-menu-search" class="t-label form-label form-label--hidden">'.Search::LABEL.'<\/label>/', $menu);
+        $this->assertMatchesRegularExpression('/<input class="form-control__input site-menu__search-input" id="site-menu-search" name="'.Search::PARAM.'"[^>]*type="search"/', $menu);
         $this->assertLessThan(strpos($menu, 'aria-label="Site sections"'), strpos($menu, 'site-menu__search'), 'The search field comes first');
         $this->assertStringContainsString('<p class="t-label text-accent-text site-menu__caption">'.Masthead::CONTENTS.'</p>', $menu);
 
@@ -233,7 +234,7 @@ class MastheadTest extends TestCase
     {
         $this->assertMatchesRegularExpression('/<div id="'.Masthead::SEARCH_ID.'" x-data="siteSearch" x-ref="panel" x-show="open" x-cloak[^>]*role="dialog" aria-modal="true" aria-labelledby="site-search-title" tabindex="-1" @search-open\.window="show\(\$event\.detail\?\.opener\)" @keydown\.escape\.stop="close\(\)" @keydown\.tab="trap\(\$event\)"/', $this->html);
         $this->assertStringContainsString('<p id="site-search-title" class="t-label text-accent-text">'.Search::LABEL.'</p>', $this->html, 'Not a heading: the page h1 must stay first');
-        $this->assertMatchesRegularExpression('/<input x-ref="input" id="site-search-input" type="search" name="'.Search::PARAM.'" x-model="query" @input\.debounce\.250ms="lookup\(\)"[^>]*aria-controls="site-search-results"/', $this->html);
+        $this->assertMatchesRegularExpression('/<input class="form-control__input" id="site-search-input" name="'.Search::PARAM.'"[^>]*aria-describedby="site-search-hint"[^>]*type="search"[^>]*x-ref="input" x-model="query" x-on:input\.debounce\.250ms="lookup\(\)" aria-controls="site-search-results"/', $this->html);
         $this->assertStringContainsString('<p class="sr-only" role="status" aria-live="polite" aria-atomic="true" x-text="status"></p>', $this->html);
         $this->assertStringContainsString(Search::PROMPT, $this->html);
     }

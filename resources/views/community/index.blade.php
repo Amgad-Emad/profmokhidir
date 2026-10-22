@@ -57,9 +57,9 @@
                             <p class="t-label text-accent-text">{{ $copy['applyHeading'] }}</p>
                             <h2 id="apply-heading" class="sr-only">{{ $copy['applyHeading'] }}</h2>
                             <hr class="rule-brass mt-4" data-rule>
-                            <form method="POST" action="{{ $applyUrl }}" class="mt-8 space-y-8" x-data="authForm()" x-on:submit="submit($event)" data-apply-form>
+                            <form method="POST" action="{{ $applyUrl }}" class="form-style-underline mt-8 space-y-8" x-data="authForm()" x-on:submit="submit($event)" data-apply-form>
                                 @csrf
-                                <x-auth.error-summary :targets="['throttle' => 'apply-heading']" />
+                                <x-form.error-summary :targets="['throttle' => 'apply-heading']" />
                                 @include('community.partials.application-fields', ['copy' => $copy])
                                 <x-button variant="primary" class="w-full" :busy="AuthScreens::screen(AuthScreens::COMMUNITY_SIGNUP)['busy']">{{ AuthScreens::screen(AuthScreens::COMMUNITY_SIGNUP)['action'] }}</x-button>
                             </form>
@@ -72,15 +72,15 @@
                         <p class="t-body mt-4 text-ink-muted">{{ $copy['applyIntro'] }} Already a member? <a href="{{ $loginUrl }}" class="link-hairline">Sign in</a>.</p>
                         <hr class="rule-brass mt-6" data-rule>
 
-                        <form method="POST" action="{{ $applyUrl }}" class="mt-8 space-y-8" x-data="authForm()" x-on:submit="submit($event)" data-apply-form>
+                        <form method="POST" action="{{ $applyUrl }}" class="form-style-underline mt-8 space-y-8" x-data="authForm()" x-on:submit="submit($event)" data-apply-form>
                             @csrf
 
-                            <x-auth.error-summary :targets="['throttle' => 'apply-heading']" />
+                            <x-form.error-summary :targets="['throttle' => 'apply-heading']" />
 
-                            <x-auth.field name="name" label="Your name" required autocomplete="name" />
-                            <x-auth.field name="email" label="Email" type="email" required autocomplete="email" hint="We will send a link to confirm it." />
-                            <x-auth.password-field name="password" label="Password" :autocomplete="AuthScreens::AUTOCOMPLETE_NEW_PASSWORD" :strength="true" />
-                            <x-auth.password-field name="password_confirmation" label="Confirm password" :autocomplete="AuthScreens::AUTOCOMPLETE_NEW_PASSWORD" />
+                            <x-form.input name="name" label="Your name" required autocomplete="name" />
+                            <x-form.input name="email" label="Email" type="email" required autocomplete="email" hint="We will send a link to confirm it." />
+                            <x-form.password name="password" label="Password" :autocomplete="AuthScreens::AUTOCOMPLETE_NEW_PASSWORD" :strength="true" />
+                            <x-form.password name="password_confirmation" label="Confirm password" :autocomplete="AuthScreens::AUTOCOMPLETE_NEW_PASSWORD" />
 
                             @include('community.partials.application-fields', ['copy' => $copy])
 

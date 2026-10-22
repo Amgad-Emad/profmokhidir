@@ -113,7 +113,7 @@ class MediaLibraryTest extends TestCase
             ->set('uploadAlbumId', $album->getKey())
             ->set('uploads', [UploadedFile::fake()->create('a.pdf', 10, 'application/pdf')])
             ->assertHasErrors(['uploads.0'])
-            ->assertSee('The file must be an image.')
+            ->assertSee('Choose an image file: JPEG, PNG or WebP.')
             ->set('uploads', [UploadedFile::fake()->image('a.jpg', 40, 30), UploadedFile::fake()->image('b.webp', 40, 30)])
             ->assertHasNoErrors()
             ->assertSee('2 images uploaded');

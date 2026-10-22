@@ -41,6 +41,10 @@ final class ChatCopy
 
     public const string COMPOSER_LABEL = 'Write to the community';
 
+    public const string EDIT_LABEL = 'Edit message';
+
+    public const string REPORT_REASON_LABEL = 'Reason';
+
     public const string COMPOSER_HINT = 'Enter to send · Shift+Enter for a new line';
 
     public const string SEND = 'Send';

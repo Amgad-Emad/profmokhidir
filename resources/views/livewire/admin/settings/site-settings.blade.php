@@ -4,20 +4,21 @@
     <div class="mt-8"><x-admin.flash /></div>
 
     <form wire:submit="save" class="mt-4 max-w-3xl space-y-12" novalidate data-site-settings>
+        <x-form.error-summary after-save :intro="\App\Constants\FormControls::ERROR_SUMMARY_INTRO" />
         <fieldset class="space-y-6">
             <legend class="t-label text-accent-text">Public contact details</legend>
             <p class="mt-2 text-sm font-light text-ink-muted">Shown in the Contact block of the About page when the profile has no contact email of its own.</p>
             <div class="grid gap-6 sm:grid-cols-2">
-                <x-admin.field :name="'form.'.SettingKeys::CONTACT_EMAIL" :label="$labels[SettingKeys::CONTACT_EMAIL]" type="email" />
-                <x-admin.field :name="'form.'.SettingKeys::CONTACT_PHONE" :label="$labels[SettingKeys::CONTACT_PHONE]" type="tel" hint="Digits, spaces and a leading + only." />
+                <x-form.input :model="'form.'.SettingKeys::CONTACT_EMAIL" :label="$labels[SettingKeys::CONTACT_EMAIL]" type="email" />
+                <x-form.input :model="'form.'.SettingKeys::CONTACT_PHONE" :label="$labels[SettingKeys::CONTACT_PHONE]" type="tel" hint="Digits, spaces and a leading + only." />
             </div>
-            <x-admin.textarea-field :name="'form.'.SettingKeys::CONTACT_ADDRESS" :label="$labels[SettingKeys::CONTACT_ADDRESS]" rows="3" />
+            <x-form.textarea :model="'form.'.SettingKeys::CONTACT_ADDRESS" :label="$labels[SettingKeys::CONTACT_ADDRESS]" rows="3" />
         </fieldset>
 
         <fieldset class="space-y-6">
             <legend class="t-label text-accent-text">Notifications</legend>
             <p class="mt-2 text-sm font-light text-ink-muted">New tributes and community applications are announced to this address. When it is blank, every administrator and editor is emailed instead.</p>
-            <x-admin.field :name="'form.'.SettingKeys::NOTIFICATION_EMAIL" :label="$labels[SettingKeys::NOTIFICATION_EMAIL]" type="email" />
+            <x-form.input :model="'form.'.SettingKeys::NOTIFICATION_EMAIL" :label="$labels[SettingKeys::NOTIFICATION_EMAIL]" type="email" />
         </fieldset>
 
         <fieldset class="space-y-6">
@@ -28,8 +29,8 @@
                 @endif
             </p>
             <div class="grid gap-6 sm:grid-cols-2">
-                <x-admin.field :name="'form.'.SettingKeys::MAIL_FROM_NAME" :label="$labels[SettingKeys::MAIL_FROM_NAME]" />
-                <x-admin.field :name="'form.'.SettingKeys::MAIL_FROM_ADDRESS" :label="$labels[SettingKeys::MAIL_FROM_ADDRESS]" type="email" />
+                <x-form.input :model="'form.'.SettingKeys::MAIL_FROM_NAME" :label="$labels[SettingKeys::MAIL_FROM_NAME]" />
+                <x-form.input :model="'form.'.SettingKeys::MAIL_FROM_ADDRESS" :label="$labels[SettingKeys::MAIL_FROM_ADDRESS]" type="email" />
             </div>
         </fieldset>
 

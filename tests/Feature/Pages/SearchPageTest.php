@@ -37,7 +37,8 @@ class SearchPageTest extends TestCase
         $this->assertStringContainsString('<title>'.Search::TITLE.Seo::TITLE_SEPARATOR.Seo::SITE_NAME.'</title>', $html);
         $this->assertStringContainsString('<meta name="robots" content="'.Seo::ROBOTS_NOINDEX.'">', $html);
         $this->assertMatchesRegularExpression('/<form method="get" action="'.preg_quote(route(Search::ROUTE), '/').'" role="search" class="search-form mt-12"/', $html);
-        $this->assertMatchesRegularExpression('/<input id="search-query" name="'.Search::PARAM.'" type="search" value=""/', $html);
+        $this->assertMatchesRegularExpression('/<input class="form-control__input" id="search-query" name="'.Search::PARAM.'" maxlength="'.Search::MAX_LENGTH.'"[^>]*type="search"/', $html);
+        $this->assertDoesNotMatchRegularExpression('/id="search-query"[^>]*value=/', $html, 'No query, no value');
         $this->assertStringContainsString(Search::PROMPT, $html);
         $this->assertStringContainsString(Search::MEMBERS_NOTE, $html);
         $this->assertStringContainsString('aria-label="Breadcrumb"', $html);
@@ -125,7 +126,7 @@ class SearchPageTest extends TestCase
 
         $long = str_repeat('soil ', 60);
         $html = $this->get(route(Search::ROUTE, [Search::PARAM => $long]))->assertOk()->getContent();
-        preg_match('/<input id="search-query"[^>]*value="([^"]*)"/', $html, $value);
+        preg_match('/id="search-query"[^>]*value="([^"]*)"/', $html, $value);
         $this->assertLessThanOrEqual(Search::MAX_LENGTH, mb_strlen($value[1]));
         $this->assertGreaterThan(Search::MAX_LENGTH - 5, mb_strlen($value[1]));
     }

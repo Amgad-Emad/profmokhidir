@@ -18,10 +18,7 @@
     @else
         {{-- Bulk actions --}}
         <div class="mt-6 flex flex-wrap items-center gap-4 text-sm" data-bulk>
-            <label class="flex items-center gap-2">
-                <input type="checkbox" wire:click="toggleAll" @checked($pageIds !== [] && array_diff($pageIds, $selected) === []) class="size-4 rounded-sm border-rule text-ink">
-                Select all on this page
-            </label>
+            <x-form.checkbox id="select-all" wire:click="toggleAll" :checked="$pageIds !== [] && array_diff($pageIds, $selected) === []">Select all on this page</x-form.checkbox>
             <span class="font-light text-ink-muted">{{ count($selected) }} selected</span>
             @if ($current !== TributeStatus::Approved)
                 <button type="button" wire:click="approveSelected" @disabled($selected === []) class="text-success-tone underline-offset-4 hover:underline disabled:opacity-40" data-bulk-approve>Approve selected</button>
@@ -35,7 +32,7 @@
             @foreach ($tributes as $tribute)
                 <li wire:key="tribute-{{ $tribute->getKey() }}" class="rounded-card border border-rule bg-surface-panel p-5" data-tribute="{{ $tribute->getKey() }}">
                     <div class="flex flex-col gap-4 sm:flex-row sm:items-start">
-                        <input type="checkbox" value="{{ $tribute->getKey() }}" wire:model.live="selected" class="mt-1 size-4 shrink-0 rounded-sm border-rule text-ink" aria-label="Select tribute from {{ $tribute->name }}">
+                        <x-form.checkbox model="selected" live :id="'select-tribute-'.$tribute->getKey()" :value="(string) $tribute->getKey()" class="shrink-0"><span class="sr-only">Select tribute from {{ $tribute->name }}</span></x-form.checkbox>
                         <div class="min-w-0 flex-1">
                             <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                                 <p class="font-medium text-ink">{{ $tribute->name }}</p>
@@ -47,10 +44,10 @@
                             @if ($editingId === (int) $tribute->getKey())
                                 <form wire:submit="saveEdit" class="mt-4 space-y-4" novalidate data-edit-form>
                                     <div class="grid gap-4 sm:grid-cols-2">
-                                        <x-admin.field name="edit.name" label="Name" required />
-                                        <x-admin.field name="edit.location" label="Location" />
+                                        <x-form.input model="edit.name" label="Name" required />
+                                        <x-form.input model="edit.location" label="Location" />
                                     </div>
-                                    <x-admin.textarea-field name="edit.message" label="Tribute" rows="5" required />
+                                    <x-form.textarea model="edit.message" label="Tribute" rows="5" required />
                                     <div class="flex flex-wrap gap-3">
                                         <x-button type="submit" class="px-5 py-2 text-sm">Save changes</x-button>
                                         <x-button type="button" variant="outline" class="px-5 py-2 text-sm" wire:click="cancelEditing">Cancel</x-button>

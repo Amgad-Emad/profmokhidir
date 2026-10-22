@@ -39,7 +39,7 @@ class ChatMessageRequest extends FormRequest
     {
         return [
             'body.required' => 'Write a message first.',
-            'body.max' => 'Messages can be at most :max characters.',
+            'body.max' => 'Shorten the message to :max characters or fewer.',
             'client_uuid.required' => 'The message is missing its identifier; please reload the page.',
             'client_uuid.uuid' => 'The message identifier is invalid; please reload the page.',
             'reply_to_id.integer' => 'The message you are replying to could not be found.',

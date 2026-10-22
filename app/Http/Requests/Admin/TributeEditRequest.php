@@ -37,9 +37,9 @@ class TributeEditRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'The tribute needs a name.',
-            'message.required' => 'The tribute cannot be empty.',
-            'message.max' => 'The tribute can be at most :max characters.',
+            'name.required' => 'Enter the name to show on the tribute.',
+            'message.required' => 'Write the tribute text.',
+            'message.max' => 'Shorten the tribute to :max characters or fewer.',
         ];
     }
 

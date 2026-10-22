@@ -27,8 +27,8 @@
             <form method="POST" action="{{ route('user-profile-information.update') }}" class="mt-6 space-y-6">
                 @csrf
                 @method('PUT')
-                <x-input name="name" label="Name" :value="$user->name" required autocomplete="name" bag="updateProfileInformation" />
-                <x-input name="email" label="Email" type="email" :value="$user->email" required autocomplete="email" bag="updateProfileInformation" />
+                <x-form.input name="name" label="Name" :value="$user->name" required autocomplete="name" bag="updateProfileInformation" />
+                <x-form.input name="email" label="Email" type="email" :value="$user->email" required autocomplete="email" bag="updateProfileInformation" />
                 <x-button>Save details</x-button>
             </form>
         </section>
@@ -41,9 +41,9 @@
             <form method="POST" action="{{ route('user-password.update') }}" class="mt-6 space-y-6">
                 @csrf
                 @method('PUT')
-                <x-input name="current_password" label="Current password" type="password" required autocomplete="current-password" bag="updatePassword" />
-                <x-input name="password" label="New password" type="password" required autocomplete="new-password" bag="updatePassword" />
-                <x-input name="password_confirmation" label="Confirm new password" type="password" required autocomplete="new-password" bag="updatePassword" />
+                <x-form.password name="current_password" label="Current password" autocomplete="current-password" bag="updatePassword" />
+                <x-form.password name="password" label="New password" autocomplete="new-password" :strength="true" bag="updatePassword" />
+                <x-form.password name="password_confirmation" label="Confirm new password" autocomplete="new-password" bag="updatePassword" />
                 <x-button>Change password</x-button>
             </form>
         </section>
@@ -118,7 +118,7 @@
                         <p class="font-mono text-sm tracking-wide break-all" data-setup-key>{{ $twoFactor['setup_key'] }}</p>
                         <form method="POST" action="{{ route('two-factor.confirm') }}" class="space-y-4">
                             @csrf
-                            <x-input name="code" label="Code from your app" inputmode="numeric" autocomplete="one-time-code" required bag="confirmTwoFactorAuthentication" />
+                            <x-form.otp name="code" label="Code from your app" :autofocus="false" bag="confirmTwoFactorAuthentication" />
                             <div class="flex flex-wrap items-center gap-4">
                                 <x-button>Confirm and turn on</x-button>
                             </div>

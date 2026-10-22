@@ -289,24 +289,6 @@
         background-color: var(--surface);
     }
 
-    .chat-search__input {
-        width: 100%;
-        min-height: 2.75rem;
-        padding: var(--space-1) 0;
-        border: 0;
-        border-bottom: 1px solid var(--rule-strong);
-        border-radius: 0;
-        background: transparent;
-        font-size: 1.125rem;
-        font-weight: 300;
-        color: var(--ink);
-        transition: border-color 400ms var(--ease-rise);
-    }
-
-    .chat-search__input:focus {
-        border-bottom-color: var(--focus);
-    }
-
     .chat-search__results {
         display: grid;
         gap: var(--space-1);
@@ -646,24 +628,6 @@
         margin-top: var(--space-1);
     }
 
-    .chat-edit__input {
-        display: block;
-        width: 100%;
-        resize: vertical;
-        border-radius: var(--radius-card);
-        border: 1px solid var(--rule-strong);
-        background-color: var(--surface-field);
-        padding: var(--space-1) var(--space-2);
-        font-size: var(--text-body);
-        font-weight: 300;
-        line-height: 1.6;
-        color: var(--ink);
-    }
-
-    .chat-edit__input:focus {
-        border-color: var(--focus);
-    }
-
     /* ---------------------------------------------------------- empty state */
     .chat-empty {
         display: grid;
@@ -739,32 +703,14 @@
         gap: var(--space-2);
     }
 
+    /* The composer's field is <x-form.textarea> in the underline style; only its size and the italic prompt are its own. */
     .chat-composer__input {
-        display: block;
-        flex: 1;
-        width: 100%;
         min-height: 2.75rem;
         max-height: 12rem;
-        padding: var(--space-1) 0;
-        border: 0;
-        border-bottom: 1px solid var(--rule-strong);
-        border-radius: 0;
-        background: transparent;
-        font-size: var(--text-body);
-        font-weight: 300;
+        padding-block: var(--space-1);
         line-height: 1.6;
-        color: var(--ink);
         resize: none;
         overflow-y: auto;
-        transition: border-color 400ms var(--ease-rise);
-    }
-
-    .chat-composer__input:focus {
-        border-bottom-color: var(--focus);
-    }
-
-    .chat-composer__input:disabled {
-        color: var(--ink-muted);
     }
 
     .chat-composer__input::placeholder {
@@ -955,7 +901,6 @@
         .chat-tool,
         .chat-reply__excerpt,
         .chat-search__result,
-        .chat-search__input,
         .chat-composer__input {
             transition: none;
         }

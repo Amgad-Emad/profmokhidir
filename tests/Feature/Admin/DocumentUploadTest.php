@@ -4,6 +4,7 @@ namespace Tests\Feature\Admin;
 
 use App\Constants\AuditAction;
 use App\Constants\Disks;
+use App\Constants\FormControls;
 use App\Constants\MediaCollections;
 use App\Constants\TeachingAccess;
 use App\Livewire\Admin\Publications\Form as PublicationForm;
@@ -54,7 +55,7 @@ class DocumentUploadTest extends TestCase
         $publication = Publication::factory()->create();
 
         $component = Livewire::actingAs($this->editor)->test(PublicationForm::class, ['publication' => $publication])
-            ->assertSee('Choose a file')
+            ->assertSee(FormControls::UPLOAD_CHOOSE)
             ->set('document', UploadedFile::fake()->create('virus.exe', 100, 'application/octet-stream'))
             ->assertHasErrors(['document'])
             ->assertSee('Use a PDF, Word, PowerPoint or ZIP file.')
@@ -63,7 +64,7 @@ class DocumentUploadTest extends TestCase
             ->assertSee('File attached.')
             ->assertSee('collected-papers.pdf')
             ->assertSee('PDF · 640 KB')
-            ->assertSee('Replace the file');
+            ->assertSee(FormControls::UPLOAD_REPLACE);
 
         $file = $publication->fresh()->file();
         $this->assertNotNull($file);

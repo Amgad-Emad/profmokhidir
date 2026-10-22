@@ -111,13 +111,15 @@ final class BrandAudit
     }
 
     /**
-     * Named keyframe animations that may exist (each unhurried, nothing bounces).
+     * Named keyframe animations that may exist (each unhurried, nothing bounces):
+     * the lightbox fade, the skeleton's slow breath, and the hairline that draws
+     * along the foot of a form control while it loads (1600ms, the rule timing).
      *
      * @return list<string>
      */
     public static function permittedKeyframes(): array
     {
-        return ['lightbox-fade', 'skeleton-breathe'];
+        return ['lightbox-fade', 'skeleton-breathe', 'form-draw'];
     }
 
     /**

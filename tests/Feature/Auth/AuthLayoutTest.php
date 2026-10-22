@@ -36,7 +36,7 @@ class AuthLayoutTest extends TestCase
             ->assertSee('class="auth__epigraph mt-3 text-ink"', false)
             ->assertSee('data-variant="horizontal"', false)
             ->assertSee('data-variant="stacked"', false)
-            ->assertSee('class="auth__column" data-rise-group', false)
+            ->assertSee('class="auth__column form-style-underline" data-rise-group', false)
             ->assertSee('<h1 id="page-title" class="t-heading">Sign in</h1>', false)
             ->assertSee(AuthScreens::screen(AuthScreens::LOGIN)['intro'])
             ->assertSee('class="rule-brass mt-6" data-rule', false)

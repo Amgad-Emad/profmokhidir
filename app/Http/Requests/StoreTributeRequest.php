@@ -48,13 +48,13 @@ class StoreTributeRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Please tell us your name.',
-            'relationship.required' => 'Please choose how you knew Professor Khidir.',
+            'name.required' => 'Enter your name.',
+            'relationship.required' => 'Choose how you knew Professor Khidir.',
             'relationship.Illuminate\Validation\Rules\Enum' => 'Please choose one of the listed relationships.',
-            'message.required' => 'Please write your tribute.',
-            'message.max' => 'Your tribute can be at most :max characters.',
-            'email.email' => 'Please enter a valid email address, or leave it empty.',
-            'consent.accepted' => 'Please confirm that your tribute may be published.',
+            'message.required' => 'Write your tribute.',
+            'message.max' => 'Shorten your tribute to :max characters or fewer.',
+            'email.email' => 'Enter an email address in the form name@example.com, or leave it empty.',
+            'consent.accepted' => 'Tick the box to agree that your tribute may be published.',
         ];
     }
 

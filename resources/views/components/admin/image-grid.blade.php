@@ -13,13 +13,8 @@
 
     @if ($canUpload)
         <div class="mt-6">
-            <label for="new-images" class="t-label block text-accent-text">{{ $multiple ? 'Add images' : ($media->isEmpty() ? 'Upload an image' : 'Replace the image') }}</label>
-            <p class="mt-2 text-sm font-light text-ink-muted">{{ $hint }}. Every image needs alt text, a caption, a place and a year before it can be published.</p>
-            <input id="new-images" type="file" wire:model="newImages" accept="{{ $accept }}" @if ($multiple) multiple @endif
-                   class="mt-2 block w-full text-sm text-ink file:mr-4 file:rounded-full file:border file:border-ink file:bg-surface-field file:px-5 file:py-2 file:text-sm file:font-medium file:text-ink hover:file:bg-surface-sunken">
-            <p class="mt-2 text-sm font-light text-ink-muted" wire:loading wire:target="newImages">Uploading…</p>
-            @error('newImages') <p class="mt-2 text-sm text-accent-text" role="alert">{{ $message }}</p> @enderror
-            @error('newImages.*') <p class="mt-2 text-sm text-accent-text" role="alert">{{ $message }}</p> @enderror
+            <x-form.upload model="newImages" id="new-images" :label="$multiple ? 'Add images' : ($media->isEmpty() ? 'Upload an image' : 'Replace the image')"
+                           :hint="$hint.'. Every image needs alt text, a caption, a place and a year before it can be published.'" :accept="$accept" :multiple="$multiple" image />
         </div>
     @else
         <p class="mt-6 text-sm font-light text-ink-muted">Save first, then add images.</p>
@@ -72,8 +67,8 @@
                             <form wire:submit="savePhotoArchive({{ $id }})" class="space-y-4 border-t border-rule pt-6" data-photo-archive>
                                 <p class="t-label text-accent-text">In the archive</p>
                                 <div class="grid gap-5 sm:grid-cols-2">
-                                    <x-admin.select-field :name="'archive.'.$id.'.'.\App\Constants\Archive::DECADE" label="Decade" :options="$decades" placeholder="From the year" hint="Through the decades files the photo under its year unless you choose another decade." />
-                                    <x-admin.checkbox-field :name="'archive.'.$id.'.'.\App\Constants\Archive::FEATURED" label="Featured on the wall" hint="Hangs one size larger in the album." class="sm:self-end" />
+                                    <x-form.select :model="'archive.'.$id.'.'.\App\Constants\Archive::DECADE" label="Decade" :options="$decades" placeholder="From the year" hint="Through the decades files the photo under its year unless you choose another decade." />
+                                    <x-form.toggle :model="'archive.'.$id.'.'.\App\Constants\Archive::FEATURED" label="Featured on the wall" hint="Hangs one size larger in the album." class="sm:self-end" />
                                 </div>
                                 <div class="flex items-center gap-4">
                                     <x-button type="submit" variant="outline" class="px-5 py-2 text-sm">Save archive details</x-button>

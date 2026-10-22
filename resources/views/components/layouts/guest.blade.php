@@ -76,7 +76,7 @@
         </aside>
 
         <main id="main" class="auth__main">
-            <div class="auth__column" data-rise-group>
+            <div class="auth__column form-style-underline" data-rise-group>
                 <div class="mb-8 hidden justify-center lg:flex">
                     <x-brand.lockup variant="stacked" tone="evergreen" :href="route('home')" />
                 </div>
@@ -95,7 +95,7 @@
                     <x-alert :tone="AuthStatus::isValid($status) ? AuthStatus::tone($status) : StatusTone::Cypress" class="mt-8">{{ AuthStatus::message($status) ?? $status }}</x-alert>
                 @endif
 
-                <x-auth.error-summary class="mt-8" :targets="$errorTargets" />
+                <x-form.error-summary class="mt-8" :targets="$errorTargets" />
 
                 <div class="mt-8">
                     {{ $slot }}

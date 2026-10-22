@@ -19,7 +19,7 @@ SVG);
             <p class="t-quote max-w-2xl">&ldquo;Knowledge is the light we pass on.&rdquo;</p>
             <p class="t-body max-w-2xl">Every colour, type style, button, card, rule, image treatment and motion pattern in one place. This page is served only in the local environment.</p>
             <nav aria-label="Sections" class="flex flex-wrap gap-3">
-                @foreach (['colours' => 'Colours', 'type' => 'Type', 'buttons' => 'Buttons', 'cards' => 'Cards', 'rules' => 'Rules', 'mark' => 'Mark', 'photos' => 'Photos', 'motion' => 'Motion', 'press' => 'Press', 'components' => 'Components'] as $id => $label)
+                @foreach (['colours' => 'Colours', 'type' => 'Type', 'buttons' => 'Buttons', 'forms' => 'Forms', 'cards' => 'Cards', 'rules' => 'Rules', 'mark' => 'Mark', 'photos' => 'Photos', 'motion' => 'Motion', 'press' => 'Press', 'components' => 'Components'] as $id => $label)
                     <a href="#{{ $id }}" class="btn-pill-outline">{{ $label }}</a>
                 @endforeach
             </nav>
@@ -137,6 +137,8 @@ SVG);
                 </div>
             </div>
         </section>
+
+        @include('styleguide.partials.forms')
 
         {{-- Cards --}}
         <section id="cards" class="py-20" aria-labelledby="cards-title">

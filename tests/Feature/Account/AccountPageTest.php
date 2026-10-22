@@ -100,8 +100,8 @@ class AccountPageTest extends TestCase
             ->put(route('user-profile-information.update'), ['name' => '', 'email' => $other->email])
             ->assertOk()
             ->assertSee('role="alert"', false)
-            ->assertSee('The name field is required.')
-            ->assertSee('The email has already been taken.');
+            ->assertSee('Enter name.')
+            ->assertSee('That email is already in use. Choose another.');
     }
 
     #[Test]

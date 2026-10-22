@@ -43,7 +43,7 @@ class AlbumPhotosTest extends TestCase
             ->assertSee('No images yet.')
             ->set('newImages', [UploadedFile::fake()->create('notes.pdf', 10, 'application/pdf')])
             ->assertHasErrors(['newImages.0'])
-            ->assertSee('The file must be an image.')
+            ->assertSee('Choose an image file: JPEG, PNG or WebP.')
             ->set('newImages', [UploadedFile::fake()->image('one.jpg', 40, 30), UploadedFile::fake()->image('two.png', 40, 30)])
             ->assertHasNoErrors()
             ->assertSee('2 images uploaded')

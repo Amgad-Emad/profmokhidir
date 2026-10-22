@@ -73,15 +73,15 @@ class CommunitySignupRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Please tell us your name.',
-            'email.required' => 'Please enter your email address.',
+            'name.required' => 'Enter your name.',
+            'email.required' => 'Enter your email address.',
             'email.unique' => 'An account with this email address already exists. Sign in to continue.',
-            'affiliation.required' => 'Please tell us your institution or organisation.',
-            'academic_field.required' => 'Please tell us your academic field.',
-            'reason_for_joining.required' => 'Please tell us briefly why you would like to join.',
-            'reason_for_joining.max' => 'Your reason can be at most :max characters.',
-            'conduct_agreed.accepted' => 'Please confirm that you agree to the conduct rules.',
-            'privacy_agreed.accepted' => 'Please confirm that you have read the privacy note.',
+            'affiliation.required' => 'Enter your university, institute or organisation.',
+            'academic_field.required' => 'Enter your academic field, for example soil science.',
+            'reason_for_joining.required' => 'Say briefly why you would like to join.',
+            'reason_for_joining.max' => 'Shorten your reason to :max characters or fewer.',
+            'conduct_agreed.accepted' => 'Tick the box to agree to the conduct rules.',
+            'privacy_agreed.accepted' => 'Tick the box to confirm you have read the privacy note.',
         ];
     }
 

@@ -2,11 +2,12 @@
     <x-admin.page-header eyebrow="Media" :title="$isNew ? 'New album' : 'Edit album'" />
     <div class="mt-8"><x-admin.flash /></div>
 
-    <form wire:submit="save" class="mt-4 max-w-3xl space-y-6" novalidate>
-        <x-admin.field name="form.title" label="Title" required />
-        <x-admin.textarea-field name="form.description" label="Description" rows="3" />
+    <form wire:submit="save" class="mt-4 max-w-3xl space-y-8" novalidate>
+        <x-form.error-summary after-save :intro="\App\Constants\FormControls::ERROR_SUMMARY_INTRO" />
+        <x-form.input model="form.title" label="Title" required />
+        <x-form.textarea model="form.description" label="Description" rows="3" />
         @unless ($isNew)
-            <x-admin.field name="form.slug" label="Slug" class="font-mono" />
+            <x-form.input model="form.slug" label="Slug" class="font-mono" />
         @endunless
         <x-admin.status-field :public-url="$publicUrl" />
         <x-admin.form-actions :index-url="$indexUrl" :public-url="$publicUrl" />

@@ -68,6 +68,8 @@ class PageTransitionsTest extends TestCase
         $tokens = file_get_contents(resource_path('css/tokens.css'));
         $this->assertStringContainsString('--focus: light-dark(var(--brand-bronze), var(--brand-brass));', $tokens);
         $this->assertMatchesRegularExpression('/\.on-dark \{[^}]*--focus: light-dark\(var\(--brand-brass\), var\(--brand-champagne\)\);/s', $tokens);
-        $this->assertMatchesRegularExpression('/\.site-search__input:focus-visible,\s*\.search-form__input:focus-visible \{\s*outline: 2px solid var\(--focus\);/', $this->css);
+        // Form controls (the search fields among them) draw the ring around the frame, never inside it.
+        $forms = file_get_contents(resource_path('css/forms.css'));
+        $this->assertMatchesRegularExpression('/\.form-control:has\(\.form-control__input:focus-visible\),[^{]*\{\s*outline: 2px solid var\(--focus\);/s', $forms);
     }
 }

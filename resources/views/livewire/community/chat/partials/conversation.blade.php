@@ -29,8 +29,9 @@
     </p>
 
     <div id="chat-search" class="chat-search" x-show="searchOpen" x-cloak x-on:keydown.escape.stop.prevent="closeSearch()" data-chat-search>
-        <label for="chat-search-input" class="t-label text-accent-text">{{ ChatCopy::SEARCH_LABEL }}</label>
-        <input id="chat-search-input" type="search" class="chat-search__input mt-1" placeholder="{{ ChatCopy::SEARCH_PLACEHOLDER }}" x-model="searchTerm" x-on:input.debounce.300ms="runSearch()" x-ref="searchInput" autocomplete="off" maxlength="{{ ChatSettings::SEARCH_MAX_LENGTH }}">
+        <x-form.input type="search" name="q" id="chat-search-input" :label="ChatCopy::SEARCH_LABEL" :optional="false" size="compact" class="form-style-underline"
+                      :placeholder="ChatCopy::SEARCH_PLACEHOLDER" autocomplete="off" :maxlength="ChatSettings::SEARCH_MAX_LENGTH"
+                      :control="['x-model' => 'searchTerm', 'x-on:input.debounce.300ms' => 'runSearch()', 'x-ref' => 'searchInput']" />
         <p class="mt-2 text-sm font-light text-ink-muted" role="status" x-text="searchStatus"></p>
         <ol class="chat-search__results" x-show="searchResults.length > 0" data-search-results>
             <template x-for="r in searchResults" :key="r.id">

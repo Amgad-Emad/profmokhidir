@@ -12,43 +12,17 @@
     <section class="mt-4 rounded-card border border-rule bg-surface-panel p-5" aria-labelledby="upload-heading" data-upload>
         <h2 id="upload-heading" class="font-display text-2xl font-light">Upload images</h2>
         <div class="mt-4 grid gap-4 md:grid-cols-[minmax(0,18rem)_1fr]">
-            <x-admin.select-field name="uploadAlbumId" label="Into album" :options="$albums" placeholder="Choose an album" required live />
-            <div>
-                <label for="uploads" class="t-label block text-accent-text">Images</label>
-                <p class="mt-2 text-sm font-light text-ink-muted">{{ $uploadHint }}</p>
-                <input id="uploads" type="file" wire:model="uploads" accept="{{ $uploadAccept }}" multiple
-                       class="mt-2 block w-full text-sm text-ink file:mr-4 file:rounded-full file:border file:border-ink file:bg-surface-field file:px-5 file:py-2 file:text-sm file:font-medium file:text-ink hover:file:bg-surface-sunken">
-                <p class="mt-2 text-sm font-light text-ink-muted" wire:loading wire:target="uploads">Uploading…</p>
-                @error('uploads') <p class="mt-2 text-sm text-accent-text" role="alert">{{ $message }}</p> @enderror
-                @error('uploads.*') <p class="mt-2 text-sm text-accent-text" role="alert">{{ $message }}</p> @enderror
-            </div>
+            <x-form.combobox model="uploadAlbumId" label="Into album" :options="$albums" placeholder="Type to find an album" required />
+            <x-form.upload model="uploads" label="Images" :hint="$uploadHint" :accept="$uploadAccept" multiple image />
         </div>
     </section>
 
     {{-- Search and filters --}}
     <form class="mt-8 grid gap-4 md:grid-cols-4" wire:submit.prevent role="search" aria-label="Search images">
-        <div class="md:col-span-2">
-            <label for="search" class="t-label block text-accent-text">Search</label>
-            <input id="search" type="search" wire:model.live.debounce.400ms="search" placeholder="File name, alt text, caption or place" class="mt-2 block w-full rounded-card border border-rule-strong bg-surface-field px-4 py-3 text-body text-ink placeholder:text-ink-muted focus:border-focus">
-        </div>
-        <div>
-            <label for="filter-collection" class="t-label block text-accent-text">Used as</label>
-            <span class="select-wrap"><select id="filter-collection" wire:model.live="collection" class="form-select mt-2 block w-full rounded-card border border-rule-strong bg-surface-field px-4 py-3 text-body text-ink focus:border-focus">
-                <option value="">All</option>
-                @foreach ($collections as $value => $label)<option value="{{ $value }}">{{ $label }}</option>@endforeach
-            </select><span class="select-chevron" aria-hidden="true"></span></span>
-        </div>
-        <div>
-            <label for="filter-treatment" class="t-label block text-accent-text">Treatment</label>
-            <span class="select-wrap"><select id="filter-treatment" wire:model.live="treatment" class="form-select mt-2 block w-full rounded-card border border-rule-strong bg-surface-field px-4 py-3 text-body text-ink focus:border-focus">
-                <option value="">All</option>
-                @foreach ($treatments as $value => $label)<option value="{{ $value }}">{{ $label }}</option>@endforeach
-            </select><span class="select-chevron" aria-hidden="true"></span></span>
-        </div>
-        <label class="flex items-center gap-3 text-sm md:col-span-4">
-            <input type="checkbox" wire:model.live="incomplete" class="size-4 rounded-sm border-rule text-ink">
-            Only images that still need details
-        </label>
+        <x-form.input type="search" model="search" id="search" live label="Search" :optional="false" loading="search" class="md:col-span-2" placeholder="File name, alt text, caption or place" autocomplete="off" />
+        <x-form.select model="collection" id="filter-collection" live label="Used as" :optional="false" placeholder="All" :options="$collections" />
+        <x-form.select model="treatment" id="filter-treatment" live label="Treatment" :optional="false" placeholder="All" :options="$treatments" />
+        <x-form.checkbox model="incomplete" live class="md:col-span-4">Only images that still need details</x-form.checkbox>
     </form>
 
     @if ($images->isEmpty())

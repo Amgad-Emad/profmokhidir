@@ -167,7 +167,10 @@ async function checkKeyboard(page, path, viewport) {
             const hit = document.elementFromPoint(Math.min(window.innerWidth - 1, Math.max(0, rect.left + rect.width / 2)), Math.min(window.innerHeight - 1, Math.max(0, rect.top + rect.height / 2)));
             const covered = hit !== null && hit !== el && !el.contains(hit) && !hit.contains(el);
             const style = getComputedStyle(el);
-            const outline = style.outlineStyle !== 'none' && parseFloat(style.outlineWidth) > 0;
+            // Form controls draw their one ring on the frame around the input (resources/css/forms.css).
+            const frame = el.closest('.form-control, .form-drop, .form-segmented__option');
+            const ringOf = (node) => { const s = getComputedStyle(node); return s.outlineStyle !== 'none' && parseFloat(s.outlineWidth) > 0; };
+            const outline = ringOf(el) || (frame !== null && ringOf(frame));
             const shadow = style.boxShadow !== 'none';
             const text = (el.getAttribute('aria-label') || el.textContent || el.getAttribute('name') || '').trim().replace(/\s+/g, ' ').slice(0, 40);
             const key = `${el.tagName}:${el.id || ''}:${text}:${Math.round(rect.top + window.scrollY)}`;

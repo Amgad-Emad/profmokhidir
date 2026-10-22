@@ -19,21 +19,11 @@
 
     {{-- Search and filters --}}
     <form class="mt-6 grid gap-4 md:grid-cols-4" wire:submit.prevent role="search" aria-label="Search {{ strtolower($type['plural']) }}">
-        <div class="md:col-span-2">
-            <label for="search" class="t-label block text-accent-text">Search</label>
-            <input id="search" type="search" wire:model.live.debounce.400ms="search" placeholder="Search {{ strtolower($type['plural']) }}" class="mt-2 block w-full rounded-card border border-rule-strong bg-surface-field px-4 py-3 text-body text-ink placeholder:text-ink-muted focus:border-focus">
-        </div>
+        <x-form.input type="search" model="search" id="search" live label="Search" :optional="false" loading="search" class="md:col-span-2"
+                      :placeholder="'Search '.strtolower($type['plural'])" autocomplete="off" />
         @if ($view === ContentIndex::VIEW_ACTIVE)
             @foreach ($filterOptions as $field => $filter)
-                <div>
-                    <label for="filter-{{ $field }}" class="t-label block text-accent-text">{{ $filter['label'] }}</label>
-                    <span class="select-wrap"><select id="filter-{{ $field }}" wire:model.live="filters.{{ $field }}" class="form-select mt-2 block w-full rounded-card border border-rule-strong bg-surface-field px-4 py-3 text-body text-ink focus:border-focus" data-filter="{{ $field }}">
-                        <option value="">All</option>
-                        @foreach ($filter['options'] as $value => $label)
-                            <option value="{{ $value }}">{{ $label }}</option>
-                        @endforeach
-                    </select><span class="select-chevron" aria-hidden="true"></span></span>
-                </div>
+                <x-form.select :model="'filters.'.$field" :id="'filter-'.$field" live :label="$filter['label']" :optional="false" placeholder="All" :options="$filter['options']" :data-filter="$field" />
             @endforeach
         @endif
     </form>

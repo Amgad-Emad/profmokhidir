@@ -40,15 +40,7 @@ final class AuthScreens
     /** The form column on the ivory side. */
     public const int MEASURE_PX = 400;
 
-    /** Underlined inputs: minimum height and the time the evergreen line takes to draw. */
-    public const int FIELD_HEIGHT_PX = 48;
-
-    public const int LINE_DRAW_MS = 400;
-
-    /** Visible keyboard focus: a bronze outline, offset from the field. */
-    public const int FOCUS_OUTLINE_PX = 2;
-
-    public const int FOCUS_OUTLINE_OFFSET_PX = 3;
+    /* Field sizes, focus, the password toggle's wording and the error summary are App\Constants\FormControls. */
 
     /** The authenticator code is six digits, one box each. */
     public const int CODE_LENGTH = 6;
@@ -61,14 +53,6 @@ final class AuthScreens
     public const int PASSWORD_STRONG_LENGTH = 16;
 
     public const string PASSWORD_HINT = 'Length matters more than symbols. A passphrase of twelve characters or more is strong.';
-
-    public const string CAPS_LOCK_WARNING = 'Caps Lock is on.';
-
-    public const string SHOW_PASSWORD = 'Show password';
-
-    public const string HIDE_PASSWORD = 'Hide password';
-
-    public const string ERROR_SUMMARY_TITLE = 'Please check the form';
 
     /** The one wording for a failed sign-in, so accounts cannot be probed. */
     public const string FAILED_CREDENTIALS = 'These credentials do not match our records.';

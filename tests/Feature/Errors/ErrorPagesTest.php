@@ -74,8 +74,8 @@ class ErrorPagesTest extends TestCase
 
         // The search box is a plain GET form to /search: it works on a page that loads no script.
         $this->assertMatchesRegularExpression('/<form method="get" action="'.preg_quote(route(Search::ROUTE), '/').'" role="search"/', $html);
-        $this->assertStringContainsString('<label for="error-search" class="t-label block text-accent-text">'.ErrorPages::SEARCH_LABEL.'</label>', $html);
-        $this->assertMatchesRegularExpression('/<input id="error-search" name="'.Search::PARAM.'" type="search"/', $html);
+        $this->assertStringContainsString('<label id="error-search-label" for="error-search" class="t-label form-label">'.ErrorPages::SEARCH_LABEL.'</label>', $html);
+        $this->assertMatchesRegularExpression('/<input class="form-control__input" id="error-search" name="'.Search::PARAM.'"[^>]*type="search"/', $html);
 
         // Every chapter is linked, in navigation order.
         $this->assertStringContainsString('<nav class="error-page__chapters w-full max-w-xl" aria-label="Chapters">', $html);

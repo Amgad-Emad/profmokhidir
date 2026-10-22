@@ -114,7 +114,7 @@ class TributeModerationTest extends TestCase
             ->set('edit.message', '')
             ->call('saveEdit')
             ->assertHasErrors(['edit.message'])
-            ->assertSee('The tribute cannot be empty.')
+            ->assertSee('Write the tribute text.')
             ->set('edit.message', 'He taught us well.')
             ->call('saveEdit')
             ->assertHasNoErrors()

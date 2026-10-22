@@ -6,9 +6,9 @@
             <x-section-header :label="Search::LABEL" :title="Search::TITLE" level="1" id="section-title" />
 
             <form method="get" action="{{ route(Search::ROUTE) }}" role="search" class="search-form mt-12" data-rise>
-                <label for="search-query" class="sr-only">{{ Search::LABEL }}</label>
-                <div class="search-form__row mt-3">
-                    <input id="search-query" name="{{ Search::PARAM }}" type="search" value="{{ $results['query'] }}" placeholder="{{ Search::PLACEHOLDER }}" autocomplete="off" spellcheck="false" maxlength="{{ Search::MAX_LENGTH }}" class="search-form__input" autofocus>
+                <div class="search-form__row form-style-underline mt-3">
+                    <x-form.input type="search" :name="Search::PARAM" id="search-query" :label="Search::LABEL" hide-label :optional="false" size="display" class="search-form__field"
+                                  :value="$results['query']" :placeholder="Search::PLACEHOLDER" autocomplete="off" spellcheck="false" :maxlength="Search::MAX_LENGTH" autofocus />
                     <button type="submit" class="btn-pill-outline text-ink">{{ Search::BUTTON_LABEL }}</button>
                 </div>
                 @if (! $canSeeMembersOnly)

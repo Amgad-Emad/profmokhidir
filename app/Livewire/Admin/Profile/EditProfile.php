@@ -89,17 +89,6 @@ class EditProfile extends ContentForm
         }
     }
 
-    public function addExpertise(): void
-    {
-        $this->form['expertise'][] = '';
-    }
-
-    public function removeExpertise(int $index): void
-    {
-        unset($this->form['expertise'][$index]);
-        $this->form['expertise'] = array_values($this->form['expertise']);
-    }
-
     public function addKeyFact(): void
     {
         $this->form['key_facts'][] = ['label' => '', 'value' => ''];

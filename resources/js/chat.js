@@ -10,6 +10,9 @@
  | KaTeX typesetting fetched only when a message carries maths.
  */
 import './theme';
+import { initForms, registerForms } from './forms';
+
+initForms();
 
 const STATE_SENDING = 'sending';
 const STATE_FAILED = 'failed';
@@ -113,6 +116,7 @@ function typesetMath(root, config) {
 }
 
 document.addEventListener('alpine:init', () => {
+    registerForms(Alpine);
     Alpine.data('chatRoom', (options) => ({
         channelId: options.channelId,
         channelSlug: options.channelSlug,

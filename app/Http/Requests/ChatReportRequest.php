@@ -33,8 +33,8 @@ class ChatReportRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'reason.required' => 'Please say briefly why you are reporting this message.',
-            'reason.max' => 'The reason can be at most :max characters.',
+            'reason.required' => 'Say briefly why you are reporting this message.',
+            'reason.max' => 'Shorten the reason to :max characters or fewer.',
         ];
     }
 }

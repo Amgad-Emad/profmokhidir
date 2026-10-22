@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Admin;
 
 use App\Constants\ContentStatus;
+use App\Constants\FormControls;
 use App\Constants\Permissions;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -17,7 +18,7 @@ use Illuminate\Validation\Rules\Enum;
  */
 abstract class ContentRequest extends FormRequest
 {
-    public const int EARLIEST_YEAR = 1900;
+    public const int EARLIEST_YEAR = FormControls::YEAR_MIN;
 
     public const int SLUG_MAX_LENGTH = 255;
 
@@ -36,7 +37,7 @@ abstract class ContentRequest extends FormRequest
         return [
             'status.Illuminate\Validation\Rules\Enum' => 'Choose either draft or published.',
             'slug.regex' => 'Use lowercase letters, numbers and hyphens only.',
-            '*.url' => 'Enter a full web address starting with http:// or https://.',
+            '*.url' => 'Enter a full web address starting with https://.',
         ];
     }
 
@@ -72,7 +73,7 @@ abstract class ContentRequest extends FormRequest
      */
     public static function yearRule(): array
     {
-        return ['nullable', 'integer', 'min:'.self::EARLIEST_YEAR, 'max:'.(int) now()->addYear()->format('Y')];
+        return ['nullable', 'integer', 'between:'.self::EARLIEST_YEAR.','.FormControls::yearMax()];
     }
 
     /**

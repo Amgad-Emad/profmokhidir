@@ -76,7 +76,7 @@ class TeachingPageTest extends TestCase
                 'href="'.route('teaching.download', $withFile).'" target="_blank" rel="noopener"', 'Download · PPTX · 640 KB',
                 'id="course-other"', 'Other materials', 'Loose notes',
             ], false)
-            ->assertSee('<label for="filter-topic"', false)
+            ->assertSee('<label id="filter-topic-label" for="filter-topic"', false)
             ->assertSee('<option value="Irrigation">Irrigation</option>', false)
             ->assertSee('<option value="Photosynthesis">Photosynthesis</option>', false)
             ->assertSee('<option value="slides">Slides</option>', false);

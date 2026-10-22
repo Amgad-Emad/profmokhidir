@@ -17,28 +17,9 @@
     <p class="text-sm font-light text-ink-muted" data-active-admins>Active administrators: <span class="font-mono text-ink">{{ $activeAdmins }}</span>. The last one can never be demoted or deactivated.</p>
 
     <form class="mt-6 grid gap-4 md:grid-cols-4" wire:submit.prevent role="search" aria-label="Search users">
-        <div class="md:col-span-2">
-            <label for="search" class="t-label block text-accent-text">Search</label>
-            <input id="search" type="search" wire:model.live.debounce.400ms="search" placeholder="Name or email" class="mt-2 block w-full rounded-card border border-rule-strong bg-surface-field px-4 py-3 text-body text-ink placeholder:text-ink-muted focus:border-focus">
-        </div>
-        <div>
-            <label for="filter-role" class="t-label block text-accent-text">Role</label>
-            <span class="select-wrap"><select id="filter-role" wire:model.live="role" class="form-select mt-2 block w-full rounded-card border border-rule-strong bg-surface-field px-4 py-3 text-body text-ink focus:border-focus" data-filter="role">
-                <option value="">All roles</option>
-                @foreach ($roleOptions as $value => $label)
-                    <option value="{{ $value }}">{{ $label }}</option>
-                @endforeach
-            </select><span class="select-chevron" aria-hidden="true"></span></span>
-        </div>
-        <div>
-            <label for="filter-status" class="t-label block text-accent-text">Community status</label>
-            <span class="select-wrap"><select id="filter-status" wire:model.live="status" class="form-select mt-2 block w-full rounded-card border border-rule-strong bg-surface-field px-4 py-3 text-body text-ink focus:border-focus" data-filter="status">
-                <option value="">Any</option>
-                @foreach ($statusOptions as $value => $label)
-                    <option value="{{ $value }}">{{ $label }}</option>
-                @endforeach
-            </select><span class="select-chevron" aria-hidden="true"></span></span>
-        </div>
+        <x-form.input type="search" model="search" id="search" live label="Search" :optional="false" loading="search" class="md:col-span-2" placeholder="Name or email" autocomplete="off" />
+        <x-form.select model="role" id="filter-role" live label="Role" :optional="false" placeholder="All roles" :options="$roleOptions" data-filter="role" />
+        <x-form.select model="status" id="filter-status" live label="Community status" :optional="false" placeholder="Any" :options="$statusOptions" data-filter="status" />
     </form>
 
     @if ($users->isEmpty())
@@ -132,9 +113,9 @@
                 <h2 id="invite-title" class="font-display text-3xl font-light leading-tight">Invite a staff member</h2>
                 <p id="invite-description" class="mt-3 text-base font-light text-ink">They receive an email with a link to choose their password. No password is shown here or sent by email.</p>
                 <div class="mt-6 space-y-5">
-                    <x-admin.field name="invite.name" label="Name" required />
-                    <x-admin.field name="invite.email" label="Email" type="email" required />
-                    <x-admin.select-field name="invite.role" label="Role" :options="array_intersect_key(Roles::labels(), array_flip(Roles::staff()))" required hint="Administrators manage users, settings and the community and must use two-factor authentication. Editors manage content and tributes." />
+                    <x-form.input model="invite.name" label="Name" required />
+                    <x-form.input model="invite.email" label="Email" type="email" required />
+                    <x-form.select model="invite.role" label="Role" :options="array_intersect_key(Roles::labels(), array_flip(Roles::staff()))" required hint="Administrators manage users, settings and the community and must use two-factor authentication. Editors manage content and tributes." />
                 </div>
                 <div class="mt-8 flex flex-wrap justify-end gap-3">
                     <x-button type="button" variant="outline" wire:click="cancelInvite">Cancel</x-button>
@@ -151,7 +132,7 @@
                 <h2 id="role-title" class="font-display text-3xl font-light leading-tight">Change the role of {{ $editing->name }}</h2>
                 <p id="role-description" class="mt-3 text-base font-light text-ink">{{ $editing->email }}. Any community membership is kept. A new administrator must set up two-factor authentication before the dashboard opens.</p>
                 <div class="mt-6">
-                    <x-admin.select-field name="newRole" label="Dashboard role" :options="$staffRoleOptions" required />
+                    <x-form.select model="newRole" label="Dashboard role" :options="$staffRoleOptions" required />
                 </div>
                 <div class="mt-8 flex flex-wrap justify-end gap-3">
                     <x-button type="button" variant="outline" wire:click="cancelRole">Cancel</x-button>

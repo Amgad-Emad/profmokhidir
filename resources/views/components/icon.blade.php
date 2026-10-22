@@ -69,6 +69,48 @@
     @case('panel')
         <rect x="3.5" y="5" width="17" height="14" rx="1" /><path d="M15 5v14" />
         @break
+    @case('heading')
+        <path d="M5 5v14" /><path d="M14 5v14" /><path d="M5 12h9" /><path d="M17.5 12.5l2-1.5v8" />
+        @break
+    @case('subheading')
+        <path d="M5 7v10" /><path d="M12 7v10" /><path d="M5 12h7" /><path d="M16 13.25a1.75 1.75 0 1 1 3.5 0c0 1.6-3.5 2.6-3.5 4.75h3.75" />
+        @break
+    @case('bold')
+        <path d="M7 5h6a3.5 3.5 0 0 1 0 7H7z" /><path d="M7 12h7a3.5 3.5 0 0 1 0 7H7z" />
+        @break
+    @case('italic')
+        <path d="M10 5h8" /><path d="M6 19h8" /><path d="M14.5 5l-5 14" />
+        @break
+    @case('list-bullet')
+        <path d="M9.5 7H20" /><path d="M9.5 12H20" /><path d="M9.5 17H20" /><circle cx="5" cy="7" r="0.75" fill="currentColor" /><circle cx="5" cy="12" r="0.75" fill="currentColor" /><circle cx="5" cy="17" r="0.75" fill="currentColor" />
+        @break
+    @case('list-numbered')
+        <path d="M10 7h10" /><path d="M10 12h10" /><path d="M10 17h10" /><path d="M4.5 5.5l1.25-.75v4" /><path d="M4.25 14.25a1.25 1.25 0 1 1 2.25.75L4.25 18H6.75" />
+        @break
+    @case('quote')
+        <path d="M6 18c2.5-1.25 3.5-3.25 3.5-6V7H5v5h4.5" /><path d="M15 18c2.5-1.25 3.5-3.25 3.5-6V7H14v5h4.5" />
+        @break
+    @case('undo')
+        <path d="M9 7.5L5 11.5l4 4" /><path d="M5 11.5h9.5a4.5 4.5 0 0 1 0 9H12" />
+        @break
+    @case('redo')
+        <path d="M15 7.5l4 4-4 4" /><path d="M19 11.5H9.5a4.5 4.5 0 0 0 0 9H12" />
+        @break
+    @case('upload')
+        <path d="M12 15.5V4.5" /><path d="M7.5 9L12 4.5 16.5 9" /><path d="M4.5 15v3.5a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1V15" />
+        @break
+    @case('image')
+        <rect x="3.5" y="5" width="17" height="14" rx="1" /><circle cx="9" cy="10" r="1.5" /><path d="M20.5 16l-5-4.5-8 7.5" />
+        @break
+    @case('file')
+        <path d="M13.5 3.5H7a1 1 0 0 0-1 1v15a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V8z" /><path d="M13.5 3.5V8H18" />
+        @break
+    @case('chevron-down')
+        <path d="M6 9.5l6 6 6-6" />
+        @break
+    @case('plus')
+        <path d="M12 5v14" /><path d="M5 12h14" />
+        @break
     @default
         <circle cx="12" cy="12" r="8.25" />
 @endswitch
