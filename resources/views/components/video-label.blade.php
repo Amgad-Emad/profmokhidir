@@ -7,7 +7,7 @@
 @props(['video', 'tone' => 'evergreen'])
 @php $parts = array_values(array_filter([$video->event, $video->location], 'filled')); @endphp
 @if ($video->date || $parts !== [])
-    <p {{ $attributes->class(['t-label', $tone === 'ivory' ? 'text-brass' : 'text-bronze']) }}>
+    <p {{ $attributes->class(['t-label', 'text-accent-text']) }}>
         @foreach ($parts as $index => $part)
             @if ($index > 0){{ \App\Constants\DateFormats::META_SEPARATOR }}@endif{{ $part }}
         @endforeach

@@ -21,7 +21,7 @@
             @if ($width && $height) data-lightbox-width="{{ $width }}" data-lightbox-height="{{ $height }}" @endif
         >
     @endif
-    <div @class(['photo__frame overflow-hidden rounded-card', 'photo__frame--lift' => $lifts(), 'bg-cypress/40' => $onDark(), 'bg-stone' => ! $onDark()]) @if ($aspect) style="aspect-ratio: {{ $aspect }}" @endif>
+    <div @class(['photo__frame overflow-hidden rounded-card', 'photo__frame--lift' => $lifts(), 'bg-surface-raised/40' => $onDark(), 'bg-surface-sunken' => ! $onDark()]) @if ($aspect) style="aspect-ratio: {{ $aspect }}" @endif>
         @if ($lifts())
             {{-- The untreated print beneath; the duotone above fades a little on hover (desktop, motion allowed). --}}
             <img src="{{ $src }}" @if ($srcset) srcset="{{ $srcset }}" sizes="{{ $sizes }}" @endif alt="" @if ($width && $height) width="{{ $width }}" height="{{ $height }}" @endif class="photo__under h-full w-full object-cover" loading="{{ $loading }}" decoding="async" aria-hidden="true">
@@ -46,10 +46,10 @@
     @elseif ($hasCaption())
         <figcaption class="flex flex-col gap-1">
             @if ($showCaption && $caption)
-                <span class="text-base font-light {{ $onDark() ? 'text-champagne' : 'text-ash' }}">{{ $caption }}</span>
+                <span class="text-base font-light {{ $onDark() ? 'text-ink' : 'text-ink-muted' }}">{{ $caption }}</span>
             @endif
             @if ($placeYear)
-                <span class="t-label {{ $onDark() ? 'text-brass' : 'text-bronze' }}">{{ $placeYear }}</span>
+                <span class="t-label text-accent-text">{{ $placeYear }}</span>
             @endif
         </figcaption>
     @endif

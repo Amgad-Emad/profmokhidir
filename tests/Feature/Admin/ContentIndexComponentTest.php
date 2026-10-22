@@ -105,7 +105,7 @@ class ContentIndexComponentTest extends TestCase
             ->call('delete')
             ->assertSee('moved to the trash')
             ->assertDontSee('Gold medal')
-            ->assertSee('Trash<span class="ml-2 font-mono text-xs text-ash">1</span>', false)
+            ->assertSee('Trash<span class="ml-2 font-mono text-xs text-ink-muted">1</span>', false)
             ->call('showTrash')
             ->assertSet('view', 'trash')
             ->assertSee('Gold medal')

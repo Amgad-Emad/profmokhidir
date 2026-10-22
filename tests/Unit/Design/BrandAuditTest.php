@@ -10,8 +10,9 @@ use Tests\TestCase;
 /**
  * Brand audit over the source stylesheets, scripts, Blade templates and the
  * built CSS: only the nine brand colours (plus white, black and transparent),
- * only the three brand fonts, no bounce or spin animations and no gradient
- * other than the brass glow.
+ * and only in the token file (every other file goes through the semantic
+ * tokens), only the three brand fonts, no bounce or spin animations and no
+ * gradient other than the brass glow.
  */
 class BrandAuditTest extends TestCase
 {
@@ -75,12 +76,18 @@ class BrandAuditTest extends TestCase
     public function only_brand_colours_appear_in_sources_and_built_css(): void
     {
         $offenders = [];
+        $builds = $this->builds();
 
-        foreach ([...$this->sources(), ...$this->builds()] as $file => $contents) {
+        foreach ([...$this->sources(), ...$builds] as $file => $contents) {
             preg_match_all('/#[0-9a-f]{3,8}(?![\w-])/i', $this->withoutFalseHashes($contents), $hex);
 
+            // Hex colours live in the token file only; the build inherits them from there.
+            $hexAllowed = $file === BrandAudit::TOKEN_FILE || array_key_exists($file, $builds);
+
             foreach (array_unique(array_map('strtoupper', $hex[0])) as $value) {
-                if (! in_array($this->withoutAlpha($value), BrandAudit::permittedHex(), true)) {
+                if (! $hexAllowed) {
+                    $offenders[] = "{$file}: {$value} (hex colours belong in ".BrandAudit::TOKEN_FILE.')';
+                } elseif (! in_array($this->withoutAlpha($value), BrandAudit::permittedHex(), true)) {
                     $offenders[] = "{$file}: {$value}";
                 }
             }
@@ -101,6 +108,37 @@ class BrandAuditTest extends TestCase
         }
 
         $this->assertSame([], $offenders, "Off-brand colours:\n".implode("\n", $offenders));
+    }
+
+    #[Test]
+    public function brand_colours_are_only_named_in_the_token_file(): void
+    {
+        $offenders = [];
+
+        foreach ($this->sources() as $file => $contents) {
+            if ($file === BrandAudit::TOKEN_FILE) {
+                continue;
+            }
+
+            preg_match_all(BrandAudit::rawColourClassPattern(), $contents, $classes);
+            preg_match_all(BrandAudit::rawColourVariablePattern(), $contents, $variables);
+
+            foreach (array_unique([...$classes[0], ...$variables[0]]) as $value) {
+                $offenders[] = "{$file}: {$value}";
+            }
+        }
+
+        // The build must not carry raw colour utilities either (the palette is not a Tailwind namespace).
+        foreach ($this->builds() as $file => $contents) {
+            $pattern = '~\.(?:'.implode('|', array_map('preg_quote', BrandAudit::colourUtilityPrefixes())).')-(?:'.implode('|', array_keys(Brand::colours())).')(?:\\\\/\d{1,3})?[\s,{:]~';
+            preg_match_all($pattern, $contents, $classes);
+
+            foreach (array_unique($classes[0]) as $value) {
+                $offenders[] = "{$file}: ".trim($value, " ,{:");
+            }
+        }
+
+        $this->assertSame([], $offenders, "Raw brand colours outside ".BrandAudit::TOKEN_FILE." (use the semantic tokens):\n".implode("\n", $offenders));
     }
 
     #[Test]
@@ -187,7 +225,7 @@ class BrandAuditTest extends TestCase
 
                 $lower = strtolower($arguments);
                 $isRadial = $function === BrandAudit::GRADIENT_FUNCTION;
-                $isBrass = str_contains($lower, '--color-brass') || str_contains($lower, strtolower(Brand::BRASS));
+                $isBrass = str_contains($lower, BrandAudit::GLOW_TOKEN) || str_contains($lower, '--brand-brass') || str_contains($lower, strtolower(Brand::BRASS));
 
                 if (! $isRadial || ! $isBrass) {
                     $offenders[] = "{$file}: {$whole}";

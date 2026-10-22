@@ -23,7 +23,7 @@ class TributesPageTest extends TestCase
         $response
             ->assertSee('<title>Tributes · ', false)
             ->assertSeeInOrder([
-                'glow-brass on-dark bg-evergreen', 't-label text-brass', Taglines::TRIBUTES_LABEL,
+                'glow-brass on-dark bg-surface', 't-label text-accent-text', Taglines::TRIBUTES_LABEL,
                 'rule-brass', 'id="section-title" class="t-quote', Taglines::TRIBUTES_HEADING,
                 'class="seal seal--open" aria-hidden="true" data-rise', 'brand-mark--ring', 'data-tone="ivory"', 'seal__rule',
                 'href="'.route('tributes.create').'" class="btn-pill-filled">'.Taglines::LEAVE_TRIBUTE,
@@ -70,9 +70,9 @@ class TributesPageTest extends TestCase
                 'class="book-filter smallcaps" aria-current="true">All</a>', 'Students</a>', 'Colleagues</a>', 'Family</a>', 'Friends</a>',
                 '<ol class="book mt-14" data-rise-group data-book>',
                 '<li class="book__leaf">', '<article class="tribute-entry">', '<blockquote class="tribute-entry__text">', '<span class="hang-quote">&ldquo;</span>He taught me to look twice.&rdquo;</p>',
-                '<h3 class="tribute-entry__author smallcaps">Ahmed El-Sheikh</h3>', 't-label text-bronze tribute-entry__meta">Student · Khartoum, Sudan',
+                '<h3 class="tribute-entry__author smallcaps">Ahmed El-Sheikh</h3>', 't-label text-accent-text tribute-entry__meta">Student · Khartoum, Sudan',
                 'role="separator" data-ornament="rule-dot"',
-                '<li class="book__leaf">', 'A generous colleague.&rdquo;</p>', '<h3 class="tribute-entry__author smallcaps">Leila Mahmoud</h3>', 't-label text-bronze tribute-entry__meta">Colleague</p>',
+                '<li class="book__leaf">', 'A generous colleague.&rdquo;</p>', '<h3 class="tribute-entry__author smallcaps">Leila Mahmoud</h3>', 't-label text-accent-text tribute-entry__meta">Colleague</p>',
                 'folio folio--bottom',
             ], false)
             ->assertDontSee('Others</a>', false)
@@ -114,9 +114,9 @@ class TributesPageTest extends TestCase
 
         $response
             ->assertSeeInOrder([
-                'data-featured', '<div class="frontispiece" data-rise-group>', 'class="t-label text-bronze">'.Taglines::TRIBUTES_FEATURED_LABEL,
-                '<blockquote class="frontispiece__quote t-quote text-evergreen">', '<span class="hang-quote">&ldquo;</span>He never answered a question with an answer.&rdquo;',
-                '<p class="frontispiece__author smallcaps">Ahmed El-Sheikh</p>', 't-label text-bronze frontispiece__meta">Student · Khartoum, Sudan',
+                'data-featured', '<div class="frontispiece" data-rise-group>', 'class="t-label text-accent-text">'.Taglines::TRIBUTES_FEATURED_LABEL,
+                '<blockquote class="frontispiece__quote t-quote text-ink">', '<span class="hang-quote">&ldquo;</span>He never answered a question with an answer.&rdquo;',
+                '<p class="frontispiece__author smallcaps">Ahmed El-Sheikh</p>', 't-label text-accent-text frontispiece__meta">Student · Khartoum, Sudan',
                 'href="'.route('tributes.card', $featured).'"', 'data-ornament="fleuron"',
                 'data-book', 'Zq Other',
             ], false)

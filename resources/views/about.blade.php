@@ -17,12 +17,12 @@
                         <x-photo :media="$portrait" sizes="(min-width: 1280px) 22rem, (min-width: 1024px) 36vw, 100vw" loading="eager" :show-caption="true" class="max-w-md" />
                     @endif
                     <div class="mt-8 flex flex-col gap-2">
-                        <h2 class="font-display text-quote font-light leading-tight text-evergreen">@typeset($profile->name)</h2>
+                        <h2 class="font-display text-quote font-light leading-tight text-ink">@typeset($profile->name)</h2>
                         @if (filled($profile->title))
-                            <p class="t-body text-evergreen">@typeset($profile->title)</p>
+                            <p class="t-body text-ink">@typeset($profile->title)</p>
                         @endif
                         @if (filled($profile->affiliation))
-                            <p class="text-base font-light text-ash">@typeset($profile->affiliation)</p>
+                            <p class="text-base font-light text-ink-muted">@typeset($profile->affiliation)</p>
                         @endif
                     </div>
                 </div>
@@ -38,10 +38,10 @@
 
                     @if ($expertise !== [])
                         <section aria-labelledby="expertise-title">
-                            <h2 id="expertise-title" class="t-label text-bronze">Expertise</h2>
+                            <h2 id="expertise-title" class="t-label text-accent-text">Expertise</h2>
                             <ul class="mt-5 flex flex-wrap gap-3">
                                 @foreach ($expertise as $tag)
-                                    <li class="tag t-label rounded-full border border-stone px-4 py-2 text-bronze">{{ $tag }}</li>
+                                    <li class="tag t-label rounded-full border border-rule px-4 py-2 text-accent-text">{{ $tag }}</li>
                                 @endforeach
                             </ul>
                         </section>
@@ -49,12 +49,12 @@
 
                     @if ($facts !== [])
                         <section aria-labelledby="facts-title">
-                            <h2 id="facts-title" class="t-label text-bronze">Key facts</h2>
-                            <dl class="mt-5 grid gap-x-10 gap-y-6 border-t border-stone pt-6 sm:grid-cols-2">
+                            <h2 id="facts-title" class="t-label text-accent-text">Key facts</h2>
+                            <dl class="mt-5 grid gap-x-10 gap-y-6 border-t border-rule pt-6 sm:grid-cols-2">
                                 @foreach ($facts as $fact)
                                     <div class="flex flex-col gap-1">
-                                        <dt class="t-label text-bronze">{{ $fact['label'] }}</dt>
-                                        <dd class="figures-lining font-display text-[1.75rem] font-light leading-10 text-evergreen">{{ $fact['value'] }}</dd>
+                                        <dt class="t-label text-accent-text">{{ $fact['label'] }}</dt>
+                                        <dd class="figures-lining font-display text-[1.75rem] font-light leading-10 text-ink">{{ $fact['value'] }}</dd>
                                     </div>
                                 @endforeach
                             </dl>
@@ -63,19 +63,19 @@
 
                     @if ($contact['email'] || $contact['note'] || $contact['phone'] || $contact['address'])
                         <section aria-labelledby="contact-title">
-                            <h2 id="contact-title" class="t-label text-bronze">Contact</h2>
-                            <div class="mt-5 flex flex-col gap-2 border-t border-stone pt-6">
+                            <h2 id="contact-title" class="t-label text-accent-text">Contact</h2>
+                            <div class="mt-5 flex flex-col gap-2 border-t border-rule pt-6">
                                 @if ($contact['email'])
-                                    <p class="t-body"><a href="mailto:{{ $contact['email'] }}" class="text-evergreen underline decoration-brass underline-offset-4">{{ $contact['email'] }}</a>@if ($contact['note'])<x-sidenote :number="1">@typeset($contact['note'])</x-sidenote>@endif</p>
+                                    <p class="t-body"><a href="mailto:{{ $contact['email'] }}" class="text-ink underline decoration-accent-line underline-offset-4">{{ $contact['email'] }}</a>@if ($contact['note'])<x-sidenote :number="1">@typeset($contact['note'])</x-sidenote>@endif</p>
                                 @endif
                                 @if ($contact['phone'])
-                                    <a href="tel:{{ preg_replace('/[^0-9+]/', '', $contact['phone']) }}" class="t-body text-evergreen underline decoration-brass underline-offset-4" data-contact-phone>{{ $contact['phone'] }}</a>
+                                    <a href="tel:{{ preg_replace('/[^0-9+]/', '', $contact['phone']) }}" class="t-body text-ink underline decoration-accent-line underline-offset-4" data-contact-phone>{{ $contact['phone'] }}</a>
                                 @endif
                                 @if ($contact['address'])
-                                    <p class="whitespace-pre-line text-base font-light text-ash" data-contact-address>{{ $contact['address'] }}</p>
+                                    <p class="whitespace-pre-line text-base font-light text-ink-muted" data-contact-address>{{ $contact['address'] }}</p>
                                 @endif
                                 @if ($contact['note'] && ! $contact['email'])
-                                    <p class="text-base font-light text-ash">@typeset($contact['note'])</p>
+                                    <p class="text-base font-light text-ink-muted">@typeset($contact['note'])</p>
                                 @endif
                             </div>
                         </section>
@@ -86,9 +86,9 @@
                         <ul class="mt-8 grid gap-4 sm:grid-cols-3">
                             @foreach ($links as $item)
                                 <li class="h-full">
-                                    <a href="{{ $item['url'] }}" class="section-card card flex h-full flex-col gap-3 text-evergreen no-underline hover:no-underline">
-                                        <span class="t-label text-bronze">{{ $item['label'] }}</span>
-                                        <span class="text-base font-light text-ash">{{ $item['summary'] }}</span>
+                                    <a href="{{ $item['url'] }}" class="section-card card flex h-full flex-col gap-3 text-ink no-underline hover:no-underline">
+                                        <span class="t-label text-accent-text">{{ $item['label'] }}</span>
+                                        <span class="text-base font-light text-ink-muted">{{ $item['summary'] }}</span>
                                     </a>
                                 </li>
                             @endforeach

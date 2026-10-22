@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Constants\CommunityStatus;
 use App\Constants\Roles;
+use App\Constants\Theme;
 use App\Models\User;
 use App\Repositories\Contracts\RoleRepositoryInterface;
 use App\Services\RoleService;
@@ -38,7 +39,21 @@ class UserFactory extends Factory
             'password' => static::$password ??= Hash::make('password'),
             'community_status' => CommunityStatus::None,
             'remember_token' => Str::random(10),
+            'theme' => Theme::DEFAULT,
         ];
+    }
+
+    /**
+     * A saved colour theme (System, Light or Dark).
+     */
+    public function theme(Theme $theme): static
+    {
+        return $this->state(fn (array $attributes) => ['theme' => $theme]);
+    }
+
+    public function darkTheme(): static
+    {
+        return $this->theme(Theme::Dark);
     }
 
     /**

@@ -13,7 +13,9 @@
  | pass the two-factor challenge) and A11Y_MEMBER_EMAIL / A11Y_MEMBER_PASSWORD.
  | Without them those screens are skipped. Public detail pages are read from
  | /sitemap.xml. A11Y_PUBLIC=0 skips the public pages and A11Y_ROLES=admin,editor
- | limits the signed-in sessions. Exit code 1 when anything fails.
+ | limits the signed-in sessions. Every page is audited in each theme of
+ | A11Y_THEMES (default light,dark): the theme cookie is set and the colour scheme
+ | emulated, so accounts left on System follow it too. Exit code 1 when anything fails.
  */
 import { chromium } from 'playwright';
 import { AxeBuilder } from '@axe-core/playwright';
@@ -25,6 +27,15 @@ const OUT = process.env.A11Y_REPORT ?? 'storage/app/a11y/axe-report.json';
 const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 const VIEWPORTS = { mobile: { width: 360, height: 740 }, desktop: { width: 1366, height: 900 } };
 const MAX_TABS = 400;
+const THEMES = (process.env.A11Y_THEMES ?? 'light,dark').split(',').filter((t) => ['light', 'dark'].includes(t));
+let THEME = THEMES[0] ?? 'light';
+const ORIGIN_HOST = new URL(BASE).hostname;
+
+/* Put a context in the current theme: the cookie the site reads and the matching prefers-color-scheme. */
+async function themed(context) {
+    await context.addCookies([{ name: 'theme', value: THEME, domain: ORIGIN_HOST, path: '/', sameSite: 'Lax' }]);
+    return context;
+}
 
 const PUBLIC_PAGES = [
     '/', '/about', '/cv', '/publications', '/awards', '/videos', '/pictures', '/teaching',
@@ -45,10 +56,11 @@ const results = [];
 let failures = 0;
 
 function report(page, viewport, check, ok, details = []) {
-    results.push({ page, viewport, check, ok, details });
+    viewport = `${viewport}/${THEME}`;
+    results.push({ page, viewport, theme: THEME, check, ok, details });
     if (!ok) failures += 1;
     const mark = ok ? 'ok ' : 'FAIL';
-    console.log(`${mark} ${viewport.padEnd(7)} ${page.padEnd(44)} ${check}${details.length ? ' (' + details.length + ')' : ''}`);
+    console.log(`${mark} ${viewport.padEnd(13)} ${page.padEnd(44)} ${check}${details.length ? ' (' + details.length + ')' : ''}`);
     for (const line of details) console.log('       - ' + line);
 }
 
@@ -183,7 +195,7 @@ async function checkKeyboard(page, path, viewport) {
 }
 
 async function checkReducedMotion(browser, path) {
-    const context = await browser.newContext({ ignoreHTTPSErrors: true, reducedMotion: 'reduce', viewport: VIEWPORTS.mobile });
+    const context = await themed(await browser.newContext({ ignoreHTTPSErrors: true, reducedMotion: 'reduce', colorScheme: THEME, viewport: VIEWPORTS.mobile }));
     const page = await context.newPage();
     await page.goto(`${BASE}${path}`, { waitUntil: 'domcontentloaded' });
     const hidden = await page.$$eval('[data-rise], [data-rise-group] > *', (els) =>
@@ -195,8 +207,9 @@ async function checkReducedMotion(browser, path) {
 
 async function auditPage(browser, path, viewportName, session = null) {
     const viewport = VIEWPORTS[viewportName];
-    const context = session ?? (await browser.newContext({ ignoreHTTPSErrors: true, viewport }));
+    const context = await themed(session ?? (await browser.newContext({ ignoreHTTPSErrors: true, viewport })));
     const page = await context.newPage();
+    await page.emulateMedia({ colorScheme: THEME });
     await page.setViewportSize(viewport);
     const response = await page.goto(`${BASE}${path}`, { waitUntil: 'networkidle' });
     const status = response?.status() ?? 0;
@@ -220,6 +233,8 @@ async function auditPage(browser, path, viewportName, session = null) {
 const browser = await chromium.launch({ channel: process.env.A11Y_CHANNEL ?? 'chrome', headless: true });
 
 try {
+  for (THEME of THEMES) {
+    console.log(`\n— ${THEME} theme —`);
     const publicPages = process.env.A11Y_PUBLIC === '0' ? [] : [...PUBLIC_PAGES, ...(await sitemapUrls())];
     for (const path of publicPages) {
         for (const viewportName of Object.keys(VIEWPORTS)) await auditPage(browser, path, viewportName);
@@ -242,6 +257,7 @@ try {
         }
         await context.close();
     }
+  }
 } finally {
     await browser.close();
 }

@@ -1,9 +1,9 @@
 {{-- Search dialog: evergreen, full screen. Results are fetched from /search as JSON and announced. --}}
 @use('App\Constants\Masthead')
 @use('App\Constants\Search')
-<div id="{{ Masthead::SEARCH_ID }}" x-data="siteSearch" x-ref="panel" x-show="open" x-cloak :class="{ 'is-open': shown }" role="dialog" aria-modal="true" aria-labelledby="site-search-title" tabindex="-1" @search-open.window="show($event.detail?.opener)" @keydown.escape.stop="close()" @keydown.tab="trap($event)" @keydown.down.prevent="move(1)" @keydown.up.prevent="move(-1)" class="site-search glow-brass on-dark fixed inset-0 z-50 overflow-y-auto bg-evergreen text-champagne">
+<div id="{{ Masthead::SEARCH_ID }}" x-data="siteSearch" x-ref="panel" x-show="open" x-cloak :class="{ 'is-open': shown }" role="dialog" aria-modal="true" aria-labelledby="site-search-title" tabindex="-1" @search-open.window="show($event.detail?.opener)" @keydown.escape.stop="close()" @keydown.tab="trap($event)" @keydown.down.prevent="move(1)" @keydown.up.prevent="move(-1)" class="site-search glow-brass on-dark fixed inset-0 z-50 overflow-y-auto bg-surface text-ink">
     <div class="site-menu__bar mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 sm:px-6">
-        <p id="site-search-title" class="t-label text-brass">{{ Search::LABEL }}</p>
+        <p id="site-search-title" class="t-label text-accent-text">{{ Search::LABEL }}</p>
         <button type="button" x-ref="close" class="site-menu-toggle" @click="close()">
             <span class="t-label">{{ Search::CLOSE_LABEL }}</span>
             <span class="site-menu-toggle__icon is-open" aria-hidden="true"><span></span><span></span></span>

@@ -16,7 +16,7 @@ class BrandLockupTest extends TestCase
         $this->assertStringContainsString('brand-lockup--stacked', $html);
         $this->assertStringContainsString('data-size="72"', $html);
         $this->assertStringContainsString('aria-hidden="true"', $html, 'The mark is decorative beside the name');
-        $this->assertMatchesRegularExpression('/<svg.*<span class="t-label text-brass">Professor<\/span>\s*<span class="font-display font-light leading-none text-3xl">Mohamed Osman Khidir<\/span>/s', $html);
+        $this->assertMatchesRegularExpression('/<svg.*<span class="t-label text-accent-text">Professor<\/span>\s*<span class="font-display font-light leading-none text-3xl">Mohamed Osman Khidir<\/span>/s', $html);
     }
 
     #[Test]
@@ -35,7 +35,7 @@ class BrandLockupTest extends TestCase
     {
         $html = Blade::render('<x-brand.lockup tone="evergreen" />');
 
-        $this->assertStringContainsString('t-label text-bronze', $html);
+        $this->assertStringContainsString('t-label text-accent-text', $html);
         $this->assertStringContainsString('data-tone="evergreen"', $html);
     }
 

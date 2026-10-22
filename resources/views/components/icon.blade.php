@@ -45,6 +45,15 @@
     @case('search')
         <circle cx="11" cy="11" r="6.25" /><path d="M15.5 15.5L20 20" />
         @break
+    @case('theme-light')
+        <circle cx="12" cy="12" r="3.75" /><path d="M12 3v2.25" /><path d="M12 18.75V21" /><path d="M3 12h2.25" /><path d="M18.75 12H21" /><path d="M5.64 5.64l1.6 1.6" /><path d="M16.76 16.76l1.6 1.6" /><path d="M5.64 18.36l1.6-1.6" /><path d="M16.76 7.24l1.6-1.6" />
+        @break
+    @case('theme-dark')
+        <path d="M19.5 14.25A7.75 7.75 0 0 1 9.75 4.5a7.75 7.75 0 1 0 9.75 9.75z" />
+        @break
+    @case('theme-system')
+        <circle cx="12" cy="12" r="8.25" /><path d="M12 3.75v16.5" /><path d="M12 3.75a8.25 8.25 0 0 1 0 16.5z" fill="currentColor" stroke="none" />
+        @break
     @case('reply')
         <path d="M9 7l-5 5 5 5" /><path d="M4 12h9a6 6 0 0 1 6 6v1" />
         @break

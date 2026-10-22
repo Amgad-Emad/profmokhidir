@@ -4,7 +4,7 @@
     "ivory" on evergreen surfaces.
 --}}
 @props(['attribution' => null, 'tone' => 'evergreen'])
-<figure {{ $attributes->class(['epigraph', $tone === 'ivory' ? 'text-champagne' : 'text-ash']) }}>
+<figure {{ $attributes->class(['epigraph', $tone === 'ivory' ? 'text-ink' : 'text-ink-muted']) }}>
     <blockquote class="epigraph__quote"><p>{{ $slot }}</p></blockquote>
     @if (filled($attribution))
         <figcaption class="epigraph__attribution"><span aria-hidden="true">— </span><span class="smallcaps">@typeset($attribution)</span></figcaption>

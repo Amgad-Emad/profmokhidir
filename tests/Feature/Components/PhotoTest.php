@@ -177,7 +177,7 @@ class PhotoTest extends TestCase
 
         $this->assertStringContainsString('data-lightbox-note="With the first cohort."', $html);
         $this->assertStringContainsString('data-lightbox-credit="Family archive"', $html);
-        $this->assertStringContainsString('photo__frame overflow-hidden rounded-card photo__frame--lift bg-stone', $html);
+        $this->assertStringContainsString('photo__frame overflow-hidden rounded-card photo__frame--lift bg-surface-sunken', $html);
         $this->assertMatchesRegularExpression('/<img src="[^"]+"[^>]*alt=""[^>]*class="photo__under h-full w-full object-cover"[^>]*aria-hidden="true">\s*<img/', $html, 'The untreated print sits beneath the duotone');
         $this->assertSame(2, substr_count($html, '<img'));
         $this->assertStringContainsString('<figcaption class="museum-label">', $html);

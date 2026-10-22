@@ -14,5 +14,5 @@
     }
 @endphp
 @if ($parts !== [])
-    <p {{ $attributes->class(['t-label', $tone === 'ivory' ? 'text-brass' : 'text-bronze']) }}>{!! implode(e(\App\Constants\DateFormats::META_SEPARATOR), $parts) !!}</p>
+    <p {{ $attributes->class(['t-label', 'text-accent-text']) }}>{!! implode(e(\App\Constants\DateFormats::META_SEPARATOR), $parts) !!}</p>
 @endif

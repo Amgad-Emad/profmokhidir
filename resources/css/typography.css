@@ -2,8 +2,8 @@
  | Press typography: OpenType detail, the 8px rhythm and the reading measure, and
  | the ornament components (<x-drop-cap>, <x-chapter-opening>, <x-ornament>,
  | <x-sidenote>, <x-folio>, <x-epigraph>, <x-seal>). Imported by app.css; mirrors
- | App\Constants\Typesetting and App\Constants\Ornaments. Restraint first: brass
- | only for hairlines, nothing moves except the rule and the existing rise.
+ | App\Constants\Typesetting and App\Constants\Ornaments. Restraint first: the
+ | accent only for hairlines, nothing moves except the rule and the existing rise.
  */
 :root {
     /* 8px baseline rhythm: --space-N is N baseline units. */
@@ -126,11 +126,12 @@
         font-style: normal;
         font-size: 7.25rem; /* three 32px lines from cap height to baseline */
         line-height: 0.8;
-        color: var(--color-evergreen);
+        color: var(--ink-strong);
     }
 
+    /* On a dark band the initial takes the band ink (the tokens remap inside .on-dark; the class is kept for the markup). */
     .drop-cap--ivory > p:first-of-type::first-letter {
-        color: var(--color-champagne);
+        color: var(--ink);
     }
 
     @supports (initial-letter: 3) or (-webkit-initial-letter: 3) {
@@ -182,7 +183,7 @@
 
     .ornament svg * {
         fill: none;
-        stroke: var(--color-brass);
+        stroke: var(--accent-line);
         stroke-width: 1px;
         stroke-linecap: round;
         stroke-linejoin: round;
@@ -219,22 +220,23 @@
         gap: var(--space-2);
         font-size: 1rem;
         line-height: var(--space-3);
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     .folio__rule {
         flex: 1 1 auto;
         height: 1px;
         min-width: var(--space-4);
-        background-color: var(--color-stone);
+        background-color: var(--rule);
     }
 
+    /* On a dark band the folio reads in the band ink with a quiet rule (tokens remap inside .on-dark). */
     .folio--ivory {
-        color: var(--color-champagne);
+        color: var(--ink);
     }
 
     .folio--ivory .folio__rule {
-        background-color: var(--color-cypress);
+        background-color: var(--rule);
     }
 
     /* <x-seal>: the mark as a closing seal, a short rule centred beneath it. */
@@ -249,7 +251,7 @@
         display: block;
         width: var(--space-6);
         height: 1px;
-        background-color: var(--color-brass);
+        background-color: var(--accent-line);
     }
 
     /*
@@ -282,18 +284,18 @@
         font-family: var(--font-display);
         font-size: 1rem;
         font-variant-numeric: lining-nums;
-        color: var(--color-bronze);
+        color: var(--accent-text);
         cursor: pointer;
     }
 
     .sidenote__ref[aria-expanded='true'] {
-        color: var(--color-evergreen);
+        color: var(--ink);
     }
 
     .sidenote__number {
         font-family: var(--font-display);
         font-variant-numeric: lining-nums;
-        color: var(--color-bronze);
+        color: var(--accent-text);
         margin-right: 0.25em;
     }
 
@@ -301,7 +303,7 @@
         display: block;
         margin-block: var(--space-2);
         padding-left: var(--space-2);
-        border-left: 1px solid var(--color-stone);
+        border-left: 1px solid var(--rule);
         font-family: var(--font-sans);
         font-weight: 300;
         font-size: 0.9375rem; /* 15px */
@@ -310,7 +312,7 @@
         letter-spacing: normal;
         text-transform: none;
         text-align: left;
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     @media (scripting: enabled) {

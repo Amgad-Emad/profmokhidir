@@ -52,7 +52,9 @@ class PageTransitionsTest extends TestCase
 
         $app = file_get_contents(resource_path('css/app.css'));
         $this->assertMatchesRegularExpression('/\.btn-pill-outline::before \{[^}]*background-color: var\(--btn-fill\);\s*transform: scaleX\(0\);\s*transform-origin: left center;\s*transition: transform var\(--duration-draw, 600ms\) var\(--ease-rise\);/s', $app);
-        $this->assertMatchesRegularExpression('/\.on-dark \.btn-pill-outline,[^{]*\{\s*--btn-fill: var\(--color-ivory\);\s*--btn-fill-ink: var\(--color-evergreen\);/s', $app);
+        // The fill follows the --fill token, which .on-dark remaps to ivory with evergreen ink.
+        $this->assertMatchesRegularExpression('/\.btn-pill-outline \{[^}]*--btn-fill: var\(--fill\);\s*--btn-fill-ink: var\(--fill-ink\);/s', $app);
+        $this->assertMatchesRegularExpression('/\.on-dark \{[^}]*--fill: var\(--brand-ivory\);\s*--fill-ink: var\(--brand-evergreen\);/s', file_get_contents(resource_path('css/tokens.css')));
         $this->assertStringNotContainsString('linear-gradient', $app.$this->css, 'Underlines are pseudo-elements, not gradients');
     }
 
@@ -61,8 +63,11 @@ class PageTransitionsTest extends TestCase
     {
         $app = file_get_contents(resource_path('css/app.css'));
 
-        $this->assertMatchesRegularExpression('/:focus-visible \{\s*outline: 2px solid var\(--color-bronze\);\s*outline-offset: 3px;/', $app);
-        $this->assertMatchesRegularExpression('/\.on-dark :focus-visible,[^{]*\{\s*outline-color: var\(--color-brass\);/s', $app);
-        $this->assertMatchesRegularExpression('/\.site-search__input:focus-visible,\s*\.search-form__input:focus-visible \{\s*outline: 2px solid var\(--color-brass\);/', $this->css);
+        $this->assertMatchesRegularExpression('/:focus-visible \{\s*outline: 2px solid var\(--focus\);\s*outline-offset: 3px;/', $app);
+        // --focus is bronze on ivory, brass on the light-theme band and in the dark theme, champagne on cypress.
+        $tokens = file_get_contents(resource_path('css/tokens.css'));
+        $this->assertStringContainsString('--focus: light-dark(var(--brand-bronze), var(--brand-brass));', $tokens);
+        $this->assertMatchesRegularExpression('/\.on-dark \{[^}]*--focus: light-dark\(var\(--brand-brass\), var\(--brand-champagne\)\);/s', $tokens);
+        $this->assertMatchesRegularExpression('/\.site-search__input:focus-visible,\s*\.search-form__input:focus-visible \{\s*outline: 2px solid var\(--focus\);/', $this->css);
     }
 }

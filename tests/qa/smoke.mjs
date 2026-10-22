@@ -12,7 +12,14 @@
  | (default storage/qa), SMOKE_PAGES=/,/about to limit the pages, SMOKE_WIDTHS=360,1440,
  | SMOKE_EXTERNAL=1 to also fail on broken external links (placeholder seed
  | content links to example.org, so they are warnings by default), SMOKE_CHANNEL=chromium
- | to use Playwright's bundled Chromium instead of Google Chrome (the default, as in tests/a11y). Exit code 1 when anything fails.
+ | to use Playwright's bundled Chromium instead of Google Chrome (the default, as in tests/a11y).
+ |
+ | Themes: every page runs once per theme in SMOKE_THEMES (default light,dark). The theme
+ | cookie is set and prefers-color-scheme emulated, and the check fails unless <html>
+ | resolves to that scheme (the page surface is ivory in light and evergreen in dark).
+ | Screenshots are named page-width-theme.png. Signed-in screens: SMOKE_EDITOR_EMAIL /
+ | SMOKE_EDITOR_PASSWORD (the dashboard and account) and SMOKE_MEMBER_EMAIL /
+ | SMOKE_MEMBER_PASSWORD (the community chat); skipped without them. Exit code 1 when anything fails.
  */
 import { chromium } from 'playwright';
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -21,7 +28,15 @@ import { join } from 'node:path';
 const BASE = (process.env.SMOKE_BASE_URL ?? 'https://profmokhidir.test').replace(/\/$/, '');
 const OUT = process.env.SMOKE_OUT ?? 'storage/qa';
 const WIDTHS = (process.env.SMOKE_WIDTHS ?? '360,768,1440').split(',').map(Number);
-const HEIGHTS = { 360: 740, 768: 1024, 1440: 900 };
+const HEIGHTS = { 360: 740, 390: 844, 768: 1024, 1440: 900 };
+const THEMES = (process.env.SMOKE_THEMES ?? 'light,dark').split(',').filter((t) => ['light', 'dark'].includes(t));
+/* Page surfaces per theme: ivory (or the admin's linen) in light, evergreen in dark. */
+const SURFACES = { light: ['rgb(243, 241, 234)', 'rgb(231, 229, 220)'], dark: ['rgb(19, 34, 28)'] };
+const SESSIONS = [
+    ['editor', ['/admin', '/account'], process.env.SMOKE_EDITOR_EMAIL, process.env.SMOKE_EDITOR_PASSWORD],
+    ['member', ['/community/chat'], process.env.SMOKE_MEMBER_EMAIL, process.env.SMOKE_MEMBER_PASSWORD],
+];
+let THEME = THEMES[0] ?? 'light';
 const EXTERNAL_FATAL = process.env.SMOKE_EXTERNAL === '1';
 const ORIGIN = new URL(BASE).origin;
 
@@ -36,15 +51,15 @@ const linkCache = new Map();
 let failures = 0;
 
 function report(page, width, check, ok, details = []) {
-    results.push({ page, width, check, ok, details });
+    results.push({ page, width, theme: THEME, check, ok, details });
     if (!ok) failures += 1;
-    console.log(`${ok ? 'ok  ' : 'FAIL'} ${String(width).padStart(4)} ${page.padEnd(44)} ${check}${details.length ? ' (' + details.length + ')' : ''}`);
+    console.log(`${ok ? 'ok  ' : 'FAIL'} ${String(width).padStart(4)} ${THEME.padEnd(5)} ${page.padEnd(44)} ${check}${details.length ? ' (' + details.length + ')' : ''}`);
     for (const line of details.slice(0, 12)) console.log('       - ' + line);
 }
 
 function warn(page, width, check, details) {
-    results.push({ page, width, check, ok: true, warning: true, details });
-    console.log(`warn ${String(width).padStart(4)} ${page.padEnd(44)} ${check} (${details.length})`);
+    results.push({ page, width, theme: THEME, check, ok: true, warning: true, details });
+    console.log(`warn ${String(width).padStart(4)} ${THEME.padEnd(5)} ${page.padEnd(44)} ${check} (${details.length})`);
     for (const line of details.slice(0, 12)) console.log('       - ' + line);
 }
 
@@ -122,11 +137,23 @@ async function checkLinks(page, path, width) {
 
 function screenshotName(path, width) {
     const slug = path === '/' ? 'home' : path.replace(/^\//, '').replace(/[^a-z0-9]+/gi, '-').replace(/-+$/, '');
-    return `${slug}-${width}.png`;
+    return `${slug}-${width}-${THEME}.png`;
 }
 
-async function smoke(browser, path, width) {
-    const context = await browser.newContext({ ignoreHTTPSErrors: true, viewport: { width, height: HEIGHTS[width] ?? 900 }, deviceScaleFactor: 1 });
+async function signIn(context, email, password) {
+    const page = await context.newPage();
+    await page.goto(`${BASE}/login`);
+    await page.fill('input[name="email"]', email);
+    await page.fill('input[name="password"]', password);
+    await Promise.all([page.waitForNavigation(), page.click('button[type="submit"]')]);
+    const ok = !page.url().includes('/login') && !page.url().includes('two-factor-challenge');
+    await page.close();
+    return ok;
+}
+
+async function smoke(browser, path, width, storageState = null) {
+    const context = await browser.newContext({ ignoreHTTPSErrors: true, viewport: { width, height: HEIGHTS[width] ?? 900 }, deviceScaleFactor: 1, colorScheme: THEME, ...(storageState ? { storageState } : {}) });
+    await context.addCookies([{ name: 'theme', value: THEME, domain: new URL(BASE).hostname, path: '/', sameSite: 'Lax' }]);
     const page = await context.newPage();
     const consoleErrors = [];
     const requestProblems = [];
@@ -155,6 +182,15 @@ async function smoke(browser, path, width) {
 
     await settle(page);
 
+    const scheme = await page.evaluate(() => ({
+        surface: getComputedStyle(document.body).backgroundColor,
+        attribute: document.documentElement.getAttribute('data-theme'),
+        meta: [...document.querySelectorAll('meta[name="theme-color"]')].map((m) => m.content),
+    }));
+    const expected = SURFACES[THEME];
+    const themeOk = expected.includes(scheme.surface);
+    report(path, width, `${THEME} theme applied`, themeOk && scheme.meta.length === 2, themeOk ? [] : [`body ${scheme.surface}, expected ${expected.join(' or ')} (data-theme=${scheme.attribute})`]);
+
     const overflow = await page.evaluate(() => {
         const width = window.innerWidth;
         const wide = Math.max(document.documentElement.scrollWidth, document.body.scrollWidth);
@@ -176,7 +212,7 @@ async function smoke(browser, path, width) {
     report(path, width, 'console clean', consoleErrors.length === 0, consoleErrors);
     report(path, width, 'requests ok', requestProblems.length === 0, requestProblems);
 
-    await checkLinks(page, path, width);
+    if (!storageState) await checkLinks(page, path, width);
 
     const file = join(OUT, screenshotName(path, width));
     await page.screenshot({ path: file, fullPage: true });
@@ -191,8 +227,23 @@ const browser = await chromium.launch({ channel: process.env.SMOKE_CHANNEL === '
 try {
     const pages = process.env.SMOKE_PAGES ? process.env.SMOKE_PAGES.split(',') : [...PUBLIC_PAGES, ...(await sitemapUrls())];
     console.log(`${pages.length} pages × ${WIDTHS.length} widths against ${BASE}`);
-    for (const path of pages) {
-        for (const width of WIDTHS) await smoke(browser, path, width);
+    for (THEME of THEMES) {
+        for (const path of pages) {
+            for (const width of WIDTHS) await smoke(browser, path, width);
+        }
+    }
+
+    for (const [role, rolePages, email, password] of SESSIONS) {
+        if (!email || !password) { console.log(`skip ${role} screens (no credentials)`); continue; }
+        const login = await browser.newContext({ ignoreHTTPSErrors: true });
+        if (!(await signIn(login, email, password))) { report('/login', 0, `${role} sign-in`, false, ['could not sign in']); await login.close(); continue; }
+        const state = await login.storageState();
+        await login.close();
+        for (THEME of THEMES) {
+            for (const path of rolePages) {
+                for (const width of WIDTHS) await smoke(browser, path, width, state);
+            }
+        }
     }
 } finally {
     await browser.close();

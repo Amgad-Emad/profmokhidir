@@ -74,6 +74,6 @@ class PressTypographyTest extends TestCase
 
         $this->actingAs($editor)->get(route('admin.dashboard'))
             ->assertOk()
-            ->assertSee('<body class="min-h-screen bg-linen text-evergreen tabular-nums">', false);
+            ->assertSee('<body class="min-h-screen bg-surface-sunken text-ink tabular-nums">', false);
     }
 }

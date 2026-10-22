@@ -5,14 +5,14 @@
     <header class="chat-room__header">
         <button type="button" class="chat-back" x-on:click="showChannels()" data-back>
             <x-icon name="chevron-left" class="size-5" />
-            <span class="t-label text-bronze">{{ ChatCopy::BACK_TO_CHANNELS }}</span>
+            <span class="t-label text-accent-text">{{ ChatCopy::BACK_TO_CHANNELS }}</span>
         </button>
         <div class="chat-room__heading">
             <h1 id="room-heading" class="chat-room__title">{{ $channelName }}</h1>
             <p class="chat-room__description" x-text="currentChannel?.description || @js($chatIntro)">{{ $initial['channels'][array_search(true, array_column($initial['channels'], 'current'), true) ?: 0]['description'] ?? $chatIntro }}</p>
         </div>
         <div class="chat-room__tools">
-            <span class="chat-room__count t-label text-bronze" data-member-count><span x-text="members.length"></span> <span x-text="members.length === 1 ? 'member' : 'members'"></span></span>
+            <span class="chat-room__count t-label text-accent-text" data-member-count><span x-text="members.length"></span> <span x-text="members.length === 1 ? 'member' : 'members'"></span></span>
             <button type="button" class="chat-tool" x-on:click="toggleSearch()" :aria-expanded="searchOpen ? 'true' : 'false'" aria-controls="chat-search" data-search-toggle>
                 <x-icon name="search" :label="ChatCopy::SEARCH_LABEL" />
             </button>
@@ -25,18 +25,18 @@
     <p class="chat-banner" role="status" x-show="offline || expired" x-cloak data-offline-banner>
         <x-icon name="clock" class="size-4" />
         <span x-show="!expired">{{ ChatCopy::RECONNECTING }} <span class="hidden sm:inline">{{ ChatCopy::OFFLINE_BANNER }}</span></span>
-        <span x-show="expired" x-cloak>{{ ChatCopy::EXPIRED }} <a href="{{ route('login') }}" class="text-evergreen underline decoration-brass underline-offset-4">{{ ChatCopy::SIGN_IN_AGAIN }}</a>.</span>
+        <span x-show="expired" x-cloak>{{ ChatCopy::EXPIRED }} <a href="{{ route('login') }}" class="text-ink underline decoration-accent-line underline-offset-4">{{ ChatCopy::SIGN_IN_AGAIN }}</a>.</span>
     </p>
 
     <div id="chat-search" class="chat-search" x-show="searchOpen" x-cloak x-on:keydown.escape.stop.prevent="closeSearch()" data-chat-search>
-        <label for="chat-search-input" class="t-label text-bronze">{{ ChatCopy::SEARCH_LABEL }}</label>
+        <label for="chat-search-input" class="t-label text-accent-text">{{ ChatCopy::SEARCH_LABEL }}</label>
         <input id="chat-search-input" type="search" class="chat-search__input mt-1" placeholder="{{ ChatCopy::SEARCH_PLACEHOLDER }}" x-model="searchTerm" x-on:input.debounce.300ms="runSearch()" x-ref="searchInput" autocomplete="off" maxlength="{{ ChatSettings::SEARCH_MAX_LENGTH }}">
-        <p class="mt-2 text-sm font-light text-ash" role="status" x-text="searchStatus"></p>
+        <p class="mt-2 text-sm font-light text-ink-muted" role="status" x-text="searchStatus"></p>
         <ol class="chat-search__results" x-show="searchResults.length > 0" data-search-results>
             <template x-for="r in searchResults" :key="r.id">
                 <li>
                     <button type="button" class="chat-search__result" x-on:click="jumpTo(r.id)">
-                        <span class="smallcaps text-evergreen" x-text="r.author"></span>
+                        <span class="smallcaps text-ink" x-text="r.author"></span>
                         <time class="chat-time ml-2" :datetime="r.created_at" x-text="formatDateTime(r.created_at)"></time>
                         <span class="chat-search__excerpt" x-text="r.body"></span>
                     </button>
@@ -55,7 +55,7 @@
 
         <div class="chat-empty" x-show="messages.length === 0" data-empty>
             <x-epigraph :attribution="ChatCopy::EMPTY_ATTRIBUTION">{{ ChatCopy::EMPTY_EPIGRAPH }}</x-epigraph>
-            <p class="chat-empty__rule"><span class="t-label text-bronze">{{ ChatCopy::PANEL_CONDUCT }}</span><br>{{ $conduct[0] ?? '' }}</p>
+            <p class="chat-empty__rule"><span class="t-label text-accent-text">{{ ChatCopy::PANEL_CONDUCT }}</span><br>{{ $conduct[0] ?? '' }}</p>
         </div>
 
         {{-- The log wraps the list so the list keeps its own semantics; new letters are announced politely. --}}
@@ -72,7 +72,7 @@
                                 </template>
                                 <p class="chat-run__head">
                                     <span class="smallcaps chat-run__author" x-text="run.author"></span>
-                                    <span class="t-label text-bronze" x-show="run.affiliation" x-text="run.affiliation"></span>
+                                    <span class="t-label text-accent-text" x-show="run.affiliation" x-text="run.affiliation"></span>
                                     <time class="chat-time" :datetime="run.messages[0].created_at" x-text="formatTime(run.messages[0].created_at)"></time>
                                 </p>
                                 <ol>

@@ -1,5 +1,6 @@
 // Admin and community-chat layouts. Livewire ships its own Alpine build via
 // @livewireScripts; the components below register on alpine:init.
+import './theme';
 import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';

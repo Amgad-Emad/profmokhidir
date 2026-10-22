@@ -168,7 +168,7 @@ class UsersScreenTest extends TestCase
             ->assertHasNoErrors()
             ->assertSee('Second Admin&#039;s account has been deactivated.', false)
             ->assertSee('data-reactivate', false)
-            ->assertSee('Active administrators: <span class="font-mono text-evergreen">1</span>', false);
+            ->assertSee('Active administrators: <span class="font-mono text-ink">1</span>', false);
 
         $this->assertFalse($other->fresh()->isActive());
         $this->assertDatabaseHas('audit_logs', ['user_id' => $this->admin->id, 'action' => AuditAction::USER_DEACTIVATED, 'subject_id' => $other->id]);

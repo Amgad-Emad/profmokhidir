@@ -9,7 +9,7 @@
     $compact = $compact ?? false;
 @endphp
 @if (! $searchable)
-    <p class="search-results__prompt {{ $onDark ? 'text-champagne' : 'text-ash' }}">{{ Search::PROMPT }}</p>
+    <p class="search-results__prompt {{ $onDark ? 'text-ink' : 'text-ink-muted' }}">{{ Search::PROMPT }}</p>
 @elseif ($results['groups'] === [])
     <x-empty-state :message="Search::NONE_FOUND" :attribution="Search::NONE_ATTRIBUTION" :tone="$onDark ? 'ivory' : 'evergreen'" class="search-results__empty" />
     <nav class="search-results__chapters" aria-label="Chapters">
@@ -20,7 +20,7 @@
         </ul>
     </nav>
 @else
-    <p class="search-results__summary t-label {{ $onDark ? 'text-brass' : 'text-bronze' }}">{{ $results['summary'] }}</p>
+    <p class="search-results__summary t-label {{ $onDark ? 'text-accent-text' : 'text-accent-text' }}">{{ $results['summary'] }}</p>
     @foreach ($results['groups'] as $group)
         <section class="search-results__group" aria-labelledby="search-group-{{ $group['key'] }}">
             <h2 id="search-group-{{ $group['key'] }}" class="search-results__heading">

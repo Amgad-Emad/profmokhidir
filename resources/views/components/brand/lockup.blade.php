@@ -1,9 +1,10 @@
 {{--
     Mark with the name. `variant`: "stacked" (mark above the text; footer, hero) or
     "horizontal" (mark left of the text; nav). `tone` follows the mark: "ivory" on dark
-    surfaces (label in brass), "evergreen" on light surfaces (label in bronze).
-    On the translucent glass header pass `label-tone="champagne"`: brass falls below
-    4.5:1 once ivory content shows through. The name inherits the current text colour.
+    bands, "evergreen" on the page surface. The label takes the accent text token
+    (bronze on ivory, brass on evergreen, champagne on cypress). On the translucent glass
+    header pass `label-tone="champagne"` so the label uses the body ink instead: brass falls
+    below 4.5:1 once ivory content shows through. The name inherits the current text colour.
     Pass `href` to render it as a link, `compact` in narrow bars (the admin sidebar) so the
     name stays on one line at 18px.
 --}}
@@ -21,10 +22,10 @@
     $stacked = $variant === 'stacked';
     $size ??= $stacked ? 72 : BrandMark::DISC_BELOW_PX;
     $labelColour = match ($labelTone) {
-        'champagne' => 'text-champagne',
-        'bronze' => 'text-bronze',
-        'brass' => 'text-brass',
-        default => $tone === BrandMark::TONE_EVERGREEN ? 'text-bronze' : 'text-brass',
+        'champagne' => 'text-ink',
+        'bronze' => 'text-accent-text',
+        'brass' => 'text-accent-text',
+        default => 'text-accent-text',
     };
     $tag = $href ? 'a' : 'span';
 @endphp

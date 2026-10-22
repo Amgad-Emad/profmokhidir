@@ -80,7 +80,7 @@ class TributeFormTest extends TestCase
                 'data-step="preview"', '<span class="sr-only">Step 2 of 2</span>', 'Step II of II', '>Write</span>', 'aria-current="step">Preview</span>',
                 '<div class="leaf mt-12" data-rise data-preview>', '<article class="tribute-entry">',
                 '<span class="hang-quote">&ldquo;</span>He taught me to look twice before answering.&rdquo;</p>',
-                '<h2 class="tribute-entry__author smallcaps">Ahmed El-Sheikh</h2>', 't-label text-bronze tribute-entry__meta">Student · Khartoum, Sudan',
+                '<h2 class="tribute-entry__author smallcaps">Ahmed El-Sheikh</h2>', 't-label text-accent-text tribute-entry__meta">Student · Khartoum, Sudan',
                 '<form method="POST" action="'.route('tributes.store').'"',
                 '<input type="hidden" name="name" value="Ahmed El-Sheikh">',
                 '<input type="hidden" name="relationship" value="student">',
@@ -185,7 +185,7 @@ class TributeFormTest extends TestCase
         $this->followRedirects($response)
             ->assertOk()
             ->assertSee(Taglines::TRIBUTE_THANKS)
-            ->assertSee('glow-brass on-dark bg-evergreen', false)
+            ->assertSee('glow-brass on-dark bg-surface', false)
             ->assertDontSee('quick')
             ->assertDontSee('ahmed@example.com');
     }
@@ -308,7 +308,7 @@ class TributeFormTest extends TestCase
         $this->get(route('tributes.thanks'))
             ->assertOk()
             ->assertSee('<title>Thank you · ', false)
-            ->assertSeeInOrder(['t-label text-brass', 'Tributes', 'rule-brass', 'class="seal seal--open" aria-hidden="true" data-rise', 'brand-mark--ring', 'data-size="56" data-tone="ivory"', 'id="section-title" class="t-quote', Taglines::TRIBUTE_THANKS], false)
+            ->assertSeeInOrder(['t-label text-accent-text', 'Tributes', 'rule-brass', 'class="seal seal--open" aria-hidden="true" data-rise', 'brand-mark--ring', 'data-size="56" data-tone="ivory"', 'id="section-title" class="t-quote', Taglines::TRIBUTE_THANKS], false)
             ->assertSee('href="'.route('tributes').'"', false)
             ->assertDontSee('livewire', false);
     }

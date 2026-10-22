@@ -14,7 +14,7 @@ class ChapterOpeningTest extends TestCase
         $html = Blade::render('<x-chapter-opening :number="3" label="Khartoum" title="The first lectures" />');
 
         $this->assertMatchesRegularExpression(
-            '/<p class="chapter-opening__label text-bronze" data-rise>\s*<span class="t-numeral"><span class="sr-only">Chapter <\/span>III<\/span>\s*<span class="t-label">Khartoum<\/span>\s*<\/p>\s*<hr class="rule-brass chapter-opening__rule" data-rule>\s*<h2 class="t-heading chapter-opening__title" data-rise>The first lectures<\/h2>/',
+            '/<p class="chapter-opening__label text-accent-text" data-rise>\s*<span class="t-numeral"><span class="sr-only">Chapter <\/span>III<\/span>\s*<span class="t-label">Khartoum<\/span>\s*<\/p>\s*<hr class="rule-brass chapter-opening__rule" data-rule>\s*<h2 class="t-heading chapter-opening__title" data-rise>The first lectures<\/h2>/',
             $html,
         );
     }
@@ -32,7 +32,7 @@ class ChapterOpeningTest extends TestCase
     #[Test]
     public function the_label_turns_brass_on_evergreen(): void
     {
-        $this->assertStringContainsString('chapter-opening__label text-brass', Blade::render('<x-chapter-opening :number="1" title="x" tone="ivory" />'));
+        $this->assertStringContainsString('chapter-opening__label text-accent-text', Blade::render('<x-chapter-opening :number="1" title="x" tone="ivory" />'));
     }
 
     #[Test]
@@ -41,7 +41,7 @@ class ChapterOpeningTest extends TestCase
         // Blade needs whitespace after </x-slot:...> (it compiles to @endslot), as in the page templates.
         $html = Blade::render("<x-chapter-opening :number=\"1\" title=\"Life\"><x-slot:epigraph><x-epigraph>A quote.</x-epigraph></x-slot:epigraph>\nAn intro.</x-chapter-opening>");
 
-        $this->assertMatchesRegularExpression('/<\/h2>\s*<div class="chapter-opening__epigraph" data-rise>\s*<figure class="epigraph text-ash">.*A quote\..*<\/figure>\s*<\/div>\s*<div class="t-body mt-6 max-w-2xl text-ash" data-rise>\s*An intro\.<\/div>/s', $html);
+        $this->assertMatchesRegularExpression('/<\/h2>\s*<div class="chapter-opening__epigraph" data-rise>\s*<figure class="epigraph text-ink-muted">.*A quote\..*<\/figure>\s*<\/div>\s*<div class="t-body mt-6 max-w-2xl text-ink-muted" data-rise>\s*An intro\.<\/div>/s', $html);
     }
 
     #[Test]

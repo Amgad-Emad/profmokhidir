@@ -1,7 +1,7 @@
 {{-- Brand pagination for LengthAwarePaginator: $paginator->links('components.pagination'). --}}
 @if ($paginator->hasPages())
-    <nav class="pagination mt-14 flex flex-col gap-6 border-t border-stone pt-8 sm:flex-row sm:items-center sm:justify-between" aria-label="Pagination">
-        <p class="t-label text-bronze">Page {{ $paginator->currentPage() }} of {{ $paginator->lastPage() }}</p>
+    <nav class="pagination mt-14 flex flex-col gap-6 border-t border-rule pt-8 sm:flex-row sm:items-center sm:justify-between" aria-label="Pagination">
+        <p class="t-label text-accent-text">Page {{ $paginator->currentPage() }} of {{ $paginator->lastPage() }}</p>
         <ul class="flex flex-wrap items-center gap-2">
             @if ($paginator->onFirstPage())
                 <li><span class="filter-pill is-disabled" aria-disabled="true">Previous</span></li>
@@ -11,7 +11,7 @@
 
             @foreach ($elements as $element)
                 @if (is_string($element))
-                    <li><span class="px-2 text-ash" aria-hidden="true">{{ $element }}</span></li>
+                    <li><span class="px-2 text-ink-muted" aria-hidden="true">{{ $element }}</span></li>
                 @endif
                 @if (is_array($element))
                     @foreach ($element as $page => $url)

@@ -1,6 +1,6 @@
 {{--
-    Dashboard navigation on evergreen: horizontal lockup, label-style group headings and
-    one link per item the user may see. The active item carries a brass rule on its left.
+    Dashboard navigation on the dark band (an on-dark region): horizontal lockup, label-style group
+    headings and one link per item the user may see. The active item carries a brass rule on its left.
     Driven by App\Constants\AdminNavigation.
 --}}
 @php
@@ -10,8 +10,8 @@
     $current = request()->route()?->getName() ?? '';
 @endphp
 <nav class="flex h-full flex-col" aria-label="Dashboard">
-    <div class="border-b border-cypress px-6 py-5">
-        <x-brand.lockup variant="horizontal" tone="ivory" :href="route(AdminNavigation::DASHBOARD_ROUTE)" class="text-champagne" compact />
+    <div class="border-b border-rule px-6 py-5">
+        <x-brand.lockup variant="horizontal" tone="ivory" :href="route(AdminNavigation::DASHBOARD_ROUTE)" class="text-ink" compact />
     </div>
 
     <div class="flex-1 overflow-y-auto px-3 py-6">
@@ -24,7 +24,7 @@
             @endphp
             @if ($items !== [])
                 <div class="mt-8" data-nav-group="{{ $groupKey }}">
-                    <p class="t-label px-3 text-brass">{{ $groupLabel }}</p>
+                    <p class="t-label px-3 text-accent-text">{{ $groupLabel }}</p>
                     <ul class="mt-2">
                         @foreach ($items as $key => $item)
                             @php $active = $current === $item['route'] || str_starts_with($current, $item['route'].'.'); @endphp
@@ -38,14 +38,14 @@
         @endforeach
     </div>
 
-    <div class="border-t border-cypress px-6 py-5 text-sm">
-        <p class="font-medium text-ivory">{{ $user->name }}</p>
-        <p class="font-light text-champagne">{{ $user->primaryRoleLabel() }}</p>
+    <div class="border-t border-rule px-6 py-5 text-sm">
+        <p class="font-medium text-ink-strong">{{ $user->name }}</p>
+        <p class="font-light text-ink">{{ $user->primaryRoleLabel() }}</p>
         <div class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
-            <a href="{{ route('home') }}" class="text-champagne underline-offset-4 hover:text-ivory hover:underline">View site</a>
+            <a href="{{ route('home') }}" class="text-ink underline-offset-4 hover:text-ink-strong hover:underline">View site</a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="text-champagne underline-offset-4 hover:text-ivory hover:underline">Sign out</button>
+                <button type="submit" class="text-ink underline-offset-4 hover:text-ink-strong hover:underline">Sign out</button>
             </form>
         </div>
     </div>

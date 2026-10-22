@@ -12,30 +12,30 @@
         <x-admin.rich-text name="form.full_bio" label="Full biography" hint="Headings, bold, italic, links, lists and quotes." />
 
         <fieldset data-expertise>
-            <legend class="t-label text-bronze">Expertise</legend>
+            <legend class="t-label text-accent-text">Expertise</legend>
             <div class="mt-3 space-y-3">
                 @foreach ($form['expertise'] as $index => $item)
                     <div class="flex items-start gap-3" wire:key="expertise-{{ $index }}">
                         <x-admin.field :name="'form.expertise.'.$index" :label="'Expertise '.($index + 1)" class="flex-1 [&>label]:sr-only [&>input]:mt-0" />
-                        <button type="button" wire:click="removeExpertise({{ $index }})" class="mt-3 text-sm text-bronze underline-offset-4 hover:underline">Remove<span class="sr-only"> expertise {{ $index + 1 }}</span></button>
+                        <button type="button" wire:click="removeExpertise({{ $index }})" class="mt-3 text-sm text-danger-tone underline-offset-4 hover:underline">Remove<span class="sr-only"> expertise {{ $index + 1 }}</span></button>
                     </div>
                 @endforeach
             </div>
-            <button type="button" wire:click="addExpertise" class="mt-3 text-sm text-evergreen underline decoration-brass underline-offset-4">Add an area of expertise</button>
+            <button type="button" wire:click="addExpertise" class="mt-3 text-sm text-ink underline decoration-accent-line underline-offset-4">Add an area of expertise</button>
         </fieldset>
 
         <fieldset data-key-facts>
-            <legend class="t-label text-bronze">Key facts</legend>
+            <legend class="t-label text-accent-text">Key facts</legend>
             <div class="mt-3 space-y-3">
                 @foreach ($form['key_facts'] as $index => $fact)
                     <div class="grid gap-3 sm:grid-cols-[1fr_2fr_auto]" wire:key="fact-{{ $index }}">
                         <x-admin.field :name="'form.key_facts.'.$index.'.label'" label="Label" placeholder="Label" class="[&>label]:sr-only [&>input]:mt-0" />
                         <x-admin.field :name="'form.key_facts.'.$index.'.value'" label="Value" placeholder="Value" class="[&>label]:sr-only [&>input]:mt-0" />
-                        <button type="button" wire:click="removeKeyFact({{ $index }})" class="mt-3 text-sm text-bronze underline-offset-4 hover:underline">Remove<span class="sr-only"> key fact {{ $index + 1 }}</span></button>
+                        <button type="button" wire:click="removeKeyFact({{ $index }})" class="mt-3 text-sm text-danger-tone underline-offset-4 hover:underline">Remove<span class="sr-only"> key fact {{ $index + 1 }}</span></button>
                     </div>
                 @endforeach
             </div>
-            <button type="button" wire:click="addKeyFact" class="mt-3 text-sm text-evergreen underline decoration-brass underline-offset-4">Add a key fact</button>
+            <button type="button" wire:click="addKeyFact" class="mt-3 text-sm text-ink underline decoration-accent-line underline-offset-4">Add a key fact</button>
         </fieldset>
 
         <x-admin.field name="form.students_supervised" label="Students supervised" type="number" inputmode="numeric" class="sm:max-w-xs" hint="Only if the family or university has confirmed the number. It appears in the figures on the home page; leave it blank to leave it out." />

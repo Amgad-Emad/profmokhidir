@@ -4,7 +4,7 @@
 --}}
 @props(['label', 'options' => [], 'allUrl' => null, 'allActive' => false, 'allLabel' => 'All'])
 <nav {{ $attributes->merge(['aria-label' => $label]) }}>
-    <p class="t-label text-bronze">{{ $label }}</p>
+    <p class="t-label text-accent-text">{{ $label }}</p>
     <ul class="mt-4 flex flex-wrap gap-2">
         @if ($allUrl !== null)
             <li>

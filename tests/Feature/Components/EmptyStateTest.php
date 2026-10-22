@@ -14,7 +14,7 @@ class EmptyStateTest extends TestCase
         $html = Blade::render('<x-empty-state message="No publications yet." />');
 
         $this->assertMatchesRegularExpression(
-            '/<figure class="empty-state flex flex-col items-start gap-5 py-12">\s*<hr class="rule-brass-short" data-rule>\s*<blockquote class="empty-state__quote">\s*<p class="font-display text-2xl font-light italic text-ash">No publications yet\.<\/p>\s*<\/blockquote>\s*<\/figure>/',
+            '/<figure class="empty-state flex flex-col items-start gap-5 py-12">\s*<hr class="rule-brass-short" data-rule>\s*<blockquote class="empty-state__quote">\s*<p class="font-display text-2xl font-light italic text-ink-muted">No publications yet\.<\/p>\s*<\/blockquote>\s*<\/figure>/',
             $html,
         );
         $this->assertStringNotContainsString('figcaption', $html, 'No attribution unless one is given');
@@ -26,7 +26,7 @@ class EmptyStateTest extends TestCase
         $html = Blade::render('<x-empty-state message="Nothing answers." attribution="The archivist" />');
 
         $this->assertMatchesRegularExpression(
-            '/<figcaption class="empty-state__attribution smallcaps text-ash"><span aria-hidden="true">— <\/span>The archivist<\/figcaption>/u',
+            '/<figcaption class="empty-state__attribution smallcaps text-ink-muted"><span aria-hidden="true">— <\/span>The archivist<\/figcaption>/u',
             $html,
         );
     }
@@ -36,8 +36,8 @@ class EmptyStateTest extends TestCase
     {
         $html = Blade::render('<x-empty-state message="Nothing here." attribution="A reader" tone="ivory" />');
 
-        $this->assertStringContainsString('italic text-champagne', $html);
-        $this->assertStringContainsString('smallcaps text-champagne', $html);
+        $this->assertStringContainsString('italic text-ink', $html);
+        $this->assertStringContainsString('smallcaps text-ink', $html);
         $this->assertStringContainsString('class="empty-state flex flex-col items-start gap-5 py-12 mt-6"', Blade::render('<x-empty-state message="x" class="mt-6" />'));
     }
 }

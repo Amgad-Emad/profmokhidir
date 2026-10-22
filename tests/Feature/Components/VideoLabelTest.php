@@ -15,9 +15,9 @@ class VideoLabelTest extends TestCase
         $video = Video::factory()->make(['event' => 'Inaugural Lecture', 'location' => 'Khartoum', 'date' => '1983-03-12']);
         $html = Blade::render('<x-video-label :video="$video" class="mt-6" />', ['video' => $video]);
 
-        $this->assertStringContainsString('<p class="t-label text-bronze mt-6">', $html);
+        $this->assertStringContainsString('<p class="t-label text-accent-text mt-6">', $html);
         $this->assertMatchesRegularExpression('/Inaugural Lecture\s*· Khartoum\s*· <time datetime="1983-03-12">12 March 1983<\/time>/', $html);
-        $this->assertStringContainsString('text-brass', Blade::render('<x-video-label :video="$video" tone="ivory" />', ['video' => $video]));
+        $this->assertStringContainsString('text-accent-text', Blade::render('<x-video-label :video="$video" tone="ivory" />', ['video' => $video]));
     }
 
     #[Test]
@@ -25,11 +25,11 @@ class VideoLabelTest extends TestCase
     {
         $html = Blade::render('<x-video-label :video="$video" />', ['video' => Video::factory()->make(['event' => null, 'location' => 'Khartoum', 'date' => null])]);
 
-        $this->assertMatchesRegularExpression('/<p class="t-label text-bronze">\s*Khartoum\s*<\/p>/', $html);
+        $this->assertMatchesRegularExpression('/<p class="t-label text-accent-text">\s*Khartoum\s*<\/p>/', $html);
         $this->assertStringNotContainsString('·', $html);
 
         $html = Blade::render('<x-video-label :video="$video" />', ['video' => Video::factory()->make(['event' => null, 'location' => null, 'date' => '1983-03-12'])]);
-        $this->assertMatchesRegularExpression('/<p class="t-label text-bronze">\s*<time datetime="1983-03-12">12 March 1983<\/time>\s*<\/p>/', $html);
+        $this->assertMatchesRegularExpression('/<p class="t-label text-accent-text">\s*<time datetime="1983-03-12">12 March 1983<\/time>\s*<\/p>/', $html);
 
         $this->assertSame('', trim(Blade::render('<x-video-label :video="$video" />', ['video' => Video::factory()->make(['event' => null, 'location' => ' ', 'date' => null])])));
     }

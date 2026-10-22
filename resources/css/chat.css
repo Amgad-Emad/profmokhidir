@@ -1,9 +1,9 @@
 /*
- | The correspondence room (App\Constants\ChatCopy / ChatSettings): an evergreen
- | rail of channels, the conversation on ivory set like letters, and the "About
- | this channel" panel. Imported by app.css. Brass only for hairlines, the ring
- | and small labels on evergreen; bronze for small text on ivory; the one glow is
- | the brass radial on the rail. Nothing moves faster than the brand allows and
+ | The correspondence room (App\Constants\ChatCopy / ChatSettings): a dark band
+ | rail of channels (an on-dark region), the conversation on the page surface set
+ | like letters, and the "About this channel" panel. Imported by app.css. Colours
+ | go through the semantic tokens: the accent only for hairlines, the ring and
+ | small labels; the one glow is the radial on the rail. Nothing moves faster than the brand allows and
  | every transition is removed under prefers-reduced-motion.
  */
 @layer components {
@@ -75,8 +75,8 @@
     /* ---------------------------------------------------------- rail */
     .chat-rail {
         flex-direction: column;
-        background-color: var(--color-evergreen);
-        color: var(--color-champagne);
+        background-color: var(--surface);
+        color: var(--ink);
         overflow-y: auto;
     }
 
@@ -95,28 +95,28 @@
         min-height: 2.75rem;
         padding: var(--space-1) var(--space-2) var(--space-1) var(--space-3);
         border-radius: var(--radius-card);
-        color: var(--color-champagne);
+        color: var(--ink);
         text-decoration: none;
         transition: background-color 400ms var(--ease-rise);
     }
 
     .chat-rail__link:hover {
-        background-color: color-mix(in srgb, var(--color-cypress) 55%, transparent);
+        background-color: color-mix(in srgb, var(--surface-raised) 55%, transparent);
         text-decoration: none;
     }
 
-    /* The open channel is marked by a brass hairline at its left edge. */
+    /* The open channel is marked by an accent hairline at its left edge. */
     .chat-rail__link[aria-current='page']::before {
         content: '';
         position: absolute;
         inset-block: var(--space-1);
         left: 0;
         width: 1px;
-        background-color: var(--color-brass);
+        background-color: var(--accent-line);
     }
 
     .chat-rail__link[aria-current='page'] {
-        color: var(--color-ivory);
+        color: var(--ink-strong);
     }
 
     .chat-rail__numeral {
@@ -125,7 +125,7 @@
         font-size: 1.125rem;
         font-variant-caps: all-small-caps;
         letter-spacing: 0.12em;
-        color: var(--color-brass);
+        color: var(--accent-text);
     }
 
     .chat-rail__name {
@@ -141,7 +141,7 @@
         font-weight: 400;
     }
 
-    /* Unread count: a small brass-outlined badge. */
+    /* Unread count: a small accent-outlined badge. */
     .chat-rail__badge {
         display: inline-flex;
         align-items: center;
@@ -149,32 +149,32 @@
         min-width: 1.5rem;
         height: 1.25rem;
         padding-inline: var(--space-1);
-        border: 1px solid var(--color-brass);
+        border: 1px solid var(--accent-text);
         border-radius: 9999px;
         font-family: var(--font-mono);
         font-size: 0.6875rem;
         line-height: 1;
-        color: var(--color-brass);
+        color: var(--accent-text);
     }
 
     .chat-rail__self {
         margin-top: auto;
         padding: var(--space-3) var(--space-3) calc(var(--space-3) + env(safe-area-inset-bottom));
-        border-top: 1px solid color-mix(in srgb, var(--color-brass) 40%, transparent);
+        border-top: 1px solid color-mix(in srgb, var(--accent-line) 40%, transparent);
     }
 
     .chat-rail__self-name {
         display: block;
         font-size: 1.25rem;
         line-height: var(--space-4);
-        color: var(--color-ivory);
+        color: var(--ink-strong);
     }
 
     /* ---------------------------------------------------------- room */
     .chat-room {
         display: flex;
         flex-direction: column;
-        background-color: var(--color-ivory);
+        background-color: var(--surface);
     }
 
     .chat-room__header {
@@ -182,7 +182,7 @@
         align-items: flex-start;
         gap: var(--space-2);
         padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
-        border-bottom: 1px solid var(--color-stone);
+        border-bottom: 1px solid var(--rule);
     }
 
     @media (min-width: 768px) {
@@ -209,7 +209,7 @@
         font-size: 0.9375rem;
         font-weight: 300;
         line-height: var(--space-3);
-        color: var(--color-ash);
+        color: var(--ink-muted);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -243,13 +243,13 @@
         height: 2.75rem;
         border-radius: 9999px;
         border: 1px solid transparent;
-        color: var(--color-evergreen);
+        color: var(--ink);
         transition: border-color 400ms var(--ease-rise);
     }
 
     .chat-tool:hover,
     .chat-tool[aria-expanded='true'] {
-        border-color: var(--color-stone);
+        border-color: var(--rule);
     }
 
     .chat-back {
@@ -258,7 +258,7 @@
         gap: var(--space-1);
         min-height: 2.75rem;
         padding-right: var(--space-1);
-        color: var(--color-bronze);
+        color: var(--accent-text);
     }
 
     /* From the two-column width the rail is always on screen, so there is nothing to go back to. */
@@ -274,19 +274,19 @@
         align-items: center;
         gap: var(--space-2);
         padding: var(--space-1) var(--space-3);
-        border-bottom: 1px solid var(--color-stone);
-        background-color: var(--color-linen);
+        border-bottom: 1px solid var(--rule);
+        background-color: var(--surface-raised);
         font-size: 0.875rem;
         font-weight: 300;
         line-height: var(--space-3);
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     /* ---------------------------------------------------------- search */
     .chat-search {
         padding: var(--space-2) var(--space-3);
-        border-bottom: 1px solid var(--color-stone);
-        background-color: var(--color-ivory);
+        border-bottom: 1px solid var(--rule);
+        background-color: var(--surface);
     }
 
     .chat-search__input {
@@ -294,17 +294,17 @@
         min-height: 2.75rem;
         padding: var(--space-1) 0;
         border: 0;
-        border-bottom: 1px solid var(--color-stone);
+        border-bottom: 1px solid var(--rule-strong);
         border-radius: 0;
         background: transparent;
         font-size: 1.125rem;
         font-weight: 300;
-        color: var(--color-evergreen);
+        color: var(--ink);
         transition: border-color 400ms var(--ease-rise);
     }
 
     .chat-search__input:focus {
-        border-bottom-color: var(--color-evergreen);
+        border-bottom-color: var(--focus);
     }
 
     .chat-search__results {
@@ -326,7 +326,7 @@
 
     .chat-search__result:hover,
     .chat-search__result:focus-visible {
-        background-color: var(--color-linen);
+        background-color: var(--surface-raised);
     }
 
     .chat-search__excerpt {
@@ -335,7 +335,7 @@
         font-size: 0.9375rem;
         font-weight: 300;
         line-height: var(--space-3);
-        color: var(--color-evergreen);
+        color: var(--ink);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -372,7 +372,7 @@
         align-items: center;
         gap: var(--space-2);
         margin: var(--space-4) 0 var(--space-2);
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     .chat-day__divider::before,
@@ -380,7 +380,7 @@
         content: '';
         flex: 1;
         height: 1px;
-        background-color: var(--color-stone);
+        background-color: var(--rule);
     }
 
     .chat-day__label {
@@ -388,7 +388,7 @@
         line-height: var(--space-3);
     }
 
-    /* The unread divider: a brass hairline labelled "New". */
+    /* The unread divider: an accent hairline labelled "New". */
     .chat-unread {
         display: flex;
         align-items: center;
@@ -398,14 +398,14 @@
         font-weight: 500;
         letter-spacing: 0.3em;
         text-transform: uppercase;
-        color: var(--color-bronze);
+        color: var(--accent-text);
     }
 
     .chat-unread::after {
         content: '';
         flex: 1;
         height: 1px;
-        background-color: var(--color-brass);
+        background-color: var(--accent-line);
     }
 
     /* A run: one author's consecutive messages under one header. */
@@ -420,7 +420,7 @@
     }
 
     .chat-run.is-mine {
-        background-color: var(--color-linen);
+        background-color: var(--surface-raised);
     }
 
     .chat-run__head {
@@ -433,7 +433,7 @@
     .chat-run__author {
         font-size: 1.25rem; /* small caps at 20px match the 18px body */
         line-height: var(--space-3);
-        color: var(--color-evergreen);
+        color: var(--ink);
     }
 
     .chat-time {
@@ -442,7 +442,7 @@
         font-size: 1.0625rem;
         line-height: var(--space-3);
         font-variant-numeric: oldstyle-nums proportional-nums;
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     .chat-message {
@@ -456,15 +456,15 @@
         margin-top: var(--space-1);
     }
 
-    /* A message reached by a permalink or a reply: a linen note that fades. */
+    /* A message reached by a permalink or a reply: a raised note that fades. */
     .chat-message.is-highlighted {
-        background-color: var(--color-linen);
-        box-shadow: 0 0 0 var(--space-1) var(--color-linen);
+        background-color: var(--surface-raised);
+        box-shadow: 0 0 0 var(--space-1) var(--surface-raised);
     }
 
     .chat-run.is-mine .chat-message.is-highlighted {
-        background-color: var(--color-stone);
-        box-shadow: 0 0 0 var(--space-1) var(--color-stone);
+        background-color: var(--rule);
+        box-shadow: 0 0 0 var(--space-1) var(--rule);
     }
 
     .chat-message.is-fading {
@@ -475,15 +475,15 @@
         font-size: var(--text-body);
         font-weight: 300;
         line-height: 1.7;
-        color: var(--color-evergreen);
+        color: var(--ink);
         white-space: pre-wrap;
         overflow-wrap: anywhere;
     }
 
     .chat-message__body a {
-        color: var(--color-evergreen);
+        color: var(--ink);
         text-decoration: underline;
-        text-decoration-color: var(--color-brass);
+        text-decoration-color: var(--accent-line);
         text-underline-offset: 0.2em;
     }
 
@@ -511,12 +511,13 @@
         font-size: 0.875em;
         padding: 0 0.3em;
         border-radius: var(--radius-card);
-        background-color: var(--color-linen);
+        background-color: var(--surface-sunken);
+        color: var(--ink);
         white-space: pre-wrap;
     }
 
     .chat-run.is-mine .chat-code {
-        background-color: var(--color-ivory);
+        background-color: var(--surface);
     }
 
     .chat-math[data-math='display'] {
@@ -527,10 +528,15 @@
 
     .chat-math .katex {
         font-size: 1.05em;
+        color: var(--ink);
+    }
+
+    .chat-math .katex-error {
+        color: var(--danger-tone);
     }
 
     .chat-message.is-sending .chat-message__body {
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     .chat-message__removed,
@@ -540,7 +546,7 @@
         font-weight: 300;
         font-size: 1.125rem;
         line-height: var(--space-3);
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     /* Flags under a message: edited, pinned, sending, not sent. */
@@ -558,11 +564,11 @@
         font-weight: 500;
         letter-spacing: 0.3em;
         text-transform: uppercase;
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     .chat-flag--alert {
-        color: var(--color-bronze);
+        color: var(--danger-tone);
     }
 
     .chat-flag .chat-action {
@@ -571,27 +577,27 @@
         font-size: inherit;
     }
 
-    /* The quoted original above a reply: a bronze hairline at its left. */
+    /* The quoted original above a reply: an accent hairline at its left. */
     .chat-reply {
         display: block;
         width: 100%;
         max-width: 100%;
         margin-bottom: var(--space-1);
         padding: 2px 0 2px var(--space-2);
-        border-left: 1px solid var(--color-bronze);
+        border-left: 1px solid var(--accent-line);
         text-align: left;
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     .chat-reply:hover .chat-reply__excerpt,
     .chat-reply:focus-visible .chat-reply__excerpt {
-        color: var(--color-evergreen);
+        color: var(--ink);
     }
 
     .chat-reply__author {
         font-size: 1rem;
         line-height: var(--space-3);
-        color: var(--color-evergreen);
+        color: var(--ink);
     }
 
     .chat-reply__excerpt {
@@ -617,7 +623,7 @@
         min-height: 1.75rem;
         font-size: 0.8125rem;
         font-weight: 500;
-        color: var(--color-bronze);
+        color: var(--accent-text);
         text-decoration: underline;
         text-decoration-color: transparent;
         text-underline-offset: 0.2em;
@@ -626,8 +632,8 @@
 
     .chat-action:hover,
     .chat-action:focus-visible {
-        color: var(--color-evergreen);
-        text-decoration-color: var(--color-brass);
+        color: var(--ink);
+        text-decoration-color: var(--accent-line);
     }
 
     .chat-action:disabled {
@@ -645,17 +651,17 @@
         width: 100%;
         resize: vertical;
         border-radius: var(--radius-card);
-        border: 1px solid var(--color-stone);
-        background-color: var(--color-ivory);
+        border: 1px solid var(--rule-strong);
+        background-color: var(--surface-field);
         padding: var(--space-1) var(--space-2);
         font-size: var(--text-body);
         font-weight: 300;
         line-height: 1.6;
-        color: var(--color-evergreen);
+        color: var(--ink);
     }
 
     .chat-edit__input:focus {
-        border-color: var(--color-bronze);
+        border-color: var(--focus);
     }
 
     /* ---------------------------------------------------------- empty state */
@@ -679,7 +685,7 @@
         font-size: 1rem;
         font-weight: 300;
         line-height: var(--space-3);
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     /* ---------------------------------------------------------- new messages pill */
@@ -693,10 +699,10 @@
         margin: calc(-1 * var(--space-6)) 0 0 var(--space-3);
         padding-inline: var(--space-3);
         border-radius: 9999px;
-        background-color: var(--color-evergreen);
+        background-color: var(--fill);
         font-size: 0.875rem;
         font-weight: 500;
-        color: var(--color-ivory);
+        color: var(--fill-ink);
         z-index: 5;
     }
 
@@ -705,8 +711,8 @@
         position: sticky;
         bottom: 0;
         padding: var(--space-2) var(--space-3) calc(var(--space-2) + env(safe-area-inset-bottom));
-        border-top: 1px solid var(--color-stone);
-        background-color: var(--color-ivory);
+        border-top: 1px solid var(--rule);
+        background-color: var(--surface);
     }
 
     @media (min-width: 768px) {
@@ -741,53 +747,53 @@
         max-height: 12rem;
         padding: var(--space-1) 0;
         border: 0;
-        border-bottom: 1px solid var(--color-stone);
+        border-bottom: 1px solid var(--rule-strong);
         border-radius: 0;
         background: transparent;
         font-size: var(--text-body);
         font-weight: 300;
         line-height: 1.6;
-        color: var(--color-evergreen);
+        color: var(--ink);
         resize: none;
         overflow-y: auto;
         transition: border-color 400ms var(--ease-rise);
     }
 
     .chat-composer__input:focus {
-        border-bottom-color: var(--color-evergreen);
+        border-bottom-color: var(--focus);
     }
 
     .chat-composer__input:disabled {
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     .chat-composer__input::placeholder {
-        color: var(--color-ash);
+        color: var(--ink-muted);
         font-style: italic;
         font-family: var(--font-display);
         font-size: 1.25rem;
     }
 
-    /* The send button: a small evergreen pill. */
+    /* The send button: a small solid pill. */
     .chat-send {
         display: inline-flex;
         align-items: center;
         justify-content: center;
         min-height: 2.5rem;
         padding-inline: var(--space-3);
-        border: 1px solid var(--color-evergreen);
+        border: 1px solid var(--fill);
         border-radius: 9999px;
-        background-color: var(--color-evergreen);
+        background-color: var(--fill);
         font-size: 0.875rem;
         font-weight: 500;
-        color: var(--color-ivory);
+        color: var(--fill-ink);
         white-space: nowrap;
         transition: background-color 600ms var(--ease-rise), color 600ms var(--ease-rise), opacity 400ms var(--ease-rise);
     }
 
     .chat-send:hover:not(:disabled) {
-        background-color: var(--color-cypress);
-        border-color: var(--color-cypress);
+        background-color: var(--fill-hover);
+        border-color: var(--fill-hover);
     }
 
     .chat-send:disabled {
@@ -809,25 +815,25 @@
         font-weight: 400;
         letter-spacing: 0.1em;
         text-transform: uppercase;
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     .chat-count {
         font-family: var(--font-mono);
         font-size: 0.75rem;
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     .chat-count.is-near {
-        color: var(--color-bronze);
+        color: var(--accent-text);
     }
 
     /* ---------------------------------------------------------- panel */
     .chat-panel {
         display: flex;
         flex-direction: column;
-        background-color: var(--color-ivory);
-        border-left: 1px solid var(--color-stone);
+        background-color: var(--surface);
+        border-left: 1px solid var(--rule);
         overflow-y: auto;
     }
 
@@ -840,14 +846,14 @@
             bottom: 0;
             width: min(22rem, 100vw);
             z-index: 30;
-            box-shadow: -1px 0 0 var(--color-stone);
+            box-shadow: -1px 0 0 var(--rule);
         }
 
         .chat-panel__backdrop {
             position: fixed;
             inset: var(--chat-header) 0 0 0;
             z-index: 25;
-            background-color: color-mix(in srgb, var(--color-evergreen) 40%, transparent);
+            background-color: var(--surface-overlay);
         }
     }
 
@@ -863,7 +869,7 @@
         justify-content: space-between;
         gap: var(--space-2);
         padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
-        border-bottom: 1px solid var(--color-stone);
+        border-bottom: 1px solid var(--rule);
     }
 
     .chat-panel__title {
@@ -875,7 +881,7 @@
 
     .chat-panel__section {
         padding: var(--space-3);
-        border-bottom: 1px solid var(--color-stone);
+        border-bottom: 1px solid var(--rule);
     }
 
     .chat-panel__section:last-child {
@@ -886,7 +892,7 @@
         font-size: 1rem;
         font-weight: 300;
         line-height: var(--space-3);
-        color: var(--color-evergreen);
+        color: var(--ink);
     }
 
     .chat-panel__list {
@@ -902,14 +908,14 @@
         font-size: 0.9375rem;
         font-weight: 300;
         line-height: var(--space-3);
-        color: var(--color-evergreen);
+        color: var(--ink);
     }
 
     .chat-pin {
         display: block;
         width: 100%;
         padding: var(--space-1) 0 var(--space-1) var(--space-2);
-        border-left: 1px solid var(--color-bronze);
+        border-left: 1px solid var(--accent-line);
         text-align: left;
     }
 
@@ -918,7 +924,7 @@
         font-size: 0.9375rem;
         font-weight: 300;
         line-height: var(--space-3);
-        color: var(--color-evergreen);
+        color: var(--ink);
     }
 
     .chat-member {
@@ -933,7 +939,7 @@
     .chat-member__affiliation {
         font-size: 0.875rem;
         font-weight: 300;
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     /* ---------------------------------------------------------- reduced motion */

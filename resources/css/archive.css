@@ -2,8 +2,8 @@
  | The scholarly sections as a well-kept archive: the publications catalogue,
  | the CV ledger, the roll of honour, commentary essays, the teaching syllabus
  | and the Other Information index. Restraint over effects: Cormorant for titles
- | and old-style figures, small caps and hairlines for structure, brass only for
- | rules and small labels on dark (bronze for small text on ivory).
+ | and old-style figures, small caps and hairlines for structure, the accent only for
+ | rules and small labels (the accent-text token: bronze on ivory, brass on dark).
  | Print stylesheets at the end: commentaries print as articles, the CV never prints.
  */
 
@@ -32,7 +32,7 @@
         flex-direction: column;
         gap: var(--space-1);
         padding: var(--space-3) 0 var(--space-4);
-        border-top: 1px solid var(--color-stone);
+        border-top: 1px solid var(--rule);
     }
 
     .selected-works__title {
@@ -41,7 +41,7 @@
         font-weight: 300;
         font-size: 1.5rem;
         line-height: var(--space-4);
-        color: var(--color-evergreen);
+        color: var(--ink);
         text-wrap: balance;
     }
 
@@ -50,7 +50,7 @@
         font-style: italic;
         font-size: 1.125rem;
         line-height: var(--space-3);
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     .selected-works__year {
@@ -58,7 +58,7 @@
         font-size: 1.25rem;
         line-height: var(--space-3);
         font-variant-numeric: oldstyle-nums proportional-nums;
-        color: var(--color-bronze);
+        color: var(--accent-text);
     }
 
     /* ------------------------------------------------------ catalogue: layout */
@@ -83,15 +83,15 @@
         height: 1.5rem;
         padding-inline: 0.375rem;
         border-radius: 9999px;
-        background-color: var(--color-evergreen);
-        color: var(--color-ivory);
+        background-color: var(--fill);
+        color: var(--fill-ink);
         font-size: 0.75rem;
         font-variant-numeric: lining-nums tabular-nums;
     }
 
     .catalogue__filters {
         padding-block: var(--space-4);
-        border-block: 1px solid var(--color-stone);
+        border-block: 1px solid var(--rule);
         margin-bottom: var(--space-8);
     }
 
@@ -128,7 +128,7 @@
         width: 2.75rem;
         height: 2.75rem;
         border-radius: 9999px;
-        color: var(--color-evergreen);
+        color: var(--ink);
     }
 
     .catalogue__form {
@@ -140,7 +140,7 @@
 
     .catalogue__form fieldset {
         padding-top: var(--space-3);
-        border-top: 1px solid var(--color-stone);
+        border-top: 1px solid var(--rule);
     }
 
     /* Filter labels in Cormorant small caps. */
@@ -151,14 +151,14 @@
         line-height: var(--space-3);
         font-variant-caps: all-small-caps;
         letter-spacing: 0.12em;
-        color: var(--color-bronze);
+        color: var(--accent-text);
     }
 
     .catalogue__sublabel {
         display: block;
         margin-bottom: var(--space-1);
         font-size: 0.875rem;
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     .catalogue__options {
@@ -174,7 +174,7 @@
         min-height: 2.75rem;
         font-size: 1rem;
         line-height: 1.4;
-        color: var(--color-evergreen);
+        color: var(--ink);
         cursor: pointer;
     }
 
@@ -182,7 +182,7 @@
         flex-shrink: 0;
         width: 1rem;
         height: 1rem;
-        accent-color: var(--color-evergreen);
+        accent-color: var(--fill);
     }
 
     /* Beside the results the panel is sticky, so its rows are set closer to fit one screen (32px rows stay above the 24px target size). */
@@ -214,9 +214,9 @@
             padding: var(--space-3) 1rem var(--space-6);
             overflow-y: auto;
             border-block: 0;
-            border-top: 1px solid var(--color-stone);
+            border-top: 1px solid var(--rule);
             border-radius: var(--radius-card) var(--radius-card) 0 0;
-            background-color: var(--color-ivory);
+            background-color: var(--surface);
             transform: translateY(100%);
             visibility: hidden;
             transition:
@@ -237,7 +237,7 @@
         position: fixed;
         inset: 0;
         z-index: 55;
-        background-color: color-mix(in srgb, var(--color-evergreen) 55%, transparent);
+        background-color: var(--surface-overlay);
     }
 
     /* ----------------------------------------------------- catalogue: records */
@@ -248,7 +248,7 @@
         line-height: 1.4;
         letter-spacing: 0.3em;
         text-transform: uppercase;
-        color: var(--color-bronze);
+        color: var(--accent-text);
     }
 
     .catalogue__decade {
@@ -281,7 +281,7 @@
         font-variant-caps: all-small-caps;
         font-variant-numeric: oldstyle-nums;
         letter-spacing: 0.1em;
-        color: var(--color-bronze);
+        color: var(--accent-text);
         white-space: nowrap;
     }
 
@@ -289,7 +289,7 @@
         display: grid;
         gap: var(--space-1) var(--space-6);
         padding-block: var(--space-4);
-        border-bottom: 1px solid var(--color-stone);
+        border-bottom: 1px solid var(--rule);
     }
 
     .record:last-child {
@@ -310,7 +310,7 @@
         font-size: 1.5rem;
         line-height: var(--space-4);
         font-variant-numeric: oldstyle-nums proportional-nums;
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     @media (min-width: 640px) {
@@ -333,7 +333,7 @@
         font-weight: 300;
         font-size: 1.625rem;
         line-height: var(--space-4);
-        color: var(--color-evergreen);
+        color: var(--ink);
         text-wrap: pretty;
     }
 
@@ -344,7 +344,7 @@
     .record__authors {
         font-size: 1rem;
         line-height: var(--space-3);
-        color: var(--color-evergreen);
+        color: var(--ink);
     }
 
     /* The Professor's own name in an author list. */
@@ -358,7 +358,7 @@
         font-family: var(--font-display);
         font-size: 1.25rem;
         line-height: var(--space-4);
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     .record__venue i {
@@ -386,7 +386,7 @@
         max-width: var(--container-measure);
         font-size: 1rem;
         line-height: var(--space-3);
-        color: var(--color-evergreen);
+        color: var(--ink);
     }
 
     .record__links {
@@ -403,9 +403,9 @@
         gap: 0.5rem;
         min-height: 2.75rem;
         font-size: 0.875rem;
-        color: var(--color-evergreen);
+        color: var(--ink);
         text-decoration: underline;
-        text-decoration-color: var(--color-brass);
+        text-decoration-color: var(--accent-line);
         text-underline-offset: 0.2em;
         word-break: break-all;
     }
@@ -415,7 +415,7 @@
         font-size: 1.125rem;
         font-variant-caps: all-small-caps;
         letter-spacing: 0.1em;
-        color: var(--color-bronze);
+        color: var(--accent-text);
     }
 
     /* ---------------------------------------------------- catalogue: cite panel */
@@ -426,9 +426,9 @@
     .cite__panel {
         margin-top: var(--space-2);
         padding: var(--space-3);
-        border: 1px solid var(--color-stone);
+        border: 1px solid var(--rule);
         border-radius: var(--radius-card);
-        background-color: var(--color-linen);
+        background-color: var(--surface-raised);
     }
 
     .cite__tabs {
@@ -436,7 +436,7 @@
         flex-wrap: wrap;
         gap: var(--space-1);
         margin-bottom: var(--space-2);
-        border-bottom: 1px solid var(--color-stone);
+        border-bottom: 1px solid var(--rule);
     }
 
     .cite__tab {
@@ -447,15 +447,15 @@
         font-family: var(--font-display);
         font-size: 1.125rem;
         letter-spacing: 0.04em;
-        color: var(--color-ash);
+        color: var(--ink-muted);
         transition:
             color 300ms var(--ease-rise),
             border-color 300ms var(--ease-rise);
     }
 
     .cite__tab[aria-selected='true'] {
-        color: var(--color-evergreen);
-        border-bottom-color: var(--color-evergreen);
+        color: var(--ink);
+        border-bottom-color: var(--ink);
     }
 
     .cite__format + .cite__format {
@@ -467,7 +467,7 @@
         font-size: 1.125rem;
         font-variant-caps: all-small-caps;
         letter-spacing: 0.1em;
-        color: var(--color-bronze);
+        color: var(--accent-text);
     }
 
     .cite__edition {
@@ -476,7 +476,7 @@
         font-variant-caps: normal;
         letter-spacing: normal;
         font-size: 0.8125rem;
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     /* With the tabs working, the style name is in the tab already. */
@@ -493,13 +493,13 @@
         margin-top: var(--space-1);
         padding: var(--space-2) var(--space-3);
         overflow-x: auto;
-        border: 1px solid var(--color-stone);
+        border: 1px solid var(--rule);
         border-radius: var(--radius-card);
-        background-color: var(--color-ivory);
+        background-color: var(--surface-field);
         font-family: var(--font-mono);
         font-size: 0.8125rem;
         line-height: 1.6;
-        color: var(--color-evergreen);
+        color: var(--ink);
         white-space: pre;
     }
 
@@ -514,7 +514,7 @@
     .catalogue-index__toc {
         margin-top: var(--space-8);
         padding-block: var(--space-3);
-        border-block: 1px solid var(--color-stone);
+        border-block: 1px solid var(--rule);
     }
 
     /* --------------------------------------------------------------- CV ledger */
@@ -524,11 +524,11 @@
         font-size: 1.25rem;
         line-height: var(--space-3);
         font-variant-numeric: oldstyle-nums proportional-nums;
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     .cv-ledger__updated .smallcaps {
-        color: var(--color-bronze);
+        color: var(--accent-text);
         margin-right: 0.5rem;
     }
 
@@ -547,7 +547,7 @@
 
     .cv-ledger__index {
         padding-block: var(--space-3);
-        border-block: 1px solid var(--color-stone);
+        border-block: 1px solid var(--rule);
     }
 
     @media (min-width: 1024px) {
@@ -556,7 +556,7 @@
             top: 7rem;
             padding-block: 0;
             border-block: 0;
-            border-left: 1px solid var(--color-stone);
+            border-left: 1px solid var(--rule);
             padding-left: var(--space-3);
         }
     }
@@ -581,13 +581,13 @@
         min-height: 2.75rem;
         font-family: var(--font-display);
         font-size: 1.25rem;
-        color: var(--color-evergreen);
+        color: var(--ink);
     }
 
     .cv-ledger__index-count {
         font-size: 1rem;
         font-variant-numeric: oldstyle-nums;
-        color: var(--color-bronze);
+        color: var(--accent-text);
     }
 
     .cv-ledger__sections {
@@ -610,14 +610,14 @@
 
     .ledger {
         margin-top: var(--space-6);
-        border-top: 1px solid var(--color-stone);
+        border-top: 1px solid var(--rule);
     }
 
     .ledger__row {
         display: grid;
         gap: var(--space-1) var(--space-6);
         padding-block: var(--space-4);
-        border-bottom: 1px solid var(--color-stone);
+        border-bottom: 1px solid var(--rule);
     }
 
     @media (min-width: 640px) {
@@ -633,7 +633,7 @@
         font-size: 1.375rem;
         line-height: var(--space-4);
         font-variant-numeric: oldstyle-nums proportional-nums;
-        color: var(--color-bronze);
+        color: var(--accent-text);
     }
 
     @media (min-width: 640px) {
@@ -647,7 +647,7 @@
         font-weight: 300;
         font-size: 1.5rem;
         line-height: var(--space-4);
-        color: var(--color-evergreen);
+        color: var(--ink);
     }
 
     .ledger__organisation {
@@ -655,14 +655,14 @@
         font-style: italic;
         font-size: 1.25rem;
         line-height: var(--space-3);
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     .ledger__description {
         margin-top: var(--space-2);
         max-width: var(--container-measure);
         line-height: var(--space-4);
-        color: var(--color-evergreen);
+        color: var(--ink);
     }
 
     .cv-print-notice {
@@ -695,7 +695,7 @@
         line-height: 2.5rem;
         font-variant-caps: all-small-caps;
         letter-spacing: 0.08em;
-        color: var(--color-evergreen);
+        color: var(--ink);
         text-wrap: balance;
     }
 
@@ -703,7 +703,7 @@
         font-family: var(--font-display);
         font-size: 1.25rem;
         line-height: var(--space-3);
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     .honour__organisation {
@@ -712,7 +712,7 @@
 
     .honour__separator {
         margin-inline: 0.25rem;
-        color: var(--color-bronze);
+        color: var(--accent-text);
     }
 
     .honour__year {
@@ -723,7 +723,7 @@
         max-width: var(--container-measure);
         margin-top: var(--space-2);
         line-height: var(--space-4);
-        color: var(--color-evergreen);
+        color: var(--ink);
     }
 
     .honour__source {
@@ -755,7 +755,7 @@
         font-size: 1.125rem;
         font-variant-caps: all-small-caps;
         letter-spacing: 0.1em;
-        color: var(--color-bronze);
+        color: var(--accent-text);
         white-space: nowrap;
     }
 
@@ -763,7 +763,7 @@
         max-width: var(--container-measure);
         margin-top: var(--space-3);
         line-height: var(--space-4);
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     /* A numbered reading list: the number in Cormorant old-style figures in the margin. */
@@ -778,7 +778,7 @@
         display: grid;
         gap: var(--space-2) var(--space-6);
         padding: var(--space-4) 0 var(--space-4) 3rem;
-        border-top: 1px solid var(--color-stone);
+        border-top: 1px solid var(--rule);
     }
 
     .syllabus__item::before {
@@ -790,7 +790,7 @@
         font-size: 1.5rem;
         line-height: var(--space-4);
         font-variant-numeric: oldstyle-nums proportional-nums;
-        color: var(--color-bronze);
+        color: var(--accent-text);
     }
 
     @media (min-width: 768px) {
@@ -805,7 +805,7 @@
         font-weight: 300;
         font-size: 1.5rem;
         line-height: var(--space-4);
-        color: var(--color-evergreen);
+        color: var(--ink);
     }
 
     .syllabus__item-description {
@@ -813,7 +813,7 @@
         margin-top: var(--space-1);
         font-size: 1rem;
         line-height: var(--space-3);
-        color: var(--color-evergreen);
+        color: var(--ink);
     }
 
     .syllabus__lock {
@@ -827,7 +827,7 @@
         line-height: 1.4;
         letter-spacing: 0.3em;
         text-transform: uppercase;
-        color: var(--color-bronze);
+        color: var(--accent-text);
     }
 
     .syllabus__members {
@@ -836,7 +836,7 @@
         font-style: italic;
         font-size: 1.125rem;
         line-height: var(--space-3);
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     .syllabus__action:empty {
@@ -852,7 +852,7 @@
         right: 0;
         z-index: 39;
         height: 1px;
-        background-color: var(--color-brass);
+        background-color: var(--accent-line);
         transform: scaleX(var(--reading-progress, 0));
         transform-origin: left center;
         pointer-events: none;
@@ -892,7 +892,7 @@
         position: sticky;
         top: 8rem;
         padding-left: var(--space-2);
-        border-left: 1px solid var(--color-stone);
+        border-left: 1px solid var(--rule);
     }
 
     .essay__contents-list {
@@ -907,18 +907,18 @@
         font-family: var(--font-display);
         font-size: 1.0625rem;
         line-height: 1.35;
-        color: var(--color-ash);
+        color: var(--ink-muted);
         transition: color 300ms var(--ease-rise);
     }
 
     .essay__contents-list a:hover,
     .essay__contents-list a[aria-current] {
-        color: var(--color-evergreen);
+        color: var(--ink);
     }
 
     .essay__contents-list a[aria-current] {
         text-decoration: underline;
-        text-decoration-color: var(--color-brass);
+        text-decoration-color: var(--accent-line);
     }
 
     .essay__contents-sub a {
@@ -929,7 +929,7 @@
     .essay__contents-inline {
         margin-top: var(--space-6);
         padding-block: var(--space-2);
-        border-block: 1px solid var(--color-stone);
+        border-block: 1px solid var(--rule);
     }
 
     .essay__contents-inline summary {
@@ -948,12 +948,12 @@
         font-size: 1.25rem;
         line-height: var(--space-4);
         font-variant-numeric: oldstyle-nums proportional-nums;
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     .essay__reading-time {
         display: block;
-        color: var(--color-bronze);
+        color: var(--accent-text);
     }
 
     .essay__standfirst {
@@ -963,7 +963,7 @@
         font-style: italic;
         font-size: 1.5rem;
         line-height: 2.5rem;
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     .essay__body h2,
@@ -984,7 +984,7 @@
         flex-direction: column;
         gap: var(--space-1);
         padding-block: var(--space-3);
-        border-bottom: 1px solid var(--color-stone);
+        border-bottom: 1px solid var(--rule);
     }
 
     .further-reading__title {
@@ -992,13 +992,13 @@
         font-weight: 300;
         font-size: 1.5rem;
         line-height: var(--space-4);
-        color: var(--color-evergreen);
+        color: var(--ink);
     }
 
     .further-reading__summary {
         font-size: 1rem;
         line-height: var(--space-3);
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 }
 
@@ -1008,10 +1008,12 @@
         margin: 2cm 2.2cm;
     }
 
+    /* Print is always the light theme on white. */
     html,
     body {
-        background: #ffffff !important;
-        color: var(--color-evergreen) !important;
+        color-scheme: light !important;
+        background: white !important;
+        color: var(--ink) !important;
     }
 
     .skip-link,
@@ -1117,7 +1119,7 @@
         content: ' (' attr(href) ')';
         font-family: var(--font-sans);
         font-size: 9pt;
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     /* Sidenotes print as small notes set off below the line they annotate. */
@@ -1132,7 +1134,7 @@
         width: auto !important;
         margin: 4pt 0 6pt 1.5em !important;
         padding-left: 6pt !important;
-        border-left: 0.5pt solid var(--color-brass) !important;
+        border-left: 0.5pt solid var(--accent-line) !important;
         font-size: 9pt !important;
         line-height: 1.4 !important;
         text-indent: 0;
@@ -1142,9 +1144,9 @@
         display: block !important;
         margin-top: 18pt;
         padding-top: 6pt;
-        border-top: 0.5pt solid var(--color-stone);
+        border-top: 0.5pt solid var(--rule);
         font-family: var(--font-sans);
         font-size: 9pt;
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 }

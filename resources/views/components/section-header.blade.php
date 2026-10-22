@@ -11,11 +11,11 @@
 @endphp
 <div {{ $attributes->class(['section-header']) }}>
     @if ($label)
-        <p class="t-label {{ $onDark ? 'text-brass' : 'text-bronze' }}" data-rise>{{ $label }}</p>
+        <p class="t-label text-accent-text" data-rise>{{ $label }}</p>
     @endif
     <hr class="rule-brass mt-4" data-rule>
     <{{ $tag }}{!! $id ? ' id="'.e($id).'"' : '' !!} class="t-heading mt-8" data-rise>{{ $title }}</{{ $tag }}>
     @if ($slot->isNotEmpty())
-        <div class="t-body mt-6 max-w-2xl {{ $onDark ? 'text-champagne' : 'text-ash' }}" data-rise>{{ $slot }}</div>
+        <div class="t-body mt-6 max-w-2xl {{ $onDark ? 'text-ink' : 'text-ink-muted' }}" data-rise>{{ $slot }}</div>
     @endif
 </div>

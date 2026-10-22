@@ -24,7 +24,7 @@
             </div>
         @endif
 
-        <nav class="mt-24 border-t border-stone pt-8" aria-label="More albums">
+        <nav class="mt-24 border-t border-rule pt-8" aria-label="More albums">
             <ul class="flex flex-wrap gap-x-8 gap-y-3">
                 <li><a href="{{ route('pictures') }}" class="link-meta">All albums</a></li>
                 <li><a href="{{ route('pictures', [\App\Constants\Archive::QUERY_VIEW => \App\Constants\PictureView::Decades->value]) }}" class="link-meta">Through the decades</a></li>

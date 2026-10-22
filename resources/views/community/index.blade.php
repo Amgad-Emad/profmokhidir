@@ -11,25 +11,25 @@
             {{-- What the community is, who may join, conduct and privacy --}}
             <div class="space-y-12">
                 <section aria-labelledby="who-heading" data-rise>
-                    <p class="t-label text-bronze">{{ $copy['whoHeading'] }}</p>
+                    <p class="t-label text-accent-text">{{ $copy['whoHeading'] }}</p>
                     <h2 id="who-heading" class="sr-only">{{ $copy['whoHeading'] }}</h2>
-                    <p class="t-body mt-4 text-ash">{{ $copy['who'] }}</p>
+                    <p class="t-body mt-4 text-ink-muted">{{ $copy['who'] }}</p>
                 </section>
 
                 <section aria-labelledby="conduct-heading" data-rise>
-                    <p class="t-label text-bronze">{{ $copy['conductHeading'] }}</p>
+                    <p class="t-label text-accent-text">{{ $copy['conductHeading'] }}</p>
                     <h2 id="conduct-heading" class="sr-only">{{ $copy['conductHeading'] }}</h2>
-                    <ol class="mt-4 space-y-3 text-base font-light text-ash" data-conduct>
+                    <ol class="mt-4 space-y-3 text-base font-light text-ink-muted" data-conduct>
                         @foreach ($copy['conduct'] as $rule)
-                            <li class="flex gap-4"><span class="font-mono text-xs text-bronze">{{ sprintf('%02d', $loop->iteration) }}</span><span>{{ $rule }}</span></li>
+                            <li class="flex gap-4"><span class="font-mono text-xs text-accent-text">{{ sprintf('%02d', $loop->iteration) }}</span><span>{{ $rule }}</span></li>
                         @endforeach
                     </ol>
                 </section>
 
                 <section id="privacy" aria-labelledby="privacy-heading" data-rise>
-                    <p class="t-label text-bronze">{{ $copy['privacyHeading'] }}</p>
+                    <p class="t-label text-accent-text">{{ $copy['privacyHeading'] }}</p>
                     <h2 id="privacy-heading" class="sr-only">{{ $copy['privacyHeading'] }}</h2>
-                    <p class="mt-4 text-base font-light text-ash" data-privacy>{{ $copy['privacy'] }}</p>
+                    <p class="mt-4 text-base font-light text-ink-muted" data-privacy>{{ $copy['privacy'] }}</p>
                 </section>
             </div>
 
@@ -40,10 +40,10 @@
                 @endif
 
                 @if ($standing !== null)
-                    <section class="rounded-card border border-stone bg-linen p-8 sm:p-10" aria-labelledby="standing-heading" data-standing="{{ $standing['status']->value }}">
+                    <section class="rounded-card border border-rule bg-surface-raised p-8 sm:p-10" aria-labelledby="standing-heading" data-standing="{{ $standing['status']->value }}">
                         <x-admin.status-badge :tone="$standing['tone']" :label="$standing['status']->label()" />
                         <h2 id="standing-heading" class="mt-6 font-display text-4xl font-light leading-tight">{{ $standing['heading'] }}</h2>
-                        <p class="mt-4 text-base font-light text-ash">{{ $standing['message'] }}</p>
+                        <p class="mt-4 text-base font-light text-ink-muted">{{ $standing['message'] }}</p>
                         <div class="mt-8 flex flex-wrap gap-4">
                             @if ($standing['chatUrl'])
                                 <x-button :href="$standing['chatUrl']">Open the chat</x-button>
@@ -54,7 +54,7 @@
 
                     @if ($standing['canApply'])
                         <section class="mt-10" aria-labelledby="apply-heading">
-                            <p class="t-label text-bronze">{{ $copy['applyHeading'] }}</p>
+                            <p class="t-label text-accent-text">{{ $copy['applyHeading'] }}</p>
                             <h2 id="apply-heading" class="sr-only">{{ $copy['applyHeading'] }}</h2>
                             <hr class="rule-brass mt-4" data-rule>
                             <form method="POST" action="{{ $applyUrl }}" class="mt-8 space-y-8" x-data="authForm()" x-on:submit="submit($event)" data-apply-form>
@@ -67,9 +67,9 @@
                     @endif
                 @else
                     <section class="lg:pl-8" aria-labelledby="apply-heading">
-                        <p class="t-label text-bronze">{{ $copy['applyHeading'] }}</p>
+                        <p class="t-label text-accent-text">{{ $copy['applyHeading'] }}</p>
                         <h2 id="apply-heading" class="mt-3 font-display text-4xl font-light leading-tight">{{ AuthScreens::screen(AuthScreens::COMMUNITY_SIGNUP)['title'] }}</h2>
-                        <p class="t-body mt-4 text-ash">{{ $copy['applyIntro'] }} Already a member? <a href="{{ $loginUrl }}" class="link-hairline">Sign in</a>.</p>
+                        <p class="t-body mt-4 text-ink-muted">{{ $copy['applyIntro'] }} Already a member? <a href="{{ $loginUrl }}" class="link-hairline">Sign in</a>.</p>
                         <hr class="rule-brass mt-6" data-rule>
 
                         <form method="POST" action="{{ $applyUrl }}" class="mt-8 space-y-8" x-data="authForm()" x-on:submit="submit($event)" data-apply-form>

@@ -80,7 +80,7 @@ class AdminLayoutTest extends TestCase
         $this->assertStringContainsString('x-bind:aria-expanded', $content);
         $this->assertStringContainsString('-translate-x-full', $content);
         $this->assertStringContainsString('lg:translate-x-0', $content);
-        $this->assertStringContainsString('bg-linen', $content);
+        $this->assertStringContainsString('bg-surface-sunken', $content);
 
         foreach (['red', 'green', 'blue', 'yellow', 'emerald', 'rose', 'amber', 'gray', 'slate'] as $colour) {
             $this->assertDoesNotMatchRegularExpression('/\b(bg|text|border)-'.$colour.'-\d+/', $content, "Found a {$colour} utility");

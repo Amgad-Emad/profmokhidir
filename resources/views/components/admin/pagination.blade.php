@@ -1,8 +1,8 @@
 {{-- Livewire-aware pagination in the brand style: $items->links('components.admin.pagination'). --}}
 @php $pageName = $paginator->getPageName(); @endphp
 @if ($paginator->hasPages())
-    <nav class="pagination mt-10 flex flex-col gap-6 border-t border-stone pt-6 sm:flex-row sm:items-center sm:justify-between" aria-label="Pagination">
-        <p class="t-label text-bronze">Page {{ $paginator->currentPage() }} of {{ $paginator->lastPage() }} · {{ $paginator->total() }} {{ \Illuminate\Support\Str::plural('item', $paginator->total()) }}</p>
+    <nav class="pagination mt-10 flex flex-col gap-6 border-t border-rule pt-6 sm:flex-row sm:items-center sm:justify-between" aria-label="Pagination">
+        <p class="t-label text-accent-text">Page {{ $paginator->currentPage() }} of {{ $paginator->lastPage() }} · {{ $paginator->total() }} {{ \Illuminate\Support\Str::plural('item', $paginator->total()) }}</p>
         <ul class="flex flex-wrap items-center gap-2">
             @if ($paginator->onFirstPage())
                 <li><span class="filter-pill is-disabled" aria-disabled="true">Previous</span></li>
@@ -12,7 +12,7 @@
 
             @foreach ($elements as $element)
                 @if (is_string($element))
-                    <li><span class="px-2 text-ash" aria-hidden="true">{{ $element }}</span></li>
+                    <li><span class="px-2 text-ink-muted" aria-hidden="true">{{ $element }}</span></li>
                 @endif
                 @if (is_array($element))
                     @foreach ($element as $page => $url)

@@ -4,7 +4,7 @@
     $to = sscanf(\App\Constants\Brand::IVORY, '#%02x%02x%02x');
     $table = fn (int $i): string => sprintf('%.4f %.4f', $from[$i] / 255, $to[$i] / 255);
 @endphp
-{{-- Evergreen-to-ivory duotone used by .photo-archive. Zero-size so it never affects layout. --}}
+{{-- Evergreen → ivory duotone used by .photo-archive. Zero-size so it never affects layout. --}}
 <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
     <filter id="duotone-archive" color-interpolation-filters="sRGB">
         <feColorMatrix type="saturate" values="0" />

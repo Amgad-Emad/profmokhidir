@@ -11,6 +11,12 @@ namespace App\Constants;
 final class BrandAudit
 {
     /**
+     * The one file that may name a brand colour: the raw palette (--brand-*)
+     * and the semantic tokens built from it. Everywhere else uses the tokens.
+     */
+    public const string TOKEN_FILE = 'resources/css/tokens.css';
+
+    /**
      * Globs of source files to scan, relative to the project root.
      *
      * @return list<string>
@@ -48,6 +54,42 @@ final class BrandAudit
             ...Brand::permittedExtras(),
             '#FFF', '#000', '#0000', '#00000000', '#FFF0', '#FFFFFF00',
         ]);
+    }
+
+    /**
+     * Utility prefixes that take a colour (Tailwind v4). A brand colour name
+     * after one of these is a raw colour class and must be a semantic token instead.
+     *
+     * @return list<string>
+     */
+    public static function colourUtilityPrefixes(): array
+    {
+        return [
+            'text', 'bg', 'border', 'border-x', 'border-y', 'border-s', 'border-e', 'border-t', 'border-r', 'border-b', 'border-l',
+            'ring', 'ring-offset', 'inset-ring', 'fill', 'stroke', 'outline', 'decoration', 'divide', 'divide-x', 'divide-y',
+            'placeholder', 'caret', 'accent', 'shadow', 'inset-shadow', 'from', 'via', 'to',
+        ];
+    }
+
+    /**
+     * Matches a raw brand colour class (bg-evergreen, text-brass/80, hover:text-ivory ...).
+     */
+    public static function rawColourClassPattern(): string
+    {
+        $prefixes = implode('|', array_map('preg_quote', self::colourUtilityPrefixes()));
+        $names = implode('|', array_keys(Brand::colours()));
+
+        return '/(?<![\w-])(?:'.$prefixes.')-(?:'.$names.')(?:\/\d{1,3})?(?![\w-])/';
+    }
+
+    /**
+     * Matches a raw brand colour variable (--brand-brass, --color-evergreen) wherever it is read.
+     */
+    public static function rawColourVariablePattern(): string
+    {
+        $names = implode('|', array_keys(Brand::colours()));
+
+        return '/--(?:brand|color)-(?:'.$names.')(?![\w-])/';
     }
 
     /**
@@ -93,6 +135,11 @@ final class BrandAudit
      * The only permitted gradient: a soft radial brass glow on evergreen.
      */
     public const string GRADIENT_FUNCTION = 'radial-gradient';
+
+    /**
+     * The semantic token that carries the glow colour (brass at 22%).
+     */
+    public const string GLOW_TOKEN = '--accent-glow';
 
     /**
      * File => reason, for files the audit skips entirely.

@@ -32,7 +32,7 @@ class VideoPlayerTest extends TestCase
         $html = $this->render(Video::factory()->provider(VideoProvider::YouTube, 'https://youtu.be/dQw4w9WgXcQ')->create(['title' => 'A <lecture>']));
 
         $this->assertStringContainsString('<div class="video-player">', $html);
-        $this->assertStringContainsString('class="video-facade on-dark relative overflow-hidden rounded-card bg-evergreen" style="aspect-ratio: 16 / 9" x-data="videoFacade"', $html);
+        $this->assertStringContainsString('class="video-facade on-dark relative overflow-hidden rounded-card bg-surface" style="aspect-ratio: 16 / 9" x-data="videoFacade"', $html);
         $this->assertStringContainsString('x-show="! playing"', $html);
         $this->assertStringContainsString('href="https://youtu.be/dQw4w9WgXcQ" rel="noopener" class="video-facade__play" @click.prevent="play()"', $html);
         $this->assertStringContainsString('<span class="sr-only">A &lt;lecture&gt;</span>', $html);
@@ -58,7 +58,7 @@ class VideoPlayerTest extends TestCase
         $this->assertStringNotContainsString('poster=', $html);
         $this->assertStringContainsString('<source src="'.$file->getUrl().'" type="video/webm">', $html);
         $this->assertStringContainsString('<track kind="captions" src="https://cdn.example.org/talk.vtt" srclang="en" label="Captions" default>', $html);
-        $this->assertStringContainsString('<a href="'.$file->getUrl().'" class="text-ivory">Download the file</a>', $html);
+        $this->assertStringContainsString('<a href="'.$file->getUrl().'" class="text-ink-strong">Download the file</a>', $html);
         $this->assertStringNotContainsString('<iframe', $html);
     }
 
@@ -68,7 +68,7 @@ class VideoPlayerTest extends TestCase
         $html = $this->render(Video::factory()->provider(VideoProvider::Link, 'https://www.example.org/talk')->create(['title' => 'Talk']));
 
         $this->assertStringContainsString('This recording is hosted on another site.', $html);
-        $this->assertMatchesRegularExpression('/<a href="https:\/\/www\.example\.org\/talk" class="btn-pill-outline text-evergreen" rel="noopener">Watch on example\.org<\/a>/', $html);
+        $this->assertMatchesRegularExpression('/<a href="https:\/\/www\.example\.org\/talk" class="btn-pill-outline text-ink" rel="noopener">Watch on example\.org<\/a>/', $html);
         $this->assertStringNotContainsString('<iframe', $html);
         $this->assertStringNotContainsString('<video', $html);
     }

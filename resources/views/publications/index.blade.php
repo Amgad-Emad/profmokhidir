@@ -15,7 +15,7 @@
         @else
             @if ($featured->isNotEmpty())
                 <section class="selected-works mt-20" aria-labelledby="selected-works-title">
-                    <h2 id="selected-works-title" class="t-label text-bronze" data-rise>{{ \App\Constants\Catalogue::SELECTED_WORKS_LABEL }}</h2>
+                    <h2 id="selected-works-title" class="t-label text-accent-text" data-rise>{{ \App\Constants\Catalogue::SELECTED_WORKS_LABEL }}</h2>
                     <hr class="rule-brass mt-4" data-rule>
                     <ol class="selected-works__list" data-rise-group>
                         @foreach ($featured as $work)
@@ -36,7 +36,7 @@
 
             <div class="catalogue mt-20" x-data="catalogueSheet">
                 <div class="catalogue__toolbar lg:hidden" x-cloak>
-                    <button type="button" class="btn-pill-outline text-evergreen" x-ref="toggle" aria-controls="catalogue-filters" x-bind:aria-expanded="open.toString()" x-on:click="show()">
+                    <button type="button" class="btn-pill-outline text-ink" x-ref="toggle" aria-controls="catalogue-filters" x-bind:aria-expanded="open.toString()" x-on:click="show()">
                         Refine the catalogue
                         @if ($activeCount > 0)
                             <span class="catalogue__badge">{{ $activeCount }}<span class="sr-only"> active</span></span>
@@ -77,21 +77,27 @@
                                 <div class="catalogue__range">
                                     <div>
                                         <label for="filter-from" class="catalogue__sublabel">From</label>
-                                        <select id="filter-from" name="from" class="filter-select">
-                                            <option value="">Earliest</option>
-                                            @foreach (array_reverse($years) as $year)
-                                                <option value="{{ $year }}" @selected($active['from'] === $year)>{{ $year }}</option>
-                                            @endforeach
-                                        </select>
+                                        <span class="select-wrap">
+                                            <select id="filter-from" name="from" class="filter-select">
+                                                <option value="">Earliest</option>
+                                                @foreach (array_reverse($years) as $year)
+                                                    <option value="{{ $year }}" @selected($active['from'] === $year)>{{ $year }}</option>
+                                                @endforeach
+                                            </select>
+                                            <span class="select-chevron" aria-hidden="true"></span>
+                                        </span>
                                     </div>
                                     <div>
                                         <label for="filter-to" class="catalogue__sublabel">To</label>
-                                        <select id="filter-to" name="to" class="filter-select">
-                                            <option value="">Latest</option>
-                                            @foreach ($years as $year)
-                                                <option value="{{ $year }}" @selected($active['to'] === $year)>{{ $year }}</option>
-                                            @endforeach
-                                        </select>
+                                        <span class="select-wrap">
+                                            <select id="filter-to" name="to" class="filter-select">
+                                                <option value="">Latest</option>
+                                                @foreach ($years as $year)
+                                                    <option value="{{ $year }}" @selected($active['to'] === $year)>{{ $year }}</option>
+                                                @endforeach
+                                            </select>
+                                            <span class="select-chevron" aria-hidden="true"></span>
+                                        </span>
                                     </div>
                                 </div>
                             </fieldset>

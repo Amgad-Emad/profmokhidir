@@ -33,7 +33,7 @@ class SkeletonTest extends TestCase
     {
         $css = file_get_contents(resource_path('css/wayfinding.css'));
 
-        $this->assertMatchesRegularExpression('/\.skeleton__line \{[^}]*background-color: var\(--color-linen\);[^}]*animation: skeleton-breathe 2400ms ease-in-out infinite alternate;/s', $css);
+        $this->assertMatchesRegularExpression('/\.skeleton__line \{[^}]*background-color: var\(--surface-raised\);[^}]*animation: skeleton-breathe 2400ms ease-in-out infinite alternate;/s', $css);
         $this->assertContains('skeleton-breathe', BrandAudit::permittedKeyframes());
     }
 }

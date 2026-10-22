@@ -8,7 +8,7 @@
             <x-empty-state class="mt-6" message="Photographs will be gathered into albums here once they are published." />
         @else
             <nav class="exhibition-views mt-12 flex flex-wrap items-center gap-x-8 gap-y-4" aria-label="View" data-rise>
-                <p class="t-label text-bronze">{{ $total }} {{ \Illuminate\Support\Str::plural('photograph', $total) }} in {{ count($albums) }} {{ \Illuminate\Support\Str::plural('album', count($albums)) }}</p>
+                <p class="t-label text-accent-text">{{ $total }} {{ \Illuminate\Support\Str::plural('photograph', $total) }} in {{ count($albums) }} {{ \Illuminate\Support\Str::plural('album', count($albums)) }}</p>
                 <ul class="flex flex-wrap gap-2">
                     @foreach ($views as $option)
                         <li><a href="{{ $option['url'] }}" class="filter-pill"{!! $option['active'] ? ' aria-current="true"' : '' !!}>{{ $option['label'] }}</a></li>
@@ -23,7 +23,7 @@
                         <section class="decade mt-20 first:mt-16" aria-labelledby="{{ $id }}">
                             <header class="decade__header">
                                 <h2 id="{{ $id }}" class="t-heading font-display" data-rise>{{ $group['label'] }}</h2>
-                                <p class="t-label text-bronze" data-rise>{{ $group['count'] }} {{ \Illuminate\Support\Str::plural('photograph', $group['count']) }}</p>
+                                <p class="t-label text-accent-text" data-rise>{{ $group['count'] }} {{ \Illuminate\Support\Str::plural('photograph', $group['count']) }}</p>
                             </header>
                             <hr class="rule-brass mt-6" data-rule>
                             <ul class="wall mt-12" data-rise-group aria-label="Photographs from the {{ $group['label'] }}">
@@ -52,13 +52,13 @@
                                 </a>
                                 <div class="exhibition__label">
                                     <h2 class="exhibition__title">
-                                        <a href="{{ $entry['url'] }}" class="text-evergreen">{{ $entry['album']->title }}</a>
+                                        <a href="{{ $entry['url'] }}" class="text-ink">{{ $entry['album']->title }}</a>
                                     </h2>
                                     <p class="exhibition__meta smallcaps">
                                         @if ($entry['range'])<span>{{ $entry['range'] }}</span>{{ \App\Constants\DateFormats::META_SEPARATOR }}@endif<span>{{ $entry['count'] }} {{ \Illuminate\Support\Str::plural('photograph', $entry['count']) }}</span>
                                     </p>
                                     @if (filled($entry['album']->description))
-                                        <p class="t-body max-w-measure text-ash">{{ $entry['album']->description }}</p>
+                                        <p class="t-body max-w-measure text-ink-muted">{{ $entry['album']->description }}</p>
                                     @endif
                                 </div>
                             </article>

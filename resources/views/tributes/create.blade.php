@@ -21,7 +21,7 @@
             @csrf
 
             @error(\App\Http\Controllers\TributeController::LIMIT_ERROR)
-                <p class="rounded-card border border-stone bg-linen px-4 py-3 text-base font-light text-bronze" role="alert">{{ $message }}</p>
+                <p class="rounded-card border border-rule bg-surface-raised px-4 py-3 text-base font-light text-danger-tone" role="alert">{{ $message }}</p>
             @enderror
 
             <x-input name="name" :label="$fields['name']['label']" :hint="$fields['name']['hint']" required autocomplete="name" />

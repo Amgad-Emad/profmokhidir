@@ -35,7 +35,7 @@
     ] + $input, fn ($value): bool => $value !== null && $value !== false && $value !== ''));
 @endphp
 <div {{ $attributes->class(['field', 'field--invalid' => $hasError]) }}>
-    <label for="{{ $id }}" class="t-label block text-bronze">{{ $label }}</label>
+    <label for="{{ $id }}" class="t-label block text-accent-text">{{ $label }}</label>
     @if ($hint)
         <p id="{{ $hintId }}" class="field__hint">{{ $hint }}</p>
     @endif

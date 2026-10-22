@@ -13,7 +13,7 @@
     $describedBy = implode(' ', array_filter([$hint ? $hintId : null, $maxlength ? $countId : null, $hasError ? $errorId : null]));
 @endphp
 <div {{ $attributes->class(['field', 'field--invalid' => $hasError]) }} @if ($maxlength) x-data="{ count: {{ mb_strlen($current) }} }" @endif>
-    <label for="{{ $id }}" class="t-label block text-bronze">{{ $label }}</label>
+    <label for="{{ $id }}" class="t-label block text-accent-text">{{ $label }}</label>
     @if ($hint)
         <p id="{{ $hintId }}" class="field__hint">{{ $hint }}</p>
     @endif

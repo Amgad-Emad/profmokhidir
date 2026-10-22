@@ -8,6 +8,7 @@ use App\Constants\Roles;
 use App\Constants\Search;
 use App\Constants\Sections;
 use App\Constants\Seo;
+use App\Constants\ThemeSettings;
 use App\Constants\TributeCards;
 use App\Http\Controllers\AboutController;
 use App\Http\Controllers\AccountController;
@@ -27,6 +28,7 @@ use App\Http\Controllers\SectionPlaceholderController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\StyleguideController;
 use App\Http\Controllers\TeachingMaterialController;
+use App\Http\Controllers\ThemeController;
 use App\Http\Controllers\TributeController;
 use App\Http\Controllers\VideoController;
 use App\Http\Middleware\EnsureCommunityMember;
@@ -135,6 +137,9 @@ foreach (array_diff_key($sections, array_flip($built)) as $key => $section) {
 Route::get('/styleguide', StyleguideController::class)
     ->middleware(EnsureLocalEnvironment::class)
     ->name('styleguide');
+
+// The colour theme (System, Light, Dark): kept on the account when signed in, in a cookie otherwise.
+Route::patch(ThemeSettings::PATH, [ThemeController::class, 'update'])->name(ThemeSettings::ROUTE);
 
 // Signed-in users (any role) manage their own name, email, password and two-factor here.
 Route::get('/account', [AccountController::class, 'show'])

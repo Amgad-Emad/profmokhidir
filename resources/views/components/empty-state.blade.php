@@ -7,9 +7,9 @@
 <figure {{ $attributes->class(['empty-state flex flex-col items-start gap-5 py-12']) }}>
     <hr class="rule-brass-short" data-rule>
     <blockquote class="empty-state__quote">
-        <p class="font-display text-2xl font-light italic {{ $tone === 'ivory' ? 'text-champagne' : 'text-ash' }}">{{ $message }}</p>
+        <p class="font-display text-2xl font-light italic {{ $tone === 'ivory' ? 'text-ink' : 'text-ink-muted' }}">{{ $message }}</p>
     </blockquote>
     @if (filled($attribution))
-        <figcaption class="empty-state__attribution smallcaps {{ $tone === 'ivory' ? 'text-champagne' : 'text-ash' }}"><span aria-hidden="true">— </span>{{ $attribution }}</figcaption>
+        <figcaption class="empty-state__attribution smallcaps {{ $tone === 'ivory' ? 'text-ink' : 'text-ink-muted' }}"><span aria-hidden="true">— </span>{{ $attribution }}</figcaption>
     @endif
 </figure>

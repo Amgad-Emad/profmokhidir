@@ -12,7 +12,7 @@
 @endphp
 <div {{ $attributes->class(['video-player', 'video-player--featured' => $featured]) }}>
     @if ($player['kind'] === \App\Constants\VideoEmbed::KIND_EMBED)
-        <div class="video-facade on-dark relative overflow-hidden rounded-card bg-evergreen" style="aspect-ratio: {{ $aspect }}" x-data="videoFacade">
+        <div class="video-facade on-dark relative overflow-hidden rounded-card bg-surface" style="aspect-ratio: {{ $aspect }}" x-data="videoFacade">
             <div class="absolute inset-0" x-show="! playing">
                 @if ($poster)
                     <x-photo :media="$poster" :aspect="$aspect" :captioned="false" :sizes="$featured ? '(min-width: 1280px) 1232px, 100vw' : '(min-width: 1024px) 896px, 100vw'" :loading="$featured ? 'eager' : 'lazy'" class="h-full" />
@@ -45,7 +45,7 @@
             controls
             preload="none"
             playsinline
-            class="w-full rounded-card bg-evergreen"
+            class="w-full rounded-card bg-surface"
             style="aspect-ratio: {{ $aspect }}"
             @if ($posterUrl) poster="{{ $posterUrl }}" @endif
         >
@@ -53,14 +53,14 @@
             @if ($player['captions_url'])
                 <track kind="captions" src="{{ $player['captions_url'] }}" srclang="{{ app()->getLocale() }}" label="Captions" default>
             @endif
-            <p class="t-body p-6 text-champagne">This browser cannot play the video. <a href="{{ $player['file']->getUrl() }}" class="text-ivory">Download the file</a> to watch it.</p>
+            <p class="t-body p-6 text-ink">This browser cannot play the video. <a href="{{ $player['file']->getUrl() }}" class="text-ink-strong">Download the file</a> to watch it.</p>
         </video>
     @else
         <div class="card flex flex-col items-start gap-6">
             @if ($poster)
                 <x-photo :media="$poster" :aspect="$aspect" :captioned="false" sizes="(min-width: 1024px) 896px, 100vw" class="w-full" />
             @endif
-            <p class="t-body text-ash">This recording is hosted on another site.</p>
+            <p class="t-body text-ink-muted">This recording is hosted on another site.</p>
             @if ($player['url'])
                 <x-button variant="filled" :href="$player['url']" rel="noopener">{{ $player['label'] }}</x-button>
             @endif

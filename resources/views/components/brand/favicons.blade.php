@@ -3,4 +3,4 @@
 <link rel="icon" href="{{ asset('favicon-32.png') }}" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}" sizes="180x180">
 <link rel="manifest" href="{{ asset('site.webmanifest') }}">
-<meta name="theme-color" content="{{ \App\Constants\Brand::EVERGREEN }}">
+{{-- The browser chrome colour follows the theme: <x-theme.head> prints one theme-color meta per scheme. --}}

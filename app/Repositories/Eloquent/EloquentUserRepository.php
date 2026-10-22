@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories\Eloquent;
 
 use App\Constants\CommunityStatus;
+use App\Constants\Theme;
 use App\Models\User;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -36,6 +37,13 @@ class EloquentUserRepository extends BaseEloquentRepository implements UserRepos
     public function markEmailVerified(User $user): User
     {
         $user->forceFill(['email_verified_at' => now()])->save();
+
+        return $user->refresh();
+    }
+
+    public function updateTheme(User $user, Theme $theme): User
+    {
+        $user->forceFill(['theme' => $theme])->save();
 
         return $user->refresh();
     }

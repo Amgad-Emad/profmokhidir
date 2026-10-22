@@ -2,8 +2,8 @@
 @php $recovery = $errors->has('recovery_code'); @endphp
 <x-layouts.guest :screen="AuthScreens::TWO_FACTOR" :intro="false" :error-targets="['code' => 'code-1']">
     <div x-data="authChallenge({ recovery: {{ $recovery ? 'true' : 'false' }} })" data-two-factor>
-        <p class="t-body -mt-2 mb-8 text-ash" x-show="!recovery" @if ($recovery) x-cloak @endif>{{ AuthScreens::screen(AuthScreens::TWO_FACTOR)['intro'] }}</p>
-        <p class="t-body -mt-2 mb-8 text-ash" x-show="recovery" @unless ($recovery) x-cloak @endunless>{{ AuthScreens::TWO_FACTOR_RECOVERY_INTRO }}</p>
+        <p class="t-body -mt-2 mb-8 text-ink-muted" x-show="!recovery" @if ($recovery) x-cloak @endif>{{ AuthScreens::screen(AuthScreens::TWO_FACTOR)['intro'] }}</p>
+        <p class="t-body -mt-2 mb-8 text-ink-muted" x-show="recovery" @unless ($recovery) x-cloak @endunless>{{ AuthScreens::TWO_FACTOR_RECOVERY_INTRO }}</p>
 
         <form method="POST" action="{{ route('two-factor.login') }}" class="space-y-8" x-data="authForm()" x-on:submit="submit($event)" data-auth-form>
             @csrf

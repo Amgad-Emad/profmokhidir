@@ -3,6 +3,7 @@
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../vendor/laravel/fortify/resources/views/*.blade.php';
 
+@import './tokens.css';
 @import './fonts.css';
 @import './media.css';
 @import './typography.css';
@@ -14,29 +15,16 @@
 @import './site-menu.css';
 @import './auth.css';
 @import './chat.css';
+@import './theme.css';
 
 /*
  | Brand design system — see CLAUDE.md "Brand (follow exactly)".
- | Colours mirror app/Constants/Brand.php one-to-one. Tailwind's default
- | palette is removed so only brand colours (plus white, black, transparent
- | and current) can be used.
+ | Colours: the nine brand values live in tokens.css as --brand-* and reach the
+ | page only through the semantic tokens declared there (--surface, --ink,
+ | --rule, --accent-text ...), each with a light and a dark value. This file
+ | and every other stylesheet, script and view use the tokens, never a colour.
  */
 @theme {
-    --color-*: initial;
-    --color-evergreen: #13221c;
-    --color-ivory: #f3f1ea;
-    --color-cypress: #2f4a3e;
-    --color-brass: #a8864f;
-    --color-champagne: #dccda8;
-    --color-linen: #e7e5dc;
-    --color-stone: #d3d1c5;
-    --color-ash: #575a55;
-    --color-bronze: #6f5a34;
-    --color-white: #ffffff;
-    --color-black: #000000;
-    --color-transparent: transparent;
-    --color-current: currentColor;
-
     --font-*: initial;
     --font-display: 'Cormorant Garamond', 'Cormorant', Georgia, 'Times New Roman', serif;
     --font-sans: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif;
@@ -73,14 +61,14 @@
 /* ------------------------------------------------------------------ base */
 @layer base {
     html {
-        @apply bg-ivory font-sans font-light text-evergreen antialiased;
+        @apply bg-surface font-sans font-light text-ink antialiased;
         -webkit-text-size-adjust: 100%;
         /* Anchored and focused targets land below the fixed masthead as currently shown (WCAG 2.4.11 focus not obscured); --header-height follows its compaction (masthead.css). */
         scroll-padding-top: calc(var(--header-height) + 1.5rem);
     }
 
     body {
-        @apply min-h-screen bg-ivory text-evergreen;
+        @apply min-h-screen bg-surface text-ink;
         font-size: var(--text-body);
         line-height: var(--text-body--line-height);
     }
@@ -91,6 +79,14 @@
     h4,
     blockquote {
         @apply font-display font-light;
+    }
+
+    /* Headings take the strong ink (evergreen on ivory; ivory on evergreen and in the dark theme). */
+    h1,
+    h2,
+    h3,
+    h4 {
+        color: var(--ink-strong);
     }
 
     a {
@@ -104,24 +100,47 @@
     }
 
     ::selection {
-        background-color: var(--color-linen);
-        color: var(--color-evergreen);
+        background-color: var(--selection);
+        color: var(--selection-ink);
     }
 
-    /* Visible focus: bronze on light surfaces, brass on evergreen surfaces. */
+    /* Visible focus: bronze on ivory, brass on evergreen, champagne on cypress (the --focus token follows the surface). */
     :focus-visible {
-        outline: 2px solid var(--color-bronze);
+        outline: 2px solid var(--focus);
         outline-offset: 3px;
         border-radius: 2px;
     }
 
-    .on-dark :focus-visible,
-    .on-dark:focus-visible,
-    .bg-evergreen :focus-visible,
-    .bg-evergreen:focus-visible,
-    .bg-cypress :focus-visible,
-    .bg-cypress:focus-visible {
-        outline-color: var(--color-brass);
+    /* Browser autofill keeps the field's own surface and ink in both themes. */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    textarea:-webkit-autofill,
+    select:-webkit-autofill {
+        -webkit-text-fill-color: var(--ink);
+        caret-color: var(--ink);
+        box-shadow: 0 0 0 1000px var(--surface) inset;
+        transition: background-color 9999s ease-out;
+    }
+
+    /*
+     | Theme change: colours cross-fade over 300ms while <html data-theme-transition> is set
+     | (resources/js/theme.js removes it afterwards; App\Constants\ThemeSettings::TRANSITION_MS).
+     | Under reduced motion the attribute is never set and the change is instant.
+     */
+    @media (prefers-reduced-motion: no-preference) {
+        html[data-theme-transition],
+        html[data-theme-transition] *,
+        html[data-theme-transition] *::before,
+        html[data-theme-transition] *::after {
+            transition:
+                background-color 300ms var(--ease-rise),
+                color 300ms var(--ease-rise),
+                border-color 300ms var(--ease-rise),
+                fill 300ms var(--ease-rise),
+                stroke 300ms var(--ease-rise),
+                outline-color 300ms var(--ease-rise) !important;
+        }
     }
 
     img,
@@ -200,31 +219,24 @@
     }
 
     .btn-pill-filled {
-        background-color: var(--color-ivory);
-        color: var(--color-evergreen);
+        background-color: var(--fill);
+        color: var(--fill-ink);
     }
 
     .btn-pill-filled:hover {
-        background-color: var(--color-linen);
+        background-color: var(--fill-hover);
     }
 
-    /* Outline: on ivory the fill is evergreen with ivory text; on evergreen surfaces, ivory with evergreen text. */
+    /* Outline: hover fills with the solid fill of the surface it sits on (the --fill token follows the region). */
     .btn-pill-outline {
-        --btn-fill: var(--color-evergreen);
-        --btn-fill-ink: var(--color-ivory);
+        --btn-fill: var(--fill);
+        --btn-fill-ink: var(--fill-ink);
         position: relative;
         isolation: isolate;
         overflow: hidden;
         border: 1px solid currentColor;
         color: currentColor;
         background-color: transparent;
-    }
-
-    .on-dark .btn-pill-outline,
-    .bg-evergreen .btn-pill-outline,
-    .bg-cypress .btn-pill-outline {
-        --btn-fill: var(--color-ivory);
-        --btn-fill-ink: var(--color-evergreen);
     }
 
     .btn-pill-outline::before {
@@ -249,14 +261,14 @@
         transform: scaleX(1);
     }
 
-    /* Solid: evergreen filled with ivory text, the primary action of a form on an ivory surface (sign-in,
+    /* Solid: the solid fill with its ink, the primary action of a form on the page surface (sign-in,
        password reset, the community application). One per screen, always full width of its column. */
     .btn-pill-solid {
         @apply inline-flex items-center justify-center gap-2 rounded-full px-7 py-3 font-sans text-base font-medium leading-none no-underline;
         min-height: 2.75rem;
-        border: 1px solid var(--color-evergreen);
-        background-color: var(--color-evergreen);
-        color: var(--color-ivory);
+        border: 1px solid var(--fill);
+        background-color: var(--fill);
+        color: var(--fill-ink);
         transition:
             background-color var(--duration-draw, 600ms) var(--ease-rise),
             border-color var(--duration-draw, 600ms) var(--ease-rise);
@@ -264,17 +276,17 @@
 
     .btn-pill-solid:hover,
     .btn-pill-solid:focus-visible {
-        border-color: var(--color-cypress);
-        background-color: var(--color-cypress);
-        color: var(--color-ivory);
+        border-color: var(--fill-hover);
+        background-color: var(--fill-hover);
+        color: var(--fill-ink);
         text-decoration: none;
     }
 
     /* Quiet secondary action (Back, Cancel): a text link in the metadata style with a 44px target. */
     .btn-quiet {
-        @apply inline-flex min-h-11 items-center gap-1 px-1 font-sans text-base font-medium text-evergreen;
+        @apply inline-flex min-h-11 items-center gap-1 px-1 font-sans text-base font-medium text-ink;
         text-decoration: underline;
-        text-decoration-color: var(--color-brass);
+        text-decoration-color: var(--accent-line);
         text-underline-offset: 0.2em;
         transition: text-decoration-color 300ms var(--ease-rise);
     }
@@ -282,25 +294,20 @@
     .btn-quiet:hover,
     .btn-quiet:focus-visible {
         text-decoration: underline;
-        text-decoration-color: var(--color-evergreen);
+        text-decoration-color: var(--ink);
     }
 
-    .on-dark .btn-quiet,
-    .bg-evergreen .btn-quiet {
-        color: var(--color-champagne);
-    }
-
-    /* Cards: 4px radius, linen or ivory surface, stone hairline. */
+    /* Cards: 4px radius, the raised surface (or the panel surface), a hairline rule. */
     .card {
         border-radius: var(--radius-card);
-        border: 1px solid var(--color-stone);
-        background-color: var(--color-linen);
-        color: var(--color-evergreen);
+        border: 1px solid var(--rule);
+        background-color: var(--surface-raised);
+        color: var(--ink);
         @apply p-6 sm:p-8;
     }
 
     .card-ivory {
-        background-color: var(--color-ivory);
+        background-color: var(--surface-panel);
     }
 
     /* Thin brass rule. Add data-rule to draw it in when scrolled into view. */
@@ -310,30 +317,26 @@
         height: 1px;
         border: 0;
         margin: 0;
-        background-color: var(--color-brass);
+        background-color: var(--accent-line);
     }
 
-    /* Soft radial brass glow: the only permitted gradient. Evergreen backgrounds only. */
+    /* Soft radial brass glow: the only permitted gradient. The hero surface only (evergreen in both themes). */
     .glow-brass {
-        background-color: var(--color-evergreen);
-        background-image: radial-gradient(
-            ellipse 70% 55% at 50% 0%,
-            color-mix(in srgb, var(--color-brass) 22%, transparent) 0%,
-            transparent 70%
-        );
+        background-color: var(--surface-hero);
+        background-image: radial-gradient(ellipse 70% 55% at 50% 0%, var(--accent-glow) 0%, transparent 70%);
         background-repeat: no-repeat;
     }
 
-    /* Fixed glassy evergreen masthead: evergreen at 88% over a light blur, a brass hairline along the bottom (App\Constants\Masthead; the states live in masthead.css). */
+    /* Fixed glassy masthead: the glass surface over a light blur, an accent hairline along the bottom (App\Constants\Masthead; the states live in masthead.css). */
     .glass-header {
-        background-color: color-mix(in srgb, var(--color-evergreen) 88%, transparent);
+        background-color: var(--surface-glass);
         backdrop-filter: blur(16px) saturate(120%); /* Lightning CSS adds the -webkit- prefix; a hand-written prefix makes it drop the standard property. */
-        border-bottom: 1px solid color-mix(in srgb, var(--color-brass) 35%, transparent);
+        border-bottom: 1px solid color-mix(in srgb, var(--accent-line) 35%, transparent);
     }
 
     @supports not (backdrop-filter: blur(1px)) {
         .glass-header {
-            background-color: var(--color-evergreen);
+            background-color: var(--surface-band);
         }
     }
 
@@ -342,7 +345,7 @@
         filter: grayscale(1) sepia(0.12) brightness(1.03) contrast(0.97);
     }
 
-    /* Archive photos: evergreen-to-ivory duotone via the SVG filter in <x-duotone-filter />. */
+    /* Archive photos: the brand duotone via the SVG filter in <x-duotone-filter />. */
     .photo-archive {
         filter: url('#duotone-archive');
     }
@@ -354,7 +357,7 @@
         height: 1px;
         border: 0;
         margin: 0;
-        background-color: var(--color-brass);
+        background-color: var(--accent-line);
     }
 
     /* Mark: <x-brand.mark />. Clear space is inline padding, so the box is wider than `size`. */
@@ -377,19 +380,19 @@
         top: 1rem;
         z-index: 60;
         transform: translateY(-200%);
-        @apply rounded-full bg-ivory px-5 py-2 font-sans text-base font-medium text-evergreen no-underline;
+        @apply rounded-full bg-fill px-5 py-2 font-sans text-base font-medium text-fill-ink no-underline;
     }
 
     .skip-link:focus {
         transform: none;
     }
 
-    /* Header navigation links: label style, short brass rule under the active section. */
+    /* Header navigation links: label style, short accent rule under the active section. */
     .nav-link {
         position: relative;
         display: inline-block;
         padding: 0.5rem 0;
-        color: var(--color-champagne);
+        color: var(--ink);
         text-decoration: none;
         white-space: nowrap;
         transition: color 300ms var(--ease-rise);
@@ -402,7 +405,7 @@
         bottom: 0;
         width: 1.5rem;
         height: 1px;
-        background-color: color-mix(in srgb, var(--color-champagne) 50%, transparent);
+        background-color: color-mix(in srgb, var(--ink) 50%, transparent);
         transform: scaleX(0);
         transform-origin: left center;
         transition: transform 600ms var(--ease-rise);
@@ -410,7 +413,7 @@
 
     .nav-link:hover,
     .nav-link:focus-visible {
-        color: var(--color-ivory);
+        color: var(--ink-strong);
         text-decoration: none;
     }
 
@@ -420,7 +423,7 @@
     }
 
     .nav-link[aria-current='page']::after {
-        background-color: var(--color-brass);
+        background-color: var(--accent-line);
         transform: scaleX(1);
     }
 
@@ -429,18 +432,18 @@
         bottom: 0.5rem;
     }
 
-    /* Footer section links (the drawn brass hairline lives in wayfinding.css). */
+    /* Footer section links (the drawn accent hairline lives in wayfinding.css). */
     .footer-link {
-        @apply font-sans text-base font-light text-champagne;
+        @apply font-sans text-base font-light text-ink;
     }
 
     .footer-link[aria-current='page'] {
-        color: var(--color-ivory);
+        color: var(--ink-strong);
     }
 
     /* Menu / Close buttons: label with two hairlines that form a cross when open. */
     .site-menu-toggle {
-        @apply inline-flex min-h-11 items-center gap-3 rounded-full px-2 text-champagne;
+        @apply inline-flex min-h-11 items-center gap-3 rounded-full px-2 text-ink;
     }
 
     .site-menu-toggle__icon {
@@ -489,27 +492,27 @@
 
     .section-card:hover,
     .section-card:focus-visible {
-        border-color: var(--color-evergreen);
-        background-color: var(--color-ivory);
+        border-color: var(--ink);
+        background-color: var(--surface);
     }
 
     /* Links in metadata: file and external links ("Download · PDF · 2.1 MB", "Source · example.org"). */
     .link-meta {
-        @apply inline-flex items-center gap-1 font-sans text-base font-medium text-evergreen;
+        @apply inline-flex items-center gap-1 font-sans text-base font-medium text-ink;
         text-decoration: underline;
-        text-decoration-color: var(--color-brass);
+        text-decoration-color: var(--accent-line);
         text-underline-offset: 0.2em;
         transition: text-decoration-color 300ms var(--ease-rise);
     }
 
     .link-meta:hover,
     .link-meta:focus-visible {
-        text-decoration-color: var(--color-evergreen);
+        text-decoration-color: var(--ink);
     }
 
-    /* Filter and pagination pills: outline by default, evergreen filled when current. */
+    /* Filter and pagination pills: outline by default, solid fill when current. */
     .filter-pill {
-        @apply inline-flex min-h-11 items-center justify-center rounded-full border border-stone bg-transparent px-4 font-sans text-sm font-medium text-evergreen no-underline;
+        @apply inline-flex min-h-11 items-center justify-center rounded-full border border-rule bg-transparent px-4 font-sans text-sm font-medium text-ink no-underline;
         transition:
             background-color 300ms var(--ease-rise),
             border-color 300ms var(--ease-rise),
@@ -518,39 +521,49 @@
 
     .filter-pill:hover,
     .filter-pill:focus-visible {
-        border-color: var(--color-evergreen);
+        border-color: var(--ink);
         text-decoration: none;
     }
 
     .filter-pill[aria-current] {
-        background-color: var(--color-evergreen);
-        border-color: var(--color-evergreen);
-        color: var(--color-ivory);
+        background-color: var(--fill);
+        border-color: var(--fill);
+        color: var(--fill-ink);
     }
 
     .filter-pill.is-disabled {
-        color: var(--color-ash);
-        border-color: var(--color-linen);
+        color: var(--ink-quiet);
+        border-color: var(--rule);
     }
 
-    /* Selects in filter forms: quiet, pill shaped, evergreen text on ivory. */
+    /* Selects in filter forms: quiet, pill shaped, on the field surface. Wrap in .select-wrap with a .select-chevron beside. */
     .filter-select {
-        @apply min-h-11 w-full rounded-full border border-stone bg-ivory px-4 pr-10 font-sans text-sm font-medium text-evergreen;
+        @apply min-h-11 w-full rounded-full border border-rule bg-surface-field px-4 pr-10 font-sans text-sm font-medium text-ink;
         appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10' fill='none' stroke='%2313221c' stroke-width='1'%3E%3Cpath d='M1 3.5 5 7.5 9 3.5'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 1rem center;
-        background-size: 0.625rem;
     }
 
-    /* Selects in forms: same box as inputs, with a quiet chevron. */
+    /* Selects in forms: same box as inputs. Wrap in .select-wrap with a .select-chevron beside. */
     .form-select {
         appearance: none;
         padding-right: 2.75rem;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10' fill='none' stroke='%2313221c' stroke-width='1'%3E%3Cpath d='M1 3.5 5 7.5 9 3.5'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 1rem center;
-        background-size: 0.625rem;
+    }
+
+    /* The chevron beside a select: a masked shape in the current ink, so it follows the theme. */
+    .select-wrap {
+        position: relative;
+        display: block;
+    }
+
+    .select-chevron {
+        position: absolute;
+        top: 50%;
+        right: 1rem;
+        width: 0.625rem;
+        height: 0.625rem;
+        transform: translateY(-50%);
+        pointer-events: none;
+        background-color: currentColor;
+        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10' fill='none' stroke='black' stroke-width='1'%3E%3Cpath d='M1 3.5 5 7.5 9 3.5'/%3E%3C/svg%3E") center / contain no-repeat;
     }
 
     /* Honeypot field: out of sight and out of the tab order, never display:none so bots still fill it. */
@@ -575,7 +588,7 @@
     .cite summary::after {
         content: '+';
         margin-left: 0.5rem;
-        color: var(--color-bronze);
+        color: var(--accent-text);
     }
 
     .cite[open] summary::after {
@@ -583,14 +596,14 @@
     }
 
     .cite__text {
-        @apply mt-4 rounded-card border border-stone bg-ivory p-5 font-sans text-base font-light leading-relaxed text-evergreen;
+        @apply mt-4 rounded-card border border-rule bg-surface-field p-5 font-sans text-base font-light leading-relaxed text-ink;
         white-space: pre-wrap;
         word-break: break-word;
     }
 
-    /* Hero portrait: a 4px-radius frame with a cypress hairline. */
+    /* Hero portrait: a 4px-radius frame with a strong hairline. */
     .hero__portrait .photo__frame {
-        border: 1px solid var(--color-cypress);
+        border: 1px solid var(--rule-strong);
     }
 
     /*
@@ -603,7 +616,7 @@
         font-weight: 300;
         font-size: 1.125rem; /* 18px */
         line-height: 1.7778; /* 32px */
-        color: var(--color-evergreen);
+        color: var(--ink);
     }
 
     .prose-bio > * + * {
@@ -646,7 +659,7 @@
         margin-top: var(--space-6);
         margin-bottom: var(--space-6);
         padding-top: var(--space-3);
-        border-top: 1px solid var(--color-brass);
+        border-top: 1px solid var(--accent-line);
     }
 
     .prose-bio blockquote p + p {
@@ -671,9 +684,9 @@
     }
 
     .prose-bio a {
-        color: var(--color-evergreen);
+        color: var(--ink);
         text-decoration: underline;
-        text-decoration-color: var(--color-brass);
+        text-decoration-color: var(--accent-line);
     }
 
     .prose-bio strong {
@@ -681,7 +694,7 @@
     }
 }
 
-/* Admin sidebar links: champagne on evergreen on 40px rows; the active item carries a 1px brass rule, as in the header. */
+/* Admin sidebar links (an on-dark region): the band ink on 40px rows; the active item carries a 1px accent rule, as in the header. */
 .admin-nav-link {
     display: block;
     padding: 0.5rem 0.75rem;
@@ -689,19 +702,19 @@
     font-size: 1rem;
     font-weight: 300;
     line-height: 1.5;
-    color: var(--color-champagne);
+    color: var(--ink);
     text-decoration: none;
     transition: color 300ms var(--ease-rise), border-color 300ms var(--ease-rise);
 }
 
 .admin-nav-link:hover {
-    color: var(--color-ivory);
+    color: var(--ink-strong);
     text-decoration: none;
 }
 
 .admin-nav-link--active {
-    border-left-color: var(--color-brass);
-    color: var(--color-ivory);
+    border-left-color: var(--accent-line);
+    color: var(--ink-strong);
     font-weight: 400;
 }
 
@@ -770,17 +783,17 @@
     border-bottom: 1px solid transparent;
     font-size: 0.875rem;
     font-weight: 500;
-    color: var(--color-ash);
+    color: var(--ink-muted);
     margin-bottom: -1px;
 }
 
 .admin-tab:hover {
-    color: var(--color-evergreen);
+    color: var(--ink);
 }
 
 .admin-tab[aria-selected='true'] {
-    border-bottom-color: var(--color-brass);
-    color: var(--color-evergreen);
+    border-bottom-color: var(--accent-line);
+    color: var(--ink);
 }
 
 .admin-table th {
@@ -789,15 +802,15 @@
     font-weight: 500;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: var(--color-bronze);
-    border-bottom: 1px solid var(--color-stone);
+    color: var(--accent-text);
+    border-bottom: 1px solid var(--rule);
     white-space: nowrap;
 }
 
 .admin-table td {
     padding: 0.875rem 1rem;
     vertical-align: middle;
-    border-bottom: 1px solid var(--color-stone);
+    border-bottom: 1px solid var(--rule);
     font-weight: 300;
     font-variant-numeric: lining-nums tabular-nums;
 }
@@ -807,7 +820,7 @@
 }
 
 .admin-table tbody tr:hover {
-    background: var(--color-linen);
+    background: var(--surface-sunken);
 }
 
 .admin-table tr.is-dragging {
@@ -815,7 +828,7 @@
 }
 
 .status-option:focus-within {
-    outline: 2px solid var(--color-bronze);
+    outline: 2px solid var(--focus);
     outline-offset: 2px;
 }
 
@@ -825,7 +838,7 @@
     align-items: center;
     gap: 0.25rem;
     padding: 0.5rem;
-    border-bottom: 1px solid var(--color-stone);
+    border-bottom: 1px solid var(--rule);
 }
 
 .rich-text__toolbar > button {
@@ -835,16 +848,16 @@
     border-radius: var(--radius-card);
     font-family: var(--font-sans);
     font-size: 0.875rem;
-    color: var(--color-evergreen);
+    color: var(--ink);
 }
 
 .rich-text__toolbar > button:hover {
-    background: var(--color-linen);
+    background: var(--surface-sunken);
 }
 
 .rich-text__toolbar > button[aria-pressed='true'] {
-    background: var(--color-evergreen);
-    color: var(--color-ivory);
+    background: var(--fill);
+    color: var(--fill-ink);
 }
 
 .rich-text__link {
@@ -859,15 +872,15 @@
 .rich-text__link input {
     flex: 1 1 12rem;
     padding: 0.5rem 0.75rem;
-    border: 1px solid var(--color-stone);
+    border: 1px solid var(--rule-strong);
     border-radius: var(--radius-card);
-    background: var(--color-ivory);
+    background: var(--surface-field);
     font-size: 0.875rem;
 }
 
 .rich-text__link button {
     font-size: 0.875rem;
-    color: var(--color-bronze);
+    color: var(--accent-text);
     text-decoration: underline;
     text-underline-offset: 4px;
 }
@@ -882,23 +895,23 @@
     min-height: 14rem;
 }
 
-/* The editable itself shows the focus ring (the wrapper's border also turns bronze). */
+/* The editable itself shows the focus ring (the wrapper's border also takes the focus colour). */
 .rich-text__editable:focus-visible {
-    outline: 2px solid var(--color-bronze);
+    outline: 2px solid var(--focus);
     outline-offset: -2px;
     border-radius: var(--radius-card);
 }
 
 .rich-text__editable p.is-editor-empty:first-child::before {
     content: 'Start writing…';
-    color: var(--color-ash);
+    color: var(--ink-muted);
     float: left;
     pointer-events: none;
     height: 0;
 }
 
 .rich-text:focus-within {
-    border-color: var(--color-bronze);
+    border-color: var(--focus);
 }
 
 .photo-grid {
@@ -912,7 +925,7 @@
     width: 100%;
     object-fit: cover;
     border-radius: var(--radius-card);
-    border: 1px solid var(--color-stone);
-    background: var(--color-linen);
+    border: 1px solid var(--rule);
+    background: var(--surface-sunken);
 }
 

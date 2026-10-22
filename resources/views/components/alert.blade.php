@@ -7,9 +7,9 @@
 @php
     $tone = $tone instanceof \App\Constants\StatusTone ? $tone : \App\Constants\StatusTone::from($tone);
 @endphp
-<div {{ $attributes->class(['flex items-start gap-3 rounded-card border bg-ivory px-4 py-3 text-sm', $tone->badgeClasses()]) }} role="{{ $role }}">
+<div {{ $attributes->class(['flex items-start gap-3 rounded-card border bg-surface-panel px-4 py-3 text-sm', $tone->badgeClasses()]) }} role="{{ $role }}">
     <x-icon :name="$tone->icon()" class="mt-0.5 size-5" />
-    <div class="text-evergreen">
+    <div class="text-ink">
         @if ($title)
             <p class="font-medium">{{ $title }}</p>
         @endif

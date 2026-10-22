@@ -15,7 +15,7 @@
         min-height: 100dvh;
     }
 
-    /* The evergreen panel: a short band above the form; the full left half from 1024px. */
+    /* The band panel (an on-dark region): a short band above the form; the full left half from 1024px. */
     .auth__panel {
         position: relative;
         display: flex;
@@ -23,7 +23,7 @@
         justify-content: flex-end;
         gap: var(--space-4);
         padding: var(--space-6) var(--space-2);
-        color: var(--color-champagne);
+        color: var(--ink);
     }
 
     .auth__panel-print {
@@ -92,7 +92,7 @@
         min-height: 0;
         overflow: hidden;
         border-radius: var(--radius-card);
-        background-color: color-mix(in srgb, var(--color-cypress) 40%, transparent);
+        background-color: color-mix(in srgb, var(--surface-raised) 40%, transparent);
     }
 
     .auth__portrait img {
@@ -112,7 +112,7 @@
         font-size: 0.875rem;
         font-weight: 300;
         line-height: var(--space-3);
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     /* A baseline unit below the label keeps the focus outline (offset 3px) clear of it. */
@@ -123,30 +123,30 @@
         margin-top: var(--space-1);
     }
 
-    /* An underlined input: 1px stone line, which the evergreen line below draws over on focus. */
+    /* An underlined input: a 1px quiet rule, which the ink line below draws over on focus. */
     .field__input {
         width: 100%;
         min-height: 3rem; /* 48px: AuthScreens::FIELD_HEIGHT_PX */
         padding: var(--space-1) 0;
         border: 0;
-        border-bottom: 1px solid var(--color-stone);
+        border-bottom: 1px solid var(--rule);
         border-radius: 0;
         background-color: transparent;
         font-family: var(--font-sans);
         font-weight: 300;
         font-size: 1.125rem; /* 18px */
         line-height: var(--space-4);
-        color: var(--color-evergreen);
+        color: var(--ink);
         transition: border-color 400ms var(--ease-rise);
     }
 
     .field__input::placeholder {
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     .field__input:-webkit-autofill {
-        -webkit-text-fill-color: var(--color-evergreen);
-        box-shadow: 0 0 0 1000px var(--color-ivory) inset;
+        -webkit-text-fill-color: var(--ink);
+        box-shadow: 0 0 0 1000px var(--surface) inset;
     }
 
     .field__input--toggle {
@@ -159,7 +159,7 @@
         bottom: 0;
         left: 0;
         height: 1px;
-        background-color: var(--color-evergreen);
+        background-color: var(--ink);
         transform: scaleX(0);
         transform-origin: left center;
         transition: transform 400ms var(--ease-rise); /* AuthScreens::LINE_DRAW_MS */
@@ -171,7 +171,7 @@
     }
 
     .field--invalid .field__input {
-        border-bottom-color: var(--color-bronze);
+        border-bottom-color: var(--danger-tone);
     }
 
     .field__error,
@@ -186,18 +186,18 @@
     }
 
     .field__error {
-        color: var(--color-bronze);
+        color: var(--danger-tone);
     }
 
     .field__note {
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     .field__note:empty {
         display: none;
     }
 
-    /* Show/hide password: a 44px target at the end of the line, icon in ash. */
+    /* Show/hide password: a 44px target at the end of the line, icon in muted ink. */
     .field__toggle {
         position: absolute;
         right: 0;
@@ -206,13 +206,13 @@
         justify-content: center;
         min-width: 2.75rem;
         min-height: 2.75rem;
-        color: var(--color-ash);
+        color: var(--ink-muted);
         transition: color 300ms var(--ease-rise);
     }
 
     .field__toggle:hover,
     .field__toggle[aria-pressed='true'] {
-        color: var(--color-evergreen);
+        color: var(--ink);
     }
 
     /* Password strength by length: a hairline that fills as the passphrase grows, and the word beside it. */
@@ -226,14 +226,14 @@
     .strength__track {
         flex: 1;
         height: 1px;
-        background-color: var(--color-stone);
+        background-color: var(--rule);
     }
 
     .strength__bar {
         display: block;
         height: 100%;
         width: calc(var(--strength, 0) * 100%);
-        background-color: var(--color-evergreen);
+        background-color: var(--ink);
         transition: width 400ms var(--ease-rise);
     }
 
@@ -254,9 +254,9 @@
         width: 1.125rem;
         height: 1.125rem;
         margin-top: 0.4375rem;
-        border: 1px solid var(--color-ash);
+        border: 1px solid var(--rule-strong);
         border-radius: 2px;
-        background-color: var(--color-ivory);
+        background-color: var(--surface-field);
         transition:
             background-color 300ms var(--ease-rise),
             border-color 300ms var(--ease-rise);
@@ -266,15 +266,15 @@
         content: '';
         width: 0.625rem;
         height: 0.625rem;
-        background-color: var(--color-ivory);
+        background-color: var(--fill-ink);
         clip-path: polygon(14% 44%, 0 65%, 40% 100%, 100% 20%, 86% 6%, 40% 72%);
         transform: scale(0);
         transition: transform 300ms var(--ease-rise);
     }
 
     .check__input:checked {
-        border-color: var(--color-evergreen);
-        background-color: var(--color-evergreen);
+        border-color: var(--fill);
+        background-color: var(--fill);
     }
 
     .check__input:checked::before {
@@ -286,7 +286,7 @@
         font-size: 1rem;
         font-weight: 300;
         line-height: var(--space-3);
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     /* ---------------------------------------------------------- code input */
@@ -308,19 +308,19 @@
     }
 
     .code-field__box:focus {
-        border-bottom-color: var(--color-evergreen);
+        border-bottom-color: var(--ink);
     }
 
     /* ---------------------------------------------------------- notes and links */
-    /* The one calm error summary: ash on linen, an icon, links to the fields. */
+    /* The one calm error summary: on the raised surface, an icon, links to the fields. */
     .auth-note {
         display: flex;
         align-items: flex-start;
         gap: var(--space-2);
         padding: var(--space-3);
         border-radius: var(--radius-card);
-        background-color: var(--color-linen);
-        color: var(--color-ash);
+        background-color: var(--surface-raised);
+        color: var(--ink);
         font-size: 0.9375rem;
         font-weight: 300;
         line-height: var(--space-3);
@@ -328,32 +328,32 @@
 
     .auth-note__title {
         font-weight: 500;
-        color: var(--color-evergreen);
+        color: var(--ink);
     }
 
     .auth-note a {
-        color: var(--color-evergreen);
+        color: var(--ink);
         text-decoration: underline;
         text-decoration-thickness: 1px;
-        text-decoration-color: var(--color-brass);
+        text-decoration-color: var(--accent-line);
         text-underline-offset: 0.2em;
     }
 
     .auth-note a:hover,
     .auth-note a:focus-visible {
-        text-decoration-color: var(--color-evergreen);
+        text-decoration-color: var(--ink);
     }
 
-    /* A quiet text link: hairline underline in brass that turns evergreen. */
+    /* A quiet text link: hairline accent underline that turns to the ink. */
     .link-hairline {
         display: inline-block;
         padding-block: 0.5rem;
-        color: var(--color-evergreen);
+        color: var(--ink);
         font-size: 1rem;
         font-weight: 300;
         text-decoration: underline;
         text-decoration-thickness: 1px;
-        text-decoration-color: var(--color-brass);
+        text-decoration-color: var(--accent-line);
         text-underline-offset: 0.25em;
         transition: text-decoration-color 300ms var(--ease-rise);
     }
@@ -361,7 +361,7 @@
     .link-hairline:hover,
     .link-hairline:focus-visible {
         text-decoration: underline;
-        text-decoration-color: var(--color-evergreen);
+        text-decoration-color: var(--ink);
     }
 
     /* Submitting: the label changes to the busy wording; the pill stays still. */

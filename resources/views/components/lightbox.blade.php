@@ -17,7 +17,7 @@
 >
     <div class="lightbox__inner" x-ref="inner">
         <div class="lightbox__bar">
-            <p class="t-label text-brass" aria-live="polite" x-text="counter()"></p>
+            <p class="t-label text-accent-text" aria-live="polite" x-text="counter()"></p>
             <button type="button" x-ref="close" class="lightbox__control" @click="close()">
                 <span class="t-label">Close</span>
                 <svg class="h-3 w-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true" focusable="false"><path d="M1 1l10 10M11 1L1 11" /></svg>
@@ -46,7 +46,7 @@
                     <span class="museum-label__meta smallcaps" x-show="current.meta" x-text="current.meta"></span>
                     <span class="museum-label__note" x-show="current.note" x-text="current.note"></span>
                 </div>
-                <p class="t-label text-brass" x-show="current.credit"><span class="sr-only">Credit: </span><span x-text="current.credit"></span></p>
+                <p class="t-label text-accent-text" x-show="current.credit"><span class="sr-only">Credit: </span><span x-text="current.credit"></span></p>
                 <div class="lightbox__nav" x-show="items.length > 1">
                     <button type="button" class="lightbox__arrow lightbox__arrow--prev" @click="prev()">
                         <span class="sr-only">Previous photograph</span>

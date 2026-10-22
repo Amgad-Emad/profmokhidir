@@ -31,6 +31,6 @@ class DropCapTest extends TestCase
         $this->assertStringContainsString('.drop-cap > p:first-of-type::first-letter', $css);
         $this->assertStringContainsString('initial-letter: 3;', $css);
         $this->assertStringContainsString('float: left;', $css);
-        $this->assertStringContainsString('color: var(--color-champagne);', $css);
+        $this->assertStringContainsString('color: var(--ink);', $css);
     }
 }

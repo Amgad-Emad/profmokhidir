@@ -43,7 +43,7 @@
         flex-direction: column;
         gap: var(--space-1);
         max-width: 32rem;
-        color: var(--color-evergreen);
+        color: var(--ink);
     }
 
     .museum-label__title {
@@ -57,26 +57,27 @@
     .museum-label__meta {
         font-size: 1.125rem;
         line-height: var(--space-3);
-        color: var(--color-bronze);
+        color: var(--accent-text);
     }
 
     .museum-label__note {
         font-size: 0.9375rem; /* 15px */
         line-height: var(--space-3);
         font-weight: 300;
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
+    /* On a dark band or over a photograph the label reads in the band inks (same in both themes). */
     .museum-label--ivory {
-        color: var(--color-ivory);
+        color: var(--ink-on-band-strong);
     }
 
     .museum-label--ivory .museum-label__meta {
-        color: var(--color-brass);
+        color: var(--accent-line);
     }
 
     .museum-label--ivory .museum-label__note {
-        color: var(--color-champagne);
+        color: var(--ink-on-band);
     }
 
     /* ------------------------------------------------------- exhibition */
@@ -146,7 +147,7 @@
     .exhibition__meta {
         font-size: 1.25rem;
         line-height: var(--space-4);
-        color: var(--color-bronze);
+        color: var(--accent-text);
     }
 
     /* --------------------------------------------------- exhibition wall */
@@ -225,19 +226,19 @@
         align-items: center;
         justify-content: center;
         gap: 0.75rem;
-        color: var(--color-ivory);
+        color: var(--ink-on-band-strong);
         text-decoration: none;
-        background-color: color-mix(in srgb, var(--color-evergreen) 24%, transparent);
+        background-color: color-mix(in srgb, var(--surface-scrim) 34%, transparent); /* the scrim (evergreen at 70%) thinned to about 24% over the poster */
         transition: background-color 600ms var(--ease-rise);
     }
 
     .video-facade__play:hover,
     .video-facade__play:focus-visible {
         text-decoration: none;
-        background-color: color-mix(in srgb, var(--color-evergreen) 44%, transparent);
+        background-color: color-mix(in srgb, var(--surface-scrim) 63%, transparent); /* about 44% */
     }
 
-    /* A 1px brass ring with a hairline triangle. */
+    /* A 1px accent ring with a hairline triangle. */
     .video-facade__ring {
         display: flex;
         align-items: center;
@@ -245,9 +246,9 @@
         width: 5rem;
         height: 5rem;
         border-radius: 9999px;
-        border: 1px solid var(--color-brass);
-        background-color: color-mix(in srgb, var(--color-evergreen) 60%, transparent);
-        color: var(--color-ivory);
+        border: 1px solid var(--accent-line);
+        background-color: color-mix(in srgb, var(--surface-scrim) 86%, transparent); /* about 60% */
+        color: var(--ink-on-band-strong);
     }
 
     .video-facade__ring svg {
@@ -267,7 +268,7 @@
     }
 
     /* ------------------------------------------------------- object view */
-    /* A full-screen evergreen <dialog>: the photograph large, its label to the side on desktop and below on mobile. */
+    /* A full-screen dark <dialog> (an on-dark region in both themes): the photograph large, its label to the side on desktop and below on mobile. */
     .lightbox {
         position: fixed;
         inset: 0;
@@ -278,12 +279,12 @@
         margin: 0;
         padding: 0;
         border: 0;
-        background-color: color-mix(in srgb, var(--color-evergreen) 96%, transparent);
-        color: var(--color-ivory);
+        background-color: color-mix(in srgb, var(--surface-hero) 96%, transparent);
+        color: var(--ink-on-band-strong);
     }
 
     .lightbox::backdrop {
-        background-color: color-mix(in srgb, var(--color-evergreen) 60%, transparent);
+        background-color: var(--surface-overlay);
     }
 
     .lightbox[open] {
@@ -319,14 +320,14 @@
         gap: 0.75rem;
         min-height: 2.75rem;
         padding: 0 0.5rem;
-        color: var(--color-champagne);
+        color: var(--ink-on-band);
         background: transparent;
         border: 0;
         cursor: pointer;
     }
 
     .lightbox__control:hover {
-        color: var(--color-ivory);
+        color: var(--ink-on-band-strong);
     }
 
     .lightbox__figure {
@@ -384,15 +385,15 @@
         width: 2.75rem;
         height: 2.75rem;
         border-radius: 9999px;
-        border: 1px solid var(--color-champagne);
+        border: 1px solid var(--ink-on-band);
         background-color: transparent;
-        color: var(--color-ivory);
+        color: var(--ink-on-band-strong);
         cursor: pointer;
         transition: background-color 600ms var(--ease-rise);
     }
 
     .lightbox__arrow:hover {
-        background-color: var(--color-cypress);
+        background-color: color-mix(in srgb, var(--ink-on-band) 16%, transparent);
     }
 
     .lightbox__arrow svg {
@@ -417,7 +418,7 @@
             align-self: center;
             gap: 1.5rem;
             padding-left: 2rem;
-            border-left: 1px solid var(--color-cypress);
+            border-left: 1px solid color-mix(in srgb, var(--ink-on-band) 30%, transparent);
         }
 
         .lightbox__nav {

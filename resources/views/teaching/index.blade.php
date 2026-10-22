@@ -9,27 +9,33 @@
             <x-empty-state class="mt-6" message="Teaching materials will appear here as they are prepared for sharing." />
         @else
             @if ($topics !== [] || count($types) > 1)
-                <form method="get" action="{{ $clearUrl }}" class="mt-12 flex flex-col gap-6 border-y border-stone py-8 sm:flex-row sm:flex-wrap sm:items-end" data-rise>
+                <form method="get" action="{{ $clearUrl }}" class="mt-12 flex flex-col gap-6 border-y border-rule py-8 sm:flex-row sm:flex-wrap sm:items-end" data-rise>
                     @if ($topics !== [])
                         <div class="flex flex-col gap-4">
-                            <label for="filter-topic" class="t-label text-bronze">Topic</label>
-                            <select id="filter-topic" name="topic" class="filter-select min-w-56">
-                                <option value="">All topics</option>
-                                @foreach ($topics as $topic)
-                                    <option value="{{ $topic }}"{!! $active['topic'] === $topic ? ' selected' : '' !!}>{{ $topic }}</option>
-                                @endforeach
-                            </select>
+                            <label for="filter-topic" class="t-label text-accent-text">Topic</label>
+                            <span class="select-wrap">
+                                <select id="filter-topic" name="topic" class="filter-select min-w-56">
+                                    <option value="">All topics</option>
+                                    @foreach ($topics as $topic)
+                                        <option value="{{ $topic }}"{!! $active['topic'] === $topic ? ' selected' : '' !!}>{{ $topic }}</option>
+                                    @endforeach
+                                </select>
+                                <span class="select-chevron" aria-hidden="true"></span>
+                            </span>
                         </div>
                     @endif
                     @if (count($types) > 1)
                         <div class="flex flex-col gap-4">
-                            <label for="filter-type" class="t-label text-bronze">Type</label>
-                            <select id="filter-type" name="type" class="filter-select min-w-44">
-                                <option value="">All types</option>
-                                @foreach ($types as $type)
-                                    <option value="{{ $type->value }}"{!! $active['type'] === $type ? ' selected' : '' !!}>{{ $type->label() }}</option>
-                                @endforeach
-                            </select>
+                            <label for="filter-type" class="t-label text-accent-text">Type</label>
+                            <span class="select-wrap">
+                                <select id="filter-type" name="type" class="filter-select min-w-44">
+                                    <option value="">All types</option>
+                                    @foreach ($types as $type)
+                                        <option value="{{ $type->value }}"{!! $active['type'] === $type ? ' selected' : '' !!}>{{ $type->label() }}</option>
+                                    @endforeach
+                                </select>
+                                <span class="select-chevron" aria-hidden="true"></span>
+                            </span>
                         </div>
                     @endif
                     <div class="flex flex-wrap gap-3">
@@ -42,7 +48,7 @@
             @endif
 
             @if (! $canSeeMembers)
-                <p class="mt-8 max-w-2xl text-base font-light text-ash" data-rise>Some materials are shared with members of the Scientific Community only. <a href="{{ $communityUrl }}" class="text-evergreen underline decoration-brass underline-offset-4">Apply to join the community</a> to download them.</p>
+                <p class="mt-8 max-w-2xl text-base font-light text-ink-muted" data-rise>Some materials are shared with members of the Scientific Community only. <a href="{{ $communityUrl }}" class="text-ink underline decoration-accent-line underline-offset-4">Apply to join the community</a> to download them.</p>
             @endif
 
             @if ($courses === [])

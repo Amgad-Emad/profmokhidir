@@ -12,7 +12,7 @@
             @if ($contents !== [])
                 <div class="essay__aside">
                     <nav class="essay__contents" aria-labelledby="essay-contents-title" x-data="essayContents">
-                        <p id="essay-contents-title" class="t-label text-bronze">{{ \App\Constants\Essay::TOC_LABEL }}</p>
+                        <p id="essay-contents-title" class="t-label text-accent-text">{{ \App\Constants\Essay::TOC_LABEL }}</p>
                         <ol class="essay__contents-list">
                             @foreach ($contents as $entry)
                                 <li @class(['essay__contents-sub' => $entry['level'] > 2])>
@@ -77,7 +77,7 @@
 
                 @if ($tags !== [])
                     <nav class="essay__topics" aria-label="Topics" data-rise>
-                        <p class="t-label text-bronze">Topics</p>
+                        <p class="t-label text-accent-text">Topics</p>
                         <ul class="mt-4 flex flex-wrap gap-2">
                             @foreach ($tags as $tag)
                                 <li><a href="{{ $tag['url'] }}" class="filter-pill">{{ $tag['label'] }}</a></li>
@@ -88,13 +88,13 @@
 
                 @if ($related->isNotEmpty())
                     <section class="further-reading mt-16" aria-labelledby="further-reading-title">
-                        <h2 id="further-reading-title" class="t-label text-bronze" data-rise>{{ \App\Constants\Essay::FURTHER_READING_LABEL }}</h2>
+                        <h2 id="further-reading-title" class="t-label text-accent-text" data-rise>{{ \App\Constants\Essay::FURTHER_READING_LABEL }}</h2>
                         <hr class="rule-brass mt-4" data-rule>
                         <ol class="further-reading__list" data-rise-group>
                             @foreach ($related as $item)
                                 <li class="further-reading__item">
                                     @if ($item->date)
-                                        <x-date :date="$item->date" class="t-label text-bronze" />
+                                        <x-date :date="$item->date" class="t-label text-accent-text" />
                                     @endif
                                     <a href="{{ route('commentary.show', $item->slug) }}" class="further-reading__title">@typeset($item->title)</a>
                                     @if (filled($item->summary))
@@ -111,18 +111,18 @@
                     <div class="mt-8 grid gap-8 sm:grid-cols-2">
                         <div>
                             @if ($previous)
-                                <p class="t-label text-bronze">Previous</p>
-                                <a href="{{ route('commentary.show', $previous->slug) }}" class="mt-3 block font-display text-xl font-light leading-snug text-evergreen">@typeset($previous->title)</a>
+                                <p class="t-label text-accent-text">Previous</p>
+                                <a href="{{ route('commentary.show', $previous->slug) }}" class="mt-3 block font-display text-xl font-light leading-snug text-ink">@typeset($previous->title)</a>
                             @endif
                         </div>
                         <div class="sm:text-right">
                             @if ($next)
-                                <p class="t-label text-bronze">Next</p>
-                                <a href="{{ route('commentary.show', $next->slug) }}" class="mt-3 block font-display text-xl font-light leading-snug text-evergreen">@typeset($next->title)</a>
+                                <p class="t-label text-accent-text">Next</p>
+                                <a href="{{ route('commentary.show', $next->slug) }}" class="mt-3 block font-display text-xl font-light leading-snug text-ink">@typeset($next->title)</a>
                             @endif
                         </div>
                     </div>
-                    <a href="{{ $section['url'] }}" class="btn-pill-outline mt-10 text-evergreen">All commentary</a>
+                    <a href="{{ $section['url'] }}" class="btn-pill-outline mt-10 text-ink">All commentary</a>
                 </nav>
 
                 <x-seal />

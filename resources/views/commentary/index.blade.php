@@ -8,26 +8,26 @@
             <x-empty-state class="mt-6" message="Essays and reflections will be published here in due course." />
         @else
             @if ($tags !== [])
-                <x-filter-pills class="mt-12 border-y border-stone py-8" label="Topics" :options="$tags" :all-url="$clearUrl" :all-active="$activeTag === null" all-label="All topics" data-rise />
+                <x-filter-pills class="mt-12 border-y border-rule py-8" label="Topics" :options="$tags" :all-url="$clearUrl" :all-active="$activeTag === null" all-label="All topics" data-rise />
             @endif
 
             @if ($commentaries->total() === 0)
                 <x-empty-state class="mt-6" message="Nothing has been written under this topic yet." />
             @else
-                <ol class="mt-12 divide-y divide-stone border-b border-stone" data-rise-group>
+                <ol class="mt-12 divide-y divide-rule border-b border-rule" data-rise-group>
                     @foreach ($commentaries as $commentary)
                         <li class="grid gap-3 py-10 sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-10">
                             <div class="pt-2">
                                 @if ($commentary->date)
-                                    <x-date :date="$commentary->date" class="t-label text-bronze" />
+                                    <x-date :date="$commentary->date" class="t-label text-accent-text" />
                                 @endif
                             </div>
                             <article class="flex flex-col gap-3">
-                                <h2 class="font-display text-2xl font-light leading-snug text-evergreen sm:text-quote">
-                                    <a href="{{ route('commentary.show', $commentary->slug) }}" class="text-evergreen">{{ $commentary->title }}</a>
+                                <h2 class="font-display text-2xl font-light leading-snug text-ink sm:text-quote">
+                                    <a href="{{ route('commentary.show', $commentary->slug) }}" class="text-ink">{{ $commentary->title }}</a>
                                 </h2>
                                 @if (filled($commentary->summary))
-                                    <p class="t-body max-w-measure text-evergreen">{{ $commentary->summary }}</p>
+                                    <p class="t-body max-w-measure text-ink">{{ $commentary->summary }}</p>
                                 @endif
                                 @if (filled($commentary->tags))
                                     <ul class="mt-2 flex flex-wrap gap-2" aria-label="Topics">

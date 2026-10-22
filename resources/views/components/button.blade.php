@@ -10,7 +10,7 @@
 @props(['variant' => 'filled', 'type' => 'submit', 'href' => null, 'busy' => null])
 @php
     $styles = [
-        'filled' => 'btn-pill-outline text-evergreen',
+        'filled' => 'btn-pill-outline text-ink',
         'primary' => 'btn-pill-solid',
         'outline' => 'btn-quiet',
         'filled-light' => 'btn-pill-filled on-dark',

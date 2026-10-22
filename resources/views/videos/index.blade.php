@@ -11,20 +11,20 @@
                 <x-video-player :player="$player" :title="$featured->title" :featured="true" />
                 <div class="lecture-hall__label">
                     <div class="lecture-hall__text">
-                        <p class="t-label text-bronze">Featured recording</p>
+                        <p class="t-label text-accent-text">Featured recording</p>
                         <h2 id="featured-title" class="lecture-hall__title">
-                            <a href="{{ route('videos.show', $featured->slug) }}" class="text-evergreen">{{ $featured->title }}</a>
+                            <a href="{{ route('videos.show', $featured->slug) }}" class="text-ink">{{ $featured->title }}</a>
                         </h2>
                         <x-video-label :video="$featured" />
                     </div>
                     @if (filled($featured->description))
-                        <p class="t-body max-w-measure text-ash">{{ \Illuminate\Support\Str::limit(trim($featured->description), \App\Services\VideosPageService::DESCRIPTION_LIMIT) }}</p>
+                        <p class="t-body max-w-measure text-ink-muted">{{ \Illuminate\Support\Str::limit(trim($featured->description), \App\Services\VideosPageService::DESCRIPTION_LIMIT) }}</p>
                     @endif
                 </div>
             </article>
 
             @if ($videos->isNotEmpty())
-                <h2 class="t-label mt-24 text-bronze" id="all-recordings" data-rise>All recordings</h2>
+                <h2 class="t-label mt-24 text-accent-text" id="all-recordings" data-rise>All recordings</h2>
                 <hr class="rule-brass mt-4" data-rule>
                 <ul class="mt-12 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3" data-rise-group aria-labelledby="all-recordings">
                     @foreach ($videos as $video)
@@ -40,11 +40,11 @@
                                 </a>
                                 <div class="flex flex-col gap-2">
                                     <x-video-label :video="$video" />
-                                    <h3 class="font-display text-2xl font-light leading-snug text-evergreen">
-                                        <a href="{{ $url }}" class="text-evergreen">{{ $video->title }}</a>
+                                    <h3 class="font-display text-2xl font-light leading-snug text-ink">
+                                        <a href="{{ $url }}" class="text-ink">{{ $video->title }}</a>
                                     </h3>
                                     @if (filled($video->description))
-                                        <p class="t-body text-ash">{{ \Illuminate\Support\Str::limit(trim($video->description), \App\Services\VideosPageService::DESCRIPTION_LIMIT) }}</p>
+                                        <p class="t-body text-ink-muted">{{ \Illuminate\Support\Str::limit(trim($video->description), \App\Services\VideosPageService::DESCRIPTION_LIMIT) }}</p>
                                     @endif
                                 </div>
                             </article>

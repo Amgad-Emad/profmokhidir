@@ -25,7 +25,7 @@
             @csrf
 
             @error(\App\Http\Controllers\TributeController::LIMIT_ERROR)
-                <p class="rounded-card border border-stone bg-linen px-4 py-3 text-base font-light text-bronze" role="alert">{{ $message }}</p>
+                <p class="rounded-card border border-rule bg-surface-raised px-4 py-3 text-base font-light text-danger-tone" role="alert">{{ $message }}</p>
             @enderror
 
             <input type="hidden" name="name" value="{{ $data['name'] }}">
@@ -41,12 +41,12 @@
             </div>
 
             <div>
-                <label class="flex items-start gap-3 text-base font-light text-ash">
-                    <input type="checkbox" name="consent" value="1" required class="mt-1.5 size-4 shrink-0 rounded-sm border-stone accent-evergreen" @checked(old('consent'))>
+                <label class="flex items-start gap-3 text-base font-light text-ink-muted">
+                    <input type="checkbox" name="consent" value="1" required class="mt-1.5 size-4 shrink-0 rounded-sm border-rule-strong accent-ink" @checked(old('consent'))>
                     <span>{{ $consent }}</span>
                 </label>
                 @error('consent')
-                    <p class="mt-2 text-sm text-bronze" role="alert">{{ $message }}</p>
+                    <p class="mt-2 text-sm text-danger-tone" role="alert">{{ $message }}</p>
                 @enderror
             </div>
 

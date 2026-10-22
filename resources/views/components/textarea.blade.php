@@ -10,19 +10,19 @@
     $describedBy = implode(' ', array_filter([$hint ? $hintId : null, $maxlength ? $countId : null]));
 @endphp
 <div @if ($maxlength) x-data="{ count: {{ mb_strlen($current) }} }" @endif>
-    <label for="{{ $name }}" class="t-label block text-bronze">{{ $label }}</label>
+    <label for="{{ $name }}" class="t-label block text-accent-text">{{ $label }}</label>
     @if ($hint)
-        <p id="{{ $hintId }}" class="mt-2 text-sm font-light text-ash">{{ $hint }}</p>
+        <p id="{{ $hintId }}" class="mt-2 text-sm font-light text-ink-muted">{{ $hint }}</p>
     @endif
     <textarea id="{{ $name }}" name="{{ $name }}" rows="{{ $rows }}"
               @if ($required) required @endif
               @if ($maxlength) maxlength="{{ $maxlength }}" x-on:input="count = $event.target.value.length" @endif
               @if ($describedBy !== '') aria-describedby="{{ $describedBy }}" @endif
-              {{ $attributes->merge(['class' => 'mt-2 block w-full resize-y rounded-card border border-stone bg-ivory px-4 py-3 text-body text-evergreen placeholder:text-ash focus:border-bronze']) }}>{{ $current }}</textarea>
+              {{ $attributes->merge(['class' => 'mt-2 block w-full resize-y rounded-card border border-rule-strong bg-surface-field px-4 py-3 text-body text-ink placeholder:text-ink-muted focus:border-focus']) }}>{{ $current }}</textarea>
     @if ($maxlength)
-        <p id="{{ $countId }}" class="mt-2 text-sm font-light text-ash" aria-live="polite"><span x-text="count">{{ mb_strlen($current) }}</span> / {{ $maxlength }} characters</p>
+        <p id="{{ $countId }}" class="mt-2 text-sm font-light text-ink-muted" aria-live="polite"><span x-text="count">{{ mb_strlen($current) }}</span> / {{ $maxlength }} characters</p>
     @endif
     @error($name)
-        <p class="mt-2 text-sm text-bronze" role="alert">{{ $message }}</p>
+        <p class="mt-2 text-sm text-danger-tone" role="alert">{{ $message }}</p>
     @enderror
 </div>

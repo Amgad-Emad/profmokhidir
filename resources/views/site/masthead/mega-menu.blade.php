@@ -6,7 +6,7 @@
 <div id="{{ $chapter['panelId'] }}" class="mega-menu" x-show="isOpen('{{ $chapter['key'] }}')" x-cloak x-transition:enter="mega-menu--moving" x-transition:enter-start="mega-menu--hidden" x-transition:leave="mega-menu--moving" x-transition:leave-end="mega-menu--hidden" aria-labelledby="{{ $chapter['buttonId'] }}" @keydown.down.prevent="moveFocus($event, 1)" @keydown.up.prevent="moveFocus($event, -1)" @keydown.home.prevent="moveFocus($event, 'first')" @keydown.end.prevent="moveFocus($event, 'last')">
     <div class="mega-menu__inner">
         <div class="mega-menu__title">
-            <p class="t-numeral text-brass" aria-hidden="true">{{ $chapter['numeral'] }}</p>
+            <p class="t-numeral text-accent-text" aria-hidden="true">{{ $chapter['numeral'] }}</p>
             <p class="mega-menu__name"><span class="sr-only">Chapter {{ $chapter['numeral'] }}: </span>{{ $chapter['label'] }}</p>
             <p class="mega-menu__strap">{{ $chapter['strap'] }}</p>
         </div>

@@ -18,13 +18,13 @@
 @layer components {
     /* Search button: magnifier and the "/" key hint on wide screens (the masthead itself is in masthead.css). */
     .site-search-toggle {
-        @apply inline-flex min-h-11 items-center gap-2 rounded-full px-2 text-champagne no-underline;
+        @apply inline-flex min-h-11 items-center gap-2 rounded-full px-2 text-ink no-underline;
         transition: color 300ms var(--ease-rise);
     }
 
     .site-search-toggle:hover,
     .site-search-toggle:focus-visible {
-        color: var(--color-ivory);
+        color: var(--ink-strong);
         text-decoration: none;
     }
 
@@ -38,13 +38,13 @@
         display: none;
         min-width: 1.5rem;
         padding: 0.125rem 0.375rem;
-        border: 1px solid color-mix(in srgb, var(--color-champagne) 40%, transparent);
+        border: 1px solid color-mix(in srgb, var(--ink) 40%, transparent);
         border-radius: var(--radius-card);
         font-family: var(--font-mono);
         font-size: 0.6875rem;
         line-height: 1.2;
         text-align: center;
-        color: var(--color-champagne);
+        color: var(--ink);
     }
 
     @media (min-width: 1280px) {
@@ -60,32 +60,32 @@
         min-height: 3.25rem;
         padding: 0.75rem 0;
         border: 0;
-        border-bottom: 1px solid var(--color-cypress);
+        border-bottom: 1px solid var(--rule-strong);
         border-radius: 0;
         background: transparent;
         font-family: var(--font-display);
         font-weight: 300;
         font-size: clamp(1.75rem, 1.25rem + 2vw, 2.5rem);
         line-height: 1.2;
-        color: var(--color-ivory);
+        color: var(--ink-strong);
         transition: border-color var(--duration-draw) var(--ease-rise);
     }
 
     .site-search__input::placeholder,
     .search-form__input::placeholder {
-        color: color-mix(in srgb, var(--color-champagne) 60%, transparent);
+        color: var(--ink-muted);
         font-style: italic;
     }
 
     .site-search__input:focus,
     .search-form__input:focus {
         outline: none;
-        border-bottom-color: var(--color-brass);
+        border-bottom-color: var(--focus);
     }
 
     .site-search__input:focus-visible,
     .search-form__input:focus-visible {
-        outline: 2px solid var(--color-brass);
+        outline: 2px solid var(--focus);
         outline-offset: 6px;
     }
 
@@ -98,7 +98,7 @@
     .site-search__hint {
         margin-top: 0.75rem;
         font-size: 1rem;
-        color: color-mix(in srgb, var(--color-champagne) 75%, transparent);
+        color: var(--ink-muted);
     }
 
     .site-search__results.is-loading {
@@ -106,7 +106,7 @@
         transition: opacity var(--duration-draw) var(--ease-rise);
     }
 
-    /* The plain page's form on ivory: the same quiet rule in stone, evergreen ink. */
+    /* The plain page's form: the same quiet rule, the page ink (the error page wraps it in an on-dark region). */
     .search-form__row {
         display: flex;
         flex-wrap: wrap;
@@ -117,37 +117,20 @@
     .search-form__row .search-form__input {
         flex: 1 1 16rem;
         font-size: clamp(1.375rem, 1rem + 1.25vw, 1.75rem);
-        border-bottom-color: var(--color-stone);
-        color: var(--color-evergreen);
+        border-bottom-color: var(--rule-strong);
+        color: var(--ink);
     }
 
     .search-form__row .search-form__input::placeholder {
-        color: var(--color-ash);
+        color: var(--ink-muted);
     }
 
     .search-form__row .search-form__input:focus {
-        border-bottom-color: var(--color-bronze);
+        border-bottom-color: var(--focus);
     }
 
     .search-form__row .search-form__input:focus-visible {
-        outline-color: var(--color-bronze);
-    }
-
-    .search-form--ivory .search-form__row .search-form__input {
-        border-bottom-color: var(--color-cypress);
-        color: var(--color-ivory);
-    }
-
-    .search-form--ivory .search-form__row .search-form__input::placeholder {
-        color: color-mix(in srgb, var(--color-champagne) 60%, transparent);
-    }
-
-    .search-form--ivory .search-form__row .search-form__input:focus {
-        border-bottom-color: var(--color-brass);
-    }
-
-    .search-form--ivory .search-form__row .search-form__input:focus-visible {
-        outline-color: var(--color-brass);
+        outline-color: var(--focus);
     }
 
     /* ------------------------------------------------------------ results */
@@ -184,11 +167,7 @@
 
     .search-results__count {
         font-size: 1.125rem;
-        color: var(--color-bronze);
-    }
-
-    .site-search .search-results__count {
-        color: var(--color-brass);
+        color: var(--accent-text);
     }
 
     .search-results__rule {
@@ -201,11 +180,7 @@
     }
 
     .search-results__item + .search-results__item {
-        border-top: 1px solid var(--color-stone);
-    }
-
-    .site-search .search-results__item + .search-results__item {
-        border-top-color: var(--color-cypress);
+        border-top: 1px solid var(--rule);
     }
 
     .search-results__link {
@@ -233,7 +208,7 @@
     .search-results__link:hover .search-results__title,
     .search-results__link:focus-visible .search-results__title {
         text-decoration: underline;
-        text-decoration-color: var(--color-brass);
+        text-decoration-color: var(--accent-line);
         text-underline-offset: 0.2em;
         text-decoration-thickness: 1px;
     }
@@ -247,20 +222,12 @@
         font-weight: 300;
         font-size: 1rem;
         line-height: 1.6;
-        color: var(--color-ash);
-    }
-
-    .site-search .search-results__excerpt {
-        color: color-mix(in srgb, var(--color-champagne) 85%, transparent);
+        color: var(--ink-muted);
     }
 
     .search-results__members {
         font-size: 1rem;
-        color: var(--color-bronze);
-    }
-
-    .site-search .search-results__members {
-        color: var(--color-brass);
+        color: var(--accent-text);
     }
 
     .search-results__more {
@@ -278,7 +245,7 @@
         color: inherit;
         font-weight: 500;
         text-decoration: underline;
-        text-decoration-color: var(--color-brass);
+        text-decoration-color: var(--accent-line);
         text-decoration-thickness: 1px;
         text-underline-offset: 0.18em;
     }
@@ -316,11 +283,7 @@
         gap: 0.25rem 0.75rem;
         font-size: 1.125rem;
         line-height: 1.5;
-        color: var(--color-ash);
-    }
-
-    .breadcrumbs--ivory .breadcrumbs__list {
-        color: var(--color-champagne);
+        color: var(--ink-muted);
     }
 
     .breadcrumbs__item {
@@ -334,22 +297,14 @@
     }
 
     .breadcrumbs__link[aria-current='page'] {
-        color: var(--color-evergreen);
+        color: var(--ink);
         text-decoration: none;
     }
 
-    .breadcrumbs--ivory .breadcrumbs__link[aria-current='page'] {
-        color: var(--color-ivory);
-    }
-
     .breadcrumbs__separator {
-        color: var(--color-bronze);
+        color: var(--accent-text);
         font-family: var(--font-display);
         font-weight: 300;
-    }
-
-    .breadcrumbs--ivory .breadcrumbs__separator {
-        color: var(--color-brass);
     }
 
     /* ------------------------------------------------------------ skeleton */
@@ -365,12 +320,8 @@
         width: var(--w, 90%);
         height: 0.875rem;
         border-radius: 2px;
-        background-color: var(--color-linen);
+        background-color: var(--surface-raised);
         animation: skeleton-breathe 2400ms ease-in-out infinite alternate;
-    }
-
-    .skeleton--ivory .skeleton__line {
-        background-color: color-mix(in srgb, var(--color-linen) 14%, transparent);
     }
 
     /* --------------------------------------------------------- empty state */
@@ -431,7 +382,7 @@
         right: 0;
         bottom: 0;
         height: 1px;
-        background-color: var(--color-brass);
+        background-color: var(--accent-line);
         transform: scaleX(0);
         transform-origin: left center;
         transition: transform var(--duration-draw) var(--ease-rise);
@@ -439,7 +390,7 @@
 
     .footer-link:hover,
     .footer-link:focus-visible {
-        color: var(--color-ivory);
+        color: var(--ink-strong);
         text-decoration: none;
     }
 

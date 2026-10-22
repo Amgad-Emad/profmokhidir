@@ -13,7 +13,7 @@ class EpigraphTest extends TestCase
     {
         $html = Blade::render('<x-epigraph attribution="Prof. M. O. Khidir">Knowledge is the light we pass on.</x-epigraph>');
 
-        $this->assertStringContainsString('<figure class="epigraph text-ash">', $html);
+        $this->assertStringContainsString('<figure class="epigraph text-ink-muted">', $html);
         $this->assertStringContainsString('<blockquote class="epigraph__quote"><p>Knowledge is the light we pass on.</p></blockquote>', $html);
         $this->assertStringContainsString("<figcaption class=\"epigraph__attribution\"><span aria-hidden=\"true\">— </span><span class=\"smallcaps\">Prof.\u{00A0}M.\u{00A0}O.\u{00A0}Khidir</span></figcaption>", $html);
     }
@@ -23,7 +23,7 @@ class EpigraphTest extends TestCase
     {
         $html = Blade::render('<x-epigraph tone="ivory">A quote.</x-epigraph>');
 
-        $this->assertStringContainsString('class="epigraph text-champagne"', $html);
+        $this->assertStringContainsString('class="epigraph text-ink"', $html);
         $this->assertStringNotContainsString('figcaption', $html);
     }
 }

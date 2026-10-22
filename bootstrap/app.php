@@ -1,5 +1,6 @@
 <?php
 
+use App\Constants\ThemeSettings;
 use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\EnsureCommunityMember;
 use App\Http\Middleware\EnsureTwoFactorIsEnabled;
@@ -29,6 +30,9 @@ return Application::configure(basePath: dirname(__DIR__))
             EnsureCommunityMember::ALIAS => EnsureCommunityMember::class,
             EnsureAccountIsActive::ALIAS => EnsureAccountIsActive::class,
         ]);
+
+        // The theme cookie stays plain so the inline head script can read it before the first paint.
+        $middleware->encryptCookies(except: [ThemeSettings::COOKIE]);
 
         // Deactivated accounts are signed out on their next request, whatever the page.
         $middleware->web(append: [EnsureAccountIsActive::class]);

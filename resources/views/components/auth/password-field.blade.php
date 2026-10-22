@@ -53,7 +53,7 @@
     @if ($strength)
         <div class="strength" data-password-strength>
             <span class="strength__track" aria-hidden="true"><span class="strength__bar" x-bind:style="'--strength: ' + strength"></span></span>
-            <span id="{{ $strengthId }}" class="t-label text-bronze" aria-live="polite" x-text="strengthLabel"></span>
+            <span id="{{ $strengthId }}" class="t-label text-accent-text" aria-live="polite" x-text="strengthLabel"></span>
         </div>
     @endif
 </div>

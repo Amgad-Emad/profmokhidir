@@ -95,7 +95,7 @@ class AuthFormCraftTest extends TestCase
         $response
             ->assertSee('x-data="authChallenge({ recovery: false })" data-two-factor', false)
             ->assertSee('x-data="authCode({ length: '.AuthScreens::CODE_LENGTH.' })"', false)
-            ->assertSee('<legend class="t-label mb-2 text-bronze">Authentication code</legend>', false)
+            ->assertSee('<legend class="t-label mb-2 text-accent-text">Authentication code</legend>', false)
             ->assertSee('aria-label="Digit 1 of 6"', false)
             ->assertSee('aria-label="Digit 6 of 6"', false)
             ->assertSee('<input type="hidden" name="code" x-ref="value" value="" x-bind:disabled="recovery">', false)

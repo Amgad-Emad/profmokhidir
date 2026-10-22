@@ -23,19 +23,19 @@ class AuthViewsTest extends TestCase
         $response = $this->get(route('login'))->assertOk()->assertViewIs('auth.login');
 
         $response
-            ->assertSee('class="auth min-h-screen bg-ivory text-evergreen"', false)
+            ->assertSee('class="auth min-h-screen bg-surface text-ink"', false)
             ->assertSee('data-variant="stacked"', false)
             ->assertSee('Mohamed Osman Khidir')
             ->assertSee('class="auth__column" data-rise-group', false)
             ->assertSee('btn-pill-solid w-full', false)
             ->assertSee('class="seal !mt-4"', false)
             ->assertSee('<h1 id="page-title" class="t-heading">Sign in</h1>', false)
-            ->assertSee('t-label block text-bronze', false)
+            ->assertSee('t-label block text-accent-text', false)
             ->assertSee('Keep me signed in')
             ->assertSee(route('password.request'))
             ->assertSee('glow-brass')
             ->assertDontSee('auth-card')
-            ->assertDontSee('btn-pill-outline text-evergreen', false)
+            ->assertDontSee('btn-pill-outline text-ink', false)
             ->assertDontSee('livewire', false);
     }
 

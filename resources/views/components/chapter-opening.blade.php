@@ -14,7 +14,7 @@
 @endphp
 <div {{ $attributes->class(['chapter-opening']) }}>
     @if ($numeral || $label)
-        <p class="chapter-opening__label {{ $onDark ? 'text-brass' : 'text-bronze' }}" data-rise>
+        <p class="chapter-opening__label text-accent-text" data-rise>
             @if ($numeral)
                 <span class="t-numeral"><span class="sr-only">Chapter </span>{{ $numeral }}</span>
             @endif
@@ -29,6 +29,6 @@
         <div class="chapter-opening__epigraph" data-rise>{{ $epigraph }}</div>
     @endisset
     @if ($slot->isNotEmpty())
-        <div class="t-body mt-6 max-w-2xl {{ $onDark ? 'text-champagne' : 'text-ash' }}" data-rise>{{ $slot }}</div>
+        <div class="t-body mt-6 max-w-2xl {{ $onDark ? 'text-ink' : 'text-ink-muted' }}" data-rise>{{ $slot }}</div>
     @endif
 </div>

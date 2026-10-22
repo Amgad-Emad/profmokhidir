@@ -18,7 +18,7 @@
 @endphp
 <div {{ $attributes->class(['code-field', 'field--invalid' => $hasError]) }} x-data="authCode({ length: {{ (int) $length }} })">
     <fieldset class="min-w-0 border-0 p-0" @if ($hasError) aria-describedby="{{ $errorId }}" @endif>
-        <legend class="t-label mb-2 text-bronze">{{ $label }}</legend>
+        <legend class="t-label mb-2 text-accent-text">{{ $label }}</legend>
         <noscript><style>.code-field__boxes { display: none; }</style></noscript>
         <div class="code-field__boxes" x-on:paste="paste($event)">
             @for ($i = 0; $i < $length; $i++)

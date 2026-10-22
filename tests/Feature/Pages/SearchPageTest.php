@@ -109,7 +109,7 @@ class SearchPageTest extends TestCase
         $response->assertJson(['query' => 'cotton', 'total' => 1, 'summary' => '1 result in 1 section']);
         $html = $response->json('html');
         $this->assertStringContainsString('<mark class="search-mark">Cotton</mark> yields', $html);
-        $this->assertStringContainsString('class="search-results__summary t-label text-brass"', $html, 'Evergreen tone in the dialog');
+        $this->assertStringContainsString('class="search-results__summary t-label text-accent-text"', $html, 'Evergreen tone in the dialog');
         $this->assertStringNotContainsString('search-results__excerpt', $html, 'The dialog keeps results compact');
         $this->assertStringNotContainsString('<html', $html);
 

@@ -4,6 +4,7 @@ namespace Tests\Unit\Repositories;
 
 use App\Constants\CommunityStatus;
 use App\Constants\Roles;
+use App\Constants\Theme;
 use App\Models\User;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\Eloquent\EloquentUserRepository;
@@ -109,5 +110,18 @@ class EloquentUserRepositoryTest extends TestCase
 
         $this->assertNull($user->email_verified_at);
         $this->assertNull($user->fresh()->email_verified_at);
+    }
+
+    #[Test]
+    public function update_theme_keeps_the_colour_theme_choice(): void
+    {
+        $user = User::factory()->create();
+
+        $this->assertSame(Theme::System, $user->theme);
+
+        $updated = $this->repository->updateTheme($user, Theme::Dark);
+
+        $this->assertSame(Theme::Dark, $updated->theme);
+        $this->assertSame(Theme::Dark, $user->fresh()->theme);
     }
 }

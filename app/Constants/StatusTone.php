@@ -43,23 +43,27 @@ enum StatusTone: string
     }
 
     /**
-     * Tailwind classes for a badge on an ivory or linen surface.
+     * Token classes for a badge (pending, success and neutral tones follow the theme).
      */
     public function badgeClasses(): string
     {
         return match ($this) {
-            self::Bronze => 'border-bronze text-bronze',
-            self::Cypress => 'border-cypress text-cypress',
-            self::Ash => 'border-ash text-ash',
+            self::Bronze => 'border-pending-tone text-pending-tone',
+            self::Cypress => 'border-success-tone text-success-tone',
+            self::Ash => 'border-neutral-tone text-neutral-tone',
         };
     }
 
     /**
-     * Tailwind text colour class on an ivory or linen surface.
+     * Token text colour class for the tone.
      */
     public function textClass(): string
     {
-        return 'text-'.$this->value;
+        return match ($this) {
+            self::Bronze => 'text-pending-tone',
+            self::Cypress => 'text-success-tone',
+            self::Ash => 'text-neutral-tone',
+        };
     }
 
     /**

@@ -10,11 +10,11 @@
     $errorId = $id.'-error';
 @endphp
 <div {{ $attributes->only('class') }} data-rich-text>
-    <p id="{{ $id }}-label" class="t-label text-bronze">{{ $label }}</p>
+    <p id="{{ $id }}-label" class="t-label text-accent-text">{{ $label }}</p>
     @if ($hint)
-        <p class="mt-2 text-sm font-light text-ash">{{ $hint }}</p>
+        <p class="mt-2 text-sm font-light text-ink-muted">{{ $hint }}</p>
     @endif
-    <div class="rich-text mt-2 rounded-card border border-stone bg-ivory" x-data="richText('{{ $name }}')" wire:ignore x-cloak x-show="ready">
+    <div class="rich-text mt-2 rounded-card border border-rule bg-surface-panel" x-data="richText('{{ $name }}')" wire:ignore x-cloak x-show="ready">
         <div class="rich-text__toolbar" role="toolbar" aria-label="Formatting" aria-controls="{{ $id }}-editor">
             <button type="button" x-on:click="run('heading2')" x-bind:aria-pressed="is('heading2')" title="Heading"><span aria-hidden="true">H2</span><span class="sr-only">Heading</span></button>
             <button type="button" x-on:click="run('heading3')" x-bind:aria-pressed="is('heading3')" title="Subheading"><span aria-hidden="true">H3</span><span class="sr-only">Subheading</span></button>
@@ -34,9 +34,9 @@
         <div id="{{ $id }}-editor" x-ref="editor" class="rich-text__content prose-bio" data-label-id="{{ $id }}-label"></div>
     </div>
     <noscript>
-        <textarea id="{{ $id }}" rows="12" wire:model.blur="{{ $name }}" class="mt-2 block w-full rounded-card border border-stone bg-ivory px-4 py-3 font-mono text-sm text-evergreen"></textarea>
+        <textarea id="{{ $id }}" rows="12" wire:model.blur="{{ $name }}" class="mt-2 block w-full rounded-card border border-rule bg-surface-panel px-4 py-3 font-mono text-sm text-ink"></textarea>
     </noscript>
     @error($name)
-        <p id="{{ $errorId }}" class="mt-2 flex items-center gap-2 text-sm text-bronze" role="alert"><x-icon name="warning" class="size-4 shrink-0" /><span>{{ $message }}</span></p>
+        <p id="{{ $errorId }}" class="mt-2 flex items-center gap-2 text-sm text-danger-tone" role="alert"><x-icon name="warning" class="size-4 shrink-0" /><span>{{ $message }}</span></p>
     @enderror
 </div>

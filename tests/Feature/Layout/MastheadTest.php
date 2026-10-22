@@ -45,11 +45,12 @@ class MastheadTest extends TestCase
     #[Test]
     public function the_glass_is_true_evergreen_with_a_solid_fallback_and_a_brass_hairline(): void
     {
-        $this->assertStringContainsString('<div class="glass-header on-dark text-champagne">', $this->html);
+        $this->assertStringContainsString('<div class="glass-header on-dark text-ink">', $this->html);
 
         $css = file_get_contents(resource_path('css/app.css'));
-        $this->assertMatchesRegularExpression('/\.glass-header \{\s*background-color: color-mix\(in srgb, var\(--color-evergreen\) '.Masthead::GLASS_OPACITY_PERCENT.'%, transparent\);\s*backdrop-filter: blur\('.Masthead::GLASS_BLUR_PX.'px\) saturate\('.Masthead::GLASS_SATURATE_PERCENT.'%\);[^}]*border-bottom: 1px solid color-mix\(in srgb, var\(--color-brass\) '.Masthead::HAIRLINE_OPACITY_PERCENT.'%, transparent\);/', $css);
-        $this->assertMatchesRegularExpression('/@supports not \(backdrop-filter: blur\(1px\)\) \{\s*\.glass-header \{\s*background-color: var\(--color-evergreen\);/', $css);
+        $this->assertStringContainsString('color-mix(in srgb, var(--brand-evergreen) '.Masthead::GLASS_OPACITY_PERCENT.'%, transparent)', file_get_contents(resource_path('css/tokens.css')), 'The light-theme glass is evergreen at the masthead opacity');
+        $this->assertMatchesRegularExpression('/\.glass-header \{\s*background-color: var\(--surface-glass\);\s*backdrop-filter: blur\('.Masthead::GLASS_BLUR_PX.'px\) saturate\('.Masthead::GLASS_SATURATE_PERCENT.'%\);[^}]*border-bottom: 1px solid color-mix\(in srgb, var\(--accent-line\) '.Masthead::HAIRLINE_OPACITY_PERCENT.'%, transparent\);/', $css);
+        $this->assertMatchesRegularExpression('/@supports not \(backdrop-filter: blur\(1px\)\) \{\s*\.glass-header \{\s*background-color: var\(--surface-band\);/', $css);
         $this->assertStringNotContainsString('-webkit-backdrop-filter', $css, 'Lightning CSS adds the prefix; writing it by hand drops the standard property');
 
         $masthead = file_get_contents(resource_path('css/masthead.css'));
@@ -77,7 +78,7 @@ class MastheadTest extends TestCase
         $this->assertMatchesRegularExpression('/<li class="site-chapter" data-chapter="life" @mouseenter="hoverOpen\(\'life\'\)" @mouseleave="hoverClose\(\'life\'\)" @focusout="onFocusOut\(\$event, \'life\'\)" @click\.outside="onClickOutside\(\'life\'\)">/', $nav[1]);
 
         $css = file_get_contents(resource_path('css/masthead.css'));
-        $this->assertMatchesRegularExpression("/\.chapter-link\[aria-current='true'\]::after \{\s*background-color: var\(--color-brass\);\s*transform: scaleX\(1\);/", $css);
+        $this->assertMatchesRegularExpression("/\.chapter-link\[aria-current='true'\]::after \{\s*background-color: var\(--accent-line\);\s*transform: scaleX\(1\);/", $css);
         $this->assertMatchesRegularExpression("/\.chapter-link:hover::after,\s*\.chapter-link:focus-visible::after,\s*\.chapter-link\[aria-expanded='true'\]::after \{\s*transform: scaleX\(1\);/", $css, 'The hairline draws on hover and focus');
         $this->assertStringContainsString('transform-origin: left center;', $css);
     }
@@ -87,14 +88,14 @@ class MastheadTest extends TestCase
     {
         preg_match('/<div id="chapter-life" class="mega-menu" x-show="isOpen\(\'life\'\)" x-cloak x-transition:enter="mega-menu--moving" x-transition:enter-start="mega-menu--hidden" x-transition:leave="mega-menu--moving" x-transition:leave-end="mega-menu--hidden" aria-labelledby="chapter-life-button" @keydown\.down\.prevent="moveFocus\(\$event, 1\)" @keydown\.up\.prevent="moveFocus\(\$event, -1\)" @keydown\.home\.prevent="moveFocus\(\$event, \'first\'\)" @keydown\.end\.prevent="moveFocus\(\$event, \'last\'\)">(.*?)<div id="chapter-work"/s', $this->html, $life);
 
-        $this->assertStringContainsString('<p class="t-numeral text-brass" aria-hidden="true">I</p>', $life[1]);
+        $this->assertStringContainsString('<p class="t-numeral text-accent-text" aria-hidden="true">I</p>', $life[1]);
         $this->assertStringContainsString('<p class="mega-menu__name"><span class="sr-only">Chapter I: </span>Life</p>', $life[1]);
         $this->assertStringContainsString('<p class="mega-menu__strap">The man, his path and his honours.</p>', $life[1]);
         $this->assertMatchesRegularExpression('/<a href="'.preg_quote(route('about'), '/').'" class="mega-menu__link" aria-current="page">\s*<span class="mega-menu__link-label">About<\/span>\s*<span class="mega-menu__link-description">'.preg_quote(Chapters::descriptions()['about'], '/').'<\/span>/', $life[1]);
         $this->assertStringContainsString('>Other Information</span>', $life[1], 'Other Information is reachable from Life');
         $this->assertStringNotContainsString('mega-menu__featured', $life[1], 'Nothing published: no featured block');
 
-        preg_match_all('/<p class="t-numeral text-brass" aria-hidden="true">([IVX]+)<\/p>/', $this->header(), $numerals);
+        preg_match_all('/<p class="t-numeral text-accent-text" aria-hidden="true">([IVX]+)<\/p>/', $this->header(), $numerals);
         $this->assertSame(['I', 'II', 'III', 'IV', 'V'], $numerals[1]);
 
         $css = file_get_contents(resource_path('css/masthead.css'));
@@ -116,8 +117,8 @@ class MastheadTest extends TestCase
 
         $header = $this->header($this->get(route('about'))->assertOk()->getContent());
 
-        $this->assertMatchesRegularExpression('/<p class="t-label text-brass">Latest publication<\/p>\s*<a href="[^"]+#publication-[^"]+" class="featured-card" data-masthead-featured="publication">\s*<span class="featured-card__title">Soils of the Gezira<\/span>/', $header);
-        $this->assertMatchesRegularExpression('/<p class="t-label text-brass">Newest album<\/p>\s*<a href="[^"]+" class="featured-card" data-masthead-featured="album">\s*<figure class="photo flex flex-col gap-3 featured-card__photo">.*?<img[^>]*class="photo-archive h-full w-full object-cover"[^>]*loading="lazy"/s', $header, 'The album cover is a small lazy-loaded duotone');
+        $this->assertMatchesRegularExpression('/<p class="t-label text-accent-text">Latest publication<\/p>\s*<a href="[^"]+#publication-[^"]+" class="featured-card" data-masthead-featured="publication">\s*<span class="featured-card__title">Soils of the Gezira<\/span>/', $header);
+        $this->assertMatchesRegularExpression('/<p class="t-label text-accent-text">Newest album<\/p>\s*<a href="[^"]+" class="featured-card" data-masthead-featured="album">\s*<figure class="photo flex flex-col gap-3 featured-card__photo">.*?<img[^>]*class="photo-archive h-full w-full object-cover"[^>]*loading="lazy"/s', $header, 'The album cover is a small lazy-loaded duotone');
         $this->assertStringContainsString('<span class="featured-card__meta smallcaps">1 photograph</span>', $header);
         $this->assertMatchesRegularExpression('/data-masthead-featured="tribute">\s*<span class="featured-card__title">Amna Hassan<\/span>\s*<span class="featured-card__quote">&ldquo;He taught us to look twice\.&rdquo;<\/span>/', $header);
         $this->assertStringNotContainsString('museum-label', $header, 'No captions inside the panels');
@@ -129,11 +130,13 @@ class MastheadTest extends TestCase
         preg_match('/<div class="flex items-center gap-1 sm:gap-3">(.*?)<\/div>\s*<\/div>\s*<\/div>/s', $this->header(), $right);
         preg_match_all('/<(a|button)\b/', $right[1], $controls);
 
-        $this->assertSame(['a', 'a', 'button'], $controls[1]);
+        // Search, the tribute pill, the theme control (its button and three menu items) and the menu toggle.
+        $this->assertSame(['a', 'a', 'button', 'button', 'button', 'button', 'button'], $controls[1]);
+        $this->assertStringContainsString('data-theme-switch', $right[1]);
         $this->assertStringContainsString('<a href="'.route(Search::ROUTE).'" id="'.Masthead::SEARCH_OPENER_ID.'" class="site-search-toggle" aria-keyshortcuts="'.Search::keyShortcuts().'" @click.prevent="$dispatch(\'search-open\', { opener: $el })">', $right[1]);
         $this->assertStringContainsString('<span class="sr-only">'.Search::TITLE.'</span>', $right[1]);
         $this->assertStringContainsString('<kbd class="site-search-toggle__key" aria-hidden="true">/</kbd>', $right[1]);
-        $this->assertStringContainsString('<a href="'.route('tributes.create').'" class="btn-pill-outline btn-pill--small on-dark site-header__tribute hidden xl:inline-flex">'.Masthead::LEAVE_TRIBUTE.'</a>', $right[1]);
+        $this->assertStringContainsString('<a href="'.route('tributes.create').'" class="btn-pill-outline btn-pill--small site-header__tribute hidden xl:inline-flex">'.Masthead::LEAVE_TRIBUTE.'</a>', $right[1]);
         $this->assertMatchesRegularExpression('/<button type="button" x-ref="toggle" class="site-menu-toggle lg:hidden" aria-expanded="false" :aria-expanded="[^"]+" aria-controls="'.Masthead::MENU_ID.'" @click="toggleMenu\(\)">\s*<span class="t-label">'.Masthead::MENU.'<\/span>/', $right[1]);
     }
 
@@ -142,7 +145,7 @@ class MastheadTest extends TestCase
     {
         preg_match('/<div class="masthead-utility hidden xl:block"[^>]*>(.*?)<\/div>\s*<\/div>/s', $this->html, $utility);
 
-        $this->assertStringContainsString('<p class="t-label text-champagne">'.Masthead::UTILITY_LINE.'</p>', $utility[1]);
+        $this->assertStringContainsString('<p class="t-label text-ink">'.Masthead::UTILITY_LINE.'</p>', $utility[1]);
         $this->assertStringContainsString('<a href="'.route('login').'" class="masthead-utility__link t-label">'.Masthead::SIGN_IN.'</a>', $utility[1]);
         $this->assertLessThan(strpos($this->html, 'site-header__bar'), strpos($this->html, 'masthead-utility'), 'Above the bar');
 
@@ -202,14 +205,14 @@ class MastheadTest extends TestCase
         $this->assertMatchesRegularExpression('/<div id="'.Masthead::MENU_ID.'" x-ref="panel" x-show="open" x-cloak[^>]*role="dialog" aria-modal="true" aria-label="'.Masthead::MENU_DIALOG_LABEL.'" tabindex="-1" @keydown\.tab="trap\(\$event\)"/', $this->html);
         $this->assertMatchesRegularExpression('/<form method="get" action="'.preg_quote(route(Search::ROUTE), '/').'" role="search" class="site-menu__search">\s*<label for="site-menu-search" class="sr-only">'.Search::LABEL.'<\/label>\s*<input id="site-menu-search" type="search" name="'.Search::PARAM.'"/', $menu);
         $this->assertLessThan(strpos($menu, 'aria-label="Site sections"'), strpos($menu, 'site-menu__search'), 'The search field comes first');
-        $this->assertStringContainsString('<p class="t-label text-brass site-menu__caption">'.Masthead::CONTENTS.'</p>', $menu);
+        $this->assertStringContainsString('<p class="t-label text-accent-text site-menu__caption">'.Masthead::CONTENTS.'</p>', $menu);
 
         preg_match_all('/<li class="site-menu__item" style="--i: (\d+)" x-data="\{ expanded: (true|false) \}">\s*<button type="button" class="site-menu__chapter" aria-expanded="(true|false)" :aria-expanded="[^"]+" aria-controls="(menu-chapter-[a-z]+)"( aria-current="true")?/', $menu, $items, PREG_SET_ORDER);
         $this->assertSame(['0', '1', '2', '3', '4'], array_column($items, 1));
         $this->assertSame(['true', 'false', 'false', 'false', 'false'], array_column($items, 3), 'The active chapter opens expanded');
         $this->assertSame(['menu-chapter-life', 'menu-chapter-work', 'menu-chapter-archive', 'menu-chapter-community', 'menu-chapter-tributes'], array_column($items, 4));
 
-        preg_match_all('/<span class="site-menu__numeral t-numeral text-brass" aria-hidden="true">([IVX]+)<\/span>/', $menu, $numerals);
+        preg_match_all('/<span class="site-menu__numeral t-numeral text-accent-text" aria-hidden="true">([IVX]+)<\/span>/', $menu, $numerals);
         $this->assertSame(['I', 'II', 'III', 'IV', 'V'], $numerals[1]);
         $this->assertStringContainsString('<span class="sr-only">Chapter I: </span>Life</span>', $menu);
         $this->assertMatchesRegularExpression('/<a href="'.preg_quote(route('about'), '/').'" class="site-menu__link" aria-current="page">\s*<span class="site-menu__link-label">About<\/span>/', $menu);
@@ -229,7 +232,7 @@ class MastheadTest extends TestCase
     public function the_search_dialog_is_a_modal_with_a_focus_trap_escape_and_a_live_status(): void
     {
         $this->assertMatchesRegularExpression('/<div id="'.Masthead::SEARCH_ID.'" x-data="siteSearch" x-ref="panel" x-show="open" x-cloak[^>]*role="dialog" aria-modal="true" aria-labelledby="site-search-title" tabindex="-1" @search-open\.window="show\(\$event\.detail\?\.opener\)" @keydown\.escape\.stop="close\(\)" @keydown\.tab="trap\(\$event\)"/', $this->html);
-        $this->assertStringContainsString('<p id="site-search-title" class="t-label text-brass">'.Search::LABEL.'</p>', $this->html, 'Not a heading: the page h1 must stay first');
+        $this->assertStringContainsString('<p id="site-search-title" class="t-label text-accent-text">'.Search::LABEL.'</p>', $this->html, 'Not a heading: the page h1 must stay first');
         $this->assertMatchesRegularExpression('/<input x-ref="input" id="site-search-input" type="search" name="'.Search::PARAM.'" x-model="query" @input\.debounce\.250ms="lookup\(\)"[^>]*aria-controls="site-search-results"/', $this->html);
         $this->assertStringContainsString('<p class="sr-only" role="status" aria-live="polite" aria-atomic="true" x-text="status"></p>', $this->html);
         $this->assertStringContainsString(Search::PROMPT, $this->html);

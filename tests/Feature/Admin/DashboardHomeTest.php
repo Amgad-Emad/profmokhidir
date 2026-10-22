@@ -45,7 +45,7 @@ class DashboardHomeTest extends TestCase
         $greeting = $response->viewData('greeting');
         $response
             ->assertSee('<h1 class="t-heading">'.$greeting['salutation'].', ', false)
-            ->assertSee('<p class="smallcaps text-xl text-ash" data-greeting-date><time datetime="'.$greeting['datetime'].'">'.$greeting['date'].'</time></p>', false)
+            ->assertSee('<p class="smallcaps text-xl text-ink-muted" data-greeting-date><time datetime="'.$greeting['datetime'].'">'.$greeting['date'].'</time></p>', false)
             ->assertSee('published</span>', false)
             ->assertDontSee('publisheds');
     }

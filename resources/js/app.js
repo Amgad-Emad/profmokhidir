@@ -8,6 +8,7 @@ import { catalogueSheet, citePanel } from './catalogue';
 import { essayContents, readingProgress } from './essay';
 import { authChallenge, authCode, authForm, authPassword } from './auth';
 import './motion';
+import './theme';
 
 window.Alpine = Alpine;
 Alpine.data('masthead', masthead);

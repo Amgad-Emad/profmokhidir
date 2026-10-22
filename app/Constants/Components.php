@@ -64,6 +64,7 @@ final class Components
             ['tag' => 'x-seo', 'view' => 'seo', 'group' => self::GROUP_STRUCTURE, 'purpose' => 'Title, description, canonical, Open Graph and JSON-LD in the head.', 'usage' => 'Used by the public layout. Pass noindex for transactional pages.'],
             ['tag' => 'x-fonts', 'view' => 'fonts', 'group' => self::GROUP_STRUCTURE, 'purpose' => 'Preloads the display font and links the self-hosted stylesheet.', 'usage' => 'Once per layout, before @vite. Never replace the font files with Google Fonts builds.'],
             ['tag' => 'x-brand.favicons', 'view' => 'brand/favicons', 'group' => self::GROUP_STRUCTURE, 'purpose' => 'Favicon and touch icon links built from the mark.', 'usage' => 'Once per layout.'],
+            ['tag' => 'x-theme.head', 'view' => 'theme/head', 'group' => self::GROUP_STRUCTURE, 'purpose' => 'Theme plumbing in the head: CSRF token, theme-color metas for both schemes and the inline script that settles the stored preference before the first paint.', 'usage' => 'Once per layout, before @vite. The layout prints the <html> attributes from App\\Services\\ThemeService::htmlAttributes; pass light/dark brand colour names for the browser chrome.'],
             ['tag' => 'x-duotone-filter', 'view' => 'duotone-filter', 'group' => self::GROUP_STRUCTURE, 'purpose' => 'The SVG filter behind the evergreen-to-ivory archive treatment.', 'usage' => 'Once per layout, directly after <body>; .photo-archive references it by id.'],
 
             // Typography and ornament
@@ -101,6 +102,7 @@ final class Components
             // Wayfinding
             ['tag' => 'x-site.breadcrumbs', 'view' => 'site/breadcrumbs', 'group' => self::GROUP_WAYFINDING, 'purpose' => 'Home / Section / Page in small caps, with BreadcrumbList JSON-LD.', 'usage' => 'Rendered by the public layout from the route; pass breadcrumb-title when the page title differs.'],
             ['tag' => 'x-filter-pills', 'view' => 'filter-pills', 'group' => self::GROUP_WAYFINDING, 'purpose' => 'A row of filter links in the pill style; the current one is filled.', 'usage' => 'Plain links that change the query string. Give it a label; add an "All" option with all-url.'],
+            ['tag' => 'x-theme.switch', 'view' => 'theme/switch', 'group' => self::GROUP_WAYFINDING, 'purpose' => 'The appearance control: a sun/moon hairline button opening a three-item menu, System, Light and Dark.', 'usage' => 'In the masthead, the admin bars and on the account page. Driven by resources/js/theme.js; inherits the surrounding ink.'],
             ['tag' => 'x-reading-progress', 'view' => 'reading-progress', 'group' => self::GROUP_WAYFINDING, 'purpose' => 'A 1px brass line under the header that grows as the reader scrolls.', 'usage' => 'Long reading pages only (About, CV, a commentary). Pass the selector of the text it measures.'],
 
             // Forms and actions

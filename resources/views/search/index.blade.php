@@ -9,10 +9,10 @@
                 <label for="search-query" class="sr-only">{{ Search::LABEL }}</label>
                 <div class="search-form__row mt-3">
                     <input id="search-query" name="{{ Search::PARAM }}" type="search" value="{{ $results['query'] }}" placeholder="{{ Search::PLACEHOLDER }}" autocomplete="off" spellcheck="false" maxlength="{{ Search::MAX_LENGTH }}" class="search-form__input" autofocus>
-                    <button type="submit" class="btn-pill-outline text-evergreen">{{ Search::BUTTON_LABEL }}</button>
+                    <button type="submit" class="btn-pill-outline text-ink">{{ Search::BUTTON_LABEL }}</button>
                 </div>
                 @if (! $canSeeMembersOnly)
-                    <p class="mt-3 text-sm font-light text-ash">{{ Search::MEMBERS_NOTE }}</p>
+                    <p class="mt-3 text-sm font-light text-ink-muted">{{ Search::MEMBERS_NOTE }}</p>
                 @endif
             </form>
 

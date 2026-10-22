@@ -9,6 +9,7 @@
  | pins, search, drafts per channel, keyboard travel between messages, and
  | KaTeX typesetting fetched only when a message carries maths.
  */
+import './theme';
 
 const STATE_SENDING = 'sending';
 const STATE_FAILED = 'failed';
@@ -98,7 +99,7 @@ function typesetMath(root, config) {
                 katex.render(tex, el, {
                     displayMode: el.getAttribute(config.mathAttribute) === 'display',
                     throwOnError: false,
-                    errorColor: '#6F5A34',
+                    errorColor: 'var(--danger-tone)',
                     strict: 'ignore',
                     trust: false,
                 });

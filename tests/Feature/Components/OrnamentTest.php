@@ -37,6 +37,6 @@ class OrnamentTest extends TestCase
     {
         $css = file_get_contents(resource_path('css/typography.css'));
 
-        $this->assertMatchesRegularExpression('/\.ornament svg \* \{[^}]*fill: none;[^}]*stroke: var\(--color-brass\);[^}]*stroke-width: 1px;[^}]*vector-effect: non-scaling-stroke;/s', $css);
+        $this->assertMatchesRegularExpression('/\.ornament svg \* \{[^}]*fill: none;[^}]*stroke: var\(--accent-line\);[^}]*stroke-width: 1px;[^}]*vector-effect: non-scaling-stroke;/s', $css);
     }
 }

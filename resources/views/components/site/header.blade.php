@@ -8,7 +8,7 @@
 @use('App\Constants\Masthead')
 @use('App\Constants\Search')
 <header class="site-header fixed inset-x-0 top-0 z-40" x-data="masthead" :class="{ 'is-compact': compact, 'is-over-hero': overHero, 'has-chapter-open': openChapter !== null }" @keydown.escape.window="onEscape()" @resize.window="onResize()" @scroll.window.passive="onScroll()">
-    <div class="glass-header on-dark text-champagne">
+    <div class="glass-header on-dark text-ink">
         @include('site.masthead.utility-line')
         <div class="site-header__bar mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 sm:px-6 lg:gap-10">
             <x-brand.lockup variant="horizontal" label-tone="champagne" :href="route('home')" class="site-header__lockup shrink-0" />
@@ -32,7 +32,9 @@
                     <kbd class="site-search-toggle__key" aria-hidden="true">/</kbd>
                 </a>
 
-                <a href="{{ $tributeUrl }}" class="btn-pill-outline btn-pill--small on-dark site-header__tribute hidden xl:inline-flex">{{ Masthead::LEAVE_TRIBUTE }}</a>
+                <a href="{{ $tributeUrl }}" class="btn-pill-outline btn-pill--small site-header__tribute hidden xl:inline-flex">{{ Masthead::LEAVE_TRIBUTE }}</a>
+
+                <x-theme.switch id="theme-switch-masthead" class="site-header__theme" />
 
                 <button type="button" x-ref="toggle" class="site-menu-toggle lg:hidden" aria-expanded="false" :aria-expanded="open ? 'true' : 'false'" aria-controls="{{ Masthead::MENU_ID }}" @click="toggleMenu()">
                     <span class="t-label">{{ Masthead::MENU }}</span>

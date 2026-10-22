@@ -2,8 +2,8 @@
     The sign-in screens (Fortify) and the other signed-out pages: a private reading room.
     From 1024px the left half is evergreen with the brass glow, an archive portrait in the
     duotone (decorative, lazy), the epigraph in champagne and its place and year; the right
-    half is ivory with the stacked lockup and the form in a 400px column, no card, hierarchy
-    from space and hairlines. Below that the evergreen panel is a short band with the mark
+    half is the page surface with the stacked lockup and the form in a 400px column, no card,
+    hierarchy from space and hairlines. Below that the evergreen panel is a short band with the mark
     and the epigraph, and the form follows. `screen` is an App\Constants\AuthScreens key,
     which supplies the title, intro, primary action and busy label (App\Services\AuthPageService);
     pass `title` or `intro` to override, `:intro="false"` to write the intro in the slot,
@@ -16,7 +16,9 @@
 @use('App\Support\ResponsiveImage')
 @props(['screen' => AuthScreens::LOGIN, 'title' => null, 'intro' => null, 'errorTargets' => []])
 @inject('authPage', 'App\Services\AuthPageService')
+@inject('themes', 'App\Services\ThemeService')
 @php
+    $theme = $themes->current(request());
     $page = $authPage->layout($screen);
     $title ??= $page['screen']['title'];
     $intro = $intro === false ? null : ($intro ?? $page['screen']['intro']);
@@ -24,17 +26,18 @@
     $dimensions = $portrait === null ? null : ResponsiveImage::dimensions($portrait);
 @endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" {{ $themes->htmlAttributes($theme) }}>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $title }} · {{ Seo::SITE_NAME }}</title>
     <meta name="robots" content="{{ Seo::ROBOTS_NOINDEX }}">
+    <x-theme.head />
     <x-brand.favicons />
     <x-fonts />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="auth min-h-screen bg-ivory text-evergreen" data-auth-screen="{{ $screen }}">
+<body class="auth min-h-screen bg-surface text-ink" data-auth-screen="{{ $screen }}">
     <x-duotone-filter />
     <a href="#main" class="skip-link">Skip to content</a>
 
@@ -53,7 +56,7 @@
                              decoding="async">
                     </figure>
                     @if ($page['caption'])
-                        <p class="t-label text-brass" data-auth-caption>{{ $page['caption'] }}</p>
+                        <p class="t-label text-accent-text" data-auth-caption>{{ $page['caption'] }}</p>
                     @endif
                 @else
                     <div class="auth__portrait" aria-hidden="true"></div>
@@ -67,8 +70,8 @@
 
             <div data-rise>
                 <hr class="rule-brass mb-4 max-w-12" data-rule>
-                <p class="t-label text-brass">{{ $page['label'] }}</p>
-                <blockquote class="auth__epigraph mt-3 text-champagne" data-auth-epigraph><p>“{{ $page['epigraph'] }}”</p></blockquote>
+                <p class="t-label text-accent-text">{{ $page['label'] }}</p>
+                <blockquote class="auth__epigraph mt-3 text-ink" data-auth-epigraph><p>“{{ $page['epigraph'] }}”</p></blockquote>
             </div>
         </aside>
 
@@ -81,7 +84,7 @@
                 <header>
                     <h1 id="page-title" class="t-heading">{{ $title }}</h1>
                     @if ($intro)
-                        <p class="t-body mt-4 text-ash">{{ $intro }}</p>
+                        <p class="t-body mt-4 text-ink-muted">{{ $intro }}</p>
                     @endif
                 </header>
 
@@ -98,7 +101,7 @@
                     {{ $slot }}
                 </div>
 
-                <footer class="mt-10 flex flex-col items-center gap-2 border-t border-stone pt-8">
+                <footer class="mt-10 flex flex-col items-center gap-2 border-t border-rule pt-8">
                     <a href="{{ $page['back']['url'] }}" class="link-hairline" data-auth-back>{{ $page['back']['label'] }}</a>
                     <x-seal class="!mt-4" :size="32" />
                 </footer>

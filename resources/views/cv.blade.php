@@ -21,7 +21,7 @@
 
                 <div class="cv-ledger__layout">
                     <nav class="cv-ledger__index" aria-labelledby="cv-index-title">
-                        <p id="cv-index-title" class="t-label text-bronze">Sections</p>
+                        <p id="cv-index-title" class="t-label text-accent-text">Sections</p>
                         <ol class="cv-ledger__index-list">
                             @foreach ($summary as $item)
                                 <li>

@@ -1,10 +1,10 @@
 @use('App\Constants\AuditAction')
 <x-layouts.admin title="Dashboard">
     <header class="flex flex-col gap-2">
-        <p class="t-label text-bronze">Dashboard</p>
+        <p class="t-label text-accent-text">Dashboard</p>
         <h1 class="t-heading">{{ $greeting['salutation'] }}, {{ auth()->user()->name }}</h1>
-        <p class="smallcaps text-xl text-ash" data-greeting-date><time datetime="{{ $greeting['datetime'] }}">{{ $greeting['date'] }}</time></p>
-        <p class="mt-2 max-w-2xl text-base font-light text-ash">Signed in as {{ auth()->user()->primaryRoleLabel() }}. Here is what is published and what is waiting for review.</p>
+        <p class="smallcaps text-xl text-ink-muted" data-greeting-date><time datetime="{{ $greeting['datetime'] }}">{{ $greeting['date'] }}</time></p>
+        <p class="mt-2 max-w-2xl text-base font-light text-ink-muted">Signed in as {{ auth()->user()->primaryRoleLabel() }}. Here is what is published and what is waiting for review.</p>
     </header>
 
     {{-- Needs attention --}}
@@ -17,17 +17,17 @@
         @if ($attention === [])
             <x-empty-state message="Nothing is waiting for review." class="py-8" />
         @else
-            <ul class="mt-6 divide-y divide-stone rounded-card border border-stone bg-ivory">
+            <ul class="mt-6 divide-y divide-rule rounded-card border border-rule bg-surface-panel">
                 @foreach ($attention as $key => $queue)
                     <li>
-                        <a href="{{ route($queue['route']) }}" class="flex items-center justify-between gap-4 px-5 py-4 no-underline hover:bg-linen hover:no-underline" data-queue="{{ $key }}">
+                        <a href="{{ route($queue['route']) }}" class="flex items-center justify-between gap-4 px-5 py-4 no-underline hover:bg-surface-sunken hover:no-underline" data-queue="{{ $key }}">
                             <span class="flex items-center gap-3">
                                 <x-icon :name="$queue['tone']->icon()" class="size-5 {{ $queue['tone']->textClass() }}" />
                                 <span class="font-medium">{{ $queue['label'] }}</span>
                             </span>
-                            <span class="flex items-center gap-3 text-sm text-ash">
+                            <span class="flex items-center gap-3 text-sm text-ink-muted">
                                 <span>{{ $queue['count'] }} {{ \Illuminate\Support\Str::plural($queue['noun'], $queue['count']) }}</span>
-                                <x-icon name="arrow" class="size-4 text-bronze" />
+                                <x-icon name="arrow" class="size-4 text-accent-text" />
                             </span>
                         </a>
                     </li>
@@ -74,17 +74,17 @@
         @if ($activity->isEmpty())
             <x-empty-state message="No activity has been recorded yet." class="py-8" />
         @else
-            <ol class="mt-6 divide-y divide-stone rounded-card border border-stone bg-ivory" data-activity>
+            <ol class="mt-6 divide-y divide-rule rounded-card border border-rule bg-surface-panel" data-activity>
                 @foreach ($activity as $log)
                     <li class="flex flex-col gap-1 px-5 py-4 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
                         <p class="text-base">
                             <span class="font-medium">{{ $log->user?->name ?? 'Visitor' }}</span>
                             <span class="font-light">{{ AuditAction::label($log->action) }}</span>
                             @if (is_array($log->meta) && isset($log->meta['label']))
-                                <span class="font-light text-ash">· {{ $log->meta['label'] }}</span>
+                                <span class="font-light text-ink-muted">· {{ $log->meta['label'] }}</span>
                             @endif
                         </p>
-                        <time datetime="{{ $log->created_at->toIso8601String() }}" class="shrink-0 text-sm font-light text-ash" title="{{ $log->created_at->format(\App\Constants\DateFormats::LONG.', H:i') }}">{{ $log->created_at->diffForHumans() }}</time>
+                        <time datetime="{{ $log->created_at->toIso8601String() }}" class="shrink-0 text-sm font-light text-ink-muted" title="{{ $log->created_at->format(\App\Constants\DateFormats::LONG.', H:i') }}">{{ $log->created_at->diffForHumans() }}</time>
                     </li>
                 @endforeach
             </ol>

@@ -18,8 +18,8 @@ class BrandMarkTest extends TestCase
         $this->assertStringContainsString('class="brand-mark brand-mark--ring"', $svg);
         $this->assertStringContainsString('width="48" height="48"', $svg);
         $this->assertStringContainsString('viewBox="0 0 96 96"', $svg);
-        $this->assertMatchesRegularExpression('/<circle[^>]*fill="none"[^>]*stroke-width="1"[^>]*vector-effect="non-scaling-stroke"[^>]*stroke: var\(--color-brass, '.Brand::BRASS.'\)/', $svg);
-        $this->assertStringContainsString('<path d="'.BrandMark::LETTERS_PATH.'" style="fill: var(--color-ivory, '.Brand::IVORY.')"', $svg);
+        $this->assertMatchesRegularExpression('/<circle[^>]*fill="none"[^>]*stroke-width="1"[^>]*vector-effect="non-scaling-stroke"[^>]*stroke: var\(--accent-line\)/', $svg);
+        $this->assertStringContainsString('<path d="'.BrandMark::LETTERS_PATH.'" style="fill: var(--ink-on-band-strong)"', $svg);
         $this->assertStringNotContainsString('filter', $svg);
         $this->assertStringNotContainsString('rotate', $svg);
     }
@@ -39,9 +39,9 @@ class BrandMarkTest extends TestCase
 
         $this->assertStringContainsString('brand-mark--disc', $svg);
         $this->assertStringContainsString('data-variant="disc"', $svg);
-        $this->assertMatchesRegularExpression('/<circle cx="48" cy="48" r="48" style="fill: var\(--color-evergreen, '.Brand::EVERGREEN.'\)"/', $svg);
+        $this->assertMatchesRegularExpression('/<circle cx="48" cy="48" r="48" style="fill: var\(--mark-disc\)"/', $svg);
         $this->assertStringNotContainsString('stroke', $svg);
-        $this->assertStringContainsString('fill: var(--color-ivory', $svg, 'Letters stay ivory even when an evergreen tone is requested');
+        $this->assertStringContainsString('fill: var(--mark-disc-ink)', $svg, 'The disc letters use the disc ink (ivory on evergreen, inverted in the dark theme) whatever tone is requested');
 
         $this->assertStringContainsString('brand-mark--ring', Blade::render('<x-brand.mark :size="32" />'));
     }
@@ -49,8 +49,8 @@ class BrandMarkTest extends TestCase
     #[Test]
     public function tone_sets_the_ink_of_the_letters(): void
     {
-        $this->assertStringContainsString('fill: var(--color-evergreen, '.Brand::EVERGREEN.')"', Blade::render('<x-brand.mark :size="64" tone="evergreen" />'));
-        $this->assertStringContainsString('fill: var(--color-ivory, '.Brand::IVORY.')"', Blade::render('<x-brand.mark :size="64" tone="ivory" />'));
+        $this->assertStringContainsString('fill: var(--ink-strong)"', Blade::render('<x-brand.mark :size="64" tone="evergreen" />'));
+        $this->assertStringContainsString('fill: var(--ink-on-band-strong)"', Blade::render('<x-brand.mark :size="64" tone="ivory" />'));
         $this->assertStringContainsString('data-tone="ivory"', Blade::render('<x-brand.mark :size="64" tone="purple" />'), 'Unknown tones fall back to the default');
     }
 

@@ -10,7 +10,7 @@
             </div>
 
             @if (filled($video->description))
-                <p class="t-body mt-10 max-w-measure text-evergreen" data-rise>{{ $video->description }}</p>
+                <p class="t-body mt-10 max-w-measure text-ink" data-rise>{{ $video->description }}</p>
             @endif
 
             @if ($player['captions_url'] && $player['kind'] !== \App\Constants\VideoEmbed::KIND_FILE)
@@ -20,7 +20,7 @@
 
         @if ($related->isNotEmpty())
             <section class="mt-24" aria-labelledby="same-event">
-                <h2 id="same-event" class="t-label text-bronze" data-rise>More from this event</h2>
+                <h2 id="same-event" class="t-label text-accent-text" data-rise>More from this event</h2>
                 <hr class="rule-brass mt-4" data-rule>
                 <ul class="mt-12 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3" data-rise-group>
                     @foreach ($related as $other)
@@ -36,8 +36,8 @@
                                 </a>
                                 <div class="flex flex-col gap-2">
                                     <x-video-label :video="$other" />
-                                    <h3 class="font-display text-2xl font-light leading-snug text-evergreen">
-                                        <a href="{{ $url }}" class="text-evergreen">{{ $other->title }}</a>
+                                    <h3 class="font-display text-2xl font-light leading-snug text-ink">
+                                        <a href="{{ $url }}" class="text-ink">{{ $other->title }}</a>
                                     </h3>
                                 </div>
                             </article>
@@ -47,7 +47,7 @@
             </section>
         @endif
 
-        <nav class="mt-20 border-t border-stone pt-8" aria-label="More videos">
+        <nav class="mt-20 border-t border-rule pt-8" aria-label="More videos">
             <a href="{{ route('videos') }}" class="link-meta">All videos</a>
         </nav>
     </article>

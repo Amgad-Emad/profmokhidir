@@ -12,35 +12,35 @@
     </div>
 
     {{-- Active / Trash tabs --}}
-    <div class="flex flex-wrap items-center gap-2 border-b border-stone" role="tablist" aria-label="Records">
+    <div class="flex flex-wrap items-center gap-2 border-b border-rule" role="tablist" aria-label="Records">
         <button type="button" role="tab" wire:click="showActive" aria-selected="{{ $view === ContentIndex::VIEW_ACTIVE ? 'true' : 'false' }}" class="admin-tab" data-tab="active">{{ $type['plural'] }}</button>
-        <button type="button" role="tab" wire:click="showTrash" aria-selected="{{ $view === ContentIndex::VIEW_TRASH ? 'true' : 'false' }}" class="admin-tab" data-tab="trash">Trash<span class="ml-2 font-mono text-xs text-ash">{{ $trashedCount }}</span></button>
+        <button type="button" role="tab" wire:click="showTrash" aria-selected="{{ $view === ContentIndex::VIEW_TRASH ? 'true' : 'false' }}" class="admin-tab" data-tab="trash">Trash<span class="ml-2 font-mono text-xs text-ink-muted">{{ $trashedCount }}</span></button>
     </div>
 
     {{-- Search and filters --}}
     <form class="mt-6 grid gap-4 md:grid-cols-4" wire:submit.prevent role="search" aria-label="Search {{ strtolower($type['plural']) }}">
         <div class="md:col-span-2">
-            <label for="search" class="t-label block text-bronze">Search</label>
-            <input id="search" type="search" wire:model.live.debounce.400ms="search" placeholder="Search {{ strtolower($type['plural']) }}" class="mt-2 block w-full rounded-card border border-stone bg-ivory px-4 py-3 text-body text-evergreen placeholder:text-ash focus:border-bronze">
+            <label for="search" class="t-label block text-accent-text">Search</label>
+            <input id="search" type="search" wire:model.live.debounce.400ms="search" placeholder="Search {{ strtolower($type['plural']) }}" class="mt-2 block w-full rounded-card border border-rule-strong bg-surface-field px-4 py-3 text-body text-ink placeholder:text-ink-muted focus:border-focus">
         </div>
         @if ($view === ContentIndex::VIEW_ACTIVE)
             @foreach ($filterOptions as $field => $filter)
                 <div>
-                    <label for="filter-{{ $field }}" class="t-label block text-bronze">{{ $filter['label'] }}</label>
-                    <select id="filter-{{ $field }}" wire:model.live="filters.{{ $field }}" class="form-select mt-2 block w-full rounded-card border border-stone bg-ivory px-4 py-3 text-body text-evergreen focus:border-bronze" data-filter="{{ $field }}">
+                    <label for="filter-{{ $field }}" class="t-label block text-accent-text">{{ $filter['label'] }}</label>
+                    <span class="select-wrap"><select id="filter-{{ $field }}" wire:model.live="filters.{{ $field }}" class="form-select mt-2 block w-full rounded-card border border-rule-strong bg-surface-field px-4 py-3 text-body text-ink focus:border-focus" data-filter="{{ $field }}">
                         <option value="">All</option>
                         @foreach ($filter['options'] as $value => $label)
                             <option value="{{ $value }}">{{ $label }}</option>
                         @endforeach
-                    </select>
+                    </select><span class="select-chevron" aria-hidden="true"></span></span>
                 </div>
             @endforeach
         @endif
     </form>
 
     @if ($view === ContentIndex::VIEW_ACTIVE && ! $canReorder)
-        <p class="mt-4 text-sm font-light text-ash">Clear the search, filters and sorting to change the display order.
-            @if ($sort !== '')<button type="button" wire:click="clearSort" class="ml-1 text-bronze underline-offset-4 hover:underline">Reset sorting</button>@endif
+        <p class="mt-4 text-sm font-light text-ink-muted">Clear the search, filters and sorting to change the display order.
+            @if ($sort !== '')<button type="button" wire:click="clearSort" class="ml-1 text-accent-text underline-offset-4 hover:underline">Reset sorting</button>@endif
         </p>
     @endif
 
@@ -48,7 +48,7 @@
     @if ($items->isEmpty())
         <x-empty-state :message="$view === ContentIndex::VIEW_TRASH ? 'The trash is empty.' : (trim($search) !== '' || array_filter($filters) !== [] ? 'Nothing matches your search.' : 'No '.strtolower($type['plural']).' yet. Create the first one.')" />
     @else
-        <div class="mt-6 overflow-x-auto rounded-card border border-stone bg-ivory">
+        <div class="mt-6 overflow-x-auto rounded-card border border-rule bg-surface-panel">
             <table class="admin-table w-full text-left text-sm" data-view="{{ $view }}">
                 <caption class="sr-only">{{ $type['plural'] }}{{ $view === ContentIndex::VIEW_TRASH ? ' in the trash' : '' }}</caption>
                 <thead>
@@ -59,7 +59,7 @@
                         @foreach ($columns as $column => $label)
                             <th scope="col" @if ($sort === $column) aria-sort="{{ $direction === 'asc' ? 'ascending' : 'descending' }}" @endif>
                                 @if ($view === ContentIndex::VIEW_ACTIVE && in_array($column, $sortable, true))
-                                    <button type="button" wire:click="sortBy('{{ $column }}')" class="inline-flex items-center gap-1 uppercase tracking-[0.2em] hover:text-evergreen" data-sort="{{ $column }}">
+                                    <button type="button" wire:click="sortBy('{{ $column }}')" class="inline-flex items-center gap-1 uppercase tracking-[0.2em] hover:text-ink" data-sort="{{ $column }}">
                                         {{ $label }}
                                         @if ($sort === $column)<span aria-hidden="true">{{ $direction === 'asc' ? '↑' : '↓' }}</span>@endif
                                     </button>
@@ -80,11 +80,11 @@
                         <tr wire:key="row-{{ $item->getKey() }}" data-id="{{ $item->getKey() }}"
                             @if ($canReorder) draggable="true" x-on:dragstart="start($event, {{ $item->getKey() }})" x-on:dragover.prevent="over($event)" x-on:dragend="end($event)" @endif>
                             @if ($canReorder)
-                                <td class="cursor-grab text-ash" aria-hidden="true" title="Drag to reorder">⋮⋮</td>
+                                <td class="cursor-grab text-ink-muted" aria-hidden="true" title="Drag to reorder">⋮⋮</td>
                             @endif
                             @foreach ($columns as $column => $columnLabel)
                                 @php $cell = $this->cell($item, $column); @endphp
-                                <td @if ($loop->first) class="font-medium text-evergreen" @endif>
+                                <td @if ($loop->first) class="font-medium text-ink" @endif>
                                     @if ($loop->first && $view === ContentIndex::VIEW_ACTIVE)
                                         <a href="{{ $editUrl }}" class="no-underline hover:underline">{{ $cell['text'] }}</a>
                                     @elseif (isset($cell['tone']))
@@ -96,8 +96,8 @@
                             @endforeach
                             <td class="text-right">
                                 @if ($view === ContentIndex::VIEW_TRASH)
-                                    <span class="mr-4 font-light text-ash">{{ $item->deleted_at?->diffForHumans() }}</span>
-                                    <button type="button" wire:click="restore({{ $item->getKey() }})" class="text-cypress underline-offset-4 hover:underline" data-restore>Restore<span class="sr-only"> {{ $label }}</span></button>
+                                    <span class="mr-4 font-light text-ink-muted">{{ $item->deleted_at?->diffForHumans() }}</span>
+                                    <button type="button" wire:click="restore({{ $item->getKey() }})" class="text-success-tone underline-offset-4 hover:underline" data-restore>Restore<span class="sr-only"> {{ $label }}</span></button>
                                 @else
                                     <x-admin.table-actions :item="$item" :edit-url="$editUrl" :public-url="$this->publicUrl($item)" :can-reorder="$canReorder" :first="$loop->first && $items->onFirstPage()" :last="$loop->last && ! $items->hasMorePages()" :label="$label" />
                                 @endif

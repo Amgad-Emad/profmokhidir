@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories\Contracts;
 
 use App\Constants\CommunityStatus;
+use App\Constants\Theme;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
@@ -25,6 +26,11 @@ interface UserRepositoryInterface extends BaseRepositoryInterface
      * Stamp the email as verified (after an invitation link has been used).
      */
     public function markEmailVerified(User $user): User;
+
+    /**
+     * Keep the user's colour theme choice.
+     */
+    public function updateTheme(User $user, Theme $theme): User;
 
     /**
      * Users holding the role whose account is not deactivated, optionally

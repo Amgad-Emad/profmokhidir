@@ -2,7 +2,7 @@
 {{-- The evergreen rail: Roman-numbered channels, unread counts, and the member at the foot. --}}
 <nav class="chat-rail glow-brass on-dark" aria-labelledby="channels-heading" data-chat-rail>
     <div class="px-6 pt-6">
-        <p id="channels-heading" class="t-label text-brass">{{ ChatCopy::CHANNELS_HEADING }}</p>
+        <p id="channels-heading" class="t-label text-accent-text">{{ ChatCopy::CHANNELS_HEADING }}</p>
         <ol class="chat-rail__list" data-channels>
             <template x-for="channel in channels" :key="channel.id">
                 <li>
@@ -17,10 +17,10 @@
     </div>
 
     <div class="chat-rail__self" data-chat-self>
-        <p class="t-label text-brass">{{ auth()->user()->isAdmin() ? ChatCopy::STATUS_ADMIN : ChatCopy::STATUS_MEMBER }}</p>
+        <p class="t-label text-accent-text">{{ auth()->user()->isAdmin() ? ChatCopy::STATUS_ADMIN : ChatCopy::STATUS_MEMBER }}</p>
         <span class="smallcaps chat-rail__self-name">{{ auth()->user()->name }}</span>
         @if (filled(auth()->user()->affiliation))
-            <span class="block text-sm font-light text-champagne">{{ auth()->user()->affiliation }}</span>
+            <span class="block text-sm font-light text-ink">{{ auth()->user()->affiliation }}</span>
         @endif
     </div>
 </nav>

@@ -64,17 +64,17 @@ class ErrorPagesTest extends TestCase
 
         $this->assertStringContainsString('<title>'.e($page['title']).Seo::TITLE_SEPARATOR.Seo::SITE_NAME.'</title>', $html);
         $this->assertStringContainsString('<meta name="robots" content="'.Seo::ROBOTS_NOINDEX.'">', $html);
-        $this->assertMatchesRegularExpression('/<body class="[^"]*glow-brass[^"]*bg-evergreen[^"]*text-champagne[^"]*">/', $html);
+        $this->assertMatchesRegularExpression('/<body class="[^"]*glow-brass[^"]*bg-surface[^"]*text-ink[^"]*">/', $html);
         $this->assertStringContainsString('data-error-code="'.$code.'"', $html);
         $this->assertStringContainsString('class="brand-mark brand-mark--ring"', $html, 'The MK mark in its ring');
-        $this->assertStringContainsString('<p class="t-label text-brass">'.ErrorPages::LABEL_PREFIX.' '.$code.'</p>', $html);
-        $this->assertStringContainsString('<h1 class="t-heading text-ivory">'.e($page['title']).'</h1>', $html);
+        $this->assertStringContainsString('<p class="t-label text-accent-text">'.ErrorPages::LABEL_PREFIX.' '.$code.'</p>', $html);
+        $this->assertStringContainsString('<h1 class="t-heading text-ink-strong">'.e($page['title']).'</h1>', $html);
         $this->assertStringContainsString('<p class="t-quote max-w-xl">'.e($page['line']).'</p>', $html);
         $this->assertStringContainsString('<a href="'.route('home').'" class="btn-pill-filled mt-4">'.ErrorPages::HOME_LABEL.'</a>', $html);
 
         // The search box is a plain GET form to /search: it works on a page that loads no script.
         $this->assertMatchesRegularExpression('/<form method="get" action="'.preg_quote(route(Search::ROUTE), '/').'" role="search"/', $html);
-        $this->assertStringContainsString('<label for="error-search" class="t-label block text-brass">'.ErrorPages::SEARCH_LABEL.'</label>', $html);
+        $this->assertStringContainsString('<label for="error-search" class="t-label block text-accent-text">'.ErrorPages::SEARCH_LABEL.'</label>', $html);
         $this->assertMatchesRegularExpression('/<input id="error-search" name="'.Search::PARAM.'" type="search"/', $html);
 
         // Every chapter is linked, in navigation order.
@@ -84,7 +84,9 @@ class ErrorPagesTest extends TestCase
         $this->assertSame(array_map(fn (array $section): string => e($section['label']), array_values(Sections::definitions())), $chapters[1]);
 
         $this->assertStringNotContainsString('livewire', $html);
-        $this->assertStringNotContainsString('<script', $html);
+        // The only script is the inline theme boot in the head, which settles the scheme before paint.
+        $this->assertSame(1, substr_count($html, '<script'));
+        $this->assertStringContainsString('<script data-theme-boot>', $html);
         $this->assertStringNotContainsString('fonts.googleapis.com', $html);
     }
 

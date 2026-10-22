@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Constants\CommunityStatus;
 use App\Constants\Roles;
+use App\Constants\Theme;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -25,7 +26,7 @@ use Spatie\Permission\Traits\HasRoles;
 #[Fillable([
     'name', 'email', 'password',
     'community_status', 'affiliation', 'academic_field', 'reason_for_joining',
-    'reviewed_by', 'reviewed_at', 'review_note', 'deactivated_at',
+    'reviewed_by', 'reviewed_at', 'review_note', 'deactivated_at', 'theme',
 ])]
 #[Hidden(['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'])]
 class User extends Authenticatable implements MustVerifyEmail
@@ -45,6 +46,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'community_status' => CommunityStatus::class,
             'reviewed_at' => 'datetime',
             'deactivated_at' => 'datetime',
+            'theme' => Theme::class,
         ];
     }
 

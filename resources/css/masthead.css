@@ -2,7 +2,7 @@
  | The masthead (App\Constants\Masthead): the glass bar and its compaction on scroll,
  | the utility line, the chapter buttons and their mega menus, the full-screen menu.
  | Brand rules apply (CLAUDE.md): brass only for hairlines, the ring and small labels;
- | the panels are solid evergreen; every transition is 400ms on the brand curve and
+ | the panels are solid on the band surface; every transition is 400ms on the brand curve and
  | stilled by the global reduced-motion rule in app.css.
  */
 
@@ -58,7 +58,7 @@
             border-color var(--duration-masthead) var(--ease-rise);
     }
 
-    /* Over the home hero the bar is transparent with champagne text; the glass returns after it. */
+    /* Over the home hero the bar is transparent with the band ink; the glass returns after it. */
     .site-header.is-over-hero .glass-header {
         background-color: transparent;
         backdrop-filter: none;
@@ -99,7 +99,7 @@
     .masthead-utility {
         height: var(--masthead-utility-height);
         overflow: hidden;
-        border-bottom: 1px solid color-mix(in srgb, var(--color-brass) 20%, transparent);
+        border-bottom: 1px solid color-mix(in srgb, var(--accent-line) 20%, transparent);
         transition:
             height var(--duration-masthead) var(--ease-rise),
             opacity var(--duration-masthead) var(--ease-rise),
@@ -122,7 +122,7 @@
 
     .masthead-utility__link {
         position: relative;
-        color: var(--color-champagne);
+        color: var(--ink);
         text-decoration: none;
         transition: color 300ms var(--ease-rise);
     }
@@ -135,7 +135,7 @@
         bottom: 0;
         width: 100%;
         height: 1px;
-        background-color: color-mix(in srgb, var(--color-champagne) 50%, transparent);
+        background-color: color-mix(in srgb, var(--ink) 50%, transparent);
         transform: scaleX(0);
         transform-origin: left center;
         transition: transform var(--duration-draw, 600ms) var(--ease-rise);
@@ -143,7 +143,7 @@
 
     .masthead-utility__link:hover,
     .masthead-utility__link:focus-visible {
-        color: var(--color-ivory);
+        color: var(--ink-strong);
         text-decoration: none;
     }
 
@@ -159,7 +159,7 @@
         padding: 0.625rem 0;
         border: 0;
         background: none;
-        color: var(--color-champagne);
+        color: var(--ink);
         cursor: pointer;
         white-space: nowrap;
         transition: color 300ms var(--ease-rise);
@@ -168,7 +168,7 @@
     .chapter-link:hover,
     .chapter-link:focus-visible,
     .chapter-link[aria-expanded='true'] {
-        color: var(--color-ivory);
+        color: var(--ink-strong);
     }
 
     /* A hairline draws from the left on hover, focus and while the panel is open. */
@@ -180,7 +180,7 @@
 
     /* The active chapter carries a 1px brass rule. */
     .chapter-link[aria-current='true']::after {
-        background-color: var(--color-brass);
+        background-color: var(--accent-line);
         transform: scaleX(1);
     }
 
@@ -199,11 +199,11 @@
         top: 100%;
         z-index: 10;
         padding: 3rem 3rem 3.5rem;
-        border: 1px solid color-mix(in srgb, var(--color-brass) 35%, transparent);
+        border: 1px solid color-mix(in srgb, var(--accent-line) 35%, transparent);
         border-top: 0;
         border-radius: 0 0 var(--radius-card) var(--radius-card);
-        background-color: var(--color-evergreen);
-        color: var(--color-champagne);
+        background-color: var(--surface);
+        color: var(--ink);
     }
 
     @media (min-width: 40rem) {
@@ -237,7 +237,7 @@
         font-weight: 300;
         font-size: 2rem; /* 32px */
         line-height: 1.1;
-        color: var(--color-ivory);
+        color: var(--ink-strong);
     }
 
     .mega-menu__strap {
@@ -247,12 +247,12 @@
         font-weight: 300;
         font-size: 1rem;
         line-height: 1.6;
-        color: var(--color-champagne);
+        color: var(--ink);
     }
 
     .mega-menu__links,
     .mega-menu__featured {
-        border-left: 1px solid var(--color-cypress);
+        border-left: 1px solid var(--rule);
         padding-left: 2.5rem;
     }
 
@@ -265,7 +265,7 @@
     .mega-menu__link {
         display: block;
         padding: 0.625rem 0;
-        color: var(--color-champagne);
+        color: var(--ink);
         text-decoration: none;
     }
 
@@ -276,7 +276,7 @@
         font-weight: 300;
         font-size: 1.375rem; /* 22px */
         line-height: 1.2;
-        color: var(--color-ivory);
+        color: var(--ink-strong);
     }
 
     .mega-menu__link-label::after,
@@ -287,7 +287,7 @@
         bottom: -0.125rem;
         width: 100%;
         height: 1px;
-        background-color: color-mix(in srgb, var(--color-champagne) 50%, transparent);
+        background-color: color-mix(in srgb, var(--ink) 50%, transparent);
         transform: scaleX(0);
         transform-origin: left center;
         transition: transform var(--duration-draw, 600ms) var(--ease-rise);
@@ -309,7 +309,7 @@
 
     .mega-menu__link[aria-current='page'] .mega-menu__link-label::after,
     .site-menu__link[aria-current='page'] .site-menu__link-label::after {
-        background-color: var(--color-brass);
+        background-color: var(--accent-line);
         transform: scaleX(1);
     }
 
@@ -321,7 +321,7 @@
         font-weight: 300;
         font-size: 0.9375rem;
         line-height: 1.5;
-        color: var(--color-champagne);
+        color: var(--ink);
     }
 
     /* The featured item: label, a small treated photograph, title, quote, metadata. */
@@ -331,7 +331,7 @@
         align-items: flex-start;
         gap: 0.75rem;
         margin-top: 1rem;
-        color: var(--color-champagne);
+        color: var(--ink);
         text-decoration: none;
     }
 
@@ -350,7 +350,7 @@
         font-weight: 300;
         font-size: 1.375rem;
         line-height: 1.2;
-        color: var(--color-ivory);
+        color: var(--ink-strong);
         transition: color 300ms var(--ease-rise);
     }
 

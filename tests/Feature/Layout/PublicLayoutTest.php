@@ -38,7 +38,7 @@ class PublicLayoutTest extends TestCase
     public function the_header_is_fixed_glassy_evergreen_with_the_horizontal_lockup(): void
     {
         $this->assertMatchesRegularExpression('/<header class="site-header fixed inset-x-0 top-0 z-40"/', $this->html);
-        $this->assertStringContainsString('glass-header on-dark text-champagne', $this->html);
+        $this->assertStringContainsString('glass-header on-dark text-ink', $this->html);
 
         preg_match('/<header.*?<nav/s', $this->html, $beforeNav);
         $this->assertStringContainsString('data-variant="horizontal"', $beforeNav[0]);
@@ -62,10 +62,10 @@ class PublicLayoutTest extends TestCase
         preg_match('/<footer.*<\/footer>/s', $this->html, $footer);
         $footer = $footer[0];
 
-        $this->assertStringContainsString('bg-evergreen text-champagne', $footer);
+        $this->assertStringContainsString('bg-surface text-ink', $footer);
         $this->assertStringContainsString('data-variant="stacked"', $footer);
         $this->assertStringContainsString('<p class="t-quote max-w-xl">'.Footer::CLOSING_LINE.'</p>', $footer);
-        $this->assertStringContainsString('<p class="t-label text-brass">'.Footer::DOMAIN.'</p>', $footer);
+        $this->assertStringContainsString('<p class="t-label text-accent-text">'.Footer::DOMAIN.'</p>', $footer);
         $this->assertStringContainsString('&copy; '.date('Y'), $footer);
 
         preg_match_all('/class="footer-link"[^>]*>([^<]+)<\/a>/', $footer, $links);
@@ -86,7 +86,10 @@ class PublicLayoutTest extends TestCase
         $this->assertStringContainsString('<link rel="icon" href="'.asset('favicon-32.png').'" sizes="32x32" type="image/png">', $this->html);
         $this->assertStringContainsString('<link rel="apple-touch-icon" href="'.asset('apple-touch-icon.png').'" sizes="180x180">', $this->html);
         $this->assertStringContainsString('<link rel="manifest" href="'.asset('site.webmanifest').'">', $this->html);
-        $this->assertStringContainsString('<meta name="theme-color" content="'.Brand::EVERGREEN.'">', $this->html);
+        // One theme-color per scheme (evergreen chrome in light, cypress in dark), from <x-theme.head>.
+        $this->assertSame(2, substr_count($this->html, 'name="theme-color"'));
+        $this->assertStringContainsString('<meta name="theme-color" content="'.Brand::EVERGREEN.'" media="(prefers-color-scheme: light)"', $this->html);
+        $this->assertStringContainsString('<meta name="theme-color" content="'.Brand::CYPRESS.'" media="(prefers-color-scheme: dark)"', $this->html);
     }
 
     #[Test]

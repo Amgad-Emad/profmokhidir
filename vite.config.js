@@ -10,6 +10,10 @@ export default defineConfig({
         }),
         tailwindcss(),
     ],
+    build: {
+        // light-dark() stays native (Lightning CSS would otherwise polyfill it and pre-compute colour mixes).
+        cssTarget: ['chrome123', 'safari17.5', 'firefox120'],
+    },
     server: {
         watch: {
             ignored: ['**/storage/framework/views/**'],

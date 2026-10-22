@@ -23,7 +23,7 @@ class LightboxTest extends TestCase
             ':alt="current.alt || \'\'"', ':width="current.width || null"', ':height="current.height || null"', '@load="loaded = true"',
             '<figcaption class="lightbox__caption">', 'museum-label museum-label--ivory', 'museum-label__title" x-show="current.caption" x-text="current.caption"',
             'museum-label__meta smallcaps" x-show="current.meta" x-text="current.meta"', 'museum-label__note" x-show="current.note" x-text="current.note"',
-            'class="t-label text-brass" x-show="current.credit"', '<span class="sr-only">Credit: </span><span x-text="current.credit"></span>', 'class="lightbox__nav"',
+            'class="t-label text-accent-text" x-show="current.credit"', '<span class="sr-only">Credit: </span><span x-text="current.credit"></span>', 'class="lightbox__nav"',
             '@click="prev()"', 'Previous photograph', '@click="next()"', 'Next photograph',
         ] as $fragment) {
             $this->assertStringContainsString($fragment, $html, "missing {$fragment}");

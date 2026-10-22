@@ -29,11 +29,11 @@ class AuthLayoutTest extends TestCase
 
         $response
             ->assertSee('<title>Sign in · '.Seo::SITE_NAME.'</title>', false)
-            ->assertSee('class="auth min-h-screen bg-ivory text-evergreen"', false)
+            ->assertSee('class="auth min-h-screen bg-surface text-ink"', false)
             ->assertSee('class="auth__split"', false)
             ->assertSee('<aside class="auth__panel glow-brass on-dark" aria-label="'.AuthScreens::PANEL_LABEL.'">', false)
             ->assertSee('“'.AuthScreens::EPIGRAPH.'”')
-            ->assertSee('class="auth__epigraph mt-3 text-champagne"', false)
+            ->assertSee('class="auth__epigraph mt-3 text-ink"', false)
             ->assertSee('data-variant="horizontal"', false)
             ->assertSee('data-variant="stacked"', false)
             ->assertSee('class="auth__column" data-rise-group', false)
@@ -44,7 +44,7 @@ class AuthLayoutTest extends TestCase
             ->assertSee('<a href="'.route('home').'" class="link-hairline" data-auth-back>'.AuthScreens::BACK_LABEL.'</a>', false)
             ->assertSee('class="seal !mt-4"', false)
             ->assertDontSee('auth-card')
-            ->assertDontSee('rounded-card border border-stone bg-linen', false)
+            ->assertDontSee('rounded-card border border-stone bg-surface-sunken', false)
             ->assertDontSee('livewire', false);
 
         $this->assertSame(1, substr_count($response->getContent(), 'data-variant="stacked"'), 'One stacked lockup, for the ivory column');
@@ -62,7 +62,7 @@ class AuthLayoutTest extends TestCase
         $response
             ->assertSee('<figure class="auth__portrait" data-auth-portrait>', false)
             ->assertSee('class="photo-archive"', false)
-            ->assertSee('<p class="t-label text-brass" data-auth-caption>Khartoum, 1998</p>', false);
+            ->assertSee('<p class="t-label text-accent-text" data-auth-caption>Khartoum, 1998</p>', false);
 
         $this->assertMatchesRegularExpression('/<img src="[^"]+"[^>]*\salt=""[^>]*\sloading="lazy"/', $response->getContent());
         $this->assertDoesNotMatchRegularExpression('/data-auth-portrait>\s*<img[^>]*fetchpriority/', $response->getContent(), 'The print is never prioritised');

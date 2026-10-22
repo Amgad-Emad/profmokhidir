@@ -1,14 +1,14 @@
 <x-layouts.public :description="$copy['line']" :hero="true">
     {{-- 1. Hero: evergreen, full viewport height, soft brass glow, under the transparent masthead. Text and portrait recede slowly with scroll. --}}
-    <section class="hero glow-brass on-dark bg-evergreen text-champagne" aria-labelledby="hero-title" {{ \App\Constants\Masthead::HERO_ATTRIBUTE }}>
+    <section class="hero glow-brass on-dark bg-surface text-ink" aria-labelledby="hero-title" {{ \App\Constants\Masthead::HERO_ATTRIBUTE }}>
         <div class="hero__inner relative mx-auto grid max-w-7xl items-center gap-12 px-4 pb-36 sm:px-6 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-20">
             <div class="flex flex-col items-start gap-8" data-scroll-scale>
-                <p class="t-label text-brass">{{ $copy['label'] }}</p>
+                <p class="t-label text-accent-text">{{ $copy['label'] }}</p>
                 <h1 id="hero-title" class="t-display">
-                    <span class="block text-champagne">Professor</span>
-                    <span class="block text-ivory">Mohamed Osman Khidir</span>
+                    <span class="block text-ink">Professor</span>
+                    <span class="block text-ink-strong">Mohamed Osman Khidir</span>
                 </h1>
-                <p class="t-body max-w-xl text-champagne">{{ $copy['line'] }}</p>
+                <p class="t-body max-w-xl text-ink">{{ $copy['line'] }}</p>
                 <x-epigraph tone="ivory" class="hero__epigraph">@typeset($copy['epigraph'])</x-epigraph>
                 <div class="flex flex-wrap gap-4">
                     <a href="{{ route('about') }}" class="btn-pill-filled">{{ $copy['readStory'] }}</a>
@@ -22,7 +22,7 @@
                 </div>
             @endif
 
-            <a href="#{{ $anchor }}" class="scroll-cue t-label text-brass">
+            <a href="#{{ $anchor }}" class="scroll-cue t-label text-accent-text">
                 <span>{{ $copy['scroll'] }}</span><span class="sr-only"> to {{ $copy['chapters'] }}</span>
                 <span class="scroll-cue__line" aria-hidden="true" data-rule></span>
             </a>
@@ -30,7 +30,7 @@
     </section>
 
     {{-- 2. A life in chapters: one chapter per decade, a brass hairline down the left, quote interludes between. --}}
-    <section class="life bg-ivory text-evergreen" aria-labelledby="{{ $anchor }}">
+    <section class="life bg-surface text-ink" aria-labelledby="{{ $anchor }}">
         <div class="mx-auto max-w-7xl px-4 pt-20 sm:px-6 lg:pt-28">
             <x-chapter-opening :title="$copy['chapters']" :id="$anchor">
                 Each decade of his life, drawn from the record of his education, appointments and honours.
@@ -43,7 +43,7 @@
                     <div class="life-chapter__inner" data-scroll-line>
                         <span class="life-chapter__line" aria-hidden="true"></span>
                         <header class="life-chapter__marker">
-                            <p class="t-numeral text-bronze"><span class="sr-only">Chapter </span>{{ $chapter['numeral'] }}</p>
+                            <p class="t-numeral text-accent-text"><span class="sr-only">Chapter </span>{{ $chapter['numeral'] }}</p>
                             <h3 id="{{ $chapter['id'] }}" class="life-chapter__years">{{ $chapter['years'] }}</h3>
                         </header>
                         <div class="life-chapter__body">
@@ -53,9 +53,9 @@
                                         <p class="milestone__year">{{ $milestone['years'] }}</p>
                                         <p class="milestone__title">@typeset($milestone['title'])</p>
                                         <p class="milestone__meta">
-                                            <span class="smallcaps text-bronze">{{ $milestone['label'] }}</span>
+                                            <span class="smallcaps text-accent-text">{{ $milestone['label'] }}</span>
                                             @if ($milestone['detail'])
-                                                <span aria-hidden="true" class="text-stone">·</span>
+                                                <span aria-hidden="true" class="text-rule">·</span>
                                                 <span>{{ $milestone['detail'] }}</span>
                                             @endif
                                         </p>
@@ -73,7 +73,7 @@
             </article>
 
             @if ($chapter['interlude'])
-                <figure class="interlude glow-brass on-dark bg-evergreen text-champagne">
+                <figure class="interlude glow-brass on-dark bg-surface text-ink">
                     <div class="mx-auto max-w-4xl px-8 py-24 lg:py-32">
                         <blockquote class="t-quote pull-quote" data-rise>
                             <p><span class="hang-quote">&ldquo;</span>@typeset($chapter['interlude']->quote)&rdquo;</p>
@@ -97,7 +97,7 @@
     </section>
 
     {{-- 4. His work in numbers: lining figures that rise in like everything else, never count up. --}}
-    <section class="bg-linen text-evergreen" aria-labelledby="work-in-numbers">
+    <section class="bg-surface-raised text-ink" aria-labelledby="work-in-numbers">
         <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28">
             <x-chapter-opening :title="$copy['numbers']" id="work-in-numbers" />
             @if ($stats !== [])
@@ -118,7 +118,7 @@
     </section>
 
     {{-- 5. Continue the story: three quiet entry cards. 6. The seal and the closing line. --}}
-    <section class="bg-ivory text-evergreen" aria-labelledby="continue-the-story">
+    <section class="bg-surface text-ink" aria-labelledby="continue-the-story">
         <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28">
             <x-chapter-opening :title="$copy['continue']" id="continue-the-story" />
             <ul class="mt-12 grid gap-6 md:grid-cols-3" data-rise-group>
@@ -127,14 +127,14 @@
                         @if ($story['photo'])
                             <x-photo :media="$story['photo']" sizes="(min-width: 768px) 30vw, 100vw" aspect="3 / 2" class="story-card__photo" />
                         @endif
-                        <a href="{{ $story['url'] }}" class="story-card__link t-label text-bronze">{{ $story['title'] }}</a>
+                        <a href="{{ $story['url'] }}" class="story-card__link t-label text-accent-text">{{ $story['title'] }}</a>
                         <p class="story-card__line">{{ $story['line'] }}</p>
                     </li>
                 @endforeach
             </ul>
 
             <x-seal />
-            <p class="t-quote mx-auto mt-8 max-w-2xl text-center text-evergreen" data-rise>{{ $copy['closing'] }}</p>
+            <p class="t-quote mx-auto mt-8 max-w-2xl text-center text-ink" data-rise>{{ $copy['closing'] }}</p>
         </div>
     </section>
 </x-layouts.public>

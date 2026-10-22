@@ -13,7 +13,7 @@
 
     <template x-if="m.reply_to">
         <button type="button" class="chat-reply" x-on:click="jumpTo(m.reply_to.id)" data-reply-quote>
-            <span class="t-label text-bronze mr-2">{{ ChatCopy::REPLYING_TO }}</span>
+            <span class="t-label text-accent-text mr-2">{{ ChatCopy::REPLYING_TO }}</span>
             <span class="smallcaps chat-reply__author" x-show="!m.reply_to.deleted" x-text="m.reply_to.author"></span>
             <span class="chat-reply__excerpt" :class="{ 'chat-reply__removed': m.reply_to.deleted }" x-text="m.reply_to.excerpt"></span>
         </button>
@@ -31,7 +31,7 @@
         <form class="chat-edit" x-on:submit.prevent="saveEdit()">
             <label class="sr-only" :for="'edit-' + m.key">Edit message</label>
             <textarea :id="'edit-' + m.key" class="chat-edit__input" rows="3" x-model="editing.body" :maxlength="config.bodyMaxLength" x-on:keydown.enter.prevent="if (!$event.shiftKey) saveEdit(); else insertNewline($event)" x-on:keydown.escape.prevent.stop="cancelEdit()" x-init="$el.focus()"></textarea>
-            <p class="text-sm text-bronze" x-show="editing.error" x-text="editing.error" role="alert"></p>
+            <p class="text-sm text-accent-text" x-show="editing.error" x-text="editing.error" role="alert"></p>
             <div class="flex flex-wrap gap-4">
                 <button type="submit" class="chat-action" x-bind:disabled="editing.saving">Save</button>
                 <button type="button" class="chat-action" x-on:click="cancelEdit()">Cancel</button>
@@ -60,7 +60,7 @@
         <template x-if="m.can_delete">
             <span>
                 <button type="button" class="chat-action" x-show="deleting !== m.key" x-on:click="deleting = m.key" data-delete>{{ ChatCopy::ACTION_DELETE }}</button>
-                <span x-show="deleting === m.key" x-cloak class="text-sm font-light text-ash">{{ ChatCopy::DELETE_CONFIRM }} <button type="button" class="chat-action" x-on:click="remove(m)" data-delete-confirm>Yes</button> <button type="button" class="chat-action" x-on:click="deleting = null">No</button></span>
+                <span x-show="deleting === m.key" x-cloak class="text-sm font-light text-ink-muted">{{ ChatCopy::DELETE_CONFIRM }} <button type="button" class="chat-action" x-on:click="remove(m)" data-delete-confirm>Yes</button> <button type="button" class="chat-action" x-on:click="deleting = null">No</button></span>
             </span>
         </template>
         <button type="button" class="chat-action" x-show="m.can_report" x-on:click="startReport(m)" data-report>{{ ChatCopy::ACTION_REPORT }}</button>
