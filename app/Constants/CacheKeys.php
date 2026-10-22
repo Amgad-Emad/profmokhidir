@@ -44,6 +44,9 @@ final class CacheKeys
 
     public const string HOME_QUOTES = 'public.home_quotes';
 
+    /** The portrait on the sign-in screens (the published profile's, or a featured archive photo). */
+    public const string AUTH_PORTRAIT = 'public.auth.portrait';
+
     /** Site settings (contact details, notification address, mail sender). */
     public const string SETTINGS = 'settings.all';
 
@@ -55,7 +58,7 @@ final class CacheKeys
         return [
             self::PROFILE, self::CV_ENTRIES, self::PUBLICATIONS, self::AWARDS, self::VIDEOS,
             self::ALBUMS, self::ALBUMS_NEWEST, self::TEACHING_MATERIALS, self::COMMENTARIES, self::OTHER_ITEMS, self::TRIBUTES, self::TRIBUTES_FEATURED,
-            self::HOME_QUOTES, self::SETTINGS,
+            self::HOME_QUOTES, self::AUTH_PORTRAIT, self::SETTINGS,
         ];
     }
 }

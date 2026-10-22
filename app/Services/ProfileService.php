@@ -39,6 +39,16 @@ class ProfileService extends AbstractContentService
     }
 
     /**
+     * The sign-in screens show the portrait too, so they are cleared with the profile.
+     *
+     * @return list<string>
+     */
+    protected function cacheKeys(): array
+    {
+        return [CacheKeys::PROFILE, CacheKeys::AUTH_PORTRAIT];
+    }
+
+    /**
      * The published profile for the public site (cached).
      */
     public function get(): ?Profile

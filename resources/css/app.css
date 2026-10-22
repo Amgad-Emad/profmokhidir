@@ -12,6 +12,7 @@
 @import './wayfinding.css';
 @import './masthead.css';
 @import './site-menu.css';
+@import './auth.css';
 
 /*
  | Brand design system — see CLAUDE.md "Brand (follow exactly)".
@@ -245,6 +246,27 @@
     .btn-pill-outline:hover::before,
     .btn-pill-outline:focus-visible::before {
         transform: scaleX(1);
+    }
+
+    /* Solid: evergreen filled with ivory text, the primary action of a form on an ivory surface (sign-in,
+       password reset, the community application). One per screen, always full width of its column. */
+    .btn-pill-solid {
+        @apply inline-flex items-center justify-center gap-2 rounded-full px-7 py-3 font-sans text-base font-medium leading-none no-underline;
+        min-height: 2.75rem;
+        border: 1px solid var(--color-evergreen);
+        background-color: var(--color-evergreen);
+        color: var(--color-ivory);
+        transition:
+            background-color var(--duration-draw, 600ms) var(--ease-rise),
+            border-color var(--duration-draw, 600ms) var(--ease-rise);
+    }
+
+    .btn-pill-solid:hover,
+    .btn-pill-solid:focus-visible {
+        border-color: var(--color-cypress);
+        background-color: var(--color-cypress);
+        color: var(--color-ivory);
+        text-decoration: none;
     }
 
     /* Quiet secondary action (Back, Cancel): a text link in the metadata style with a 44px target. */

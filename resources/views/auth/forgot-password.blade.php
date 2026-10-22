@@ -1,10 +1,9 @@
-<x-layouts.guest title="Reset password" intro="Enter your email address and we will send you a link to choose a new password.">
-    <form method="POST" action="{{ route('password.email') }}" class="space-y-6">
+@use('App\Constants\AuthScreens')
+<x-layouts.guest :screen="AuthScreens::FORGOT_PASSWORD">
+    <form method="POST" action="{{ route('password.email') }}" class="space-y-8" x-data="authForm()" x-on:submit="submit($event)" data-auth-form>
         @csrf
-        <x-input name="email" label="Email" type="email" required autocomplete="username" autofocus />
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <x-button>Email reset link</x-button>
-            <a href="{{ route('login') }}" class="text-sm text-bronze underline-offset-4 hover:underline">Back to sign in</a>
-        </div>
+        <x-auth.field name="email" label="Email" type="email" required :autocomplete="AuthScreens::AUTOCOMPLETE_USERNAME" autofocus />
+        <x-button variant="primary" class="w-full" :busy="AuthScreens::screen(AuthScreens::FORGOT_PASSWORD)['busy']">{{ AuthScreens::screen(AuthScreens::FORGOT_PASSWORD)['action'] }}</x-button>
+        <p class="text-center"><a href="{{ route('login') }}" class="link-hairline">Back to sign in</a></p>
     </form>
 </x-layouts.guest>

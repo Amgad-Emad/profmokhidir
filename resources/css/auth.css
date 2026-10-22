@@ -1,0 +1,372 @@
+/*
+ | The sign-in experience (App\Constants\AuthScreens): the split reading-room
+ | layout of the guest screens, the underlined fields, the password toggle and
+ | strength line, the six-box code input, the calm error note, the styled
+ | checkbox and the hairline link. Imported by app.css. Nothing here moves
+ | faster than the brand allows: the field line draws over 400ms, everything
+ | else rides the shared rise and rule timings.
+ */
+@layer components {
+    /* ---------------------------------------------------------- layout */
+    .auth__split {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        min-height: 100dvh;
+    }
+
+    /* The evergreen panel: a short band above the form; the full left half from 1024px. */
+    .auth__panel {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        gap: var(--space-4);
+        padding: var(--space-6) var(--space-2);
+        color: var(--color-champagne);
+    }
+
+    .auth__panel-print {
+        display: none;
+    }
+
+    .auth__main {
+        display: flex;
+        flex: 1;
+        justify-content: center;
+        padding: var(--space-8) var(--space-2) var(--space-12);
+    }
+
+    .auth__column {
+        width: 100%;
+        max-width: 25rem; /* 400px: AuthScreens::MEASURE_PX */
+    }
+
+    .auth__epigraph {
+        font-family: var(--font-display);
+        font-weight: 300;
+        font-style: italic;
+        font-size: clamp(1.5rem, 1.125rem + 1.5vw, 2rem); /* 24px -> 32px, the quote size */
+        line-height: 1.3;
+        text-wrap: pretty;
+        hanging-punctuation: first;
+    }
+
+    @media (min-width: 1024px) {
+        .auth__split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .auth__panel {
+            position: sticky;
+            top: 0;
+            display: grid;
+            grid-template-rows: minmax(0, 1fr) auto;
+            gap: var(--space-6);
+            height: 100vh;
+            height: 100dvh;
+            padding: var(--space-8);
+        }
+
+        .auth__panel-print {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+            min-height: 0;
+        }
+
+        .auth__panel-band {
+            display: none;
+        }
+
+        .auth__main {
+            align-items: center;
+            padding: var(--space-8);
+        }
+    }
+
+    /* The portrait: an archive print in the duotone, filling the space above the epigraph. */
+    .auth__portrait {
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+        border-radius: var(--radius-card);
+        background-color: color-mix(in srgb, var(--color-cypress) 40%, transparent);
+    }
+
+    .auth__portrait img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center 20%;
+    }
+
+    /* ---------------------------------------------------------- fields */
+    .field {
+        position: relative;
+    }
+
+    .field__hint {
+        margin-top: var(--space-1);
+        font-size: 0.875rem;
+        font-weight: 300;
+        line-height: var(--space-3);
+        color: var(--color-ash);
+    }
+
+    /* A baseline unit below the label keeps the focus outline (offset 3px) clear of it. */
+    .field__control {
+        position: relative;
+        display: flex;
+        align-items: center;
+        margin-top: var(--space-1);
+    }
+
+    /* An underlined input: 1px stone line, which the evergreen line below draws over on focus. */
+    .field__input {
+        width: 100%;
+        min-height: 3rem; /* 48px: AuthScreens::FIELD_HEIGHT_PX */
+        padding: var(--space-1) 0;
+        border: 0;
+        border-bottom: 1px solid var(--color-stone);
+        border-radius: 0;
+        background-color: transparent;
+        font-family: var(--font-sans);
+        font-weight: 300;
+        font-size: 1.125rem; /* 18px */
+        line-height: var(--space-4);
+        color: var(--color-evergreen);
+        transition: border-color 400ms var(--ease-rise);
+    }
+
+    .field__input::placeholder {
+        color: var(--color-ash);
+    }
+
+    .field__input:-webkit-autofill {
+        -webkit-text-fill-color: var(--color-evergreen);
+        box-shadow: 0 0 0 1000px var(--color-ivory) inset;
+    }
+
+    .field__input--toggle {
+        padding-right: 3rem;
+    }
+
+    .field__line {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        height: 1px;
+        background-color: var(--color-evergreen);
+        transform: scaleX(0);
+        transform-origin: left center;
+        transition: transform 400ms var(--ease-rise); /* AuthScreens::LINE_DRAW_MS */
+        pointer-events: none;
+    }
+
+    .field__control:focus-within .field__line {
+        transform: scaleX(1);
+    }
+
+    .field--invalid .field__input {
+        border-bottom-color: var(--color-bronze);
+    }
+
+    .field__error,
+    .field__note {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--space-1);
+        margin-top: var(--space-1);
+        font-size: 0.875rem;
+        font-weight: 300;
+        line-height: var(--space-3);
+    }
+
+    .field__error {
+        color: var(--color-bronze);
+    }
+
+    .field__note {
+        color: var(--color-ash);
+    }
+
+    .field__note:empty {
+        display: none;
+    }
+
+    /* Show/hide password: a 44px target at the end of the line, icon in ash. */
+    .field__toggle {
+        position: absolute;
+        right: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 2.75rem;
+        min-height: 2.75rem;
+        color: var(--color-ash);
+        transition: color 300ms var(--ease-rise);
+    }
+
+    .field__toggle:hover,
+    .field__toggle[aria-pressed='true'] {
+        color: var(--color-evergreen);
+    }
+
+    /* Password strength by length: a hairline that fills as the passphrase grows, and the word beside it. */
+    .strength {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        margin-top: var(--space-2);
+    }
+
+    .strength__track {
+        flex: 1;
+        height: 1px;
+        background-color: var(--color-stone);
+    }
+
+    .strength__bar {
+        display: block;
+        height: 100%;
+        width: calc(var(--strength, 0) * 100%);
+        background-color: var(--color-evergreen);
+        transition: width 400ms var(--ease-rise);
+    }
+
+    /* ---------------------------------------------------------- checkbox */
+    .check {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--space-2);
+        min-height: 2.75rem;
+        cursor: pointer;
+    }
+
+    .check__input {
+        appearance: none;
+        flex-shrink: 0;
+        display: grid;
+        place-content: center;
+        width: 1.125rem;
+        height: 1.125rem;
+        margin-top: 0.4375rem;
+        border: 1px solid var(--color-ash);
+        border-radius: 2px;
+        background-color: var(--color-ivory);
+        transition:
+            background-color 300ms var(--ease-rise),
+            border-color 300ms var(--ease-rise);
+    }
+
+    .check__input::before {
+        content: '';
+        width: 0.625rem;
+        height: 0.625rem;
+        background-color: var(--color-ivory);
+        clip-path: polygon(14% 44%, 0 65%, 40% 100%, 100% 20%, 86% 6%, 40% 72%);
+        transform: scale(0);
+        transition: transform 300ms var(--ease-rise);
+    }
+
+    .check__input:checked {
+        border-color: var(--color-evergreen);
+        background-color: var(--color-evergreen);
+    }
+
+    .check__input:checked::before {
+        transform: scale(1);
+    }
+
+    .check__label {
+        padding-top: 0.5rem;
+        font-size: 1rem;
+        font-weight: 300;
+        line-height: var(--space-3);
+        color: var(--color-ash);
+    }
+
+    /* ---------------------------------------------------------- code input */
+    .code-field__boxes {
+        display: flex;
+        gap: var(--space-1);
+    }
+
+    .code-field__box {
+        flex: 1;
+        min-width: 0;
+        max-width: 3.5rem;
+        min-height: 3.5rem;
+        padding: 0;
+        text-align: center;
+        font-family: var(--font-mono);
+        font-size: 1.5rem;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .code-field__box:focus {
+        border-bottom-color: var(--color-evergreen);
+    }
+
+    /* ---------------------------------------------------------- notes and links */
+    /* The one calm error summary: ash on linen, an icon, links to the fields. */
+    .auth-note {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--space-2);
+        padding: var(--space-3);
+        border-radius: var(--radius-card);
+        background-color: var(--color-linen);
+        color: var(--color-ash);
+        font-size: 0.9375rem;
+        font-weight: 300;
+        line-height: var(--space-3);
+    }
+
+    .auth-note__title {
+        font-weight: 500;
+        color: var(--color-evergreen);
+    }
+
+    .auth-note a {
+        color: var(--color-evergreen);
+        text-decoration: underline;
+        text-decoration-thickness: 1px;
+        text-decoration-color: var(--color-brass);
+        text-underline-offset: 0.2em;
+    }
+
+    .auth-note a:hover,
+    .auth-note a:focus-visible {
+        text-decoration-color: var(--color-evergreen);
+    }
+
+    /* A quiet text link: hairline underline in brass that turns evergreen. */
+    .link-hairline {
+        display: inline-block;
+        padding-block: 0.5rem;
+        color: var(--color-evergreen);
+        font-size: 1rem;
+        font-weight: 300;
+        text-decoration: underline;
+        text-decoration-thickness: 1px;
+        text-decoration-color: var(--color-brass);
+        text-underline-offset: 0.25em;
+        transition: text-decoration-color 300ms var(--ease-rise);
+    }
+
+    .link-hairline:hover,
+    .link-hairline:focus-visible {
+        text-decoration: underline;
+        text-decoration-color: var(--color-evergreen);
+    }
+
+    /* Submitting: the label changes to the busy wording; the pill stays still. */
+    .btn-pill-solid[aria-busy='true'] {
+        cursor: progress;
+        opacity: 0.85;
+    }
+}

@@ -118,6 +118,14 @@ SVG);
                     </div>
                     <p class="mt-4 text-sm text-ash">The outline button borders in the current text colour, so it inherits evergreen here.</p>
                 </div>
+                <div class="card card-ivory" data-styleguide-primary-pill>
+                    <p class="t-label text-bronze">Primary action of a form on ivory</p>
+                    <div class="mt-5 flex flex-wrap gap-4">
+                        <button type="button" class="btn-pill-solid">.btn-pill-solid</button>
+                        <button type="button" class="btn-pill-solid" aria-busy="true">Signing in…</button>
+                    </div>
+                    <p class="mt-4 text-sm text-ash">Evergreen filled with ivory text: the one main action of a sign-in, password or application form (<code class="font-mono text-xs">&lt;x-button variant="primary" busy="Signing in…"&gt;</code>), full width of its column. This extends the pill rule (ivory filled or outline) to "evergreen-filled on ivory surfaces" for forms only; page actions keep the outline pill. While submitting, the label changes to the busy wording and nothing spins.</p>
+                </div>
                 <div class="card on-dark border-cypress bg-evergreen text-champagne">
                     <p class="t-label text-brass">On evergreen</p>
                     <div class="mt-5 flex flex-wrap gap-4">

@@ -1,7 +1,8 @@
-<x-layouts.guest title="Confirm your password" intro="This is a secure area. Please confirm your password before continuing.">
-    <form method="POST" action="{{ route('password.confirm') }}" class="space-y-6">
+@use('App\Constants\AuthScreens')
+<x-layouts.guest :screen="AuthScreens::CONFIRM_PASSWORD">
+    <form method="POST" action="{{ route('password.confirm') }}" class="space-y-8" x-data="authForm()" x-on:submit="submit($event)" data-auth-form>
         @csrf
-        <x-input name="password" label="Password" type="password" required autocomplete="current-password" autofocus />
-        <x-button>Confirm</x-button>
+        <x-auth.password-field name="password" label="Password" :autocomplete="AuthScreens::AUTOCOMPLETE_CURRENT_PASSWORD" autofocus />
+        <x-button variant="primary" class="w-full" :busy="AuthScreens::screen(AuthScreens::CONFIRM_PASSWORD)['busy']">{{ AuthScreens::screen(AuthScreens::CONFIRM_PASSWORD)['action'] }}</x-button>
     </form>
 </x-layouts.guest>

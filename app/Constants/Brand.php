@@ -68,7 +68,7 @@ final class Brand
     public static function roles(): array
     {
         return [
-            'evergreen' => ['role' => 'Primary', 'usage' => 'Dark surfaces, about '.self::EVERGREEN_SHARE.'% of the page. Body text on ivory.'],
+            'evergreen' => ['role' => 'Primary', 'usage' => 'Dark surfaces, about '.self::EVERGREEN_SHARE.'% of the page. Body text on ivory, and the one primary pill of a form on ivory.'],
             'ivory' => ['role' => 'Primary', 'usage' => 'Light surfaces, about '.self::IVORY_SHARE.'% of the page. Text and filled buttons on evergreen.'],
             'cypress' => ['role' => 'Support', 'usage' => 'Secondary dark surfaces and hover states, about '.self::CYPRESS_SHARE.'%.'],
             'brass' => ['role' => 'Accent', 'usage' => 'About '.self::BRASS_SHARE.'%: the mark ring, thin rules and small labels on dark only. Never large text or fills.'],

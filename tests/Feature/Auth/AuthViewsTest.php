@@ -9,8 +9,9 @@ use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 /**
- * Every Fortify screen renders our Blade view inside the guest layout: ivory
- * page, stacked lockup above a centred card, the seal beneath, pill buttons, label-style labels.
+ * Every Fortify screen renders our Blade view inside the guest layout: the
+ * evergreen panel with the epigraph, the ivory column with the stacked lockup,
+ * the solid primary pill, label-style labels and the seal beneath.
  */
 class AuthViewsTest extends TestCase
 {
@@ -22,18 +23,20 @@ class AuthViewsTest extends TestCase
         $response = $this->get(route('login'))->assertOk()->assertViewIs('auth.login');
 
         $response
-            ->assertSee('class="min-h-screen bg-ivory text-evergreen"', false)
+            ->assertSee('class="auth min-h-screen bg-ivory text-evergreen"', false)
             ->assertSee('data-variant="stacked"', false)
             ->assertSee('Mohamed Osman Khidir')
-            ->assertSee('auth-card rounded-card', false)
-            ->assertSee('btn-pill-outline text-evergreen', false)
-            ->assertSee('class="seal !mt-12"', false)
-            ->assertSee('<h1 id="page-title" class="font-display text-quote font-light">Sign in</h1>', false)
+            ->assertSee('class="auth__column" data-rise-group', false)
+            ->assertSee('btn-pill-solid w-full', false)
+            ->assertSee('class="seal !mt-4"', false)
+            ->assertSee('<h1 id="page-title" class="t-heading">Sign in</h1>', false)
             ->assertSee('t-label block text-bronze', false)
             ->assertSee('Keep me signed in')
             ->assertSee(route('password.request'))
-            ->assertDontSee('livewire', false)
-            ->assertDontSee('glow-brass');
+            ->assertSee('glow-brass')
+            ->assertDontSee('auth-card')
+            ->assertDontSee('btn-pill-outline text-evergreen', false)
+            ->assertDontSee('livewire', false);
     }
 
     #[Test]
@@ -42,7 +45,7 @@ class AuthViewsTest extends TestCase
         $this->get(route('password.request'))
             ->assertOk()
             ->assertViewIs('auth.forgot-password')
-            ->assertSee('Email reset link')
+            ->assertSee('Email me a reset link')
             ->assertSee('data-variant="stacked"', false);
 
         $user = User::factory()->editor()->create();

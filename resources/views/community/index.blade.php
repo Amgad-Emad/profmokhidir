@@ -1,3 +1,4 @@
+@use('App\Constants\AuthScreens')
 @use('App\Http\Requests\CommunitySignupRequest')
 @use('App\Http\Controllers\CommunityController')
 <x-layouts.public :title="$section['title']" :description="$section['summary']">
@@ -55,34 +56,35 @@
                         <section class="mt-10" aria-labelledby="apply-heading">
                             <p class="t-label text-bronze">{{ $copy['applyHeading'] }}</p>
                             <h2 id="apply-heading" class="sr-only">{{ $copy['applyHeading'] }}</h2>
-                            <form method="POST" action="{{ $applyUrl }}" class="mt-6 space-y-8" data-apply-form>
+                            <hr class="rule-brass mt-4" data-rule>
+                            <form method="POST" action="{{ $applyUrl }}" class="mt-8 space-y-8" x-data="authForm()" x-on:submit="submit($event)" data-apply-form>
                                 @csrf
+                                <x-auth.error-summary :targets="['throttle' => 'apply-heading']" />
                                 @include('community.partials.application-fields', ['copy' => $copy])
-                                <x-button>Apply to join</x-button>
+                                <x-button variant="primary" class="w-full" :busy="AuthScreens::screen(AuthScreens::COMMUNITY_SIGNUP)['busy']">{{ AuthScreens::screen(AuthScreens::COMMUNITY_SIGNUP)['action'] }}</x-button>
                             </form>
                         </section>
                     @endif
                 @else
-                    <section class="rounded-card border border-stone bg-linen p-8 sm:p-10" aria-labelledby="apply-heading">
+                    <section class="lg:pl-8" aria-labelledby="apply-heading">
                         <p class="t-label text-bronze">{{ $copy['applyHeading'] }}</p>
-                        <h2 id="apply-heading" class="sr-only">{{ $copy['applyHeading'] }}</h2>
-                        <p class="mt-4 text-base font-light text-ash">{{ $copy['applyIntro'] }} Already a member? <a href="{{ $loginUrl }}" class="text-evergreen underline decoration-brass underline-offset-4">Sign in</a>.</p>
+                        <h2 id="apply-heading" class="mt-3 font-display text-4xl font-light leading-tight">{{ AuthScreens::screen(AuthScreens::COMMUNITY_SIGNUP)['title'] }}</h2>
+                        <p class="t-body mt-4 text-ash">{{ $copy['applyIntro'] }} Already a member? <a href="{{ $loginUrl }}" class="link-hairline">Sign in</a>.</p>
+                        <hr class="rule-brass mt-6" data-rule>
 
-                        <form method="POST" action="{{ $applyUrl }}" class="mt-8 space-y-8" data-apply-form>
+                        <form method="POST" action="{{ $applyUrl }}" class="mt-8 space-y-8" x-data="authForm()" x-on:submit="submit($event)" data-apply-form>
                             @csrf
 
-                            @error('throttle')
-                                <p class="rounded-card border border-stone bg-ivory px-4 py-3 text-base font-light text-bronze" role="alert">{{ $message }}</p>
-                            @enderror
+                            <x-auth.error-summary :targets="['throttle' => 'apply-heading']" />
 
-                            <x-input name="name" label="Your name" required autocomplete="name" />
-                            <x-input name="email" label="Email" type="email" required autocomplete="email" hint="We will send a link to confirm it." />
-                            <x-input name="password" label="Password" type="password" required autocomplete="new-password" hint="At least eight characters." />
-                            <x-input name="password_confirmation" label="Confirm password" type="password" required autocomplete="new-password" />
+                            <x-auth.field name="name" label="Your name" required autocomplete="name" />
+                            <x-auth.field name="email" label="Email" type="email" required autocomplete="email" hint="We will send a link to confirm it." />
+                            <x-auth.password-field name="password" label="Password" :autocomplete="AuthScreens::AUTOCOMPLETE_NEW_PASSWORD" :strength="true" />
+                            <x-auth.password-field name="password_confirmation" label="Confirm password" :autocomplete="AuthScreens::AUTOCOMPLETE_NEW_PASSWORD" />
 
                             @include('community.partials.application-fields', ['copy' => $copy])
 
-                            <x-button>Apply to join</x-button>
+                            <x-button variant="primary" class="w-full" :busy="AuthScreens::screen(AuthScreens::COMMUNITY_SIGNUP)['busy']">{{ AuthScreens::screen(AuthScreens::COMMUNITY_SIGNUP)['action'] }}</x-button>
                         </form>
                     </section>
                 @endif

@@ -6,6 +6,7 @@ import lightbox from './lightbox';
 import videoFacade from './video-facade';
 import { catalogueSheet, citePanel } from './catalogue';
 import { essayContents, readingProgress } from './essay';
+import { authChallenge, authCode, authForm, authPassword } from './auth';
 import './motion';
 
 window.Alpine = Alpine;
@@ -17,4 +18,8 @@ Alpine.data('catalogueSheet', catalogueSheet);
 Alpine.data('citePanel', citePanel);
 Alpine.data('essayContents', essayContents);
 Alpine.data('readingProgress', readingProgress);
+Alpine.data('authForm', authForm);
+Alpine.data('authPassword', authPassword);
+Alpine.data('authCode', authCode);
+Alpine.data('authChallenge', authChallenge);
 Alpine.start();

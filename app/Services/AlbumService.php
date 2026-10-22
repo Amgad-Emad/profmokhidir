@@ -41,7 +41,7 @@ class AlbumService extends AbstractContentService
 
     protected function cacheKeys(): array
     {
-        return [CacheKeys::ALBUMS, CacheKeys::ALBUMS_NEWEST];
+        return [CacheKeys::ALBUMS, CacheKeys::ALBUMS_NEWEST, CacheKeys::AUTH_PORTRAIT];
     }
 
     /**

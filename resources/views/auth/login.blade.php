@@ -1,19 +1,17 @@
-<x-layouts.guest title="Sign in">
-    <form method="POST" action="{{ route('login') }}" class="space-y-6">
+@use('App\Constants\AuthScreens')
+<x-layouts.guest :screen="AuthScreens::LOGIN">
+    <form method="POST" action="{{ route('login') }}" class="space-y-8" x-data="authForm()" x-on:submit="submit($event)" data-auth-form>
         @csrf
-        <x-input name="email" label="Email" type="email" required autocomplete="username" autofocus />
-        <x-input name="password" label="Password" type="password" required autocomplete="current-password" />
+        <x-auth.field name="email" label="Email" type="email" required :autocomplete="AuthScreens::AUTOCOMPLETE_USERNAME" autofocus />
+        <x-auth.password-field name="password" label="Password" :autocomplete="AuthScreens::AUTOCOMPLETE_CURRENT_PASSWORD" />
 
-        <label class="flex items-center gap-3 text-sm text-ash">
-            <input type="checkbox" name="remember" class="size-4 rounded-sm border-stone accent-evergreen">
-            Keep me signed in
-        </label>
-
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <x-button>Sign in</x-button>
+        <div class="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
+            <x-auth.checkbox name="remember">{{ AuthScreens::REMEMBER_LABEL }}</x-auth.checkbox>
             @if (Route::has('password.request'))
-                <a href="{{ route('password.request') }}" class="text-sm text-bronze underline-offset-4 hover:underline">Forgotten your password?</a>
+                <a href="{{ route('password.request') }}" class="link-hairline">{{ AuthScreens::FORGOT_LINK }}</a>
             @endif
         </div>
+
+        <x-button variant="primary" class="w-full" :busy="AuthScreens::screen(AuthScreens::LOGIN)['busy']">{{ AuthScreens::screen(AuthScreens::LOGIN)['action'] }}</x-button>
     </form>
 </x-layouts.guest>
