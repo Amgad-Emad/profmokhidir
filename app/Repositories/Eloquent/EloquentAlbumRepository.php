@@ -40,4 +40,11 @@ class EloquentAlbumRepository extends BaseContentRepository implements AlbumRepo
             ->when($ignoreId !== null, fn ($query) => $query->whereKeyNot($ignoreId))
             ->exists();
     }
+
+    public function newestPublished(): ?Album
+    {
+        return $this->query()->published()->with($this->publishedWith)
+            ->orderByDesc('published_at')->orderByDesc($this->model->getKeyName())
+            ->first();
+    }
 }

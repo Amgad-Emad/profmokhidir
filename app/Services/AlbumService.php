@@ -39,6 +39,22 @@ class AlbumService extends AbstractContentService
         return CacheKeys::ALBUMS;
     }
 
+    protected function cacheKeys(): array
+    {
+        return [CacheKeys::ALBUMS, CacheKeys::ALBUMS_NEWEST];
+    }
+
+    /**
+     * The newest published album, for the masthead's Archive chapter. Cached with the listing.
+     */
+    public function newest(): ?Album
+    {
+        /** @var AlbumRepositoryInterface $repository */
+        $repository = $this->repository;
+
+        return $this->remember(CacheKeys::ALBUMS_NEWEST, fn (): ?Album => $repository->newestPublished());
+    }
+
     public function findPublishedBySlug(string $slug): ?Album
     {
         /** @var AlbumRepositoryInterface $repository */

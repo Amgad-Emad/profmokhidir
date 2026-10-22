@@ -122,8 +122,9 @@ class TributesPageTest extends TestCase
             ], false)
             ->assertDontSee('ahmed@example.com');
 
-        // The frontispiece is not repeated among the pages.
-        $this->assertSame(1, substr_count($response->getContent(), 'He never answered a question with an answer.'));
+        // The frontispiece is not repeated among the pages (the masthead's Tributes panel quotes it once more).
+        preg_match('/<main.*<\/main>/s', $response->getContent(), $book);
+        $this->assertSame(1, substr_count($book[0], 'He never answered a question with an answer.'));
 
         // Under another relationship the frontispiece stays closed.
         $this->get(route('tributes', ['relationship' => 'colleague']))->assertOk()->assertDontSee('data-featured', false);

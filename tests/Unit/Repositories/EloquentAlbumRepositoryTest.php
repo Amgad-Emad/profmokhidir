@@ -81,4 +81,17 @@ class EloquentAlbumRepositoryTest extends TestCase
 
         $this->assertNull($album->cover());
     }
+
+    #[Test]
+    public function the_newest_published_album_is_the_latest_by_publication_date(): void
+    {
+        $this->assertNull($this->repository->newestPublished());
+
+        Album::factory()->published()->create(['title' => 'Older', 'published_at' => now()->subYear(), 'sort_order' => 1]);
+        $newest = Album::factory()->published()->create(['title' => 'Newest', 'published_at' => now()->subDay(), 'sort_order' => 9]);
+        Album::factory()->draft()->create(['title' => 'Draft', 'published_at' => now()]);
+
+        $this->assertTrue($this->repository->newestPublished()->is($newest), 'Publication date wins over display order; drafts are skipped');
+        $this->assertTrue($this->repository->newestPublished()->relationLoaded('media'));
+    }
 }

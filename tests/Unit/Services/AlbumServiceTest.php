@@ -134,4 +134,22 @@ class AlbumServiceTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->service->updatePhotoArchive($other, $photo, 1900, false);
     }
+
+    #[Test]
+    public function the_newest_album_is_cached_for_the_masthead_and_forgotten_when_an_album_changes(): void
+    {
+        $this->assertNull($this->service->newest());
+
+        $album = Album::factory()->published()->create(['published_at' => now()->subDay()]);
+        $this->assertTrue($this->service->newest()->is($album));
+        $this->assertTrue(Cache::has(CacheKeys::ALBUMS_NEWEST));
+
+        $newer = Album::factory()->published()->create(['published_at' => now()]);
+        $this->assertTrue($this->service->newest()->is($album), 'Still the cached answer until the service flushes');
+
+        $this->service->update($newer, ['title' => 'Renamed']);
+
+        $this->assertFalse(Cache::has(CacheKeys::ALBUMS_NEWEST));
+        $this->assertTrue($this->service->newest()->is($newer));
+    }
 }

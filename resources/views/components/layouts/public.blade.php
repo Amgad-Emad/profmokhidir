@@ -7,9 +7,10 @@
     Inner pages get a breadcrumb trail (App\Services\BreadcrumbService) with BreadcrumbList JSON-LD:
     `breadcrumb-title` names the current page when it differs from `title`; `breadcrumbs` passes a
     trail of ['label' => , 'url' => , 'current' => ] outright, or false to show none. `breadcrumb-tone="ivory"`
-    sets the trail on evergreen, for pages that open on a dark surface.
+    sets the trail on evergreen, for pages that open on a dark surface. `hero` marks a page that opens with the
+    evergreen hero under the masthead: the bar starts transparent over it and the page reserves no top padding.
 --}}
-@props(['title' => null, 'description' => null, 'image' => null, 'canonical' => null, 'type' => null, 'schema' => null, 'noindex' => false, 'breadcrumbs' => null, 'breadcrumbTitle' => null, 'breadcrumbTone' => 'evergreen'])
+@props(['title' => null, 'description' => null, 'image' => null, 'canonical' => null, 'type' => null, 'schema' => null, 'noindex' => false, 'breadcrumbs' => null, 'breadcrumbTitle' => null, 'breadcrumbTone' => 'evergreen', 'hero' => false])
 @inject('breadcrumbService', 'App\Services\BreadcrumbService')
 @php
     $trail = match (true) {
@@ -41,9 +42,9 @@
     <x-duotone-filter />
     <a href="#main" class="skip-link">Skip to content</a>
 
-    <x-site.header />
+    <x-site.header :hero="$hero" />
 
-    <main id="main" tabindex="-1" class="pt-20">
+    <main id="main" tabindex="-1" @class(['site-main', 'site-main--hero' => $hero])>
         @if (count($trail) > 1)
             <div @class(['breadcrumbs-band', 'on-dark bg-evergreen text-champagne' => $breadcrumbTone === 'ivory'])>
                 <div class="mx-auto max-w-7xl px-4 pt-8 sm:px-6">

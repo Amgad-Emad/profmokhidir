@@ -5,7 +5,6 @@ namespace Tests\Feature\Layout;
 use App\Constants\Brand;
 use App\Constants\BrandMark;
 use App\View\Components\Site\Footer;
-use App\View\Components\Site\Header;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -48,49 +47,13 @@ class PublicLayoutTest extends TestCase
     }
 
     #[Test]
-    public function the_primary_nav_lists_the_sections_in_order_with_label_style_links(): void
+    public function the_masthead_lists_the_five_chapters_and_the_footer_every_section(): void
     {
-        preg_match('/<nav class="hidden lg:block" aria-label="Primary">(.*?)<\/nav>/s', $this->html, $nav);
-        preg_match_all('/<a href="[^"]+" class="nav-link t-label"[^>]*>([^<]+)<\/a>/', $nav[1], $links);
+        preg_match('/<nav class="site-chapters hidden lg:block" aria-label="Primary"[^>]*>(.*?)<\/nav>/s', $this->html, $nav);
+        preg_match_all('/class="chapter-link t-label"[^>]*>([A-Za-z]+)<\/button>/', $nav[1], $buttons);
 
-        $this->assertSame([
-            'About', 'CV &amp; Achievements', 'Publications', 'Awards', 'Videos',
-            'Pictures', 'Teaching', 'Commentary', 'Community', 'Tributes',
-        ], $links[1]);
-        $this->assertStringNotContainsString('Other Information', $nav[1]);
-    }
-
-    #[Test]
-    public function items_that_do_not_fit_are_repeated_under_an_accessible_more_disclosure(): void
-    {
-        $this->assertStringContainsString('aria-controls="nav-more"', $this->html);
-        $this->assertMatchesRegularExpression('/<button[^>]*aria-expanded="false"[^>]*aria-controls="nav-more"[^>]*>\s*More/', $this->html);
-
-        preg_match('/<ul id="nav-more".*?<\/ul>/s', $this->html, $more);
-        $this->assertStringContainsString('<li class="block">', $more[0], 'Items past the xl count stay under More at every width: the bar is capped at max-w-7xl');
-        $this->assertStringContainsString('<li class="block xl:hidden">', $more[0]);
-        $this->assertStringContainsString('<li class="hidden">', $more[0]);
-        $this->assertStringContainsString('Tributes', $more[0]);
-        $this->assertStringNotContainsString('2xl:', $this->html, 'No 2xl tier: the bar never grows past 1280px');
-
-        $this->assertSame(4, Header::INLINE_AT_LG);
-        $this->assertSame(6, Header::INLINE_AT_XL);
-    }
-
-    #[Test]
-    public function the_full_screen_menu_is_an_accessible_dialog_with_staggered_items(): void
-    {
-        $this->assertMatchesRegularExpression('/<button type="button" x-ref="toggle" class="site-menu-toggle lg:hidden" aria-expanded="false" :aria-expanded="[^"]+" aria-controls="site-menu"/', $this->html);
-        $this->assertMatchesRegularExpression('/<div id="site-menu"[^>]*role="dialog"[^>]*aria-modal="true"[^>]*aria-label="Site menu"/', $this->html);
-        $this->assertStringContainsString('@keydown.escape.window', $this->html);
-        $this->assertStringContainsString('@keydown.tab="trap($event)"', $this->html);
-        $this->assertStringContainsString('x-ref="close"', $this->html);
-
-        preg_match_all('/<li class="site-menu__item" style="--i: (\d+)">/', $this->html, $items);
-        $this->assertSame(range(0, 10), array_map('intval', $items[1]), 'Eleven menu items with a stagger index each');
-
-        preg_match('/<nav class="[^"]*" aria-label="Site sections">(.*?)<\/nav>/s', $this->html, $menu);
-        $this->assertStringContainsString('Other Information', $menu[1]);
+        $this->assertSame(['Life', 'Work', 'Archive', 'Community', 'Tributes'], $buttons[1]);
+        $this->assertStringNotContainsString('More', $nav[1]);
     }
 
     #[Test]

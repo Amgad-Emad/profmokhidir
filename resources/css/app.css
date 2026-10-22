@@ -10,6 +10,8 @@
 @import './archive.css';
 @import './remembrance.css';
 @import './wayfinding.css';
+@import './masthead.css';
+@import './site-menu.css';
 
 /*
  | Brand design system — see CLAUDE.md "Brand (follow exactly)".
@@ -71,8 +73,8 @@
     html {
         @apply bg-ivory font-sans font-light text-evergreen antialiased;
         -webkit-text-size-adjust: 100%;
-        /* Anchored and focused targets land below the fixed 5rem header (WCAG 2.4.11 focus not obscured). */
-        scroll-padding-top: 6.5rem;
+        /* Anchored and focused targets land below the fixed masthead as currently shown (WCAG 2.4.11 focus not obscured); --header-height follows its compaction (masthead.css). */
+        scroll-padding-top: calc(var(--header-height) + 1.5rem);
     }
 
     body {
@@ -299,10 +301,17 @@
         background-repeat: no-repeat;
     }
 
-    /* Fixed glassy evergreen header. */
+    /* Fixed glassy evergreen masthead: evergreen at 88% over a light blur, a brass hairline along the bottom (App\Constants\Masthead; the states live in masthead.css). */
     .glass-header {
-        background-color: color-mix(in srgb, var(--color-evergreen) 82%, transparent);
-        backdrop-filter: blur(14px); /* Lightning CSS adds the -webkit- prefix; a hand-written prefix makes it drop the standard property. */
+        background-color: color-mix(in srgb, var(--color-evergreen) 88%, transparent);
+        backdrop-filter: blur(16px) saturate(120%); /* Lightning CSS adds the -webkit- prefix; a hand-written prefix makes it drop the standard property. */
+        border-bottom: 1px solid color-mix(in srgb, var(--color-brass) 35%, transparent);
+    }
+
+    @supports not (backdrop-filter: blur(1px)) {
+        .glass-header {
+            background-color: var(--color-evergreen);
+        }
     }
 
     /* Photography. Portraits: warm monochrome (grey, then ~12% ivory warmth). */
@@ -441,35 +450,6 @@
 
     .site-menu-toggle__icon.is-open > span:last-child {
         transform: translateY(-0.1875rem) rotate(-45deg);
-    }
-
-    /* Full-screen menu items. */
-    .site-menu__link {
-        position: relative;
-        display: inline-block;
-        padding: 0.25rem 0;
-        font-family: var(--font-display);
-        font-weight: 300;
-        font-size: clamp(2rem, 1.5rem + 2.5vw, 3rem);
-        line-height: 1.15;
-        color: var(--color-champagne);
-        text-decoration: none;
-        transition: color 300ms var(--ease-rise);
-    }
-
-    .site-menu__link:hover,
-    .site-menu__link:focus-visible {
-        color: var(--color-ivory);
-        text-decoration: none;
-    }
-
-    .site-menu__link[aria-current='page']::after {
-        content: '';
-        display: block;
-        width: 2rem;
-        height: 1px;
-        margin-top: 0.25rem;
-        background-color: var(--color-brass);
     }
 
     /* Lock page scroll while the menu is open. */
@@ -755,20 +735,6 @@
         will-change: transform, opacity;
     }
 
-    /* Full-screen menu: items rise 40px and fade in, 120ms apart, once the panel is open. */
-    .site-menu__item {
-        opacity: 0;
-        transform: translateY(var(--distance-rise));
-        transition:
-            opacity var(--duration-rise) var(--ease-rise),
-            transform var(--duration-rise) var(--ease-rise);
-        transition-delay: calc(var(--i, 0) * var(--duration-stagger));
-    }
-
-    .site-menu.is-open .site-menu__item {
-        opacity: 1;
-        transform: none;
-    }
 }
 
 /* ------------------------------------------------------------------ admin */

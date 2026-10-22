@@ -847,7 +847,7 @@
     .reading-progress {
         position: fixed;
         top: var(--header-height, 5rem); /* directly under the fixed header, which condenses on scroll */
-        transition: top var(--duration-condense, 600ms) var(--ease-rise);
+        transition: top var(--duration-masthead, 400ms) var(--ease-rise);
         left: 0;
         right: 0;
         z-index: 39;

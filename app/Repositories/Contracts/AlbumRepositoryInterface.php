@@ -16,4 +16,9 @@ interface AlbumRepositoryInterface extends ContentRepositoryInterface
     public function findPublishedBySlug(string $slug): ?Album;
 
     public function slugExists(string $slug, ?int $ignoreId = null): bool;
+
+    /**
+     * The most recently published album (by published_at, then id), with its media.
+     */
+    public function newestPublished(): ?Album;
 }

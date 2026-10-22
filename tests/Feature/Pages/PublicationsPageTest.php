@@ -142,16 +142,21 @@ class PublicationsPageTest extends TestCase
         $this->get(route('publications', ['from' => 2005, 'to' => 1985]))
             ->assertOk()->assertSee('Showing 1–2 of 2 records · 1985–2005');
 
-        $this->get(route('publications', ['topic' => 'agronomy', 'type' => 'report']))
-            ->assertOk()
-            ->assertSee('A report')->assertDontSee('Old book')->assertDontSee('New book')
+        $filtered = $this->get(route('publications', ['topic' => 'agronomy', 'type' => 'report']))->assertOk();
+        preg_match('/<main.*<\/main>/s', $filtered->getContent(), $catalogue);
+        $this->assertStringContainsString('A report', $catalogue[0]);
+        $this->assertStringNotContainsString('Old book', $catalogue[0]);
+        $this->assertStringNotContainsString('New book', $catalogue[0], 'Only the masthead may still feature the latest publication');
+        $filtered
             ->assertSee('Showing 1–1 of 1 record · Report · Agronomy')
             ->assertSee('name="topic" value="Agronomy" checked', false)
             ->assertSee('<span class="catalogue__badge">2<span class="sr-only"> active</span></span>', false);
 
         // The single-year parameter of the earlier list still works as a one-year range.
-        $this->get(route('publications', ['year' => 1978]))
-            ->assertOk()->assertSee('Old book')->assertDontSee('New book')->assertSee('Showing 1–1 of 1 record · 1978');
+        $byYear = $this->get(route('publications', ['year' => 1978]))->assertOk()->assertSee('Showing 1–1 of 1 record · 1978');
+        preg_match('/<main.*<\/main>/s', $byYear->getContent(), $catalogue);
+        $this->assertStringContainsString('Old book', $catalogue[0]);
+        $this->assertStringNotContainsString('New book', $catalogue[0]);
     }
 
     #[Test]

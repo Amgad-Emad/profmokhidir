@@ -1,19 +1,13 @@
 /*
- | Wayfinding: the condensing header, the search dialog and page, breadcrumbs,
+ | Wayfinding: the search button and dialog, the search page, breadcrumbs,
  | the reading line, skeletons, page transitions, and the hover and focus craft
  | of links and buttons. Brand rules apply (see CLAUDE.md): brass for hairlines
  | and small labels only, nothing bounces, reduced motion shows everything at once.
  */
 
 :root {
-    --header-height: 5rem;
-    --duration-condense: 600ms;
     --duration-draw: 600ms;
     --duration-page: 400ms;
-}
-
-:root.header-condensed {
-    --header-height: 4rem;
 }
 
 /* Lock page scroll while the search dialog is open (the menu uses .menu-open). */
@@ -22,22 +16,7 @@
 }
 
 @layer components {
-    /* ------------------------------------------------------------- header */
-    .site-header__bar {
-        height: var(--header-height);
-        transition: height var(--duration-condense) var(--ease-rise);
-    }
-
-    .site-header__lockup {
-        transform-origin: left center;
-        transition: transform var(--duration-condense) var(--ease-rise);
-    }
-
-    .site-header.is-condensed .site-header__lockup {
-        transform: scale(0.88);
-    }
-
-    /* Search button: magnifier, label and the "/" key hint on wide screens. */
+    /* Search button: magnifier and the "/" key hint on wide screens (the masthead itself is in masthead.css). */
     .site-search-toggle {
         @apply inline-flex min-h-11 items-center gap-2 rounded-full px-2 text-champagne no-underline;
         transition: color 300ms var(--ease-rise);
@@ -72,28 +51,6 @@
         .site-search-toggle__key {
             display: inline-block;
         }
-    }
-
-    /* Full-screen menu as a table of contents: numeral, then the chapter. */
-    .site-menu__caption {
-        padding-bottom: var(--space-2, 1rem);
-        border-bottom: 1px solid var(--color-cypress);
-    }
-
-    .site-menu__item {
-        display: grid;
-        grid-template-columns: 3.5rem minmax(0, 1fr);
-        align-items: baseline;
-        column-gap: 0.5rem;
-    }
-
-    .site-menu__numeral {
-        text-align: left;
-    }
-
-    .site-menu__search {
-        color: var(--color-champagne);
-        font-size: 1.25rem;
     }
 
     /* ------------------------------------------------------ search dialog */

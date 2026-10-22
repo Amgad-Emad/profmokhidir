@@ -30,6 +30,8 @@ final class CacheKeys
 
     public const string ALBUMS = 'public.albums';
 
+    public const string ALBUMS_NEWEST = 'public.albums.newest';
+
     public const string TEACHING_MATERIALS = 'public.teaching_materials';
 
     public const string COMMENTARIES = 'public.commentaries';
@@ -52,7 +54,7 @@ final class CacheKeys
     {
         return [
             self::PROFILE, self::CV_ENTRIES, self::PUBLICATIONS, self::AWARDS, self::VIDEOS,
-            self::ALBUMS, self::TEACHING_MATERIALS, self::COMMENTARIES, self::OTHER_ITEMS, self::TRIBUTES, self::TRIBUTES_FEATURED,
+            self::ALBUMS, self::ALBUMS_NEWEST, self::TEACHING_MATERIALS, self::COMMENTARIES, self::OTHER_ITEMS, self::TRIBUTES, self::TRIBUTES_FEATURED,
             self::HOME_QUOTES, self::SETTINGS,
         ];
     }

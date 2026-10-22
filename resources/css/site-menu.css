@@ -1,0 +1,147 @@
+/*
+ | The full-screen menu below lg (App\Constants\Masthead): the search field, the
+ | chapters as an accordion table of contents with Roman numerals, the tribute
+ | pill and the community link. Items rise and fade in, staggered, once open.
+ */
+
+@layer components {
+    .site-menu__bar {
+        height: var(--masthead-height);
+    }
+
+    .site-menu__search {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid color-mix(in srgb, var(--color-brass) 50%, transparent);
+    }
+
+    .site-menu__search-input {
+        flex: 1 1 auto;
+        min-width: 0;
+        padding: 0.5rem 0;
+        border: 0;
+        background: transparent;
+        font-family: var(--font-display);
+        font-weight: 300;
+        font-size: 1.25rem;
+        line-height: 1.2;
+        color: var(--color-ivory);
+    }
+
+    .site-menu__search-input::placeholder {
+        color: var(--color-champagne);
+        opacity: 0.7;
+    }
+
+    .site-menu__search-button {
+        display: inline-flex;
+        width: 2.75rem;
+        height: 2.75rem;
+        align-items: center;
+        justify-content: center;
+        border-radius: 9999px;
+        color: var(--color-champagne);
+    }
+
+    .site-menu__caption {
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--color-cypress);
+    }
+
+    .site-menu__chapter {
+        display: flex;
+        width: 100%;
+        align-items: baseline;
+        gap: 1rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--color-cypress);
+        text-align: left;
+        color: var(--color-champagne);
+    }
+
+    .site-menu__numeral {
+        flex: 0 0 2.5rem;
+    }
+
+    .site-menu__chapter-name {
+        font-family: var(--font-display);
+        font-weight: 300;
+        font-size: clamp(2rem, 1.5rem + 2.5vw, 2.75rem);
+        line-height: 1.15;
+        color: var(--color-champagne);
+        transition: color 300ms var(--ease-rise);
+    }
+
+    .site-menu__chapter:hover .site-menu__chapter-name,
+    .site-menu__chapter[aria-expanded='true'] .site-menu__chapter-name {
+        color: var(--color-ivory);
+    }
+
+    .site-menu__chapter[aria-current='true'] .site-menu__chapter-name::after {
+        content: '';
+        display: block;
+        width: 2rem;
+        height: 1px;
+        margin-top: 0.25rem;
+        background-color: var(--color-brass);
+    }
+
+    .site-menu__chevron {
+        width: 0.75rem;
+        height: 0.75rem;
+        margin-left: auto;
+        align-self: center;
+        flex-shrink: 0;
+        transition: transform var(--duration-masthead) var(--ease-rise);
+    }
+
+    .site-menu__chevron.is-open {
+        transform: rotate(180deg);
+    }
+
+    .site-menu__links {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        padding: 0.75rem 0 1.5rem 3.5rem;
+    }
+
+    .site-menu__link {
+        display: block;
+        padding: 0.5rem 0;
+        color: var(--color-champagne);
+        text-decoration: none;
+    }
+
+    .site-menu__link-label {
+        position: relative;
+        display: inline-block;
+        font-family: var(--font-sans);
+        font-weight: 400;
+        font-size: 1.125rem;
+        line-height: 1.4;
+        color: var(--color-ivory);
+    }
+
+    .site-menu__utility {
+        color: var(--color-champagne);
+        font-size: 1.25rem;
+    }
+
+    /* Items rise 40px and fade in, 120ms apart, once the panel is open. */
+    .site-menu__item {
+        opacity: 0;
+        transform: translateY(var(--distance-rise));
+        transition:
+            opacity var(--duration-rise) var(--ease-rise),
+            transform var(--duration-rise) var(--ease-rise);
+        transition-delay: calc(var(--i, 0) * var(--duration-stagger));
+    }
+
+    .site-menu.is-open .site-menu__item {
+        opacity: 1;
+        transform: none;
+    }
+}

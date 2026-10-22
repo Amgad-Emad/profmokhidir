@@ -45,6 +45,6 @@ class ReadingProgressTest extends TestCase
     {
         $css = file_get_contents(resource_path('css/archive.css'));
 
-        $this->assertMatchesRegularExpression('/\.reading-progress \{[^}]*top: var\(--header-height, 5rem\);[^}]*transition: top var\(--duration-condense, 600ms\) var\(--ease-rise\);[^}]*background-color: var\(--color-brass\);[^}]*transform: scaleX\(var\(--reading-progress, 0\)\);/s', $css);
+        $this->assertMatchesRegularExpression('/\.reading-progress \{[^}]*top: var\(--header-height, 5rem\);[^}]*transition: top var\(--duration-masthead, 400ms\) var\(--ease-rise\);[^}]*background-color: var\(--color-brass\);[^}]*transform: scaleX\(var\(--reading-progress, 0\)\);/s', $css);
     }
 }

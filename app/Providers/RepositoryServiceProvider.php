@@ -8,6 +8,7 @@ use App\Repositories\Contracts\AlbumRepositoryInterface;
 use App\Repositories\Contracts\AuditLogRepositoryInterface;
 use App\Repositories\Contracts\AwardRepositoryInterface;
 use App\Repositories\Contracts\BrandTokenRepositoryInterface;
+use App\Repositories\Contracts\ChapterRepositoryInterface;
 use App\Repositories\Contracts\ChatChannelRepositoryInterface;
 use App\Repositories\Contracts\ChatMessageRepositoryInterface;
 use App\Repositories\Contracts\ChatReadRepositoryInterface;
@@ -28,6 +29,7 @@ use App\Repositories\Contracts\TributeRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\Contracts\VideoRepositoryInterface;
 use App\Repositories\Eloquent\ConstantBrandTokenRepository;
+use App\Repositories\Eloquent\ConstantChapterRepository;
 use App\Repositories\Eloquent\ConstantSectionRepository;
 use App\Repositories\Eloquent\EloquentAlbumRepository;
 use App\Repositories\Eloquent\EloquentAuditLogRepository;
@@ -63,6 +65,7 @@ class RepositoryServiceProvider extends ServiceProvider
         UserRepositoryInterface::class => EloquentUserRepository::class,
         BrandTokenRepositoryInterface::class => ConstantBrandTokenRepository::class,
         SectionRepositoryInterface::class => ConstantSectionRepository::class,
+        ChapterRepositoryInterface::class => ConstantChapterRepository::class,
         RoleRepositoryInterface::class => SpatieRoleRepository::class,
         MediaRepositoryInterface::class => SpatieMediaRepository::class,
         ProfileRepositoryInterface::class => EloquentProfileRepository::class,

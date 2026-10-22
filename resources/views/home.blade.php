@@ -1,7 +1,7 @@
-<x-layouts.public :description="$copy['line']">
-    {{-- 1. Hero: evergreen, full viewport height, soft brass glow. Text and portrait recede slowly with scroll. --}}
-    <section class="hero glow-brass on-dark bg-evergreen text-champagne" aria-labelledby="hero-title">
-        <div class="relative mx-auto grid min-h-[calc(100svh-5rem)] max-w-7xl items-center gap-12 px-4 pt-20 pb-36 sm:px-6 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-20 lg:pt-24">
+<x-layouts.public :description="$copy['line']" :hero="true">
+    {{-- 1. Hero: evergreen, full viewport height, soft brass glow, under the transparent masthead. Text and portrait recede slowly with scroll. --}}
+    <section class="hero glow-brass on-dark bg-evergreen text-champagne" aria-labelledby="hero-title" {{ \App\Constants\Masthead::HERO_ATTRIBUTE }}>
+        <div class="hero__inner relative mx-auto grid max-w-7xl items-center gap-12 px-4 pb-36 sm:px-6 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-20">
             <div class="flex flex-col items-start gap-8" data-scroll-scale>
                 <p class="t-label text-brass">{{ $copy['label'] }}</p>
                 <h1 id="hero-title" class="t-display">

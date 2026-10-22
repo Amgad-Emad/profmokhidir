@@ -27,7 +27,7 @@ final class Motion
     /** The header condenses once the page has scrolled this far. */
     public const int HEADER_CONDENSE_AFTER_PX = 40;
 
-    public const int HEADER_CONDENSE_DURATION_MS = 600;
+    public const int HEADER_CONDENSE_DURATION_MS = 400;
 
     /** Cross-fade between pages (View Transitions API); the header stays in place. */
     public const int PAGE_TRANSITION_MS = 400;

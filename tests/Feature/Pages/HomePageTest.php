@@ -40,7 +40,8 @@ class HomePageTest extends TestCase
         $response
             ->assertSee('<meta name="description" content="'.e(Taglines::HERO_LINE).'">', false)
             ->assertSeeInOrder(['glow-brass', 't-label text-brass', e(Taglines::HERO_LABEL), 't-display', 'Professor', 'Mohamed Osman Khidir', e(Taglines::HERO_LINE), 'epigraph text-champagne hero__epigraph', 'Scholarship is the one inheritance', 'btn-pill-filled', 'btn-pill-outline'], false)
-            ->assertSee('min-h-[calc(100svh-5rem)]', false)
+            ->assertSee('<section class="hero glow-brass on-dark bg-evergreen text-champagne" aria-labelledby="hero-title" data-masthead-hero>', false)
+            ->assertSee('class="hero__inner relative', false)
             ->assertSee('<a href="'.route('about').'" class="btn-pill-filled">'.e(Taglines::READ_STORY).'</a>', false)
             ->assertSee('<a href="'.route('tributes.create').'" class="btn-pill-outline">'.e(Taglines::LEAVE_TRIBUTE).'</a>', false)
             ->assertSee('<a href="#'.HomeTimeline::ANCHOR.'" class="scroll-cue t-label text-brass">', false)

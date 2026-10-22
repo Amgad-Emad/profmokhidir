@@ -1,0 +1,377 @@
+/*
+ | The masthead (App\Constants\Masthead): the glass bar and its compaction on scroll,
+ | the utility line, the chapter buttons and their mega menus, the full-screen menu.
+ | Brand rules apply (CLAUDE.md): brass only for hairlines, the ring and small labels;
+ | the panels are solid evergreen; every transition is 400ms on the brand curve and
+ | stilled by the global reduced-motion rule in app.css.
+ */
+
+:root {
+    --masthead-height: 5.5rem; /* 88px */
+    --masthead-compact-height: 4rem; /* 64px */
+    --masthead-utility-height: 0px;
+    /* Reserved by every page above its content; it never changes, so nothing jumps when the bar compacts. */
+    --masthead-offset: calc(var(--masthead-height) + var(--masthead-utility-height));
+    /* The masthead as currently shown: drives scroll-padding-top and the reading line. */
+    --header-height: var(--masthead-offset);
+    --duration-masthead: 400ms;
+    --duration-mega: 400ms;
+    --mega-rise: 8px;
+}
+
+@media (min-width: 80rem) {
+    :root {
+        --masthead-utility-height: 2rem; /* 32px, xl and up */
+    }
+}
+
+:root.header-compact {
+    --header-height: var(--masthead-compact-height);
+}
+
+@layer components {
+    /* ------------------------------------------------------------ the page under it */
+    .site-main {
+        padding-top: var(--masthead-offset);
+    }
+
+    .site-main--hero {
+        padding-top: 0;
+    }
+
+    /* The home hero runs under the transparent bar and pads itself by the same reserve. */
+    .hero__inner {
+        min-height: 100svh;
+        padding-top: calc(var(--masthead-offset) + 2rem);
+    }
+
+    @media (min-width: 64rem) {
+        .hero__inner {
+            padding-top: calc(var(--masthead-offset) + 3rem);
+        }
+    }
+
+    /* ------------------------------------------------------------ the glass */
+    .glass-header {
+        transition:
+            background-color var(--duration-masthead) var(--ease-rise),
+            border-color var(--duration-masthead) var(--ease-rise);
+    }
+
+    /* Over the home hero the bar is transparent with champagne text; the glass returns after it. */
+    .site-header.is-over-hero .glass-header {
+        background-color: transparent;
+        backdrop-filter: none;
+        border-bottom-color: transparent;
+    }
+
+    .site-header__bar {
+        position: relative;
+        height: var(--masthead-height);
+        transition: height var(--duration-masthead) var(--ease-rise);
+    }
+
+    .site-header.is-compact .site-header__bar {
+        height: var(--masthead-compact-height);
+    }
+
+    /* The lockup folds to the mark and the name on one line when the bar is compact. */
+    .site-header__lockup .t-label {
+        display: block;
+        max-height: 1.25rem;
+        opacity: 1;
+        overflow: hidden;
+        transition:
+            max-height var(--duration-masthead) var(--ease-rise),
+            opacity var(--duration-masthead) var(--ease-rise);
+    }
+
+    .site-header.is-compact .site-header__lockup .t-label {
+        max-height: 0;
+        opacity: 0;
+    }
+
+    .site-header__lockup .font-display {
+        white-space: nowrap;
+    }
+
+    /* ------------------------------------------------------------ utility line */
+    .masthead-utility {
+        height: var(--masthead-utility-height);
+        overflow: hidden;
+        border-bottom: 1px solid color-mix(in srgb, var(--color-brass) 20%, transparent);
+        transition:
+            height var(--duration-masthead) var(--ease-rise),
+            opacity var(--duration-masthead) var(--ease-rise),
+            border-color var(--duration-masthead) var(--ease-rise);
+    }
+
+    .masthead-utility__inner {
+        height: 2rem;
+    }
+
+    .site-header.is-compact .masthead-utility {
+        height: 0;
+        opacity: 0;
+        border-bottom-color: transparent;
+    }
+
+    .site-header.is-over-hero .masthead-utility {
+        border-bottom-color: transparent;
+    }
+
+    .masthead-utility__link {
+        position: relative;
+        color: var(--color-champagne);
+        text-decoration: none;
+        transition: color 300ms var(--ease-rise);
+    }
+
+    .masthead-utility__link::after,
+    .chapter-link::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 1px;
+        background-color: color-mix(in srgb, var(--color-champagne) 50%, transparent);
+        transform: scaleX(0);
+        transform-origin: left center;
+        transition: transform var(--duration-draw, 600ms) var(--ease-rise);
+    }
+
+    .masthead-utility__link:hover,
+    .masthead-utility__link:focus-visible {
+        color: var(--color-ivory);
+        text-decoration: none;
+    }
+
+    .masthead-utility__link:hover::after,
+    .masthead-utility__link:focus-visible::after {
+        transform: scaleX(1);
+    }
+
+    /* ------------------------------------------------------------ chapter buttons */
+    .chapter-link {
+        position: relative;
+        display: inline-block;
+        padding: 0.625rem 0;
+        border: 0;
+        background: none;
+        color: var(--color-champagne);
+        cursor: pointer;
+        white-space: nowrap;
+        transition: color 300ms var(--ease-rise);
+    }
+
+    .chapter-link:hover,
+    .chapter-link:focus-visible,
+    .chapter-link[aria-expanded='true'] {
+        color: var(--color-ivory);
+    }
+
+    /* A hairline draws from the left on hover, focus and while the panel is open. */
+    .chapter-link:hover::after,
+    .chapter-link:focus-visible::after,
+    .chapter-link[aria-expanded='true']::after {
+        transform: scaleX(1);
+    }
+
+    /* The active chapter carries a 1px brass rule. */
+    .chapter-link[aria-current='true']::after {
+        background-color: var(--color-brass);
+        transform: scaleX(1);
+    }
+
+    /* The small outline pill on the right of the bar. */
+    .btn-pill-outline.btn-pill--small {
+        min-height: 2.25rem;
+        padding: 0.5rem 1.25rem;
+        font-size: 0.875rem;
+    }
+
+    /* ------------------------------------------------------------ mega menu */
+    .mega-menu {
+        position: absolute;
+        left: 1rem;
+        right: 1rem;
+        top: 100%;
+        z-index: 10;
+        padding: 3rem 3rem 3.5rem;
+        border: 1px solid color-mix(in srgb, var(--color-brass) 35%, transparent);
+        border-top: 0;
+        border-radius: 0 0 var(--radius-card) var(--radius-card);
+        background-color: var(--color-evergreen);
+        color: var(--color-champagne);
+    }
+
+    @media (min-width: 40rem) {
+        .mega-menu {
+            left: 1.5rem;
+            right: 1.5rem;
+        }
+    }
+
+    /* Fades and rises 8px over 400ms (Alpine toggles these classes while showing and hiding). */
+    .mega-menu--moving {
+        transition:
+            opacity var(--duration-mega) var(--ease-rise),
+            transform var(--duration-mega) var(--ease-rise);
+    }
+
+    .mega-menu--hidden {
+        opacity: 0;
+        transform: translateY(var(--mega-rise));
+    }
+
+    .mega-menu__inner {
+        display: grid;
+        grid-template-columns: minmax(0, 4fr) minmax(0, 5fr) minmax(0, 4fr);
+        gap: 3rem;
+    }
+
+    .mega-menu__name {
+        margin-top: 1rem;
+        font-family: var(--font-display);
+        font-weight: 300;
+        font-size: 2rem; /* 32px */
+        line-height: 1.1;
+        color: var(--color-ivory);
+    }
+
+    .mega-menu__strap {
+        margin-top: 0.75rem;
+        max-width: 18rem;
+        font-family: var(--font-sans);
+        font-weight: 300;
+        font-size: 1rem;
+        line-height: 1.6;
+        color: var(--color-champagne);
+    }
+
+    .mega-menu__links,
+    .mega-menu__featured {
+        border-left: 1px solid var(--color-cypress);
+        padding-left: 2.5rem;
+    }
+
+    .mega-menu__links {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .mega-menu__link {
+        display: block;
+        padding: 0.625rem 0;
+        color: var(--color-champagne);
+        text-decoration: none;
+    }
+
+    .mega-menu__link-label {
+        position: relative;
+        display: inline-block;
+        font-family: var(--font-display);
+        font-weight: 300;
+        font-size: 1.375rem; /* 22px */
+        line-height: 1.2;
+        color: var(--color-ivory);
+    }
+
+    .mega-menu__link-label::after,
+    .site-menu__link-label::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: -0.125rem;
+        width: 100%;
+        height: 1px;
+        background-color: color-mix(in srgb, var(--color-champagne) 50%, transparent);
+        transform: scaleX(0);
+        transform-origin: left center;
+        transition: transform var(--duration-draw, 600ms) var(--ease-rise);
+    }
+
+    .mega-menu__link:hover,
+    .mega-menu__link:focus-visible,
+    .site-menu__link:hover,
+    .site-menu__link:focus-visible {
+        text-decoration: none;
+    }
+
+    .mega-menu__link:hover .mega-menu__link-label::after,
+    .mega-menu__link:focus-visible .mega-menu__link-label::after,
+    .site-menu__link:hover .site-menu__link-label::after,
+    .site-menu__link:focus-visible .site-menu__link-label::after {
+        transform: scaleX(1);
+    }
+
+    .mega-menu__link[aria-current='page'] .mega-menu__link-label::after,
+    .site-menu__link[aria-current='page'] .site-menu__link-label::after {
+        background-color: var(--color-brass);
+        transform: scaleX(1);
+    }
+
+    .mega-menu__link-description,
+    .site-menu__link-description {
+        display: block;
+        margin-top: 0.125rem;
+        font-family: var(--font-sans);
+        font-weight: 300;
+        font-size: 0.9375rem;
+        line-height: 1.5;
+        color: var(--color-champagne);
+    }
+
+    /* The featured item: label, a small treated photograph, title, quote, metadata. */
+    .featured-card {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        margin-top: 1rem;
+        color: var(--color-champagne);
+        text-decoration: none;
+    }
+
+    .featured-card:hover,
+    .featured-card:focus-visible {
+        text-decoration: none;
+    }
+
+    .featured-card__photo {
+        width: 100%;
+        max-width: 14rem;
+    }
+
+    .featured-card__title {
+        font-family: var(--font-display);
+        font-weight: 300;
+        font-size: 1.375rem;
+        line-height: 1.2;
+        color: var(--color-ivory);
+        transition: color 300ms var(--ease-rise);
+    }
+
+    .featured-card:hover .featured-card__title,
+    .featured-card:focus-visible .featured-card__title {
+        text-decoration: underline;
+        text-decoration-thickness: 1px;
+        text-underline-offset: 0.2em;
+    }
+
+    .featured-card__quote {
+        font-family: var(--font-display);
+        font-weight: 300;
+        font-style: italic;
+        font-size: 1.125rem;
+        line-height: 1.4;
+    }
+
+    .featured-card__meta {
+        font-size: 1rem;
+    }
+}
+
+/* Print: the masthead is hidden with the rest of the chrome in archive.css. */

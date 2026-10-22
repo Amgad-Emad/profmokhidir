@@ -4,35 +4,31 @@ declare(strict_types=1);
 
 namespace App\View\Components\Site;
 
+use App\Constants\Masthead;
 use App\Constants\Search;
+use App\Services\MastheadService;
 use App\Services\NavigationService;
-use App\Services\TypesetterService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\View\Component;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
- * Fixed glassy header with the primary navigation, the "More" disclosure for
- * items that do not fit, the search button and dialog, and the full-screen
- * menu for tablet and mobile, which lists the sections as a table of contents.
+ * The masthead: a glassy evergreen bar with the lockup, five chapter disclosures
+ * (each a mega menu with a featured item), the search button and the tribute
+ * pill; a utility line above it on wide screens; and, below lg, the full-screen
+ * menu with the chapters as an accordion. Over the home hero the bar starts
+ * transparent (`hero`), and it compacts as the reader scrolls down.
  */
 class Header extends Component
 {
-    /**
-     * How many primary items are shown inline at each desktop breakpoint; the rest go
-     * under "More". The bar is capped at max-w-7xl, so from xl the count no longer grows:
-     * measured at 1280px, six label-style items beside the lockup and the search button
-     * leave a dozen pixels to spare.
-     */
-    public const int INLINE_AT_LG = 4;
+    /** @var list<array{key: string, numeral: string, label: string, strap: string, panelId: string, buttonId: string, items: list<array{key: string, label: string, description: string, url: string, active: bool}>, active: bool, featured: array{kind: string, label: string, title: string, meta: string|null, quote: string|null, url: string, media: Media|null}|null}> */
+    public array $chapters;
 
-    public const int INLINE_AT_XL = 6;
+    public ?string $activeChapter;
 
-    /** @var list<array{key: string, label: string, title: string, url: string, route: string, placement: string, summary: string, active: bool}> */
-    public array $primary;
-
-    /** @var list<array{key: string, label: string, title: string, url: string, route: string, placement: string, summary: string, active: bool, numeral: string}> */
-    public array $all;
+    /** @var array{line: string, link: array{label: string, url: string}} */
+    public array $utility;
 
     public string $searchUrl;
 
@@ -40,47 +36,33 @@ class Header extends Component
 
     public string $searchShortcuts;
 
-    public function __construct(NavigationService $navigation, TypesetterService $typesetter, Request $request)
+    public string $tributeUrl;
+
+    /** @var list<array{key: string, label: string, title: string, url: string, route: string, placement: string, summary: string, active: bool}> */
+    public array $sections;
+
+    public function __construct(MastheadService $masthead, NavigationService $navigation, Request $request, public bool $hero = false)
     {
         $current = $request->route()?->getName();
+        $user = $request->user();
 
-        $this->primary = $navigation->primary($current);
-        $this->all = array_map(
-            fn (array $item, int $index): array => $item + ['numeral' => $typesetter->roman($index + 1)],
-            $navigation->all($current),
-            array_keys($navigation->all($current)),
-        );
+        $this->sections = $navigation->all($current);
+        $this->chapters = $masthead->chapters($current, $user);
+        $this->activeChapter = $masthead->activeChapter($current);
+        $this->utility = $masthead->utility($user);
         $this->searchUrl = route(Search::ROUTE);
         $this->searchShortcuts = Search::keyShortcuts();
+        $this->tributeUrl = route('tributes.create');
     }
 
-    /**
-     * Tailwind classes that show an inline item only from the breakpoint where it fits.
-     */
-    public function inlineClasses(int $index): string
+    public function menuId(): string
     {
-        return match (true) {
-            $index < self::INLINE_AT_LG => 'hidden lg:block',
-            $index < self::INLINE_AT_XL => 'hidden xl:block',
-            default => 'hidden',
-        };
+        return Masthead::MENU_ID;
     }
 
-    /**
-     * Tailwind classes that show an item inside "More" only while it is not inline.
-     */
-    public function overflowClasses(int $index): string
+    public function searchId(): string
     {
-        return match (true) {
-            $index < self::INLINE_AT_LG => 'hidden',
-            $index < self::INLINE_AT_XL => 'block xl:hidden',
-            default => 'block',
-        };
-    }
-
-    public function hasOverflow(): bool
-    {
-        return count($this->primary) > self::INLINE_AT_LG;
+        return Masthead::SEARCH_ID;
     }
 
     public function render(): View
