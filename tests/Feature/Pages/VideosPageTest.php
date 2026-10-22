@@ -32,7 +32,7 @@ class VideosPageTest extends TestCase
         $this->get(route('videos'))
             ->assertOk()
             ->assertSee('<title>Videos · ', false)
-            ->assertSeeInOrder(['section-header', 'Videos', 'rule-brass', 'id="section-title"', 'Videos'], false)
+            ->assertSeeInOrder(['chapter-opening', '<span class="sr-only">Chapter </span>V</span>', 'Videos', 'rule-brass', 'id="section-title"', 'Videos'], false)
             ->assertSee('Recordings of lectures, interviews and events will appear here once they are published.')
             ->assertDontSee('Draft recording')
             ->assertDontSee('livewire', false);
@@ -91,7 +91,7 @@ class VideosPageTest extends TestCase
             ->assertSee('<title>Inaugural lecture · ', false)
             ->assertSee('<meta name="description" content="On the soil beneath our feet.">', false)
             ->assertSeeInOrder([
-                'section-header', 'Videos', 'id="section-title"', 'Inaugural lecture',
+                'chapter-opening', 'Videos', 'id="section-title"', 'Inaugural lecture',
                 'Inaugural Lecture', '· Khartoum', '· <time datetime="1983-03-12">12 March 1983</time>',
                 'video-facade', 'x-data="videoFacade"', 'photo-archive',
                 'href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" rel="noopener" class="video-facade__play" @click.prevent="play()"',

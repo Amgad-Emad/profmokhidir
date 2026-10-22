@@ -68,7 +68,7 @@ class VideoPlayerTest extends TestCase
         $html = $this->render(Video::factory()->provider(VideoProvider::Link, 'https://www.example.org/talk')->create(['title' => 'Talk']));
 
         $this->assertStringContainsString('This recording is hosted on another site.', $html);
-        $this->assertMatchesRegularExpression('/<a href="https:\/\/www\.example\.org\/talk" class="[^"]*rounded-full[^"]*" rel="noopener">Watch on example\.org<\/a>/', $html);
+        $this->assertMatchesRegularExpression('/<a href="https:\/\/www\.example\.org\/talk" class="btn-pill-outline text-evergreen" rel="noopener">Watch on example\.org<\/a>/', $html);
         $this->assertStringNotContainsString('<iframe', $html);
         $this->assertStringNotContainsString('<video', $html);
     }

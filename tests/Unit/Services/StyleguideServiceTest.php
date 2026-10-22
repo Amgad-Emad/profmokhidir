@@ -3,6 +3,7 @@
 namespace Tests\Unit\Services;
 
 use App\Constants\Brand;
+use App\Constants\Components;
 use App\Services\StyleguideService;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
@@ -82,7 +83,9 @@ class StyleguideServiceTest extends TestCase
     {
         $sections = $this->service->sections();
 
-        $this->assertSame(['colours', 'fonts', 'typeScale', 'motion', 'typesetting', 'ornaments', 'typesetExamples'], array_keys($sections));
+        $this->assertSame(['colours', 'fonts', 'typeScale', 'motion', 'typesetting', 'ornaments', 'typesetExamples', 'components'], array_keys($sections));
+        $this->assertSame(array_keys(Components::groups()), array_keys($sections['components']));
+        $this->assertCount(count(Components::all()), array_merge(...array_column($sections['components'], 'components')));
         $this->assertCount(9, $sections['colours']);
         $this->assertCount(3, $sections['fonts']);
         $this->assertCount(5, $sections['typeScale']);

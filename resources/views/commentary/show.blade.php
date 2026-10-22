@@ -8,8 +8,6 @@
     <x-reading-progress target="#essay-body" />
 
     <article class="essay mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28" aria-labelledby="section-title">
-        <x-folio :section="$section['label']" class="mb-16" />
-
         <div @class(['essay__layout', 'essay__layout--contents' => $contents !== []])>
             @if ($contents !== [])
                 <div class="essay__aside">

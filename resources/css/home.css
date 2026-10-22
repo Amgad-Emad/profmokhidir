@@ -233,7 +233,7 @@
 
     .story-card:hover,
     .story-card:focus-within {
-        border-color: var(--color-brass);
+        border-color: var(--color-evergreen);
     }
 
     .story-card__photo {

@@ -55,4 +55,18 @@ interface BrandTokenRepositoryInterface
      * @return array<string, array{label: string, width: int, height: int, shapes: list<array<string, string|float|int>>}>
      */
     public function ornaments(): array;
+
+    /**
+     * The Blade components, grouped for the style guide (App\Constants\Components).
+     *
+     * @return array<string, list<array{tag: string, view: string, group: string, purpose: string, usage: string}>>
+     */
+    public function components(): array;
+
+    /**
+     * Group key => heading, in display order.
+     *
+     * @return array<string, string>
+     */
+    public function componentGroups(): array;
 }

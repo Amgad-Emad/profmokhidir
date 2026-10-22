@@ -1,7 +1,7 @@
 <x-layouts.public :title="$video->title" :description="$description ?? $section['summary']">
     <article class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28">
         <div class="max-w-4xl">
-            <x-section-header :label="$section['label']" :title="$video->title" level="1" id="section-title" />
+            <x-chapter-opening :number="$chapter" :label="$section['label']" :title="$video->title" level="1" id="section-title" />
 
             <x-video-label :video="$video" class="mt-6" data-rise />
 

@@ -6,9 +6,10 @@
     (or list of arrays) printed as JSON-LD; `noindex` keeps transactional pages out of search.
     Inner pages get a breadcrumb trail (App\Services\BreadcrumbService) with BreadcrumbList JSON-LD:
     `breadcrumb-title` names the current page when it differs from `title`; `breadcrumbs` passes a
-    trail of ['label' => , 'url' => , 'current' => ] outright, or false to show none.
+    trail of ['label' => , 'url' => , 'current' => ] outright, or false to show none. `breadcrumb-tone="ivory"`
+    sets the trail on evergreen, for pages that open on a dark surface.
 --}}
-@props(['title' => null, 'description' => null, 'image' => null, 'canonical' => null, 'type' => null, 'schema' => null, 'noindex' => false, 'breadcrumbs' => null, 'breadcrumbTitle' => null])
+@props(['title' => null, 'description' => null, 'image' => null, 'canonical' => null, 'type' => null, 'schema' => null, 'noindex' => false, 'breadcrumbs' => null, 'breadcrumbTitle' => null, 'breadcrumbTone' => 'evergreen'])
 @inject('breadcrumbService', 'App\Services\BreadcrumbService')
 @php
     $trail = match (true) {
@@ -44,8 +45,10 @@
 
     <main id="main" tabindex="-1" class="pt-20">
         @if (count($trail) > 1)
-            <div class="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
-                <x-site.breadcrumbs :trail="$trail" />
+            <div @class(['breadcrumbs-band', 'on-dark bg-evergreen text-champagne' => $breadcrumbTone === 'ivory'])>
+                <div class="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
+                    <x-site.breadcrumbs :trail="$trail" :tone="$breadcrumbTone" />
+                </div>
             </div>
         @endif
         {{ $slot }}

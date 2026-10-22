@@ -14,7 +14,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * A brand photograph: responsive WebP sources from the media conversions, the
  * treatment class (warm monochrome portrait or evergreen duotone archive), the
  * recorded width/height so the frame is reserved before the image loads, and a
- * place/year caption in the label style. `tone` is the caption ink: "ivory" on
+ * museum-label caption (title, place and year). `tone` is the caption ink: "ivory" on
  * evergreen surfaces (brass), "evergreen" on ivory surfaces (bronze). With
  * `lightbox`, the frame becomes a link the gallery lightbox picks up. With
  * `label`, the caption is set as a museum label (<x-museum-label>); with
@@ -51,7 +51,7 @@ class Photo extends Component
         public bool $captioned = true,
         public bool $lightbox = false,
         public ?string $aspect = null,
-        public bool $label = false,
+        public bool $label = true,
         public bool $lift = false,
     ) {
         $this->src = ResponsiveImage::largestUrl($media);

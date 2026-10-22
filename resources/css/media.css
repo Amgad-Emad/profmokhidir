@@ -83,7 +83,7 @@
     /* Album index: a calm asymmetric grid, two albums to a row at different heights. */
     .exhibition {
         display: grid;
-        grid-template-columns: repeat(12, minmax(0, 1fr));
+        grid-template-columns: minmax(0, 1fr);
         column-gap: 1.5rem;
         row-gap: 5rem;
     }
@@ -94,6 +94,7 @@
 
     @media (min-width: 640px) {
         .exhibition {
+            grid-template-columns: repeat(12, minmax(0, 1fr));
             row-gap: 7rem;
         }
 
@@ -150,9 +151,10 @@
 
     /* --------------------------------------------------- exhibition wall */
     /* Album page: frames of varied width (each photo's own proportions, so faces are never cropped) on a 12-column wall. */
+    /* One column on narrow screens (twelve 32px gaps alone are wider than a phone), the 12-column wall from 640px. */
     .wall {
         display: grid;
-        grid-template-columns: repeat(12, minmax(0, 1fr));
+        grid-template-columns: minmax(0, 1fr);
         column-gap: 2rem;
         row-gap: 4rem;
         align-items: end;
@@ -164,6 +166,7 @@
 
     @media (min-width: 640px) {
         .wall {
+            grid-template-columns: repeat(12, minmax(0, 1fr));
             row-gap: 6rem;
         }
 
@@ -381,7 +384,7 @@
         width: 2.75rem;
         height: 2.75rem;
         border-radius: 9999px;
-        border: 1px solid var(--color-brass);
+        border: 1px solid var(--color-champagne);
         background-color: transparent;
         color: var(--color-ivory);
         cursor: pointer;
@@ -414,7 +417,7 @@
             align-self: center;
             gap: 1.5rem;
             padding-left: 2rem;
-            border-left: 1px solid color-mix(in srgb, var(--color-brass) 50%, transparent);
+            border-left: 1px solid var(--color-cypress);
         }
 
         .lightbox__nav {

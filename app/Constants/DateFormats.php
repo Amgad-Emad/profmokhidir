@@ -16,6 +16,9 @@ final class DateFormats
     /** "March 2021": when only the month matters. */
     public const string MONTH_YEAR = 'F Y';
 
+    /** "Wednesday 22 October 2026": the date under the dashboard greeting, set in small caps. */
+    public const string GREETING = 'l j F Y';
+
     /** Machine-readable value for <time datetime>. */
     public const string MACHINE = 'Y-m-d';
 

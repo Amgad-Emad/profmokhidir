@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Constants\AdminNavigation;
+use App\Constants\DashboardGreeting;
+use App\Constants\DateFormats;
 use App\Constants\StatusTone;
 use App\Models\AuditLog;
 use App\Models\User;
@@ -19,6 +21,7 @@ use App\Repositories\Contracts\TeachingMaterialRepositoryInterface;
 use App\Repositories\Contracts\TributeRepositoryInterface;
 use App\Repositories\Contracts\VideoRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Carbon;
 
 /**
  * Figures for the dashboard home: published items per section, the moderation
@@ -118,15 +121,32 @@ class DashboardService
     }
 
     /**
+     * The greeting at the top of the dashboard: a salutation for the hour and the date in small caps.
+     *
+     * @return array{salutation: string, date: string, datetime: string}
+     */
+    public function greeting(?Carbon $now = null): array
+    {
+        $now ??= Carbon::now();
+
+        return [
+            'salutation' => DashboardGreeting::salutation((int) $now->format('G')),
+            'date' => $now->format(DateFormats::GREETING),
+            'datetime' => $now->format(DateFormats::MACHINE),
+        ];
+    }
+
+    /**
      * Everything the dashboard home renders, in one call.
      *
-     * @return array{published: array<string, array{label: string, count: int, route: string, permission: string}>, queues: array<string, array{label: string, count: int, route: string, permission: string, tone: StatusTone, noun: string}>, attention: array<string, array{label: string, count: int, route: string, permission: string, tone: StatusTone, noun: string}>, activity: Collection<int, AuditLog>}
+     * @return array{greeting: array{salutation: string, date: string, datetime: string}, published: array<string, array{label: string, count: int, route: string, permission: string}>, queues: array<string, array{label: string, count: int, route: string, permission: string, tone: StatusTone, noun: string}>, attention: array<string, array{label: string, count: int, route: string, permission: string, tone: StatusTone, noun: string}>, activity: Collection<int, AuditLog>}
      */
     public function summary(?User $user = null): array
     {
         $queues = $this->queues();
 
         return [
+            'greeting' => $this->greeting(),
             'published' => $this->publishedCounts(),
             'queues' => $queues,
             'attention' => array_filter(

@@ -45,6 +45,7 @@ class VideosPageService
     /**
      * @return array{
      *     section: array{key: string, label: string, title: string, url: string, route: string, placement: string, summary: string, active: bool},
+     *     chapter: int,
      *     featured: Video|null,
      *     player: Player|null,
      *     videos: Collection<int, Video>
@@ -56,6 +57,7 @@ class VideosPageService
 
         return [
             'section' => $this->navigation->section(Sections::VIDEOS, Sections::VIDEOS),
+            'chapter' => $this->navigation->chapter(Sections::VIDEOS),
             'featured' => $featured,
             'player' => $featured === null ? null : $this->player($featured),
             'videos' => $this->videos->published()->reject(fn (Video $video): bool => $video->is($featured))->values(),
@@ -70,6 +72,7 @@ class VideosPageService
     /**
      * @return array{
      *     section: array{key: string, label: string, title: string, url: string, route: string, placement: string, summary: string, active: bool},
+     *     chapter: int,
      *     video: Video,
      *     player: Player,
      *     description: string|null,
@@ -80,6 +83,7 @@ class VideosPageService
     {
         return [
             'section' => $this->navigation->section(Sections::VIDEOS, Sections::VIDEOS.'.show'),
+            'chapter' => $this->navigation->chapter(Sections::VIDEOS),
             'video' => $video,
             'player' => $this->player($video),
             'description' => filled($video->description) ? Str::limit(trim((string) $video->description), self::DESCRIPTION_LIMIT) : null,

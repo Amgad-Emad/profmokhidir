@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 /**
  * Every Fortify screen renders our Blade view inside the guest layout: ivory
- * page, stacked lockup above a centred card, pill buttons, label-style labels.
+ * page, stacked lockup above a centred card, the seal beneath, pill buttons, label-style labels.
  */
 class AuthViewsTest extends TestCase
 {
@@ -26,7 +26,9 @@ class AuthViewsTest extends TestCase
             ->assertSee('data-variant="stacked"', false)
             ->assertSee('Mohamed Osman Khidir')
             ->assertSee('auth-card rounded-card', false)
-            ->assertSee('rounded-full', false)
+            ->assertSee('btn-pill-outline text-evergreen', false)
+            ->assertSee('class="seal !mt-12"', false)
+            ->assertSee('<h1 id="page-title" class="font-display text-quote font-light">Sign in</h1>', false)
             ->assertSee('t-label block text-bronze', false)
             ->assertSee('Keep me signed in')
             ->assertSee(route('password.request'))

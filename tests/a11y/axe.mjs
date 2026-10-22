@@ -38,7 +38,7 @@ const EDITOR_PAGES = [
     '/admin/content/other', '/admin/media/library', '/admin/media/albums', '/admin/media/albums/create',
     '/admin/media/videos', '/admin/media/videos/create', '/admin/tributes', '/account',
 ];
-const ADMIN_PAGES = ['/admin/community', '/admin/community/members', '/admin/community/reports', '/admin/settings/users'];
+const ADMIN_PAGES = ['/admin/community', '/admin/community/members', '/admin/community/reports', '/admin/users'];
 const MEMBER_PAGES = ['/community/chat'];
 
 const results = [];

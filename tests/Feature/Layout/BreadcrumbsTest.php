@@ -27,7 +27,7 @@ class BreadcrumbsTest extends TestCase
     {
         $html = $this->get(route('awards'))->assertOk()->getContent();
 
-        $this->assertMatchesRegularExpression('/<main id="main" tabindex="-1" class="pt-20">\s*<div class="mx-auto max-w-7xl px-4 pt-8 sm:px-6">\s*<nav class="breadcrumbs" aria-label="Breadcrumb">/', $html);
+        $this->assertMatchesRegularExpression('/<main id="main" tabindex="-1" class="pt-20">\s*<div class="breadcrumbs-band">\s*<div class="mx-auto max-w-7xl px-4 pt-8 sm:px-6">\s*<nav class="breadcrumbs" aria-label="Breadcrumb">/', $html);
         $this->assertStringContainsString('<a href="'.route('home').'" class="breadcrumbs__link link-draw smallcaps">'.Breadcrumbs::HOME_LABEL.'</a>', $html);
         $this->assertStringContainsString('<span class="breadcrumbs__separator" aria-hidden="true">'.Breadcrumbs::SEPARATOR.'</span>', $html);
         $this->assertStringContainsString('<a href="'.route('awards').'" class="breadcrumbs__link smallcaps" aria-current="page">Awards</a>', $html);

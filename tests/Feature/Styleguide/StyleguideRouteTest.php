@@ -3,6 +3,7 @@
 namespace Tests\Feature\Styleguide;
 
 use App\Constants\Brand;
+use App\Constants\Components;
 use App\Constants\Environments;
 use App\Constants\Typography;
 use PHPUnit\Framework\Attributes\Test;
@@ -41,6 +42,17 @@ class StyleguideRouteTest extends TestCase
         }
 
         $response->assertSee('Professor Mohamed Osman Khidir');
+
+        // Every component is catalogued with its usage note.
+        $response->assertSee('id="components"', false);
+
+        foreach (Components::groups() as $key => $label) {
+            $response->assertSee('data-component-group="'.$key.'"', false)->assertSee($label);
+        }
+
+        foreach (Components::all() as $component) {
+            $response->assertSee('data-component="'.$component['tag'].'"', false)->assertSee($component['usage']);
+        }
     }
 
     #[Test]

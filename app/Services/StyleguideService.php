@@ -99,6 +99,22 @@ class StyleguideService
     }
 
     /**
+     * The component catalogue, grouped, with the usage note of each component.
+     *
+     * @return array<string, array{label: string, components: list<array{tag: string, view: string, group: string, purpose: string, usage: string}>}>
+     */
+    public function components(): array
+    {
+        $groups = [];
+
+        foreach ($this->tokens->componentGroups() as $key => $label) {
+            $groups[$key] = ['label' => $label, 'components' => $this->tokens->components()[$key] ?? []];
+        }
+
+        return $groups;
+    }
+
+    /**
      * Each sample as written and as the typesetter renders it (escaped HTML).
      *
      * @return list<array{before: string, after: string}>
@@ -114,7 +130,7 @@ class StyleguideService
     /**
      * Everything the style guide view needs.
      *
-     * @return array{colours: list<array<string, mixed>>, fonts: array<string, mixed>, typeScale: array<string, mixed>, motion: array<string, mixed>, typesetting: array<string, mixed>, ornaments: array<string, mixed>, typesetExamples: list<array{before: string, after: string}>}
+     * @return array{colours: list<array<string, mixed>>, fonts: array<string, mixed>, typeScale: array<string, mixed>, motion: array<string, mixed>, typesetting: array<string, mixed>, ornaments: array<string, mixed>, typesetExamples: list<array{before: string, after: string}>, components: array<string, array{label: string, components: list<array<string, string>>}>}
      */
     public function sections(): array
     {
@@ -126,6 +142,7 @@ class StyleguideService
             'typesetting' => $this->typesetting(),
             'ornaments' => $this->ornaments(),
             'typesetExamples' => $this->typesetExamples(),
+            'components' => $this->components(),
         ];
     }
 

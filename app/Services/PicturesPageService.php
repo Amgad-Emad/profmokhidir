@@ -29,6 +29,7 @@ class PicturesPageService
     /**
      * @return array{
      *     section: array{key: string, label: string, title: string, url: string, route: string, placement: string, summary: string, active: bool},
+     *     chapter: int,
      *     view: PictureView,
      *     views: list<array{label: string, url: string, active: bool}>,
      *     albums: list<array{album: Album, cover: Media|null, count: int, range: string|null, url: string}>,
@@ -56,6 +57,7 @@ class PicturesPageService
 
         return [
             'section' => $this->navigation->section(Sections::PICTURES, Sections::PICTURES),
+            'chapter' => $this->navigation->chapter(Sections::PICTURES),
             'view' => $view,
             'views' => $this->views($view),
             'albums' => $albums,
@@ -72,6 +74,7 @@ class PicturesPageService
     /**
      * @return array{
      *     section: array{key: string, label: string, title: string, url: string, route: string, placement: string, summary: string, active: bool},
+     *     chapter: int,
      *     album: Album,
      *     range: string|null,
      *     wall: list<Hung>,
@@ -82,6 +85,7 @@ class PicturesPageService
     {
         return [
             'section' => $this->navigation->section(Sections::PICTURES, Sections::PICTURES.'.show'),
+            'chapter' => $this->navigation->chapter(Sections::PICTURES),
             'album' => $album,
             'range' => $this->archive->yearRange($album),
             'wall' => $this->archive->wall($album),

@@ -30,6 +30,7 @@ class CommentaryPageService
     /**
      * @return array{
      *     section: array{key: string, label: string, title: string, url: string, route: string, placement: string, summary: string, active: bool},
+     *     chapter: int,
      *     commentaries: LengthAwarePaginator<int, Commentary>,
      *     tags: list<TagOption>,
      *     activeTag: string|null,
@@ -43,6 +44,7 @@ class CommentaryPageService
 
         return [
             'section' => $this->navigation->section(Sections::COMMENTARY, Sections::COMMENTARY),
+            'chapter' => $this->navigation->chapter(Sections::COMMENTARY),
             'commentaries' => $this->commentaries->paginatePublished($activeTag, PageSizes::COMMENTARIES),
             'tags' => $this->tagOptions($tags, $activeTag),
             'activeTag' => $activeTag,

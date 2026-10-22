@@ -20,7 +20,7 @@ class CommentaryPageTest extends TestCase
         $this->get(route('commentary'))
             ->assertOk()
             ->assertSee('<title>Commentary Corner · ', false)
-            ->assertSeeInOrder(['section-header', 'Commentary', 'rule-brass', 'id="section-title"', 'Commentary Corner'], false)
+            ->assertSeeInOrder(['chapter-opening', '<span class="sr-only">Chapter </span>VIII</span>', 'Commentary', 'rule-brass', 'id="section-title"', 'Commentary Corner'], false)
             ->assertSee('Essays and reflections will be published here in due course.')
             ->assertDontSee('Draft essay')
             ->assertDontSee('aria-label="Topics"', false)
@@ -96,7 +96,7 @@ class CommentaryPageTest extends TestCase
             ->assertSee('<meta name="description" content="Why the lecture still matters.">', false)
             ->assertSeeInOrder([
                 'class="reading-progress" x-data="readingProgress" data-target="#essay-body" aria-hidden="true"',
-                'folio', 'sidenote-host', 'chapter-opening', '<span class="sr-only">Chapter </span>VIII</span>', 'Commentary', 'id="section-title"', 'On teaching',
+                'sidenote-host', 'chapter-opening', '<span class="sr-only">Chapter </span>VIII</span>', 'Commentary', 'id="section-title"', 'On teaching',
                 '<span class="smallcaps">Prof. Mohamed Osman Khidir</span>', '<time datetime="2021-03-12" class="whitespace-nowrap">12 March 2021</time>',
                 'First published at www.example.org', '1 min read',
                 'Why the lecture still matters.',

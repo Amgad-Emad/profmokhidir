@@ -1,8 +1,8 @@
 <x-layouts.public :title="$album->title" :description="filled($album->description) ? $album->description : $section['summary']">
     <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28" aria-labelledby="section-title">
-        <x-section-header :label="$section['label']" :title="$album->title" level="1" id="section-title">
+        <x-chapter-opening :number="$chapter" :label="$section['label']" :title="$album->title" level="1" id="section-title">
             @if (filled($album->description)){{ $album->description }}@endif
-        </x-section-header>
+        </x-chapter-opening>
 
         @if ($wall === [])
             <x-empty-state class="mt-6" message="This album has no photographs yet." />

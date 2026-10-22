@@ -3,6 +3,7 @@
 namespace Tests\Unit\Services;
 
 use App\Constants\AdminNavigation;
+use App\Constants\DashboardGreeting;
 use App\Constants\AuditAction;
 use App\Constants\StatusTone;
 use App\Models\AuditLog;
@@ -15,6 +16,7 @@ use App\Models\User;
 use App\Services\DashboardService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
+use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
 class DashboardServiceTest extends TestCase
@@ -130,10 +132,22 @@ class DashboardServiceTest extends TestCase
 
         $summary = $this->service->summary(User::factory()->editor()->create());
 
-        $this->assertSame(['published', 'queues', 'attention', 'activity'], array_keys($summary));
+        $this->assertSame(['greeting', 'published', 'queues', 'attention', 'activity'], array_keys($summary));
+        $this->assertContains($summary['greeting']['salutation'], DashboardGreeting::all());
         $this->assertCount(10, $summary['published']);
         $this->assertCount(3, $summary['queues']);
         $this->assertSame([AdminNavigation::TRIBUTES], array_keys($summary['attention']));
         $this->assertCount(1, $summary['activity']);
+    }
+
+    #[Test]
+    public function the_greeting_follows_the_hour_and_sets_the_date_in_the_greeting_format(): void
+    {
+        $morning = $this->service->greeting(Carbon::parse('2026-10-22 08:15'));
+        $evening = $this->service->greeting(Carbon::parse('2026-10-22 19:00'));
+
+        $this->assertSame(['salutation' => DashboardGreeting::MORNING, 'date' => 'Thursday 22 October 2026', 'datetime' => '2026-10-22'], $morning);
+        $this->assertSame(DashboardGreeting::EVENING, $evening['salutation']);
+        $this->assertSame(DashboardGreeting::AFTERNOON, $this->service->greeting(Carbon::parse('2026-10-22 12:00'))['salutation']);
     }
 }

@@ -4,7 +4,8 @@
     surfaces (label in brass), "evergreen" on light surfaces (label in bronze).
     On the translucent glass header pass `label-tone="champagne"`: brass falls below
     4.5:1 once ivory content shows through. The name inherits the current text colour.
-    Pass `href` to render it as a link.
+    Pass `href` to render it as a link, `compact` in narrow bars (the admin sidebar) so the
+    name stays on one line at 18px.
 --}}
 @props([
     'variant' => 'horizontal',
@@ -12,6 +13,7 @@
     'labelTone' => null,
     'href' => null,
     'size' => null,
+    'compact' => false,
 ])
 @php
     use App\Constants\BrandMark;
@@ -37,6 +39,6 @@
     <x-brand.mark :size="$size" :tone="$tone" decorative />
     <span @class(['flex flex-col', 'mt-4 items-center gap-2' => $stacked, 'items-start gap-0.5' => ! $stacked])>
         <span class="t-label {{ $labelColour }}">Professor</span>
-        <span @class(['font-display font-light leading-none', 'text-3xl' => $stacked, 'text-lg sm:text-xl' => ! $stacked])>Mohamed Osman Khidir</span>
+        <span @class(['font-display font-light leading-none', 'text-3xl' => $stacked, 'text-lg sm:text-xl' => ! $stacked && ! $compact, 'text-lg whitespace-nowrap' => ! $stacked && $compact])>Mohamed Osman Khidir</span>
     </span>
 </{{ $tag }}>

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories\Eloquent;
 
 use App\Constants\Brand;
+use App\Constants\Components;
 use App\Constants\Motion;
 use App\Constants\Ornaments;
 use App\Constants\Typesetting;
@@ -65,5 +66,15 @@ final class ConstantBrandTokenRepository implements BrandTokenRepositoryInterfac
     public function ornaments(): array
     {
         return Ornaments::definitions();
+    }
+
+    public function components(): array
+    {
+        return Components::byGroup();
+    }
+
+    public function componentGroups(): array
+    {
+        return Components::groups();
     }
 }

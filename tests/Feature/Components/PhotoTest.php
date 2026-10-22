@@ -56,7 +56,8 @@ class PhotoTest extends TestCase
         $this->assertStringContainsString('class="photo-portrait h-full w-full object-cover"', $html);
         $this->assertStringContainsString('loading="lazy"', $html);
         $this->assertStringNotContainsString('fetchpriority', $html);
-        $this->assertStringContainsString('<span class="t-label text-bronze">Khartoum, 1998</span>', $html);
+        $this->assertStringContainsString('<figcaption class="museum-label">', $html);
+        $this->assertStringContainsString('<span class="museum-label__meta smallcaps">Khartoum, 1998</span>', $html);
         $this->assertStringNotContainsString('In his office', $html);
     }
 
@@ -80,8 +81,9 @@ class PhotoTest extends TestCase
         $this->assertStringContainsString('sizes="40vw"', $html);
         $this->assertStringContainsString('loading="eager"', $html);
         $this->assertStringContainsString('fetchpriority="high"', $html);
-        $this->assertStringContainsString('<span class="text-base font-light text-champagne">In his office</span>', $html);
-        $this->assertStringContainsString('<span class="t-label text-brass">Khartoum, 1998</span>', $html);
+        $this->assertStringContainsString('<figcaption class="museum-label museum-label--ivory">', $html);
+        $this->assertStringContainsString('<span class="museum-label__title">In his office</span>', $html);
+        $this->assertStringContainsString('<span class="museum-label__meta smallcaps">Khartoum, 1998</span>', $html);
     }
 
     #[Test]
@@ -93,7 +95,7 @@ class PhotoTest extends TestCase
 
         $media = $this->portrait([MediaProperties::ALT_TEXT => 'Portrait', MediaProperties::YEAR => 1974]);
 
-        $this->assertStringContainsString('<span class="t-label text-bronze">1974</span>', Blade::render('<x-photo :media="$media" />', ['media' => $media]));
+        $this->assertStringContainsString('<span class="museum-label__meta smallcaps">1974</span>', Blade::render('<x-photo :media="$media" />', ['media' => $media]));
     }
 
     #[Test]
@@ -184,12 +186,12 @@ class PhotoTest extends TestCase
         $this->assertStringContainsString('<span class="museum-label__note">With the first cohort.</span>', $html);
         $this->assertStringNotContainsString('t-label', $html);
 
-        // Portraits keep the warm monochrome: no lift layer, and the label only when asked for.
+        // Portraits keep the warm monochrome: no lift layer; the museum label is the one caption.
         $portrait = $this->app->make(AlbumService::class)->addPhoto($album, PlaceholderImage::grey(48, 64), [MediaProperties::TREATMENT => MediaTreatment::Portrait, MediaProperties::YEAR => 1980]);
         $html = Blade::render('<x-photo :media="$media" :lift="true" />', ['media' => $portrait]);
 
         $this->assertStringNotContainsString('photo__under', $html);
         $this->assertStringNotContainsString('photo__frame--lift', $html);
-        $this->assertStringContainsString('<span class="t-label text-bronze">1980</span>', $html);
+        $this->assertStringContainsString('<span class="museum-label__meta smallcaps">1980</span>', $html);
     }
 }

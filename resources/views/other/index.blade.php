@@ -1,8 +1,6 @@
 {{-- Other Information as a catalogue index: items grouped by category, each set as a catalogue record. --}}
 <x-layouts.public :title="$section['title']" :description="$section['summary']">
     <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28" aria-labelledby="section-title">
-        <x-folio :section="$section['label']" class="mb-16" />
-
         <x-chapter-opening :number="$chapter" :label="$section['label']" :title="$section['title']" level="1" id="section-title">
             {{ $section['summary'] }}
         </x-chapter-opening>

@@ -72,21 +72,42 @@ function setupRise(root) {
         });
     });
 
+    const pending = new Set();
+    const reveal = (el) => {
+        el.classList.add(el.hasAttribute('data-rule') ? 'is-drawn' : 'is-visible');
+        pending.delete(el);
+        observer.unobserve(el);
+    };
+
     const observer = new IntersectionObserver(
         (entries) => {
             entries.forEach((entry) => {
-                if (!entry.isIntersecting) return;
-                const el = entry.target;
-                el.classList.add(el.hasAttribute('data-rule') ? 'is-drawn' : 'is-visible');
-                observer.unobserve(el);
+                if (entry.isIntersecting) reveal(entry.target);
             });
         },
         { threshold: 0.15, rootMargin: '0px 0px -8% 0px' },
     );
 
-    root.querySelectorAll('[data-rise], [data-rise-group], [data-rule]').forEach((el) => observer.observe(el));
+    root.querySelectorAll('[data-rise], [data-rise-group], [data-rule]').forEach((el) => {
+        pending.add(el);
+        observer.observe(el);
+    });
 
-    return () => observer.disconnect();
+    // The bottom margin never admits an element that sits in the last 8% of the page (a seal on a short
+    // page, the end of a long one), so once the page cannot scroll further everything left is revealed.
+    const atEnd = () => window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 1;
+    const revealRest = () => {
+        if (!atEnd()) return;
+        pending.forEach(reveal);
+        window.removeEventListener('scroll', revealRest);
+    };
+    window.addEventListener('scroll', revealRest, { passive: true });
+    requestAnimationFrame(revealRest);
+
+    return () => {
+        observer.disconnect();
+        window.removeEventListener('scroll', revealRest);
+    };
 }
 
 function setupScrollScale(root) {

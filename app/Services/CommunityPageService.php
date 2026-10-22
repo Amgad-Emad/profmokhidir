@@ -31,6 +31,7 @@ class CommunityPageService
     /**
      * @return array{
      *     section: NavItem,
+     *     chapter: int,
      *     copy: array{heading: string, intro: string, whoHeading: string, who: string, conductHeading: string, conduct: list<string>, privacyHeading: string, privacy: string, conductAgreement: string, privacyAgreement: string, applyHeading: string, applyIntro: string},
      *     standing: ?Standing,
      *     applyUrl: string,
@@ -41,6 +42,7 @@ class CommunityPageService
     {
         return [
             'section' => $this->navigation->section(Sections::COMMUNITY, self::ROUTE_INDEX),
+            'chapter' => $this->navigation->chapter(Sections::COMMUNITY),
             'copy' => [
                 'heading' => CommunityCopy::HEADING,
                 'intro' => CommunityCopy::INTRO,

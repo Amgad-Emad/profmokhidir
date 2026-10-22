@@ -40,6 +40,14 @@ class DashboardHomeTest extends TestCase
 
         $this->assertSame(4, $response->viewData('published')[AdminNavigation::PUBLICATIONS]['count']);
         $this->assertSame(2, $response->viewData('queues')[AdminNavigation::TRIBUTES]['count']);
+
+        // The greeting: a salutation for the hour, the date in small caps, and "published" written as a word.
+        $greeting = $response->viewData('greeting');
+        $response
+            ->assertSee('<h1 class="t-heading">'.$greeting['salutation'].', ', false)
+            ->assertSee('<p class="smallcaps text-xl text-ash" data-greeting-date><time datetime="'.$greeting['datetime'].'">'.$greeting['date'].'</time></p>', false)
+            ->assertSee('published</span>', false)
+            ->assertDontSee('publisheds');
     }
 
     #[Test]

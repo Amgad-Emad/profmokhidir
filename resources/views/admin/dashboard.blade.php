@@ -2,8 +2,9 @@
 <x-layouts.admin title="Dashboard">
     <header class="flex flex-col gap-2">
         <p class="t-label text-bronze">Dashboard</p>
-        <h1 class="t-heading">Welcome, {{ auth()->user()->name }}</h1>
-        <p class="max-w-2xl text-base font-light text-ash">Signed in as {{ auth()->user()->primaryRoleLabel() }}. Here is what is published and what is waiting for review.</p>
+        <h1 class="t-heading">{{ $greeting['salutation'] }}, {{ auth()->user()->name }}</h1>
+        <p class="smallcaps text-xl text-ash" data-greeting-date><time datetime="{{ $greeting['datetime'] }}">{{ $greeting['date'] }}</time></p>
+        <p class="mt-2 max-w-2xl text-base font-light text-ash">Signed in as {{ auth()->user()->primaryRoleLabel() }}. Here is what is published and what is waiting for review.</p>
     </header>
 
     {{-- Needs attention --}}
@@ -57,7 +58,7 @@
         </div>
         <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             @foreach ($published as $key => $card)
-                <x-admin.stat-card :label="$card['label']" :count="$card['count']" noun="published"
+                <x-admin.stat-card :label="$card['label']" :count="$card['count']" caption="published"
                                    :href="auth()->user()->can($card['permission']) ? route($card['route']) : null" data-stat="{{ $key }}" />
             @endforeach
         </div>

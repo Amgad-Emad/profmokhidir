@@ -214,7 +214,7 @@
             padding: var(--space-3) 1rem var(--space-6);
             overflow-y: auto;
             border-block: 0;
-            border-top: 1px solid var(--color-brass);
+            border-top: 1px solid var(--color-stone);
             border-radius: var(--radius-card) var(--radius-card) 0 0;
             background-color: var(--color-ivory);
             transform: translateY(100%);
@@ -556,7 +556,7 @@
             top: 7rem;
             padding-block: 0;
             border-block: 0;
-            border-left: 1px solid var(--color-brass);
+            border-left: 1px solid var(--color-stone);
             padding-left: var(--space-3);
         }
     }
@@ -892,7 +892,7 @@
         position: sticky;
         top: 8rem;
         padding-left: var(--space-2);
-        border-left: 1px solid var(--color-brass);
+        border-left: 1px solid var(--color-stone);
     }
 
     .essay__contents-list {

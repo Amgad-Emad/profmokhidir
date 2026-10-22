@@ -1,5 +1,5 @@
 @inject('page', 'App\Services\TributesPageService')
-<x-layouts.public :title="$section['title']" :description="$section['summary']" :image="$shareImage">
+<x-layouts.public :title="$section['title']" :description="$section['summary']" :image="$shareImage" breadcrumb-tone="ivory">
     {{-- Opens on evergreen: "Remembering" in brass, the heading in the quote style, and the seal. --}}
     <section class="glow-brass on-dark bg-evergreen text-champagne" aria-labelledby="section-title">
         <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28">

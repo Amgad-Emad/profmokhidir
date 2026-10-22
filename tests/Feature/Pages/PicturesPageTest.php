@@ -36,7 +36,7 @@ class PicturesPageTest extends TestCase
         $this->get(route('pictures'))
             ->assertOk()
             ->assertSee('<title>Pictures · ', false)
-            ->assertSeeInOrder(['section-header', 'Pictures', 'rule-brass', 'id="section-title"', 'Pictures'], false)
+            ->assertSeeInOrder(['chapter-opening', '<span class="sr-only">Chapter </span>VI</span>', 'Pictures', 'rule-brass', 'id="section-title"', 'Pictures'], false)
             ->assertSee('Photographs will be gathered into albums here once they are published.')
             ->assertDontSee('Draft album')
             ->assertDontSee('livewire', false);
@@ -87,7 +87,7 @@ class PicturesPageTest extends TestCase
             ->assertSee('<title>In the field · ', false)
             ->assertSee('<meta name="description" content="Research stations across the decades.">', false)
             ->assertSeeInOrder([
-                'section-header', 'Pictures', 'id="section-title"', 'In the field', 'Research stations across the decades.',
+                'chapter-opening', 'Pictures', 'id="section-title"', 'In the field', 'Research stations across the decades.',
                 'exhibition__meta smallcaps', '<span>1972–1980</span>', '2 photographs',
                 'x-data="lightbox"', 'class="wall mt-16" data-rise-group aria-label="Photographs in In the field"',
                 'class="wall__item" style="--span: 6"',

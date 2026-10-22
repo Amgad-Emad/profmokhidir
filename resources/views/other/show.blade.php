@@ -1,7 +1,7 @@
 <x-layouts.public :title="$item->title" :description="$item->summary">
     <article class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28" aria-labelledby="section-title">
         <div class="mx-auto max-w-measure">
-            <x-section-header :label="$section['label']" :title="$item->title" level="1" id="section-title" />
+            <x-chapter-opening :number="$chapter" :label="$section['label']" :title="$item->title" level="1" id="section-title" />
 
             <x-meta class="mt-8" :items="[$item->typeLabel(), $item->category, $item->date]" data-rise />
 

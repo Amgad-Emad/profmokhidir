@@ -67,7 +67,8 @@ class HomePageTest extends TestCase
         $this->assertStringContainsString('aspect-ratio: 4 / 5', $hero[0]);
         $this->assertMatchesRegularExpression('/<img[^>]*srcset="[^"]*480w[^"]*960w[^"]*1600w"/', $hero[0]);
         $this->assertMatchesRegularExpression('/<img[^>]*class="photo-portrait h-full w-full object-cover"[^>]*loading="eager"/', $hero[0]);
-        $this->assertStringContainsString('<span class="t-label text-brass">Khartoum, 1998</span>', $hero[0]);
+        $this->assertStringContainsString('<figcaption class="museum-label museum-label--ivory">', $hero[0]);
+        $this->assertStringContainsString('<span class="museum-label__meta smallcaps">Khartoum, 1998</span>', $hero[0]);
     }
 
     #[Test]

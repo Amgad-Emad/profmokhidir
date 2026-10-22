@@ -19,7 +19,7 @@ SVG);
             <p class="t-quote max-w-2xl">&ldquo;Knowledge is the light we pass on.&rdquo;</p>
             <p class="t-body max-w-2xl">Every colour, type style, button, card, rule, image treatment and motion pattern in one place. This page is served only in the local environment.</p>
             <nav aria-label="Sections" class="flex flex-wrap gap-3">
-                @foreach (['colours' => 'Colours', 'type' => 'Type', 'buttons' => 'Buttons', 'cards' => 'Cards', 'rules' => 'Rules', 'mark' => 'Mark', 'photos' => 'Photos', 'motion' => 'Motion', 'press' => 'Press'] as $id => $label)
+                @foreach (['colours' => 'Colours', 'type' => 'Type', 'buttons' => 'Buttons', 'cards' => 'Cards', 'rules' => 'Rules', 'mark' => 'Mark', 'photos' => 'Photos', 'motion' => 'Motion', 'press' => 'Press', 'components' => 'Components'] as $id => $label)
                     <a href="#{{ $id }}" class="btn-pill-outline">{{ $label }}</a>
                 @endforeach
             </nav>
@@ -384,6 +384,92 @@ SVG);
                     <x-folio section="Tributes" position="bottom" tone="ivory" class="mt-10" />
                 </div>
             </div>
+        </section>
+        {{-- Components --}}
+        <section id="components" class="py-20" aria-labelledby="components-title">
+            <hr class="rule-brass mb-10" data-rule>
+            <p class="t-label text-bronze" data-rise>10 · Components</p>
+            <h2 id="components-title" class="t-heading mt-3" data-rise>Every component, with its usage note</h2>
+            <p class="t-body mt-4 max-w-measure text-ash" data-rise>The catalogue below is App\Constants\Components; a test fails when a component in resources/views/components has no entry. Live examples first, then the full list with how each one is meant to be used.</p>
+
+            <h3 class="mt-12 font-display text-3xl" data-rise>Openers, metadata and notices</h3>
+            <div class="mt-6 grid gap-5 md:grid-cols-2" data-rise-group>
+                <div class="card card-ivory">
+                    <p class="t-label text-bronze">&lt;x-chapter-opening&gt; opens every section page</p>
+                    <x-chapter-opening class="mt-6" :number="4" label="Awards" title="Prizes and recognitions" level="4">The intro sits in the default slot.</x-chapter-opening>
+                    <p class="t-label mt-10 text-bronze">&lt;x-meta&gt; and &lt;x-date&gt;</p>
+                    <x-meta class="mt-3" :items="['Journal article', 'Khartoum', new \DateTimeImmutable('1983-03-12')]" />
+                    <p class="mt-3 t-body">Last updated <x-date :date="new \DateTimeImmutable('2026-09-21')" class="smallcaps" /></p>
+                    <p class="t-label mt-10 text-bronze">&lt;x-museum-label&gt;</p>
+                    <x-museum-label class="mt-3" as="div" title="Gezira research station" meta="Wad Madani, 1972" note="With the first cohort of agronomy students." />
+                </div>
+                <div class="card card-ivory">
+                    <p class="t-label text-bronze">&lt;x-alert&gt; · one per tone</p>
+                    <div class="mt-4 flex flex-col gap-3">
+                        <x-alert tone="cypress">The publication was saved and is now live.</x-alert>
+                        <x-alert tone="bronze" role="alert">Add alt text before publishing this photograph.</x-alert>
+                        <x-alert tone="ash" title="Draft">Only staff can see this item.</x-alert>
+                    </div>
+                    <p class="t-label mt-10 text-bronze">&lt;x-admin.status-badge&gt;</p>
+                    <div class="mt-4 flex flex-wrap gap-3">
+                        <x-admin.status-badge tone="cypress" label="Published" />
+                        <x-admin.status-badge tone="bronze" label="Pending review" />
+                        <x-admin.status-badge tone="ash" label="Draft" />
+                    </div>
+                    <p class="t-label mt-10 text-bronze">&lt;x-skeleton&gt; · while results load</p>
+                    <div class="mt-4"><x-skeleton :lines="3" /></div>
+                </div>
+            </div>
+
+            <h3 class="mt-12 font-display text-3xl" data-rise>Buttons, filters and links</h3>
+            <div class="mt-6 grid gap-5 md:grid-cols-2" data-rise-group>
+                <div class="card card-ivory">
+                    <p class="t-label text-bronze">&lt;x-button&gt; on light · primary is the outline pill, secondary is quiet</p>
+                    <div class="mt-5 flex flex-wrap items-center gap-4">
+                        <x-button type="button">Save</x-button>
+                        <x-button type="button" variant="outline">Back to the list</x-button>
+                        <x-button href="#components" variant="filled">As a link</x-button>
+                    </div>
+                    <p class="t-label mt-10 text-bronze">&lt;x-filter-pills&gt;</p>
+                    <x-filter-pills class="mt-2" label="Topics" :options="[['label' => 'agronomy', 'url' => '#components', 'active' => false], ['label' => 'soil fertility', 'url' => '#components', 'active' => true]]" all-url="#components" :all-active="false" all-label="All topics" />
+                    <p class="t-label mt-10 text-bronze">&lt;x-external-link&gt; and &lt;x-file-link&gt;</p>
+                    <p class="mt-3 flex flex-wrap gap-6 text-base"><x-external-link href="https://example.org/source" label="Source" /><span class="link-meta">Download · PDF · 2.1 MB</span></p>
+                </div>
+                <div class="card on-dark border-cypress bg-evergreen text-champagne">
+                    <p class="t-label text-brass">&lt;x-button&gt; on evergreen</p>
+                    <div class="mt-5 flex flex-wrap items-center gap-4">
+                        <x-button type="button" variant="filled-light">Leave a tribute</x-button>
+                        <x-button type="button" variant="outline-light">Read his story</x-button>
+                        <x-button type="button" variant="outline">Cancel</x-button>
+                    </div>
+                    <p class="t-label mt-10 text-brass">&lt;x-site.breadcrumbs&gt; · tone ivory</p>
+                    <x-site.breadcrumbs class="mt-3" tone="ivory" :trail="[['label' => 'Home', 'url' => '#', 'current' => false], ['label' => 'Pictures', 'url' => '#', 'current' => false], ['label' => 'In the field', 'url' => '#', 'current' => true]]" />
+                    <p class="t-label mt-10 text-brass">&lt;x-admin.stat-card&gt; sits on ivory</p>
+                    <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                        <x-admin.stat-card label="Tributes pending review" :count="3" tone="bronze" noun="tribute" />
+                        <x-admin.stat-card label="Publications" :count="15" caption="published" />
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="mt-12 font-display text-3xl" data-rise>The catalogue</h3>
+            @foreach ($components as $groupKey => $group)
+                <div class="mt-10" data-component-group="{{ $groupKey }}" data-rise>
+                    <p class="t-label text-bronze">{{ $group['label'] }}</p>
+                    <hr class="rule-brass mt-4" data-rule>
+                    <dl class="divide-y divide-stone">
+                        @foreach ($group['components'] as $component)
+                            <div class="grid gap-2 py-6 md:grid-cols-[14rem_minmax(0,1fr)] md:gap-8" data-component="{{ $component['tag'] }}">
+                                <dt><code class="font-mono text-sm text-evergreen">&lt;{{ $component['tag'] }}&gt;</code></dt>
+                                <dd class="flex flex-col gap-1">
+                                    <span class="text-base font-normal text-evergreen">{{ $component['purpose'] }}</span>
+                                    <span class="text-base font-light text-ash">{{ $component['usage'] }}</span>
+                                </dd>
+                            </div>
+                        @endforeach
+                    </dl>
+                </div>
+            @endforeach
         </section>
     </div>
 </x-layouts.public>

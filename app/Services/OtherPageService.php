@@ -64,6 +64,7 @@ class OtherPageService
     /**
      * @return array{
      *     section: array{key: string, label: string, title: string, url: string, route: string, placement: string, summary: string, active: bool},
+     *     chapter: int,
      *     item: OtherItem,
      *     body: string
      * }
@@ -72,6 +73,7 @@ class OtherPageService
     {
         return [
             'section' => $this->navigation->section(Sections::OTHER, Sections::OTHER.'.show'),
+            'chapter' => $this->navigation->chapter(Sections::OTHER),
             'item' => $item,
             'body' => RichText::sanitise($item->body),
         ];

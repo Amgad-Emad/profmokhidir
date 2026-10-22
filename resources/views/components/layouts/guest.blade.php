@@ -1,6 +1,6 @@
 {{--
     Auth pages (Fortify) and other signed-out screens: ivory page, the stacked lockup above
-    a centred linen card. Plain Blade + Alpine, no Livewire.
+    a centred linen card, the seal beneath. Plain Blade + Alpine, no Livewire.
 --}}
 @props(['title' => 'Sign in', 'intro' => null])
 <!DOCTYPE html>
@@ -21,7 +21,7 @@
         </div>
 
         <section class="auth-card rounded-card border border-stone bg-linen p-8 sm:p-10" aria-labelledby="page-title">
-            <h1 id="page-title" class="font-display text-4xl font-light leading-tight">{{ $title }}</h1>
+            <h1 id="page-title" class="font-display text-quote font-light">{{ $title }}</h1>
             @if ($intro)
                 <p class="mt-3 text-base font-light text-ash">{{ $intro }}</p>
             @endif
@@ -39,6 +39,8 @@
         <p class="mt-8 text-center text-sm font-light text-ash">
             <a href="{{ route('home') }}" class="text-bronze underline-offset-4 hover:underline">Back to the website</a>
         </p>
+
+        <x-seal class="!mt-12" :size="32" />
     </main>
 </body>
 </html>

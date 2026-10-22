@@ -245,6 +245,26 @@
         transform: scaleX(1);
     }
 
+    /* Quiet secondary action (Back, Cancel): a text link in the metadata style with a 44px target. */
+    .btn-quiet {
+        @apply inline-flex min-h-11 items-center gap-1 px-1 font-sans text-base font-medium text-evergreen;
+        text-decoration: underline;
+        text-decoration-color: var(--color-brass);
+        text-underline-offset: 0.2em;
+        transition: text-decoration-color 300ms var(--ease-rise);
+    }
+
+    .btn-quiet:hover,
+    .btn-quiet:focus-visible {
+        text-decoration: underline;
+        text-decoration-color: var(--color-evergreen);
+    }
+
+    .on-dark .btn-quiet,
+    .bg-evergreen .btn-quiet {
+        color: var(--color-champagne);
+    }
+
     /* Cards: 4px radius, linen or ivory surface, stone hairline. */
     .card {
         border-radius: var(--radius-card);
@@ -466,7 +486,7 @@
 
     .section-card:hover,
     .section-card:focus-visible {
-        border-color: var(--color-brass);
+        border-color: var(--color-evergreen);
         background-color: var(--color-ivory);
     }
 
@@ -537,34 +557,6 @@
         width: 1px;
         height: 1px;
         overflow: hidden;
-    }
-
-    /* Awards timeline: a brass hairline down the left with a small brass marker per entry. */
-    .timeline {
-        position: relative;
-        border-left: 1px solid var(--color-brass);
-    }
-
-    .timeline__item {
-        position: relative;
-        padding-left: 2rem;
-    }
-
-    .timeline__item::before {
-        content: '';
-        position: absolute;
-        left: -4px;
-        top: 0.45rem;
-        width: 7px;
-        height: 7px;
-        border-radius: 9999px;
-        background-color: var(--color-brass);
-    }
-
-    @media (min-width: 640px) {
-        .timeline__item {
-            padding-left: 3rem;
-        }
     }
 
     /* Citation disclosure on the publications list. */
@@ -686,12 +678,12 @@
     }
 }
 
-/* Admin sidebar links: champagne on evergreen, the active item carries a brass rule. */
+/* Admin sidebar links: champagne on evergreen on 40px rows; the active item carries a 1px brass rule, as in the header. */
 .admin-nav-link {
     display: block;
     padding: 0.5rem 0.75rem;
-    border-left: 2px solid transparent;
-    font-size: 0.9375rem;
+    border-left: 1px solid transparent;
+    font-size: 1rem;
     font-weight: 300;
     line-height: 1.5;
     color: var(--color-champagne);
@@ -786,7 +778,7 @@
  */
 .admin-tab {
     padding: 0.75rem 1rem;
-    border-bottom: 2px solid transparent;
+    border-bottom: 1px solid transparent;
     font-size: 0.875rem;
     font-weight: 500;
     color: var(--color-ash);
@@ -818,6 +810,7 @@
     vertical-align: middle;
     border-bottom: 1px solid var(--color-stone);
     font-weight: 300;
+    font-variant-numeric: lining-nums tabular-nums;
 }
 
 .admin-table tbody tr:last-child td {
@@ -1035,7 +1028,7 @@
     content: '';
     flex: 1;
     height: 1px;
-    background-color: var(--color-brass);
+    background-color: var(--color-bronze);
 }
 
 .chat-message {

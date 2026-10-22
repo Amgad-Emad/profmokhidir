@@ -11,7 +11,7 @@
 @endphp
 <nav class="flex h-full flex-col" aria-label="Dashboard">
     <div class="border-b border-cypress px-6 py-5">
-        <x-brand.lockup variant="horizontal" tone="ivory" :href="route(AdminNavigation::DASHBOARD_ROUTE)" class="text-champagne" />
+        <x-brand.lockup variant="horizontal" tone="ivory" :href="route(AdminNavigation::DASHBOARD_ROUTE)" class="text-champagne" compact />
     </div>
 
     <div class="flex-1 overflow-y-auto px-3 py-6">
@@ -25,7 +25,7 @@
             @if ($items !== [])
                 <div class="mt-8" data-nav-group="{{ $groupKey }}">
                     <p class="t-label px-3 text-brass">{{ $groupLabel }}</p>
-                    <ul class="mt-3 space-y-0.5">
+                    <ul class="mt-2">
                         @foreach ($items as $key => $item)
                             @php $active = $current === $item['route'] || str_starts_with($current, $item['route'].'.'); @endphp
                             <li>
