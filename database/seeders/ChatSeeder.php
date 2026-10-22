@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Constants\CommunityStatus;
 use App\Repositories\Contracts\UserRepositoryInterface;
+use App\Services\ChatCorrespondenceService;
 use App\Services\ChatService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -13,7 +14,7 @@ class ChatSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(ChatService $chat, UserRepositoryInterface $users): void
+    public function run(ChatService $chat, ChatCorrespondenceService $correspondence, UserRepositoryInterface $users): void
     {
         $channel = $chat->findChannel('general')
             ?? $chat->createChannel('General', 'Open discussion for approved members of the Scientific Community.');
@@ -41,6 +42,16 @@ class ChatSeeder extends Seeder
         foreach ($messages as [$author, $body]) {
             $sent[] = $chat->send($channel, $author, $body, (string) Str::uuid());
         }
+
+        // A reply with light formatting and maths, and the welcome note pinned by the administrator.
+        $sent[] = $chat->send(
+            $channel,
+            $members[1 % $members->count()],
+            '[Placeholder] I have the **1994** set. The yield model was $y = a + bx$, if memory serves. See https://example.org/agr-301',
+            (string) Str::uuid(),
+            (int) $sent[3]->getKey(),
+        );
+        $correspondence->pin($sent[0], $admin);
 
         // One open report so the moderation queue has something to show.
         $reported = $sent[3] ?? null;

@@ -39,4 +39,14 @@ class EloquentChatChannelRepository extends BaseEloquentRepository implements Ch
     {
         $channel->forceFill(['last_message_id' => $messageId])->save();
     }
+
+    public function advanceLastMessage(ChatChannel $channel, int $messageId): void
+    {
+        $this->query()
+            ->whereKey($channel->getKey())
+            ->where(fn ($query) => $query->whereNull('last_message_id')->orWhere('last_message_id', '<', $messageId))
+            ->update(['last_message_id' => $messageId, 'updated_at' => now()]);
+
+        $channel->refresh();
+    }
 }

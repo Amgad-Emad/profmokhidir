@@ -7,7 +7,6 @@ namespace App\Services;
 use App\Constants\AuditAction;
 use App\Constants\ChatChange;
 use App\Constants\ChatSettings;
-use App\Constants\Permissions;
 use App\Constants\RateLimits;
 use App\Events\ChatMessageChanged;
 use App\Exceptions\ChatMessageConflictException;
@@ -21,6 +20,7 @@ use App\Repositories\Contracts\ChatChannelRepositoryInterface;
 use App\Repositories\Contracts\ChatMessageRepositoryInterface;
 use App\Repositories\Contracts\ChatReadRepositoryInterface;
 use App\Repositories\Contracts\ChatReportRepositoryInterface;
+use App\Support\ChatAccess;
 use App\Support\ChatMessageData;
 use App\Support\ChatText;
 use Carbon\CarbonImmutable;
@@ -50,6 +50,8 @@ class ChatService
         private readonly CommunityService $community,
         private readonly RateLimiter $limiter,
         private readonly ConnectionInterface $db,
+        private readonly TypesetterService $typesetter,
+        private readonly ChatCorrespondenceService $correspondence,
     ) {}
 
     // -- Channels -----------------------------------------------------------
@@ -109,14 +111,16 @@ class ChatService
     // -- Messages -----------------------------------------------------------
 
     /**
-     * Send a message. Each insert runs in its own short transaction and the
-     * client uuid makes retries idempotent: a double click, a second Enter, a
+     * Send a message. Each insert runs in its own short transaction (retried on
+     * a deadlock) and the client uuid makes retries idempotent: a double click, a second Enter, a
      * slow-network retry or a second tab all get the original message back.
+     *
+     * A reply names the message it answers, which must belong to the same channel.
      *
      * @throws AuthorizationException
      * @throws ChatRateLimitException
      */
-    public function send(ChatChannel $channel, User $author, string $body, string $clientUuid): ChatMessage
+    public function send(ChatChannel $channel, User $author, string $body, string $clientUuid, ?int $replyToId = null): ChatMessage
     {
         $this->guardAccess($author);
 
@@ -124,6 +128,12 @@ class ChatService
 
         if (! Str::isUuid($clientUuid)) {
             throw new InvalidArgumentException('client_uuid must be a UUID.');
+        }
+
+        $replyTo = $replyToId === null ? null : $this->messages->findWithTrashed($replyToId);
+
+        if ($replyToId !== null && ($replyTo === null || (int) $replyTo->channel_id !== (int) $channel->getKey())) {
+            throw new InvalidArgumentException('The message you are replying to is not in this channel.');
         }
 
         $existing = $this->messages->findByClientUuid((int) $author->getKey(), $clientUuid);
@@ -138,23 +148,27 @@ class ChatService
             throw ChatRateLimitException::make($this->limiter->availableIn($limitKey));
         }
 
-        [$message, $created] = $this->db->transaction(function () use ($channel, $author, $body, $clientUuid): array {
+        // The channel row is NOT touched inside this transaction: the insert holds a
+        // shared lock on it (foreign key), so two members sending at the same moment
+        // would deadlock trying to upgrade it. The pointer moves forward after commit.
+        [$message, $created] = $this->db->transaction(function () use ($channel, $author, $body, $clientUuid, $replyTo): array {
             [$message, $created] = $this->messages->firstOrCreateByClientUuid((int) $author->getKey(), $clientUuid, [
                 'channel_id' => $channel->getKey(),
                 'body' => $body,
+                'reply_to_id' => $replyTo?->getKey(),
                 'version' => 1,
             ]);
 
             if ($created) {
-                $this->channels->setLastMessage($channel, (int) $message->getKey());
                 $this->reads->markRead((int) $channel->getKey(), (int) $author->getKey(), (int) $message->getKey());
                 ChatMessageChanged::dispatch((int) $channel->getKey(), (int) $message->getKey(), ChatChange::Sent);
             }
 
             return [$message, $created];
-        });
+        }, 3);
 
         if ($created) {
+            $this->channels->advanceLastMessage($channel, (int) $message->getKey());
             $this->limiter->hit($limitKey, 60);
         }
 
@@ -291,14 +305,31 @@ class ChatService
      *
      * @return array{
      *     messages: list<array<string, mixed>>, cursor: int, since: string, lastRead: int,
-     *     hasOlder: bool, channels: list<array{id: int, name: string, slug: string, description: ?string, unread: int, current: bool}>
+     *     hasOlder: bool, channels: list<array{id: int, name: string, slug: string, numeral: string, description: ?string, unread: int, current: bool}>,
+     *     focus: ?int, pins: list<array<string, mixed>>, members: list<array{id: int, name: string, affiliation: ?string}>
      * }
      */
-    public function initialState(ChatChannel $channel, User $viewer): array
+    public function initialState(ChatChannel $channel, User $viewer, ?int $focusId = null): array
     {
         $this->guardAccess($viewer);
 
-        $messages = $this->history($channel, $viewer, ChatSettings::PAGE_SIZE);
+        $focus = $focusId === null ? null : $this->messages->findWithTrashed($focusId);
+
+        if ($focus !== null && (int) $focus->channel_id !== (int) $channel->getKey()) {
+            $focus = null;
+        }
+
+        if ($focus !== null) {
+            // A permalink: the page around the linked message. The cursor then sits
+            // before the newest messages, which the first poll fetches in id order.
+            $half = intdiv(ChatSettings::PAGE_SIZE, 2);
+            $messages = $this->messages->latestInChannel((int) $channel->getKey(), $half, (int) $focus->getKey() + 1)
+                ->concat($this->messages->afterId((int) $channel->getKey(), (int) $focus->getKey(), $half))
+                ->values();
+        } else {
+            $messages = $this->history($channel, $viewer, ChatSettings::PAGE_SIZE);
+        }
+
         $cursor = (int) ($messages->last()?->getKey() ?? $this->messages->latestIdInChannel((int) $channel->getKey()) ?? 0);
         $read = $this->reads->forUser((int) $channel->getKey(), (int) $viewer->getKey());
 
@@ -309,6 +340,9 @@ class ChatService
             'lastRead' => (int) ($read?->last_read_message_id ?? 0),
             'hasOlder' => $messages->isNotEmpty() && $this->messages->countBefore((int) $channel->getKey(), (int) $messages->first()->getKey()) > 0,
             'channels' => $this->channelSummaries($channel, $viewer),
+            'focus' => $focus === null ? null : (int) $focus->getKey(),
+            'pins' => $this->correspondence->pins($channel, $viewer),
+            'members' => $this->correspondence->members(),
         ];
     }
 
@@ -316,7 +350,7 @@ class ChatService
      * One poll: new messages after the cursor plus edits and deletions of
      * messages the client already has, and the next cursors.
      *
-     * @return array{messages: list<array<string, mixed>>, changed: list<array<string, mixed>>, cursor: int, since: string, channels: list<array<string, mixed>>}
+     * @return array{messages: list<array<string, mixed>>, changed: list<array<string, mixed>>, cursor: int, since: string, channels: list<array<string, mixed>>, pins: list<array<string, mixed>>}
      */
     public function sync(ChatChannel $channel, User $viewer, int $cursor, ?string $since): array
     {
@@ -335,6 +369,7 @@ class ChatService
             'cursor' => (int) ($new->last()?->getKey() ?? $cursor),
             'since' => $now,
             'channels' => $this->channelSummaries($channel, $viewer),
+            'pins' => $this->correspondence->pins($channel, $viewer),
         ];
     }
 
@@ -511,7 +546,7 @@ class ChatService
 
     public function canModerate(User $user): bool
     {
-        return $user->isAdmin() || $user->can(Permissions::MODERATE_CHAT);
+        return ChatAccess::canModerate($user);
     }
 
     /**
@@ -522,11 +557,7 @@ class ChatService
      */
     public function guardAccess(User $user): void
     {
-        $user->unsetRelation('roles');
-
-        if (! $user->canAccessChat()) {
-            throw new AuthorizationException('The community chat is only open to approved members.');
-        }
+        ChatAccess::guard($user);
     }
 
     /**
@@ -534,22 +565,21 @@ class ChatService
      */
     private function guardModerator(User $user): void
     {
-        if (! $this->canModerate($user)) {
-            throw new AuthorizationException('Only moderators may do this.');
-        }
+        ChatAccess::guardModerator($user);
     }
 
     /**
-     * @return list<array{id: int, name: string, slug: string, description: ?string, unread: int, current: bool}>
+     * @return list<array{id: int, name: string, slug: string, numeral: string, description: ?string, unread: int, current: bool}>
      */
     private function channelSummaries(ChatChannel $current, User $viewer): array
     {
         $unread = $this->messages->unreadCountsFor((int) $viewer->getKey());
 
-        return $this->channels()->map(fn (ChatChannel $channel): array => [
+        return $this->channels()->values()->map(fn (ChatChannel $channel, int $index): array => [
             'id' => (int) $channel->getKey(),
             'name' => $channel->name,
             'slug' => $channel->slug,
+            'numeral' => $this->typesetter->roman($index + 1),
             'description' => $channel->description,
             'unread' => $channel->is($current) ? 0 : ($unread[(int) $channel->getKey()] ?? 0),
             'current' => $channel->is($current),

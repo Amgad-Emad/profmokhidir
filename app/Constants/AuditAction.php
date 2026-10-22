@@ -74,6 +74,10 @@ final class AuditAction
 
     public const string CHAT_REPORT_RESOLVED = 'chat.report_resolved';
 
+    public const string CHAT_MESSAGE_PINNED = 'chat.message_pinned';
+
+    public const string CHAT_MESSAGE_UNPINNED = 'chat.message_unpinned';
+
     public const string ADMIN_LOGIN = 'auth.admin_login';
 
     /**
@@ -89,7 +93,8 @@ final class AuditAction
             self::USER_INVITED, self::USER_INVITE_RESENT, self::USER_DEACTIVATED, self::USER_REACTIVATED, self::SETTINGS_UPDATED,
             self::CONTENT_CREATED, self::CONTENT_RESTORED, self::CONTENT_PUBLISHED, self::CONTENT_UNPUBLISHED, self::CONTENT_DELETED,
             self::TRIBUTE_EDITED, self::TRIBUTE_FEATURED, self::TRIBUTE_UNFEATURED, self::MEDIA_UPLOADED, self::MEDIA_UPDATED, self::MEDIA_DELETED,
-            self::CHAT_MESSAGE_DELETED, self::CHAT_MESSAGE_REPORTED, self::CHAT_REPORT_RESOLVED, self::ADMIN_LOGIN,
+            self::CHAT_MESSAGE_DELETED, self::CHAT_MESSAGE_REPORTED, self::CHAT_REPORT_RESOLVED,
+            self::CHAT_MESSAGE_PINNED, self::CHAT_MESSAGE_UNPINNED, self::ADMIN_LOGIN,
         ];
     }
 
@@ -133,6 +138,8 @@ final class AuditAction
             self::CHAT_MESSAGE_DELETED => 'deleted a chat message',
             self::CHAT_MESSAGE_REPORTED => 'reported a chat message',
             self::CHAT_REPORT_RESOLVED => 'resolved a chat report',
+            self::CHAT_MESSAGE_PINNED => 'pinned a chat message',
+            self::CHAT_MESSAGE_UNPINNED => 'unpinned a chat message',
             self::ADMIN_LOGIN => 'signed in',
         ];
     }

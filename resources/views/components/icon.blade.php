@@ -42,6 +42,24 @@
     @case('eye-off')
         <path d="M4 4l16 16" /><path d="M10.6 6.3A9.9 9.9 0 0 1 12 6.2c6 0 9.5 5.8 9.5 5.8a16.5 16.5 0 0 1-3.2 3.9" /><path d="M6.6 8.2A16.3 16.3 0 0 0 2.5 12s3.5 5.8 9.5 5.8a9.7 9.7 0 0 0 3.6-.7" /><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
         @break
+    @case('search')
+        <circle cx="11" cy="11" r="6.25" /><path d="M15.5 15.5L20 20" />
+        @break
+    @case('reply')
+        <path d="M9 7l-5 5 5 5" /><path d="M4 12h9a6 6 0 0 1 6 6v1" />
+        @break
+    @case('link')
+        <path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1.5 1.5" /><path d="M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1.5-1.5" />
+        @break
+    @case('pin')
+        <path d="M9 4.5h6" /><path d="M10 4.5v5l-3 3v1.5h10V12.5l-3-3v-5" /><path d="M12 14v6" />
+        @break
+    @case('chevron-left')
+        <path d="M14.5 6L8.5 12l6 6" />
+        @break
+    @case('panel')
+        <rect x="3.5" y="5" width="17" height="14" rx="1" /><path d="M15 5v14" />
+        @break
     @default
         <circle cx="12" cy="12" r="8.25" />
 @endswitch

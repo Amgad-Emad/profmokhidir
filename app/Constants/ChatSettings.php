@@ -14,6 +14,9 @@ final class ChatSettings
     /** Longest message body, in characters, enforced on the server. */
     public const int BODY_MAX_LENGTH = 2000;
 
+    /** The composer shows the character count once this many characters remain. */
+    public const int COUNT_WARNING_REMAINING = 200;
+
     /** Messages loaded on first render and per "load older" request. */
     public const int PAGE_SIZE = 50;
 
@@ -32,6 +35,34 @@ final class ChatSettings
     /** Longest channel name. */
     public const int CHANNEL_NAME_MAX_LENGTH = 100;
 
+    /** Consecutive messages by one author within this window share one header. */
+    public const int GROUP_WINDOW_SECONDS = 300;
+
+    /** Characters of the original quoted above a reply. */
+    public const int REPLY_EXCERPT_LENGTH = 140;
+
+    /** Characters of a pinned message shown in the side panel. */
+    public const int PIN_EXCERPT_LENGTH = 160;
+
+    /** Search within a channel: shortest query, longest query, most results. */
+    public const int SEARCH_MIN_LENGTH = 2;
+
+    public const int SEARCH_MAX_LENGTH = 100;
+
+    public const int SEARCH_LIMIT = 20;
+
+    /** Query-string parameter of a message permalink (/community/chat/{channel}?message=123). */
+    public const string MESSAGE_PARAM = 'message';
+
+    /** Prefix of the localStorage key that keeps a member's draft per channel. */
+    public const string DRAFT_STORAGE_PREFIX = 'chat-draft:';
+
+    /** How long a linked message stays highlighted, in milliseconds. */
+    public const int HIGHLIGHT_MS = 2400;
+
+    /** A touch held this long opens a message's actions. */
+    public const int LONG_PRESS_MS = 500;
+
     /** Shown in place of the body of a deleted message. */
     public const string REMOVED_PLACEHOLDER = 'Message removed';
 
@@ -40,6 +71,9 @@ final class ChatSettings
 
     /** Name of the private broadcast channel per chat channel (Reverb). */
     public const string BROADCAST_CHANNEL_PREFIX = 'community.chat.';
+
+    /** Where the KaTeX stylesheet is served from (copied out of node_modules at build time). */
+    public const string KATEX_STYLESHEET = 'vendor/katex/katex.min.css';
 
     public static function broadcastChannel(int $channelId): string
     {
@@ -60,7 +94,7 @@ final class ChatSettings
     /**
      * Everything the chat JavaScript needs to know, in one array.
      *
-     * @return array{transport: string, pollInterval: int, backoff: list<int>, bodyMaxLength: int, pageSize: int, removedPlaceholder: string}
+     * @return array<string, mixed>
      */
     public static function clientConfig(): array
     {
@@ -69,8 +103,18 @@ final class ChatSettings
             'pollInterval' => self::pollIntervalSeconds(),
             'backoff' => self::BACKOFF_SECONDS,
             'bodyMaxLength' => self::BODY_MAX_LENGTH,
+            'countWarningRemaining' => self::COUNT_WARNING_REMAINING,
             'pageSize' => self::PAGE_SIZE,
             'removedPlaceholder' => self::REMOVED_PLACEHOLDER,
+            'groupWindowSeconds' => self::GROUP_WINDOW_SECONDS,
+            'searchMinLength' => self::SEARCH_MIN_LENGTH,
+            'messageParam' => self::MESSAGE_PARAM,
+            'draftPrefix' => self::DRAFT_STORAGE_PREFIX,
+            'highlightMs' => self::HIGHLIGHT_MS,
+            'longPressMs' => self::LONG_PRESS_MS,
+            'mathAttribute' => ChatFormat::MATH_ATTRIBUTE,
+            'katexStylesheet' => asset(self::KATEX_STYLESHEET),
+            'copy' => ChatCopy::client(),
         ];
     }
 }

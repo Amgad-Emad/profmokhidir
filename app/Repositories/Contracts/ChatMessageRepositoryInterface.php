@@ -84,4 +84,26 @@ interface ChatMessageRepositoryInterface extends BaseRepositoryInterface
      * the message is not deleted. Returns true when the row was updated.
      */
     public function updateBodyIfVersion(ChatMessage $message, string $body, int $expectedVersion): bool;
+
+    /**
+     * Live messages in a channel matching every word of a term (fulltext in
+     * boolean mode, LIKE for words the index does not hold), newest first.
+     *
+     * @return Collection<int, ChatMessage>
+     */
+    public function search(int $channelId, string $term, int $limit = 20): Collection;
+
+    /**
+     * Live pinned messages in a channel, most recently pinned first.
+     *
+     * @return Collection<int, ChatMessage>
+     */
+    public function pinned(int $channelId): Collection;
+
+    /**
+     * Pin (with the moderator's id) or unpin (null) a message. Pinning does not
+     * count as an edit: updated_at is left alone so the change does not appear
+     * in changedSince(); clients learn about pins from the pin list instead.
+     */
+    public function setPinned(ChatMessage $message, ?int $byUserId): ChatMessage;
 }

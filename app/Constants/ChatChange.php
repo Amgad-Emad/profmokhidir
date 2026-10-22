@@ -7,7 +7,8 @@ namespace App\Constants;
 use App\Constants\Concerns\HasValues;
 
 /**
- * What happened to a chat message, carried by the ChatMessageChanged event.
+ * What happened to a chat message, carried by the ChatMessageChanged event:
+ * sent, edited, deleted, or pinned and unpinned by a moderator.
  */
 enum ChatChange: string
 {
@@ -16,6 +17,8 @@ enum ChatChange: string
     case Sent = 'sent';
     case Edited = 'edited';
     case Deleted = 'deleted';
+    case Pinned = 'pinned';
+    case Unpinned = 'unpinned';
 
     public function label(): string
     {
@@ -23,6 +26,8 @@ enum ChatChange: string
             self::Sent => 'sent',
             self::Edited => 'edited',
             self::Deleted => 'deleted',
+            self::Pinned => 'pinned',
+            self::Unpinned => 'unpinned',
         };
     }
 }

@@ -10,7 +10,7 @@ use App\Models\User;
 
 /**
  * Only approved members post. Authors may edit and delete their own messages;
- * moderators ("moderate chat") may delete anyone's.
+ * moderators ("moderate chat") may delete anyone's and pin or unpin any live message.
  */
 class ChatMessagePolicy
 {
@@ -46,5 +46,10 @@ class ChatMessagePolicy
     public function report(User $user, ChatMessage $message): bool
     {
         return $user->canAccessChat() && $message->user_id !== $user->getKey();
+    }
+
+    public function pin(User $user, ChatMessage $message): bool
+    {
+        return $user->can(Permissions::MODERATE_CHAT) && ! $message->trashed();
     }
 }

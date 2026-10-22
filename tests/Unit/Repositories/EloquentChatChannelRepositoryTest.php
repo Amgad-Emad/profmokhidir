@@ -4,6 +4,7 @@ namespace Tests\Unit\Repositories;
 
 use App\Models\ChatChannel;
 use App\Models\ChatMessage;
+use App\Models\User;
 use App\Repositories\Contracts\ChatChannelRepositoryInterface;
 use App\Repositories\Eloquent\EloquentChatChannelRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -63,6 +64,23 @@ class EloquentChatChannelRepositoryTest extends TestCase
 
         $this->repository->setLastMessage($channel, null);
         $this->assertNull($channel->fresh()->last_message_id);
+    }
+
+    #[Test]
+    public function advance_last_message_only_ever_moves_the_pointer_forward(): void
+    {
+        $channel = ChatChannel::factory()->create();
+        $author = User::factory()->member()->create();
+        $first = ChatMessage::factory()->for($channel, 'channel')->for($author, 'user')->create();
+        $second = ChatMessage::factory()->for($channel, 'channel')->for($author, 'user')->create();
+
+        $this->repository->advanceLastMessage($channel, $second->id);
+        $this->assertSame($second->id, $channel->fresh()->last_message_id);
+
+        // The slower of two simultaneous senders arrives last with the older id.
+        $this->repository->advanceLastMessage($channel, $first->id);
+        $this->assertSame($second->id, $channel->fresh()->last_message_id);
+        $this->assertSame($second->id, $channel->last_message_id, 'the model is refreshed');
     }
 
     #[Test]

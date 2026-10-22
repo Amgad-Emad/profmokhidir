@@ -22,4 +22,11 @@ interface ChatChannelRepositoryInterface extends BaseRepositoryInterface
     public function allOrdered(): Collection;
 
     public function setLastMessage(ChatChannel $channel, ?int $messageId): void;
+
+    /**
+     * Move last_message_id forward to the given id, never backwards: safe to
+     * run after the insert commits, whichever of two simultaneous senders
+     * gets here last.
+     */
+    public function advanceLastMessage(ChatChannel $channel, int $messageId): void;
 }

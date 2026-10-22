@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Community\Chat;
 
+use App\Constants\ChatCopy;
+use App\Constants\ChatFormat;
 use App\Constants\ChatSettings;
 use App\Constants\CommunityCopy;
 use App\Exceptions\ChatMessageConflictException;
@@ -14,6 +16,7 @@ use App\Http\Requests\ChatReportRequest;
 use App\Models\ChatChannel;
 use App\Models\ChatMessage;
 use App\Models\User;
+use App\Services\ChatCorrespondenceService;
 use App\Services\ChatService;
 use App\Services\CommunityPageService;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -72,8 +75,10 @@ class Room extends Component
         $this->channelSlug = $channel->slug;
         $this->channelName = $channel->name;
 
+        $focus = request()->integer(ChatSettings::MESSAGE_PARAM);
+
         try {
-            $this->initial = $this->chat()->initialState($channel, $this->viewer());
+            $this->initial = $this->chat()->initialState($channel, $this->viewer(), $focus > 0 ? $focus : null);
         } catch (AuthorizationException) {
             $this->accessRevoked = true;
         }
@@ -100,14 +105,14 @@ class Room extends Component
      *
      * @return array<string, mixed>
      */
-    public function send(string $body, string $clientUuid, int $cursor = 0, ?string $since = null): array
+    public function send(string $body, string $clientUuid, int $cursor = 0, ?string $since = null, ?int $replyToId = null): array
     {
-        return $this->guarded(function () use ($body, $clientUuid, $cursor, $since): array {
+        return $this->guarded(function () use ($body, $clientUuid, $cursor, $since, $replyToId): array {
             $this->authorize('create', ChatMessage::class);
-            $this->validateAgainst(new ChatMessageRequest, ['body' => $body, 'client_uuid' => $clientUuid]);
+            $this->validateAgainst(new ChatMessageRequest, ['body' => $body, 'client_uuid' => $clientUuid, 'reply_to_id' => $replyToId]);
 
             $channel = $this->channel();
-            $message = $this->chat()->send($channel, $this->viewer(), $body, $clientUuid);
+            $message = $this->chat()->send($channel, $this->viewer(), $body, $clientUuid, $replyToId);
 
             return [
                 'ok' => true,
@@ -178,6 +183,66 @@ class Room extends Component
     }
 
     /**
+     * Moderators pin a message to the channel's side panel; the new pin list
+     * comes back so every open tab agrees on the next poll.
+     *
+     * @return array<string, mixed>
+     */
+    public function pin(int $messageId): array
+    {
+        return $this->setPinned($messageId, true);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function unpin(int $messageId): array
+    {
+        return $this->setPinned($messageId, false);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function setPinned(int $messageId, bool $pinned): array
+    {
+        return $this->guarded(function () use ($messageId, $pinned): array {
+            $message = $this->message($messageId);
+
+            if ($message->trashed()) {
+                throw ChatMessageRemovedException::make();
+            }
+
+            $this->authorize('pin', $message);
+
+            $message = $pinned
+                ? $this->correspondence()->pin($message, $this->viewer())
+                : $this->correspondence()->unpin($message, $this->viewer());
+
+            return [
+                'ok' => true,
+                'message' => $this->chat()->present($message, $this->viewer()),
+                'pins' => $this->correspondence()->pins($this->channel(), $this->viewer()),
+            ];
+        });
+    }
+
+    /**
+     * Search within this channel.
+     *
+     * @return array<string, mixed>
+     */
+    public function search(string $term): array
+    {
+        return $this->guarded(function () use ($term): array {
+            $channel = $this->channel();
+            $this->authorize('view', $channel);
+
+            return ['ok' => true] + $this->correspondence()->search($channel, $this->viewer(), $term);
+        });
+    }
+
+    /**
      * The current state of one message, for a client that was told its copy is stale.
      *
      * @return array<string, mixed>
@@ -215,8 +280,10 @@ class Room extends Component
             'suspendedHeading' => CommunityCopy::SUSPENDED_HEADING,
             'suspendedMessage' => CommunityCopy::SUSPENDED,
             'chatIntro' => CommunityCopy::CHAT_INTRO,
+            'conduct' => CommunityCopy::conductRules(),
+            'hints' => ChatFormat::hints(),
             'canModerate' => ! $this->accessRevoked && $this->chat()->canModerate($this->viewer()),
-        ])->title($this->channelName.' · Community chat');
+        ])->title($this->channelName.' · '.ChatCopy::TITLE);
     }
 
     /**
@@ -310,5 +377,10 @@ class Room extends Component
     private function chat(): ChatService
     {
         return app(ChatService::class);
+    }
+
+    private function correspondence(): ChatCorrespondenceService
+    {
+        return app(ChatCorrespondenceService::class);
     }
 }

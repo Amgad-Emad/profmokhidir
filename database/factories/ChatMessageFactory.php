@@ -42,4 +42,26 @@ class ChatMessageFactory extends Factory
     {
         return $this->state(fn (array $attributes) => ['deleted_at' => now()]);
     }
+
+    /**
+     * An answer to another message (same channel as the original).
+     */
+    public function replyTo(ChatMessage $original): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'channel_id' => $original->channel_id,
+            'reply_to_id' => $original->getKey(),
+        ]);
+    }
+
+    /**
+     * Pinned to the channel's side panel by a moderator.
+     */
+    public function pinned(?User $by = null): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'pinned_at' => now(),
+            'pinned_by' => $by?->getKey() ?? User::factory()->admin(),
+        ]);
+    }
 }
