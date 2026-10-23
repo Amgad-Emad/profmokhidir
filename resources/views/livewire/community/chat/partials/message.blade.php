@@ -34,13 +34,16 @@
             <ul class="chat-gallery" :class="'is-' + imagesOf(m).length" x-show="imagesOf(m).length > 0" aria-label="{{ ChatCopy::ATTACHMENTS_LABEL }}">
                 <template x-for="(a, i) in imagesOf(m)" :key="a.id || a.key">
                     <li>
-                        <button type="button" class="chat-gallery__item" x-on:click="openLightbox(m, i, $event.currentTarget)" :aria-label="'{{ ChatCopy::ATTACH_OPEN_IMAGE }}: ' + a.alt" data-attachment-image>
-                            <img :src="a.thumb || a.preview" :alt="a.alt" loading="lazy" decoding="async" :width="a.width || null" :height="a.height || null">
+                        {{-- Until the WebP thumbnail exists, `thumb` is the original (scaled down here); the cell breathes until either has loaded. --}}
+                        <button type="button" class="chat-gallery__item" :class="{ 'is-loaded': a.loaded }" x-on:click="openLightbox(m, i, $event.currentTarget)" :aria-label="'{{ ChatCopy::ATTACH_OPEN_IMAGE }}: ' + a.alt"
+                                :data-thumb-ready="a.thumb_ready ? 'true' : 'false'" data-attachment-image>
+                            <img :src="a.thumb || a.preview" :alt="a.alt" loading="lazy" decoding="async" :width="a.width || null" :height="a.height || null"
+                                 x-on:load="a.loaded = true" x-on:error="a.loaded = true">
                         </button>
                     </li>
                 </template>
             </ul>
-            <ul class="chat-files" x-show="documentsOf(m).length > 0" aria-label="{{ ChatCopy::ATTACHMENTS_LABEL }}">
+            <ul class="chat-files" :class="'is-' + documentsOf(m).length" x-show="documentsOf(m).length > 0" aria-label="{{ ChatCopy::ATTACHMENTS_LABEL }}">
                 <template x-for="a in documentsOf(m)" :key="a.id || a.key">
                     <li class="chat-file" data-attachment-document>
                         <span class="chat-filemark" aria-hidden="true" x-text="a.extension"></span>
@@ -58,7 +61,7 @@
     </template>
 
     <template x-if="editing && editing.key === m.key">
-        <form class="chat-edit" x-on:submit.prevent="saveEdit()">
+        <form novalidate class="chat-edit" x-on:submit.prevent="saveEdit()">
             <x-form.textarea name="edit" id="chat-edit" :label="ChatCopy::EDIT_LABEL" hide-label :optional="false" :counter="false" rows="3"
                              :control="[
                                  'x-model' => 'editing.body',

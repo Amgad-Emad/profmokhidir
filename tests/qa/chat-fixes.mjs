@@ -15,7 +15,7 @@
  |   layout   no document scroll and no horizontal scroll, Members opens the Members tab
  |            with every member, "You" and "online", focus on the tab (not a heading), axe
  |   files    every type through the paperclip, drag and drop, a pasted image, previews
- |            with progress and the required description, the grid and the lightbox,
+ |            with progress and the optional description, the grid and the lightbox,
  |            document cards, downloads as a member, refused for a guest and a pending
  |            applicant, location data gone from the downloaded photo, a renamed program
  |            refused, the administrator's member menu (view profile, suspend)
@@ -280,16 +280,13 @@ for (const theme of THEMES) {
     check('a HEIC photo arrives as JPEG', trayStates.some((t) => /iphone-photo\.jpg:ready/.test(t)), trayStates.join(', '));
     await a.page.screenshot({ path: join(OUT, 'tray-images-1440.png') });
 
-    // The description is required.
+    // The description is optional: three are described, the fourth is sent without one.
+    check('the image description has no required attribute', await a.page.$$eval('[data-alt]', (els) => els.every((e) => !e.required && e.placeholder === 'Add a description (optional)')));
+    const alts = ['Students measuring a plot', 'A soil profile drawing', 'A herbarium sheet'];
+    const altInputs = a.page.locator('[data-alt]');
+    for (let i = 0; i < alts.length; i++) await altInputs.nth(i).fill(alts[i]);
     await a.page.locator('#chat-draft').click();
     await a.page.keyboard.type(`Photographs ${STAMP}`);
-    await a.page.keyboard.press('Enter');
-    await a.page.waitForTimeout(300);
-    check('sending images without descriptions is stopped and says why', await a.page.locator('[data-send-error]').isVisible() && (await a.page.locator('.chat-message.is-sending').count()) === 0, await a.page.locator('[data-send-error]').textContent());
-    const alts = ['Students measuring a plot', 'A soil profile drawing', 'A herbarium sheet', 'A photo from a phone'];
-    const altInputs = a.page.locator('[data-alt]');
-    for (let i = 0; i < await altInputs.count(); i++) await altInputs.nth(i).fill(alts[i]);
-    await a.page.locator('#chat-draft').click();
     await a.page.keyboard.press('Enter');
     await waitNotSending(a.page);
 
@@ -366,6 +363,7 @@ for (const theme of THEMES) {
     }, STAMP);
     check(`the other member sees the images as a grid (${seen.grid})`, seen.grid === images.length, seen.alts.join(' | '));
     check('image descriptions are the alt text', seen.alts.includes('Students measuring a plot'));
+    check('an image sent without a description is described as shared by its member', seen.alts.includes('Image shared by Amina Hassan'), seen.alts.join(' | '));
     check(`the other member sees document cards with type, size and Download (${seen.cards.length})`, seen.cards.length === 5 && seen.downloads === 5 && seen.cards.every((c) => /MB|KB|B/.test(c)), seen.cards.join(' | '));
     await y.page.evaluate((stamp) => Array.from(document.querySelectorAll('[data-chat-message]')).find((m) => m.innerText.includes(`Documents ${stamp}`))?.scrollIntoView({ block: 'center' }), STAMP);
     await y.page.waitForTimeout(300);

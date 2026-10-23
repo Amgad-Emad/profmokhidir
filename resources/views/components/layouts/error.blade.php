@@ -38,7 +38,7 @@
         <h1 class="t-heading text-ink-strong">{{ $page['title'] }}</h1>
         <p class="t-quote max-w-xl">{{ $page['line'] }}</p>
 
-        <form method="get" action="{{ route(Search::ROUTE) }}" role="search" class="search-form search-form--ivory w-full max-w-xl text-left">
+        <form novalidate method="get" action="{{ route(Search::ROUTE) }}" role="search" class="search-form search-form--ivory w-full max-w-xl text-left">
             <div class="search-form__row form-style-underline">
                 <x-form.input type="search" :name="Search::PARAM" id="error-search" :label="ErrorPages::SEARCH_LABEL" :optional="false" size="display" class="search-form__field"
                               :placeholder="Search::PLACEHOLDER" autocomplete="off" :maxlength="Search::MAX_LENGTH" />

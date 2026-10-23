@@ -17,7 +17,7 @@
 
     {{-- Search and filters: chips for short option lists, a select for long ones; all kept in the address. --}}
     <div class="list-tools mt-6">
-        <form wire:submit.prevent role="search" aria-label="Search {{ strtolower($type['plural']) }}" class="list-tools__search">
+        <form novalidate wire:submit.prevent role="search" aria-label="Search {{ strtolower($type['plural']) }}" class="list-tools__search">
             <x-form.input type="search" model="search" id="search" live label="Search" :optional="false" loading="search" hint="Press / to jump here."
                           :placeholder="'Title or words in '.strtolower($type['plural'])" autocomplete="off" data-shortcut="search" />
         </form>

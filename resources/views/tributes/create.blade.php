@@ -17,7 +17,7 @@
             @endforeach
         </p>
 
-        <form method="POST" action="{{ $previewUrl }}" class="form-style-underline mt-12 space-y-10" data-rise>
+        <form novalidate method="POST" action="{{ $previewUrl }}" class="form-style-underline mt-12 space-y-10" data-rise>
             @csrf
 
             <x-form.error-summary :intro="\App\Constants\FormControls::ERROR_SUMMARY_INTRO" :except="[\App\Http\Controllers\TributeController::LIMIT_ERROR, 'consent']" />

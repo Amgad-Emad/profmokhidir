@@ -1,6 +1,6 @@
 @use('App\Constants\AuthScreens')
 <x-layouts.guest :screen="AuthScreens::RESET_PASSWORD">
-    <form method="POST" action="{{ route('password.update') }}" class="space-y-8" x-data="authForm()" x-on:submit="submit($event)" data-auth-form>
+    <form novalidate method="POST" action="{{ route('password.update') }}" class="space-y-8" x-data="authForm()" x-on:submit="submit($event)" data-auth-form>
         @csrf
         <input type="hidden" name="token" value="{{ $request->route('token') }}">
         <x-form.input name="email" label="Email" type="email" :value="$request->email" required :autocomplete="AuthScreens::AUTOCOMPLETE_USERNAME" />

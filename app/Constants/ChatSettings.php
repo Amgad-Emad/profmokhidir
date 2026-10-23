@@ -110,6 +110,14 @@ final class ChatSettings
     /** Name of the private broadcast channel per chat channel (Reverb). */
     public const string BROADCAST_CHANNEL_PREFIX = 'community.chat.';
 
+    /** Side padding of the room's header, conversation and composer (--chat-gutter in chat.css), below and from 1024px. */
+    public const int GUTTER_PX = 24;
+
+    public const int GUTTER_DESKTOP_PX = 40;
+
+    /** Longest line of message text, in characters; the message row and its files still span the column. */
+    public const int MESSAGE_MEASURE_CH = 100;
+
     /** Where the KaTeX stylesheet is served from (copied out of node_modules at build time). */
     public const string KATEX_STYLESHEET = 'vendor/katex/katex.min.css';
 

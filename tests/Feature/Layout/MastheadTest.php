@@ -203,7 +203,7 @@ class MastheadTest extends TestCase
         $menu = $menu[1];
 
         $this->assertMatchesRegularExpression('/<div id="'.Masthead::MENU_ID.'" x-ref="panel" x-show="open" x-cloak[^>]*role="dialog" aria-modal="true" aria-label="'.Masthead::MENU_DIALOG_LABEL.'" tabindex="-1" @keydown\.tab="trap\(\$event\)"/', $this->html);
-        $this->assertMatchesRegularExpression('/<form method="get" action="'.preg_quote(route(Search::ROUTE), '/').'" role="search" class="site-menu__search">\s*<div class="form-field[^"]*form-style-underline[^"]*" data-form-field\s*>\s*<label id="site-menu-search-label" for="site-menu-search" class="t-label form-label form-label--hidden">'.Search::LABEL.'<\/label>/', $menu);
+        $this->assertMatchesRegularExpression('/<form novalidate method="get" action="'.preg_quote(route(Search::ROUTE), '/').'" role="search" class="site-menu__search">\s*<div class="form-field[^"]*form-style-underline[^"]*" data-form-field\s*>\s*<label id="site-menu-search-label" for="site-menu-search" class="t-label form-label form-label--hidden">'.Search::LABEL.'<\/label>/', $menu);
         $this->assertMatchesRegularExpression('/<input class="form-control__input site-menu__search-input" id="site-menu-search" name="'.Search::PARAM.'"[^>]*type="search"/', $menu);
         $this->assertLessThan(strpos($menu, 'aria-label="Site sections"'), strpos($menu, 'site-menu__search'), 'The search field comes first');
         $this->assertStringContainsString('<p class="t-label text-accent-text site-menu__caption">'.Masthead::CONTENTS.'</p>', $menu);

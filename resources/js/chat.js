@@ -815,6 +815,12 @@ document.addEventListener('alpine:init', () => {
                 target.attachments.forEach((a) => a.preview && URL.revokeObjectURL(a.preview));
             }
 
+            // A new copy of an image already on screen (its thumbnail just became ready) swaps in
+            // without the loading breath: the old picture stays until the new one has loaded.
+            (incoming.attachments || []).forEach((a) => {
+                if (target.attachments?.some((b) => b.id && b.id === a.id && b.loaded)) a.loaded = true;
+            });
+
             Object.assign(target, incoming, { key: target.key, local: target.local, state: null, error: null });
             return false;
         },
@@ -889,14 +895,6 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
 
-            const undescribed = files.find((a) => a.kind === 'image' && a.alt.trim() === '');
-            if (undescribed) {
-                undescribed.altMissing = true;
-                this.sendError = this.config.copy.attachDescribe;
-                this.$nextTick(() => this.$root.querySelector(`#chat-alt-${undescribed.key}`)?.focus());
-                return;
-            }
-
             this.sendError = '';
             const reply = this.replyTo;
             const message = this.normalise({
@@ -922,7 +920,9 @@ document.addEventListener('alpine:init', () => {
                 // Local previews until the server's copy (with signed links) replaces them.
                 attachments: files.map((a) => ({
                     key: a.key, kind: a.kind, name: a.name, type: a.type, extension: a.extension,
-                    size_label: a.sizeLabel, alt: a.alt.trim(), preview: a.preview, thumb: null, url: null,
+                    size_label: a.sizeLabel, preview: a.preview, thumb: null, url: null,
+                    // The description is optional; the server stores the same fallback.
+                    alt: a.alt.trim() || this.config.copy.attachDefaultAlt.replace(':name', this.viewer.name),
                 })),
             });
             message.state = STATE_SENDING;
@@ -1094,7 +1094,6 @@ document.addEventListener('alpine:init', () => {
                     sizeLabel: fileSize(file.size),
                     preview: canPreview ? URL.createObjectURL(file) : null,
                     alt: '',
-                    altMissing: false,
                     progress: 0,
                     state: STATE_UPLOADING,
                     error: '',
@@ -1383,17 +1382,18 @@ document.addEventListener('alpine:init', () => {
 
             this.loadingOlder = true;
             const el = this.$refs.scroller;
-            const previousHeight = el.scrollHeight;
-            const previousTop = el.scrollTop;
 
             try {
                 const result = await this.$wire.loadOlder(first.id);
                 if (result && result.ok) {
+                    // Keep the reader's place: measured when the older messages arrive (the reader, or
+                    // keyboard focus, may have moved while they loaded), as the distance from the bottom,
+                    // which prepending does not change.
+                    const fromBottom = el.scrollHeight - el.scrollTop;
                     for (const incoming of result.messages || []) this.merge(incoming);
                     this.hasOlder = Boolean(result.hasOlder);
-                    // Keep the reader's place: shift by however much was prepended.
                     this.$nextTick(() => {
-                        el.scrollTop = previousTop + (el.scrollHeight - previousHeight);
+                        el.scrollTop = el.scrollHeight - fromBottom;
                     });
                 } else {
                     this.handleResult(result, () => {});

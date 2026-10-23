@@ -5,7 +5,7 @@
         <p class="t-body -mt-2 mb-8 text-ink-muted" x-show="!recovery" @if ($recovery) x-cloak @endif>{{ AuthScreens::screen(AuthScreens::TWO_FACTOR)['intro'] }}</p>
         <p class="t-body -mt-2 mb-8 text-ink-muted" x-show="recovery" @unless ($recovery) x-cloak @endunless>{{ AuthScreens::TWO_FACTOR_RECOVERY_INTRO }}</p>
 
-        <form method="POST" action="{{ route('two-factor.login') }}" class="space-y-8" x-data="authForm()" x-on:submit="submit($event)" data-auth-form>
+        <form novalidate method="POST" action="{{ route('two-factor.login') }}" class="space-y-8" x-data="authForm()" x-on:submit="submit($event)" data-auth-form>
             @csrf
             <div x-show="!recovery" @if ($recovery) x-cloak @endif>
                 <x-form.otp name="code" label="Authentication code" :autofocus="! $recovery" :hidden="['x-bind:disabled' => 'recovery']" />

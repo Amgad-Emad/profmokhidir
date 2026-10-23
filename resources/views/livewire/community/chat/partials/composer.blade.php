@@ -1,12 +1,12 @@
 @use('App\Constants\ChatCopy')
 {{--
-    The composer: reply strip, attachment previews (name, size, progress, remove, and a required
-    description for images), the auto-growing <x-form.textarea> whose text lives only in Alpine
+    The composer: reply strip, attachment previews (name, size, progress, remove, and an optional
+    description for images; left empty, the server describes it as shared by the member), the auto-growing <x-form.textarea> whose text lives only in Alpine
     state (`draft`), the paperclip, "Aa" for the formatting help, and the send button. The
     Enter / Shift+Enter hint retires after three sends; the count appears only near the limit,
     which is enforced on the server (the field has no maxlength, so a paste is never cut short).
 --}}
-<form class="chat-composer" x-on:submit.prevent="send()" data-composer>
+<form class="chat-composer" x-on:submit.prevent="send()" novalidate data-composer>
     <div class="chat-composer__inner">
         <div class="chat-composer__strip" x-show="replyTo" x-cloak data-reply-preview>
             <p class="min-w-0 flex-1 border-l border-accent-line pl-3">
@@ -34,8 +34,8 @@
                         <template x-if="a.kind === 'image'">
                             <span class="block">
                                 <label class="sr-only" :for="'chat-alt-' + a.key">{{ ChatCopy::ATTACH_DESCRIPTION_LABEL }}: <span x-text="a.name"></span></label>
-                                <input type="text" class="chat-tray__alt" :id="'chat-alt-' + a.key" x-model="a.alt" required :maxlength="config.attachments.altMaxLength"
-                                       placeholder="{{ ChatCopy::ATTACH_DESCRIPTION_PLACEHOLDER }}" :aria-invalid="a.altMissing ? 'true' : 'false'" x-on:input="a.altMissing = false"
+                                <input type="text" class="chat-tray__alt" :id="'chat-alt-' + a.key" x-model="a.alt" :maxlength="config.attachments.altMaxLength"
+                                       placeholder="{{ ChatCopy::ATTACH_DESCRIPTION_PLACEHOLDER }}"
                                        x-on:keydown.enter.prevent="$refs.draft?.focus()" dir="auto" data-alt>
                             </span>
                         </template>

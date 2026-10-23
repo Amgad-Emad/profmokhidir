@@ -10,7 +10,7 @@
         </button>
     </div>
     <div class="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
-        <form x-ref="form" method="get" action="{{ $searchUrl }}" role="search" class="site-search__form" @submit="submit($event)">
+        <form novalidate x-ref="form" method="get" action="{{ $searchUrl }}" role="search" class="site-search__form" @submit="submit($event)">
             <x-form.input type="search" :name="$searchParam" id="site-search-input" :label="Search::LABEL" hide-label :optional="false" size="display" class="form-style-underline"
                           :placeholder="Search::PLACEHOLDER" autocomplete="off" spellcheck="false" :maxlength="Search::MAX_LENGTH"
                           :control="['x-ref' => 'input', 'x-model' => 'query', 'x-on:input.debounce.250ms' => 'lookup()', 'aria-controls' => 'site-search-results', 'aria-describedby' => 'site-search-hint']" />

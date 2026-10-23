@@ -11,6 +11,14 @@
     :root {
         --chat-header: 4rem;
         --chat-panel: 22rem;
+        /* The side padding of the header, the conversation and the composer (ChatSettings::GUTTER_*). */
+        --chat-gutter: 1.5rem;
+    }
+
+    @media (min-width: 1024px) {
+        :root {
+            --chat-gutter: 2.5rem;
+        }
     }
 
     /*
@@ -64,14 +72,8 @@
         display: flex;
         align-items: flex-start;
         gap: var(--space-2);
-        padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+        padding: var(--space-2) var(--chat-gutter);
         border-bottom: 1px solid var(--rule);
-    }
-
-    @media (min-width: 768px) {
-        .chat-room__header {
-            padding-inline: var(--space-4);
-        }
     }
 
     .chat-room__heading {
@@ -181,7 +183,7 @@
         display: flex;
         align-items: center;
         gap: var(--space-2);
-        padding: var(--space-1) var(--space-3);
+        padding: var(--space-1) var(--chat-gutter);
         border-bottom: 1px solid var(--rule);
         background-color: var(--surface-raised);
         font-size: 0.875rem;
@@ -192,7 +194,7 @@
 
     /* ---------------------------------------------------------- search */
     .chat-search {
-        padding: var(--space-2) var(--space-3);
+        padding: var(--space-2) var(--chat-gutter);
         border-bottom: 1px solid var(--rule);
         background-color: var(--surface);
     }
@@ -239,21 +241,16 @@
         overflow-y: auto;
         overscroll-behavior: contain;
         scroll-behavior: smooth;
-        padding: 0 var(--space-3) var(--space-3);
-    }
-
-    @media (min-width: 768px) {
-        .chat-scroller {
-            padding-inline: var(--space-4);
-        }
+        padding: 0 var(--chat-gutter) var(--space-3);
     }
 
     .chat-scroller:focus-visible {
         outline-offset: -3px;
     }
 
+    /* The conversation spans the whole centre column (up to the panel, or the full width when it is closed). */
     .chat-log {
-        max-width: 68ch;
+        width: 100%;
     }
 
     /* Day divider: a centred hairline with the date in small caps. */
@@ -408,6 +405,8 @@
         color: var(--ink);
         white-space: pre-wrap;
         overflow-wrap: anywhere;
+        /* Only the text keeps a reading measure on very wide screens; the row, its toolbar and its files still span the column. */
+        max-width: 100ch;
     }
 
     /* A message that has just arrived rises 8px into place over 300ms (none with reduced motion). */
@@ -710,19 +709,13 @@
     .chat-composer {
         position: relative;
         flex: none;
-        padding: var(--space-2) var(--space-3) calc(var(--space-2) + env(safe-area-inset-bottom));
+        padding: var(--space-2) var(--chat-gutter) calc(var(--space-2) + env(safe-area-inset-bottom));
         border-top: 1px solid var(--rule);
         background-color: var(--surface);
     }
 
-    @media (min-width: 768px) {
-        .chat-composer {
-            padding-inline: var(--space-4);
-        }
-    }
-
     .chat-composer__inner {
-        max-width: 68ch;
+        width: 100%;
     }
 
     .chat-composer__strip {
@@ -1237,8 +1230,10 @@
     }
 
     /* ---------------------------------------------------------- attachments: composer tray */
+    /* The files waiting to be sent: cards across the composer's width, as many to a row as fit. */
     .chat-tray {
         display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
         gap: var(--space-1);
         margin-bottom: var(--space-2);
     }
@@ -1384,35 +1379,52 @@
     }
 
     /* ---------------------------------------------------------- attachments: in a message */
+    /*
+     | A message's files span the whole column. The attachment block is a size container,
+     | so the grids follow the column's width (narrower with the panel open), not the window's.
+     */
     .chat-attachments {
+        container-type: inline-size;
         display: grid;
         gap: var(--space-1);
         margin-top: var(--space-1);
-        max-width: 36rem;
+        width: 100%;
     }
 
-    /* Images: one wide, two or four in pairs, three or five in rows of three, all squares. */
+    /* Images: a row of square thumbnails, two to five across as the column widens; a single image takes two cells at 4:3. */
     .chat-gallery {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 0.25rem;
     }
 
-    .chat-gallery.is-1 {
-        grid-template-columns: minmax(0, 1fr);
-        max-width: 24rem;
+    @container (min-width: 36rem) {
+        .chat-gallery {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
     }
 
-    .chat-gallery.is-3,
-    .chat-gallery.is-5 {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+    @container (min-width: 56rem) {
+        .chat-gallery {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
     }
 
-    .chat-gallery.is-2,
-    .chat-gallery.is-4 {
-        max-width: 28rem;
+    @container (min-width: 80rem) {
+        .chat-gallery {
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+        }
     }
 
+    .chat-gallery.is-1 > li {
+        grid-column: span 2;
+    }
+
+    /*
+     | A thumbnail cell. Until its image has loaded (the original, scaled down, while the
+     | thumbnail is still being made) it breathes quietly instead of sitting as an empty box;
+     | the global reduced-motion rule stills the breath.
+     */
     .chat-gallery__item {
         display: block;
         width: 100%;
@@ -1420,6 +1432,10 @@
         overflow: hidden;
         border-radius: var(--radius-card);
         background-color: var(--surface-sunken);
+    }
+
+    .chat-gallery__item:not(.is-loaded) {
+        animation: skeleton-breathe 2400ms ease-in-out infinite alternate;
     }
 
     .chat-gallery.is-1 .chat-gallery__item {
@@ -1432,9 +1448,23 @@
         object-fit: cover;
     }
 
+    /* Documents: one card fills the row; two or more share it, two across and then three as the column widens. */
     .chat-files {
         display: grid;
+        grid-template-columns: minmax(0, 1fr);
         gap: 0.25rem;
+    }
+
+    @container (min-width: 40rem) {
+        .chat-files:not(.is-1) {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @container (min-width: 64rem) {
+        .chat-files:not(.is-1, .is-2, .is-4) {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
     }
 
     .chat-file {

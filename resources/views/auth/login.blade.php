@@ -1,6 +1,6 @@
 @use('App\Constants\AuthScreens')
 <x-layouts.guest :screen="AuthScreens::LOGIN">
-    <form method="POST" action="{{ route('login') }}" class="space-y-8" x-data="authForm()" x-on:submit="submit($event)" data-auth-form>
+    <form novalidate method="POST" action="{{ route('login') }}" class="space-y-8" x-data="authForm()" x-on:submit="submit($event)" data-auth-form>
         @csrf
         <x-form.input name="email" label="Email" type="email" required :autocomplete="AuthScreens::AUTOCOMPLETE_USERNAME" autofocus />
         <x-form.password name="password" label="Password" :autocomplete="AuthScreens::AUTOCOMPLETE_CURRENT_PASSWORD" />

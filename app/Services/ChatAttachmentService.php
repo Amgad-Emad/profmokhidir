@@ -17,6 +17,7 @@ use App\Exceptions\ChatRateLimitException;
 use App\Models\ChatMessage;
 use App\Models\ChatUpload;
 use App\Models\User;
+use App\Repositories\Contracts\ChatMessageRepositoryInterface;
 use App\Repositories\Contracts\ChatUploadRepositoryInterface;
 use App\Support\ChatAccess;
 use App\Support\ChatImageSanitiser;
@@ -52,6 +53,7 @@ class ChatAttachmentService
 
     public function __construct(
         private readonly ChatUploadRepositoryInterface $uploads,
+        private readonly ChatMessageRepositoryInterface $messages,
         private readonly MediaService $media,
         private readonly SettingService $settings,
         private readonly RateLimiter $limiter,
@@ -213,8 +215,8 @@ class ChatAttachmentService
 
     /**
      * Check the attachments named in a send before anything is written: at
-     * most MAX_FILES, each the member's own staged file, each image described.
-     * Returns them as [uuid => description].
+     * most MAX_FILES, each the member's own staged file. A description is
+     * optional. Returns them as [uuid => description, '' when none was given].
      *
      * @param  list<array{id?: mixed, alt?: mixed}>|array<int, mixed>  $attachments
      * @return array<string, string>
@@ -245,12 +247,8 @@ class ChatAttachmentService
                 throw new InvalidArgumentException('One of the files could not be found. Remove it and attach it again.');
             }
 
-            $upload = $this->uploads->findPendingFor((int) $member->getKey(), $uuid)
+            $this->uploads->findPendingFor((int) $member->getKey(), $uuid)
                 ?? throw new InvalidArgumentException('One of the files is no longer available. Remove it and attach it again.');
-
-            if ($upload->isImage() && $alt === '') {
-                throw new InvalidArgumentException(ChatCopy::ATTACH_DESCRIPTION_REQUIRED);
-            }
 
             $prepared[$uuid] = mb_substr($alt, 0, ChatAttachments::ALT_MAX_LENGTH);
         }
@@ -261,7 +259,9 @@ class ChatAttachmentService
     /**
      * Move the staged files onto a just-created message. Runs inside the send
      * transaction: the uploads are locked, so a file can only ever be claimed
-     * once, and a failure rolls the message back with it.
+     * once, and a failure rolls the message back with it. An image sent
+     * without a description is stored with alt text naming who shared it,
+     * so a screen reader still has something to say.
      *
      * @param  array<string, string>  $prepared  uuid => description, from prepare()
      *
@@ -286,7 +286,7 @@ class ChatAttachmentService
             $media = $upload->getFirstMedia(MediaCollections::CHAT_PENDING)
                 ?? throw new InvalidArgumentException('One of the files is no longer available. Remove it and attach it again.');
 
-            $properties = $upload->isImage() ? [MediaProperties::ALT_TEXT => $prepared[$upload->uuid]] : [];
+            $properties = $upload->isImage() ? [MediaProperties::ALT_TEXT => $this->altText($prepared[$upload->uuid], $member)] : [];
             $media->order_column = $index + 1;
             $this->media->reassign($media, $message, MediaCollections::CHAT_ATTACHMENTS, $properties);
             $this->uploads->markClaimed($upload, (int) $message->getKey(), $now);
@@ -325,6 +325,30 @@ class ChatAttachmentService
         } while ($batch->isNotEmpty());
 
         return $removed;
+    }
+
+    // -- Thumbnails ---------------------------------------------------------
+
+    /**
+     * A queued conversion finished (RefreshChatThumbnails). When it is the
+     * thumbnail of a sent message's image, the message is marked changed so
+     * every open room picks up the thumbnail on its next poll. Returns
+     * whether a message was marked.
+     */
+    public function conversionCompleted(Media $media, string $conversion): bool
+    {
+        $message = $media->model;
+
+        if ($conversion !== ChatAttachments::CONVERSION_THUMB
+            || $media->collection_name !== MediaCollections::CHAT_ATTACHMENTS
+            || ! str_starts_with((string) $media->mime_type, 'image/')
+            || ! $message instanceof ChatMessage) {
+            return false;
+        }
+
+        $this->messages->markChanged($message);
+
+        return true;
     }
 
     // -- Downloads ----------------------------------------------------------
@@ -375,6 +399,18 @@ class ChatAttachmentService
             // Images open in the page; documents always download.
             'inline' => $image && $variant !== self::VARIANT_ORIGINAL,
         ];
+    }
+
+    /**
+     * The alt text an image is stored with: the member's description, or "Image shared by {name}".
+     */
+    public function altText(string $description, User $member): string
+    {
+        $description = trim($description);
+
+        return $description !== ''
+            ? mb_substr($description, 0, ChatAttachments::ALT_MAX_LENGTH)
+            : mb_substr(strtr(ChatCopy::ATTACH_DEFAULT_ALT, [':name' => (string) $member->name]), 0, ChatAttachments::ALT_MAX_LENGTH);
     }
 
     private function deleteUpload(ChatUpload $upload): void

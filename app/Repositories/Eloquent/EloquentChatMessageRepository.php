@@ -93,7 +93,7 @@ class EloquentChatMessageRepository extends BaseEloquentRepository implements Ch
             ->where('channel_id', $channelId)
             ->where('id', '<=', $upToId)
             ->where('updated_at', '>=', $since)
-            ->where(fn ($query) => $query->whereNotNull('deleted_at')->orWhereNotNull('edited_at'))
+            ->where(fn ($query) => $query->whereNotNull('deleted_at')->orWhereNotNull('edited_at')->orWhereColumn('updated_at', '>', 'created_at'))
             ->orderBy('id')
             ->limit($limit)
             ->get();
@@ -157,6 +157,15 @@ class EloquentChatMessageRepository extends BaseEloquentRepository implements Ch
         }
 
         return false;
+    }
+
+    public function markChanged(ChatMessage $message): void
+    {
+        // A second after the send at the earliest, so changedSince (updated_at > created_at) sees it.
+        $at = now()->max($message->created_at?->copy()->addSecond() ?? now());
+
+        $this->query()->withTrashed()->whereKey($message->getKey())->update(['updated_at' => $at]);
+        $message->setAttribute('updated_at', $at);
     }
 
     public function search(int $channelId, string $term, int $limit = 20): Collection

@@ -34,7 +34,7 @@
     </div>
 
     <h3 class="mt-16 font-display text-3xl font-light" data-rise>Every control</h3>
-    <form class="mt-8 grid gap-6 lg:grid-cols-2" action="#forms" method="get" data-form-specimens="controls">
+    <form novalidate class="mt-8 grid gap-6 lg:grid-cols-2" action="#forms" method="get" data-form-specimens="controls">
         <div class="form-specimen form-specimen--light" data-specimen="controls-light">
             <p class="t-label form-label">Light</p>
             <div class="mt-6">@include('styleguide.partials.form-set', ['suffix' => 'light'])</div>

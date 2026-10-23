@@ -21,7 +21,7 @@
             <x-tribute-entry :tribute="$tribute" heading="2" />
         </div>
 
-        <form method="POST" action="{{ $storeUrl }}" class="mt-12 space-y-8" data-rise>
+        <form novalidate method="POST" action="{{ $storeUrl }}" class="mt-12 space-y-8" data-rise>
             @csrf
 
             @error(\App\Http\Controllers\TributeController::LIMIT_ERROR)

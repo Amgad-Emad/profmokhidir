@@ -58,7 +58,7 @@
                         </button>
                     </div>
 
-                    <form method="get" action="{{ $clearUrl }}" class="catalogue__form">
+                    <form novalidate method="get" action="{{ $clearUrl }}" class="catalogue__form">
                         @if ($types !== [])
                             <x-form.radio-group name="type" label="Type" :optional="false" :value="$active['type']?->value ?? ''"
                                                 :options="['' => 'All types'] + collect($types)->mapWithKeys(fn ($type) => [$type['value'] => $type['label']])->all()" />

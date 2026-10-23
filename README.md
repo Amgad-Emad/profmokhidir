@@ -38,9 +38,15 @@ tests at the second one, so `php artisan test` never touches development data.
 php artisan migrate --seed       # placeholder content; prints the seeded passwords once
 php artisan storage:link         # public media is served from public/storage
 npm install
-npm run build                    # or `npm run dev` while working on the front end
-php artisan queue:work --stop-when-empty   # image conversions and mail are queued (QUEUE_CONNECTION=database)
+npm run build
 ```
+
+While working, keep `composer run dev` running. Valet serves the site; the command starts the
+queue worker (`queue:listen`), the log tail (`pail`) and Vite (`npm run dev`) together. The queue
+matters: image thumbnails (chat pictures, media library) and mail are queued
+(`QUEUE_CONNECTION=database`), so without a worker no WebP thumbnail is ever made. The chat then
+shows the full-size original in its place. If you only build assets, run
+`php artisan queue:work --stop-when-empty` after seeding or uploading to process the backlog.
 
 Then open <https://profmokhidir.test>. The design-system review page is at `/styleguide`
 (local environment only; 404 elsewhere).

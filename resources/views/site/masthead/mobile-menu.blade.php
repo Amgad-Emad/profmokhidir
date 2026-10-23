@@ -14,7 +14,7 @@
         </button>
     </div>
     <div class="mx-auto max-w-7xl px-4 pb-16 pt-6 sm:px-6 sm:pt-10">
-        <form method="get" action="{{ $searchUrl }}" role="search" class="site-menu__search">
+        <form novalidate method="get" action="{{ $searchUrl }}" role="search" class="site-menu__search">
             <x-form.input type="search" :name="$searchParam" id="site-menu-search" :label="Search::LABEL" hide-label :optional="false" class="form-style-underline min-w-0 flex-1" control-class="site-menu__search-input"
                           :placeholder="Search::PLACEHOLDER" autocomplete="off" spellcheck="false" :maxlength="Search::MAX_LENGTH" />
             <button type="submit" class="site-menu__search-button">

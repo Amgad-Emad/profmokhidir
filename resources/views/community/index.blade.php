@@ -57,7 +57,7 @@
                             <p class="t-label text-accent-text">{{ $copy['applyHeading'] }}</p>
                             <h2 id="apply-heading" class="sr-only">{{ $copy['applyHeading'] }}</h2>
                             <hr class="rule-brass mt-4" data-rule>
-                            <form method="POST" action="{{ $applyUrl }}" class="form-style-underline mt-8 space-y-8" x-data="authForm()" x-on:submit="submit($event)" data-apply-form>
+                            <form novalidate method="POST" action="{{ $applyUrl }}" class="form-style-underline mt-8 space-y-8" x-data="authForm()" x-on:submit="submit($event)" data-apply-form>
                                 @csrf
                                 <x-form.error-summary :targets="['throttle' => 'apply-heading']" />
                                 @include('community.partials.application-fields', ['copy' => $copy])
@@ -72,7 +72,7 @@
                         <p class="t-body mt-4 text-ink-muted">{{ $copy['applyIntro'] }} Already a member? <a href="{{ $loginUrl }}" class="link-hairline">Sign in</a>.</p>
                         <hr class="rule-brass mt-6" data-rule>
 
-                        <form method="POST" action="{{ $applyUrl }}" class="form-style-underline mt-8 space-y-8" x-data="authForm()" x-on:submit="submit($event)" data-apply-form>
+                        <form novalidate method="POST" action="{{ $applyUrl }}" class="form-style-underline mt-8 space-y-8" x-data="authForm()" x-on:submit="submit($event)" data-apply-form>
                             @csrf
 
                             <x-form.error-summary :targets="['throttle' => 'apply-heading']" />

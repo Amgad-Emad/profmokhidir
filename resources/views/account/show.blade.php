@@ -23,7 +23,7 @@
             <h2 id="profile-heading" class="font-display text-3xl font-light">Name and email</h2>
             <p class="mt-2 text-sm font-light text-ink-muted">Changing your email address will ask you to verify it again.</p>
 
-            <form method="POST" action="{{ route('user-profile-information.update') }}" class="mt-6 space-y-6">
+            <form novalidate method="POST" action="{{ route('user-profile-information.update') }}" class="mt-6 space-y-6">
                 @csrf
                 @method('PUT')
                 <x-form.input name="name" label="Name" :value="$user->name" required autocomplete="name" bag="updateProfileInformation" />
@@ -37,7 +37,7 @@
             <h2 id="password-heading" class="font-display text-3xl font-light">Password</h2>
             <p class="mt-2 text-sm font-light text-ink-muted">Use a long passphrase you do not use anywhere else.</p>
 
-            <form method="POST" action="{{ route('user-password.update') }}" class="mt-6 space-y-6">
+            <form novalidate method="POST" action="{{ route('user-password.update') }}" class="mt-6 space-y-6">
                 @csrf
                 @method('PUT')
                 <x-form.password name="current_password" label="Current password" autocomplete="current-password" bag="updatePassword" />
@@ -82,7 +82,7 @@
             @enderror
 
             @if (! $twoFactor['enabled'])
-                <form method="POST" action="{{ route('two-factor.enable') }}" class="mt-6">
+                <form novalidate method="POST" action="{{ route('two-factor.enable') }}" class="mt-6">
                     @csrf
                     <x-button>Enable two-factor authentication</x-button>
                 </form>
@@ -96,7 +96,7 @@
                     <div class="space-y-4">
                         <p class="text-base font-light">Scan the code with your authenticator app, or enter this key by hand:</p>
                         <p class="font-mono text-sm tracking-wide break-all" data-setup-key>{{ $twoFactor['setup_key'] }}</p>
-                        <form method="POST" action="{{ route('two-factor.confirm') }}" class="space-y-4">
+                        <form novalidate method="POST" action="{{ route('two-factor.confirm') }}" class="space-y-4">
                             @csrf
                             <x-form.otp name="code" label="Code from your app" :autofocus="false" bag="confirmTwoFactorAuthentication" />
                             <div class="flex flex-wrap items-center gap-4">
@@ -116,7 +116,7 @@
                             <li>{{ $code }}</li>
                         @endforeach
                     </ul>
-                    <form method="POST" action="{{ route('two-factor.recovery-codes') }}" class="mt-4">
+                    <form novalidate method="POST" action="{{ route('two-factor.recovery-codes') }}" class="mt-4">
                         @csrf
                         <x-button variant="outline">Generate new codes</x-button>
                     </form>
@@ -124,7 +124,7 @@
             @endif
 
             @if ($twoFactor['enabled'])
-                <form method="POST" action="{{ route('two-factor.disable') }}" class="mt-6">
+                <form novalidate method="POST" action="{{ route('two-factor.disable') }}" class="mt-6">
                     @csrf
                     @method('DELETE')
                     <x-button variant="outline">{{ $twoFactor['pending'] ? 'Cancel setup' : 'Turn off two-factor authentication' }}</x-button>

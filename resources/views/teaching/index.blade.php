@@ -9,7 +9,7 @@
             <x-empty-state class="mt-6" message="Teaching materials will appear here as they are prepared for sharing." />
         @else
             @if ($topics !== [] || count($types) > 1)
-                <form method="get" action="{{ $clearUrl }}" class="mt-12 flex flex-col gap-6 border-y border-rule py-8 sm:flex-row sm:flex-wrap sm:items-end" data-rise>
+                <form novalidate method="get" action="{{ $clearUrl }}" class="mt-12 flex flex-col gap-6 border-y border-rule py-8 sm:flex-row sm:flex-wrap sm:items-end" data-rise>
                     @if ($topics !== [])
                         <x-form.select name="topic" id="filter-topic" label="Topic" :optional="false" size="compact" class="sm:min-w-56"
                                        placeholder="All topics" :value="$active['topic']" :options="array_combine($topics, $topics)" />

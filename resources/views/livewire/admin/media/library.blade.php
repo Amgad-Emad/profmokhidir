@@ -26,7 +26,7 @@
                 </button>
             @endforeach
         </div>
-        <form class="grid gap-4 md:grid-cols-4" wire:submit.prevent role="search" aria-label="Search images">
+        <form novalidate class="grid gap-4 md:grid-cols-4" wire:submit.prevent role="search" aria-label="Search images">
             <x-form.input type="search" model="search" id="search" live label="Search" :optional="false" loading="search" class="md:col-span-2" placeholder="File name, alt text, caption or place" autocomplete="off" data-shortcut="search" />
             <x-form.select model="album" id="filter-album" live label="Album" :optional="false" placeholder="All albums" :options="$albums" data-filter="album" />
             <x-form.select model="collection" id="filter-collection" live label="Used as" :optional="false" placeholder="Anything" :options="$collections" />

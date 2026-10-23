@@ -200,6 +200,27 @@ class EloquentChatMessageRepositoryTest extends TestCase
     }
 
     #[Test]
+    public function mark_changed_brings_a_message_back_in_changed_since_without_a_new_version(): void
+    {
+        Carbon::setTestNow('2026-10-19 10:00:00');
+        $message = $this->message(['body' => 'With a photo']);
+        $since = now();
+
+        $this->assertCount(0, $this->repository->changedSince($this->channel->id, $since, $message->id), 'a new message is not a change');
+
+        // Marked in the same second it was sent: still later than the send.
+        $this->repository->markChanged($message);
+
+        $changed = $this->repository->changedSince($this->channel->id, $since, $message->id);
+        $this->assertSame([$message->id], $changed->pluck('id')->all());
+        $this->assertSame(1, $changed->first()->version);
+        $this->assertNull($changed->first()->edited_at);
+        $this->assertTrue($changed->first()->updated_at->greaterThan($changed->first()->created_at));
+
+        Carbon::setTestNow();
+    }
+
+    #[Test]
     public function update_body_if_version_refuses_deleted_messages(): void
     {
         $message = $this->message(['body' => 'x']);

@@ -53,8 +53,9 @@ interface ChatMessageRepositoryInterface extends BaseRepositoryInterface
     public function afterId(int $channelId, int $afterId, int $limit = 100): Collection;
 
     /**
-     * Messages up to and including a given id that were edited or deleted at or
-     * after a moment (so edits and deletions reach every viewer).
+     * Messages up to and including a given id that were edited, deleted or
+     * otherwise changed after they were sent (their thumbnails became ready,
+     * see markChanged) at or after a moment, so every change reaches every viewer.
      *
      * @return Collection<int, ChatMessage>
      */
@@ -84,6 +85,13 @@ interface ChatMessageRepositoryInterface extends BaseRepositoryInterface
      * the message is not deleted. Returns true when the row was updated.
      */
     public function updateBodyIfVersion(ChatMessage $message, string $body, int $expectedVersion): bool;
+
+    /**
+     * Mark a message as changed without changing its text or version, so the
+     * next poll delivers a fresh copy (used when its image thumbnails are ready).
+     * The mark is always later than the moment it was sent.
+     */
+    public function markChanged(ChatMessage $message): void;
 
     /**
      * Live messages in a channel matching every word of a term (fulltext in

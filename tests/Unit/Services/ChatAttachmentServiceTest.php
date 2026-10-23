@@ -181,16 +181,9 @@ class ChatAttachmentServiceTest extends TestCase
     }
 
     #[Test]
-    public function images_need_a_description_and_only_your_own_files_can_be_sent(): void
+    public function only_your_own_files_can_be_sent(): void
     {
         $photo = $this->service->stage($this->member, $this->file(ChatSampleFiles::png(), 'scan.png'));
-
-        try {
-            $this->send($this->member, [['id' => $photo->uuid, 'alt' => '  ']]);
-            $this->fail('An image without a description must be refused');
-        } catch (InvalidArgumentException) {
-        }
-
         $other = User::factory()->member()->create();
 
         try {
@@ -201,6 +194,54 @@ class ChatAttachmentServiceTest extends TestCase
 
         $this->assertSame(0, ChatMessage::query()->count());
         $this->assertNull($photo->fresh()->claimed_at);
+    }
+
+    #[Test]
+    public function an_image_sent_without_a_description_is_described_as_shared_by_its_member(): void
+    {
+        $this->member->forceFill(['name' => 'Amina Hassan'])->save();
+        $blank = $this->service->stage($this->member, $this->file(ChatSampleFiles::png(), 'scan.png'));
+        $missing = $this->service->stage($this->member, $this->file(ChatSampleFiles::png(), 'second.png'));
+
+        $message = $this->send($this->member, [['id' => $blank->uuid, 'alt' => '   '], ['id' => $missing->uuid]]);
+
+        $alts = $message->fresh()->attachments()->map(fn ($media) => $media->getCustomProperty(MediaProperties::ALT_TEXT))->all();
+        $this->assertSame(['Image shared by Amina Hassan', 'Image shared by Amina Hassan'], $alts);
+    }
+
+    #[Test]
+    public function the_alt_text_is_the_description_or_names_who_shared_the_image(): void
+    {
+        $this->member->forceFill(['name' => 'Yusuf Abdallah'])->save();
+
+        $this->assertSame('A soil profile', $this->service->altText('  A soil profile ', $this->member));
+        $this->assertSame('Image shared by Yusuf Abdallah', $this->service->altText('', $this->member));
+        $this->assertSame(ChatAttachments::ALT_MAX_LENGTH, mb_strlen($this->service->altText(str_repeat('a', 300), $this->member)));
+    }
+
+    #[Test]
+    public function a_finished_thumbnail_marks_its_message_changed_for_the_next_poll(): void
+    {
+        $photo = $this->service->stage($this->member, $this->file(ChatSampleFiles::png(), 'scan.png'));
+        $notes = $this->service->stage($this->member, $this->file(ChatSampleFiles::pdf(), 'notes.pdf'));
+        $message = $this->send($this->member, [['id' => $photo->uuid, 'alt' => 'A scan'], ['id' => $notes->uuid]]);
+        [$image, $document] = $message->fresh()->attachments()->all();
+        $before = $message->fresh()->updated_at;
+
+        $this->assertFalse($this->service->conversionCompleted($image, ChatAttachments::CONVERSION_MEDIUM));
+        $this->assertFalse($this->service->conversionCompleted($document, ChatAttachments::CONVERSION_THUMB));
+        $this->assertTrue($this->service->conversionCompleted($image, ChatAttachments::CONVERSION_THUMB));
+
+        $this->assertTrue($message->fresh()->updated_at->greaterThan($before));
+        $this->assertTrue($message->fresh()->updated_at->greaterThan($message->created_at));
+    }
+
+    #[Test]
+    public function a_thumbnail_made_while_the_file_is_still_waiting_marks_nothing(): void
+    {
+        $photo = $this->service->stage($this->member, $this->file(ChatSampleFiles::png(), 'scan.png'));
+
+        $this->assertFalse($this->service->conversionCompleted($photo->getFirstMedia(MediaCollections::CHAT_PENDING), ChatAttachments::CONVERSION_THUMB));
     }
 
     #[Test]

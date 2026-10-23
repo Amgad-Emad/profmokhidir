@@ -4,7 +4,9 @@
  | Page-wide behaviour, started once by initForms():
  |   validation    plain forms are checked on blur (fields the person has typed in) and on
  |                 submit, never while typing; a field already in error is re-checked as it
- |                 changes so the message can go away.
+ |                 changes so the message can go away. The browser's own "Please fill out
+ |                 this field" bubble never shows: forms carry novalidate and `invalid` is
+ |                 cancelled; the server validates every form again.
  |                 Messages come from the data-msg-* attributes the server printed
  |                 (App\Services\FormFieldService::browserMessages), each naming the fix.
  |   corrected     a field that was invalid and is now valid gets data-corrected (the "valid"
@@ -216,12 +218,15 @@ function trackValidation() {
         true,
     );
 
-    // The browser's own bubbles are replaced by the messages under the fields.
+    // The browser's own bubbles are replaced by the messages under the fields. Every form is
+    // printed with novalidate; a form added later (an Alpine template, a Livewire morph) is
+    // quietened here, and an `invalid` event never reaches the browser's bubble.
     const quiet = () => document.querySelectorAll('form').forEach((form) => {
-        if (!isLivewireForm(form) && form.querySelector(FIELD)) form.noValidate = true;
+        form.noValidate = true;
     });
     quiet();
     document.addEventListener('livewire:navigated', quiet);
+    document.addEventListener('invalid', (event) => event.preventDefault(), true);
 }
 
 function trackCorrections() {

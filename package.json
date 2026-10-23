@@ -11,6 +11,7 @@
         "qa:admin": "node tests/qa/admin-walkthrough.mjs",
         "katex": "node scripts/copy-katex.mjs",
         "qa:chat": "node tests/qa/chat-fixes.mjs",
+        "qa:chat-width": "node tests/qa/chat-width.mjs",
         "qa:focus": "node tests/qa/focus.mjs"
     },
     "devDependencies": {

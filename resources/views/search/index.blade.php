@@ -5,7 +5,7 @@
         <div class="mx-auto max-w-3xl">
             <x-section-header :label="Search::LABEL" :title="Search::TITLE" level="1" id="section-title" />
 
-            <form method="get" action="{{ route(Search::ROUTE) }}" role="search" class="search-form mt-12" data-rise>
+            <form novalidate method="get" action="{{ route(Search::ROUTE) }}" role="search" class="search-form mt-12" data-rise>
                 <div class="search-form__row form-style-underline mt-3">
                     <x-form.input type="search" :name="Search::PARAM" id="search-query" :label="Search::LABEL" hide-label :optional="false" size="display" class="search-form__field"
                                   :value="$results['query']" :placeholder="Search::PLACEHOLDER" autocomplete="off" spellcheck="false" :maxlength="Search::MAX_LENGTH" autofocus />

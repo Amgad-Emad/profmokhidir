@@ -56,7 +56,7 @@
                         </div>
                     </div>
                     <div class="space-y-8">
-                        <form wire:submit="saveImage({{ $id }})" class="space-y-4">
+                        <form novalidate wire:submit="saveImage({{ $id }})" class="space-y-4">
                             <x-admin.image-details :prefix="'images.'.$id" :required="$detailsRequired" />
                             <div class="flex items-center gap-4">
                                 <x-button type="submit" variant="outline" class="px-5 py-2 text-sm">Save details</x-button>
@@ -64,7 +64,7 @@
                             </div>
                         </form>
                         @if ($archive !== null && array_key_exists($id, $archive))
-                            <form wire:submit="savePhotoArchive({{ $id }})" class="space-y-4 border-t border-rule pt-6" data-photo-archive>
+                            <form novalidate wire:submit="savePhotoArchive({{ $id }})" class="space-y-4 border-t border-rule pt-6" data-photo-archive>
                                 <p class="t-label text-accent-text">In the archive</p>
                                 <div class="grid gap-5 sm:grid-cols-2">
                                     <x-form.select :model="'archive.'.$id.'.'.\App\Constants\Archive::DECADE" label="Decade" :options="$decades" placeholder="From the year" hint="Through the decades files the photo under its year unless you choose another decade." />

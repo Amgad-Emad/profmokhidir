@@ -21,7 +21,7 @@ class ThemeSwitchComponentTest extends TestCase
     {
         $html = Blade::render('<x-theme.switch id="t" />');
 
-        $this->assertStringContainsString('<form method="POST" action="'.route(ThemeSettings::ROUTE).'" class="theme-toggle" data-theme-toggle data-theme-label="Switch to %s theme" data-theme-showing="light">', $html);
+        $this->assertStringContainsString('<form novalidate method="POST" action="'.route(ThemeSettings::ROUTE).'" class="theme-toggle" data-theme-toggle data-theme-label="Switch to %s theme" data-theme-showing="light">', $html);
         $this->assertStringContainsString('name="_method" value="PATCH"', $html);
         $this->assertStringContainsString('name="_token"', $html);
         $this->assertStringContainsString('<button type="submit" id="t" name="theme" value="dark" class="theme-toggle__button" aria-label="Switch to dark theme" aria-pressed="false" data-theme-toggle-button>', $html);

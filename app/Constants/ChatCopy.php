@@ -187,11 +187,12 @@ final class ChatCopy
 
     public const string DROP_HINT = 'Drop files to attach them';
 
-    public const string ATTACH_DESCRIPTION_LABEL = 'Describe the image';
+    public const string ATTACH_DESCRIPTION_LABEL = 'Describe the image (optional)';
 
-    public const string ATTACH_DESCRIPTION_PLACEHOLDER = 'A short description, for members who cannot see it';
+    public const string ATTACH_DESCRIPTION_PLACEHOLDER = 'Add a description (optional)';
 
-    public const string ATTACH_DESCRIPTION_REQUIRED = 'Describe each image in a few words before sending.';
+    /** The alt text of an image sent without a description (ChatAttachmentService::claim). */
+    public const string ATTACH_DEFAULT_ALT = 'Image shared by :name';
 
     public const string ATTACH_REMOVE = 'Remove :name';
 
@@ -244,7 +245,7 @@ final class ChatCopy
             'attachUnsupported' => self::ATTACH_UNSUPPORTED,
             'attachFailed' => self::ATTACH_FAILED,
             'attachWait' => self::ATTACH_WAIT,
-            'attachDescribe' => self::ATTACH_DESCRIPTION_REQUIRED,
+            'attachDefaultAlt' => self::ATTACH_DEFAULT_ALT,
             'attachRemove' => self::ATTACH_REMOVE,
             'memberMenu' => self::MEMBER_MENU,
             'suspendConfirm' => self::MEMBER_SUSPEND_CONFIRM,

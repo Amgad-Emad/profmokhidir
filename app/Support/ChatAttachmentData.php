@@ -16,8 +16,11 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 /**
  * The files of a chat message as the browser receives them: images (with
  * their description as alt text, a thumbnail and a medium size for the
- * lightbox) and documents (type, name, size). Every link is a signed,
- * expiring route that checks the viewer's chat access again.
+ * lightbox) and documents (type, name, size). Until the queued WebP
+ * thumbnail exists, `thumb` links to the original (shown scaled down) and
+ * `thumb_ready` is false; the message is marked changed when it is made, so
+ * the next poll swaps it in. Every link is a signed, expiring route that
+ * checks the viewer's chat access again.
  */
 final class ChatAttachmentData
 {
@@ -43,6 +46,7 @@ final class ChatAttachmentData
     {
         $extension = strtolower(pathinfo($media->file_name, PATHINFO_EXTENSION));
         $image = str_starts_with((string) $media->mime_type, 'image/');
+        $thumbReady = $image && $media->hasGeneratedConversion(ChatAttachments::CONVERSION_THUMB);
 
         return [
             'id' => (int) $media->getKey(),
@@ -56,7 +60,8 @@ final class ChatAttachmentData
             'width' => $image ? $media->getCustomProperty(MediaProperties::WIDTH) : null,
             'height' => $image ? $media->getCustomProperty(MediaProperties::HEIGHT) : null,
             'url' => self::url($media, ChatAttachmentService::VARIANT_ORIGINAL),
-            'thumb' => $image ? self::url($media, ChatAttachmentService::VARIANT_THUMB) : null,
+            'thumb' => $image ? self::url($media, $thumbReady ? ChatAttachmentService::VARIANT_THUMB : ChatAttachmentService::VARIANT_ORIGINAL) : null,
+            'thumb_ready' => $thumbReady,
             'medium' => $image ? self::url($media, ChatAttachmentService::VARIANT_MEDIUM) : null,
         ];
     }

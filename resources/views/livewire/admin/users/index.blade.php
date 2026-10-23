@@ -16,7 +16,7 @@
 
     <p class="text-sm font-light text-ink-muted" data-active-admins>Active administrators: <span class="font-mono text-ink">{{ $activeAdmins }}</span>. The last one can never be demoted or deactivated.</p>
 
-    <form class="mt-6 grid gap-4 md:grid-cols-4" wire:submit.prevent role="search" aria-label="Search users">
+    <form novalidate class="mt-6 grid gap-4 md:grid-cols-4" wire:submit.prevent role="search" aria-label="Search users">
         <x-form.input type="search" model="search" id="search" live label="Search" :optional="false" loading="search" class="md:col-span-2" placeholder="Name or email" autocomplete="off" />
         <x-form.select model="role" id="filter-role" live label="Role" :optional="false" placeholder="All roles" :options="$roleOptions" data-filter="role" />
         <x-form.select model="status" id="filter-status" live label="Community status" :optional="false" placeholder="Any" :options="$statusOptions" data-filter="status" />

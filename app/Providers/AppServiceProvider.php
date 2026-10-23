@@ -12,6 +12,7 @@ use App\Services\TypesetterService;
 use App\Support\PreviewContext;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\QueryException;
+use Illuminate\Foundation\DevCommands;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
@@ -30,6 +31,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::define('access-admin', fn (User $user): bool => $user->canAccessAdmin());
+
+        $this->registerDevCommands();
 
         // @typeset($text): database text with curly quotes, en dashes, non-breaking spaces and small caps, escaped.
         Blade::directive('typeset', fn (string $expression): string => '<?php echo app(\\'.TypesetterService::class.'::class)->inline('.$expression.'); ?>');
@@ -63,5 +66,22 @@ class AppServiceProvider extends ServiceProvider
                 // Not migrated yet.
             }
         });
+    }
+
+    /**
+     * What `composer run dev` (php artisan dev) starts. Valet serves the site, so there is no
+     * `artisan serve`; the queue worker is what makes chat and media thumbnails and sends mail
+     * (QUEUE_CONNECTION=database), next to the log tail and Vite.
+     */
+    private function registerDevCommands(): void
+    {
+        DevCommands::withoutDefaultCommands();
+        DevCommands::artisan('queue:listen --tries=1 --timeout=0', 'queue');
+
+        if (function_exists('pcntl_fork')) {
+            DevCommands::artisan('pail --timeout=0', 'logs');
+        }
+
+        DevCommands::node('dev', 'vite');
     }
 }

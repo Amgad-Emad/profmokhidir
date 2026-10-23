@@ -73,7 +73,7 @@ class ErrorPagesTest extends TestCase
         $this->assertStringContainsString('<a href="'.route('home').'" class="btn-pill-filled mt-4">'.ErrorPages::HOME_LABEL.'</a>', $html);
 
         // The search box is a plain GET form to /search: it works on a page that loads no script.
-        $this->assertMatchesRegularExpression('/<form method="get" action="'.preg_quote(route(Search::ROUTE), '/').'" role="search"/', $html);
+        $this->assertMatchesRegularExpression('/<form novalidate method="get" action="'.preg_quote(route(Search::ROUTE), '/').'" role="search"/', $html);
         $this->assertStringContainsString('<label id="error-search-label" for="error-search" class="t-label form-label">'.ErrorPages::SEARCH_LABEL.'</label>', $html);
         $this->assertMatchesRegularExpression('/<input class="form-control__input" id="error-search" name="'.Search::PARAM.'"[^>]*type="search"/', $html);
 
