@@ -15,10 +15,12 @@ use Illuminate\Support\HtmlString;
 use Symfony\Component\HttpFoundation\Cookie;
 
 /**
- * The colour theme: which one applies to a request (the signed-in user's
- * choice, else the cookie, else System), how a change is kept (on the user
- * and in a cookie the inline script can read) and what the layouts print on
- * <html> and in the theme-color meta so the right scheme paints first.
+ * The colour theme, Light or Dark: which one a request has chosen (the
+ * signed-in user's choice, else the cookie, else none, when the device
+ * preference decides), how a change is kept (on the user and in a cookie the
+ * inline script can read), what the layouts print on <html> and in the
+ * theme-color meta so the right scheme paints first, and the state of the
+ * one-button toggle.
  */
 class ThemeService
 {
@@ -28,9 +30,10 @@ class ThemeService
     ) {}
 
     /**
-     * The theme in force for a request: the user's saved choice wins over the cookie.
+     * The theme chosen for a request: the user's saved choice wins over the cookie;
+     * null when nothing has been chosen (or the cookie holds the retired "system").
      */
-    public function current(Request $request): Theme
+    public function current(Request $request): ?Theme
     {
         $user = $request->user() ?? auth()->user();
 
@@ -38,7 +41,7 @@ class ThemeService
             return $user->theme;
         }
 
-        return Theme::tryFromValue($request->cookie(ThemeSettings::COOKIE)) ?? Theme::DEFAULT;
+        return Theme::tryFromValue($request->cookie(ThemeSettings::COOKIE));
     }
 
     /**
@@ -67,17 +70,12 @@ class ThemeService
     }
 
     /**
-     * Attributes for <html>: the stored preference, and data-theme when it forces a scheme.
+     * Attributes for <html>: data-theme once a theme has been chosen; nothing before, so
+     * prefers-color-scheme decides.
      */
-    public function htmlAttributes(Theme $theme): HtmlString
+    public function htmlAttributes(?Theme $theme): HtmlString
     {
-        $attributes = sprintf('%s="%s"', ThemeSettings::PREFERENCE_ATTRIBUTE, $theme->value);
-
-        if ($theme->isExplicit()) {
-            $attributes .= sprintf(' %s="%s"', ThemeSettings::ATTRIBUTE, $theme->value);
-        }
-
-        return new HtmlString($attributes);
+        return new HtmlString($theme === null ? '' : sprintf('%s="%s"', ThemeSettings::ATTRIBUTE, $theme->value));
     }
 
     /**
@@ -96,18 +94,22 @@ class ThemeService
     }
 
     /**
-     * The three choices for a control, in display order.
+     * The toggle as the server can print it. With no choice yet the server cannot see the
+     * device setting, so it assumes the light theme and resources/js/theme.js corrects the
+     * label, aria-pressed and the submitted value as soon as it starts.
      *
-     * @return list<array{value: string, label: string, description: string, icon: string, current: bool}>
+     * @return array{theme: string, next: string, label: string, pressed: string, chosen: bool}
      */
-    public function options(Theme $current): array
+    public function toggle(?Theme $current): array
     {
-        return array_map(static fn (Theme $theme): array => [
-            'value' => $theme->value,
-            'label' => $theme->label(),
-            'description' => $theme->description(),
-            'icon' => $theme->icon(),
-            'current' => $theme === $current,
-        ], Theme::cases());
+        $showing = $current ?? Theme::Light;
+
+        return [
+            'theme' => $showing->value,
+            'next' => $showing->opposite()->value,
+            'label' => $showing->switchLabel(),
+            'pressed' => $showing === Theme::Dark ? 'true' : 'false',
+            'chosen' => $current !== null,
+        ];
     }
 }

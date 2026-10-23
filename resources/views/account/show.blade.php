@@ -6,7 +6,6 @@
     $layout = $isStaff ? 'layouts.admin' : 'layouts.public';
     $status = session('status');
 @endphp
-@inject('themes', 'App\Services\ThemeService')
 <x-dynamic-component :component="$layout" title="Your account">
     <div @class(['mx-auto w-full max-w-3xl', 'px-4 py-16 sm:px-6' => ! $isStaff])>
         <header class="flex flex-col gap-2">
@@ -49,33 +48,14 @@
         </section>
 
         {{-- Appearance --}}
-        @php $themeOptions = $themes->options($themes->current(request())); @endphp
         <section id="appearance" class="mt-8 rounded-card border border-rule bg-surface-panel p-6 sm:p-8" aria-labelledby="appearance-heading" data-theme-section>
-            <h2 id="appearance-heading" class="font-display text-3xl font-light">{{ ThemeSettings::LABEL }}</h2>
-            <p class="mt-2 text-sm font-light text-ink-muted">{{ ThemeSettings::ACCOUNT_INTRO }}</p>
-
-            <form method="POST" action="{{ route(ThemeSettings::ROUTE) }}" class="mt-6" data-theme-form>
-                @csrf
-                @method('PATCH')
-                <fieldset>
-                    <legend class="sr-only">{{ ThemeSettings::LABEL }}</legend>
-                    <div class="grid gap-3 sm:grid-cols-3">
-                        @foreach ($themeOptions as $option)
-                            <label class="theme-option" data-theme-choice="{{ $option['value'] }}">
-                                <input type="radio" name="{{ ThemeSettings::FIELD }}" value="{{ $option['value'] }}" class="theme-option__input sr-only" @checked($option['current']) data-theme-radio>
-                                <span class="theme-option__body">
-                                    <x-icon :name="$option['icon']" class="theme-option__icon size-5" />
-                                    <span class="theme-option__label">{{ $option['label'] }}</span>
-                                    <span class="theme-option__description">{{ $option['description'] }}</span>
-                                </span>
-                            </label>
-                        @endforeach
-                    </div>
-                </fieldset>
-                <div class="mt-6">
-                    <x-button>Save appearance</x-button>
+            <div class="flex items-start justify-between gap-6">
+                <div>
+                    <h2 id="appearance-heading" class="font-display text-3xl font-light">{{ ThemeSettings::LABEL }}</h2>
+                    <p class="mt-2 max-w-xl text-sm font-light text-ink-muted">{{ ThemeSettings::ACCOUNT_INTRO }}</p>
                 </div>
-            </form>
+                <x-theme.switch id="theme-switch-account" class="shrink-0" />
+            </div>
         </section>
 
         {{-- Two-factor --}}

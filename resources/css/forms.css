@@ -9,17 +9,17 @@
  | own. Every state is defined here once, with tokens only (App\Constants\FormStates):
  |
  |   default   1px strong rule            hover     the rule turns to ink
- |   focus     the rule turns to the strong ink and thickens 1px → 2px, no outer box
- |   keyboard  as focus, plus a 2px ring offset 2px around the control (never the label)
+ |   focus     the field's own line (its foot) turns from 1px muted to 2px strong ink over
+ |             200ms and a faint ink tint settles behind the field; no outline, ring or box
  |   filled    the rule stays ink         invalid   danger tone and a message naming the fix
  |   valid     after a correction only    disabled  dotted rule, quiet ink
  |   read-only sunken surface             loading   a hairline drawing along the foot
  |
- | Pointer or keyboard: resources/js/forms.js sets <html data-modality="pointer|keyboard">.
- | Text inputs match :focus-visible even on a click, so the ring is withheld while the
- | modality is pointer. Without the script the ring always shows (the accessible default).
- | Nested editables (the editor's ProseMirror area, the tags and combobox inputs) never
- | draw an outline of their own: the frame carries the single ring.
+ | Text entry never draws a ring, by mouse or by keyboard: browsers match :focus-visible on
+ | text fields even after a click, so a keyboard-only ring would always show. The line and
+ | the tint are the focus indication (WCAG 2.4.7), the same in both themes. Nested editables
+ | (the editor's ProseMirror area, the tags and combobox inputs) draw nothing of their own.
+ | Buttons, checkboxes, radios and toggles keep the 2px ring on :focus-visible (app.css).
  */
 
 @layer components {
@@ -119,23 +119,26 @@
 
     /* ------------------------------------------------------------ the control frame */
     .form-control {
-        --form-rule: var(--rule-strong);
-        --form-rule-width: 0px;
+        --form-rule: var(--rule-strong); /* the frame's sides (box style) */
+        --form-line: var(--form-rule); /* its foot: the field's own line */
+        --form-line-extra: 0px; /* the second pixel of the focused line */
+        --form-surface: var(--surface-field);
         position: relative;
         display: flex;
         align-items: center;
         width: 100%;
         min-height: 3rem; /* FormControls::MIN_HEIGHT_PX */
         border: 1px solid var(--form-rule);
+        border-bottom-color: var(--form-line);
         border-radius: var(--radius-card);
-        background-color: var(--surface-field);
+        background-color: var(--form-surface);
         color: var(--ink);
-        /* The second pixel of the focused rule is an inset shadow, so nothing shifts. */
-        box-shadow: inset 0 0 0 var(--form-rule-width) var(--form-rule);
+        /* The second pixel of the focused line is an inset shadow along the foot, so nothing shifts. */
+        box-shadow: inset 0 calc(var(--form-line-extra) * -1) 0 var(--form-line);
         transition:
-            border-color 300ms var(--ease-rise),
-            box-shadow 300ms var(--ease-rise),
-            background-color 300ms var(--ease-rise);
+            border-color 200ms var(--ease-rise),
+            box-shadow 200ms var(--ease-rise),
+            background-color 200ms var(--ease-rise);
     }
 
     .form-control__input {
@@ -160,12 +163,13 @@
         opacity: 1;
     }
 
-    /* The frame carries the only focus indication: nothing inside it draws an outline. */
+    /* The frame's line carries the only focus indication: nothing inside it draws an outline or shadow. */
     .form-control__input:focus,
     .form-control__input:focus-visible,
     .form-control .ProseMirror:focus,
     .form-control .ProseMirror:focus-visible {
         outline: none;
+        box-shadow: none;
     }
 
     textarea.form-control__input {
@@ -231,24 +235,12 @@
         --form-rule: var(--ink);
     }
 
-    /* focus (any pointer): the strong ink, 2px */
+    /* focus (mouse, touch or keyboard alike): the line turns to the strong ink at 2px over a faint tint */
     .form-control:focus-within,
-    .form-control[data-demo-state^='focus'] {
-        --form-rule: var(--ink-strong);
-        --form-rule-width: 1px;
-    }
-
-    /* keyboard focus: the ring around the frame only */
-    .form-control:has(.form-control__input:focus-visible),
-    .form-control:has(.ProseMirror:focus-visible),
-    .form-control[data-demo-state='focus-keyboard'] {
-        outline: 2px solid var(--focus); /* FormControls::FOCUS_RING_PX */
-        outline-offset: 2px; /* FormControls::FOCUS_OFFSET_PX */
-    }
-
-    html[data-modality='pointer'] .form-control:has(.form-control__input:focus-visible),
-    html[data-modality='pointer'] .form-control:has(.ProseMirror:focus-visible) {
-        outline: none;
+    .form-control[data-demo-state='focus'] {
+        --form-line: var(--ink-strong);
+        --form-line-extra: 1px;
+        background-color: color-mix(in srgb, var(--ink) 5%, var(--form-surface));
     }
 
     /* invalid */
@@ -263,8 +255,7 @@
     }
 
     .form-control:has([aria-invalid='true']):focus-within {
-        --form-rule: var(--danger-tone);
-        --form-rule-width: 1px;
+        --form-line: var(--danger-tone);
     }
 
     /* valid, only once a field that was wrong has been put right (forms.js sets data-corrected) */
@@ -280,8 +271,8 @@
     .form-control:has(.form-control__input:disabled),
     .form-control[aria-disabled='true'] {
         --form-rule: var(--rule-strong);
+        --form-surface: transparent;
         border-style: dashed;
-        background-color: transparent;
         color: var(--ink-quiet);
         cursor: not-allowed;
     }
@@ -294,13 +285,8 @@
     /* read-only */
     .form-control:has(.form-control__input[readonly]) {
         --form-rule: var(--rule);
+        --form-surface: var(--surface-sunken);
         border-style: dotted;
-        background-color: var(--surface-sunken);
-    }
-
-    .form-control:has(.form-control__input[readonly]):focus-within {
-        --form-rule: var(--rule-strong);
-        --form-rule-width: 0px;
     }
 
     /* loading: muted ink and a hairline drawing along the foot (static under reduced motion) */
@@ -335,10 +321,9 @@
 
     /* ------------------------------------------------------------ underline style (sign-in, application, tributes) */
     .form-style-underline .form-control {
+        --form-surface: transparent;
         border-width: 0 0 1px;
         border-radius: 0;
-        background-color: transparent;
-        box-shadow: inset 0 calc(var(--form-rule-width) * -1) 0 var(--form-rule);
     }
 
     .form-style-underline .form-control__input {

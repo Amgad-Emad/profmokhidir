@@ -2,7 +2,7 @@
     The sign-in screens (Fortify) and the other signed-out pages: a private reading room.
     From 1024px the left half is evergreen with the brass glow, an archive portrait in the
     duotone (decorative, lazy), the epigraph in champagne and its place and year; the right
-    half is the page surface with the stacked lockup and the form in a 400px column, no card,
+    half is the page surface with the theme toggle at its top right, the stacked lockup and the form in a 400px column, no card,
     hierarchy from space and hairlines. Below that the evergreen panel is a short band with the mark
     and the epigraph, and the form follows. `screen` is an App\Constants\AuthScreens key,
     which supplies the title, intro, primary action and busy label (App\Services\AuthPageService);
@@ -76,6 +76,9 @@
         </aside>
 
         <main id="main" class="auth__main">
+            <div class="auth__tools">
+                <x-theme.switch id="theme-switch-auth" />
+            </div>
             <div class="auth__column form-style-underline" data-rise-group>
                 <div class="mb-8 hidden justify-center lg:flex">
                     <x-brand.lockup variant="stacked" tone="evergreen" :href="route('home')" />

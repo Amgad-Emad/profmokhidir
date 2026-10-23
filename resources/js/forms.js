@@ -2,8 +2,6 @@
  | The form-control system (resources/views/components/form, resources/css/forms.css).
  |
  | Page-wide behaviour, started once by initForms():
- |   modality      <html data-modality="pointer|keyboard">, so the focus ring shows for the
- |                 keyboard only (text inputs match :focus-visible even on a click)
  |   validation    plain forms are checked on blur (fields the person has typed in) and on
  |                 submit, never while typing; a field already in error is re-checked as it
  |                 changes so the message can go away.
@@ -175,18 +173,6 @@ export function focusFirstError(root) {
 
 /* ------------------------------------------------------------------ page-wide behaviour */
 
-function trackModality() {
-    const root = document.documentElement;
-    document.addEventListener('pointerdown', () => (root.dataset.modality = 'pointer'), true);
-    document.addEventListener(
-        'keydown',
-        (event) => {
-            if (!['Shift', 'Control', 'Alt', 'Meta', 'CapsLock'].includes(event.key)) root.dataset.modality = 'keyboard';
-        },
-        true,
-    );
-}
-
 function trackValidation() {
     document.addEventListener('focusout', (event) => {
         const el = event.target;
@@ -310,7 +296,6 @@ export function initForms() {
     if (window.__formsReady) return;
     window.__formsReady = true;
 
-    trackModality();
     trackCorrections();
 
     const start = () => {

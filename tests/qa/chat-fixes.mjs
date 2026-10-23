@@ -66,7 +66,7 @@ async function signIn(email, recovery = null) {
     await page.goto(`${BASE}/login`);
     await page.fill('input[name=email]', email);
     await page.fill('input[name=password]', PASSWORD);
-    await Promise.all([page.waitForNavigation(), page.click('button[type=submit]')]);
+    await Promise.all([page.waitForNavigation(), page.click('form:has(input[name=password]) button[type=submit]')]);
     if (page.url().includes('two-factor-challenge')) {
         await page.evaluate((code) => {
             document.querySelectorAll('input[name=code]').forEach((i) => { i.disabled = true; i.required = false; });

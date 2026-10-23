@@ -117,11 +117,14 @@ class EloquentUserRepositoryTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->assertSame(Theme::System, $user->theme);
+        $this->assertNull($user->theme, 'nothing chosen yet: the device decides');
 
         $updated = $this->repository->updateTheme($user, Theme::Dark);
 
         $this->assertSame(Theme::Dark, $updated->theme);
         $this->assertSame(Theme::Dark, $user->fresh()->theme);
+
+        $this->repository->updateTheme($user, Theme::Light);
+        $this->assertSame(Theme::Light, $user->fresh()->theme);
     }
 }

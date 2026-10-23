@@ -33,10 +33,15 @@ final class FormControls
 
     public const int TEXT_SIZE_PX = 18;
 
-    /** The focus ring: 2px, offset 2px, around the control only. */
+    /** The keyboard focus ring on buttons, links, checkboxes, radios and toggles (never on text entry): 2px, offset 2px. */
     public const int FOCUS_RING_PX = 2;
 
     public const int FOCUS_OFFSET_PX = 2;
+
+    /** Text entry shows focus by its own line instead: 1px muted at rest, 2px strong ink when focused, over this long. */
+    public const int FOCUS_LINE_PX = 2;
+
+    public const int FOCUS_LINE_MS = 200;
 
     /** Year inputs (and ContentRequest::yearRule). */
     public const int YEAR_MIN = 1900;

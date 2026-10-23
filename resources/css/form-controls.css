@@ -167,18 +167,9 @@
         transform: scale(1);
     }
 
-    .form-check__box:focus {
-        outline: none;
-        box-shadow: 0 0 0 1px var(--ink-strong);
-    }
-
     .form-check__box:focus-visible {
         outline: 2px solid var(--focus);
         outline-offset: 2px;
-    }
-
-    html[data-modality='pointer'] .form-check__box:focus-visible {
-        outline: none;
     }
 
     .form-check__box[aria-invalid='true'] {
@@ -258,10 +249,6 @@
     .form-segmented__option:has(:focus-visible) {
         outline: 2px solid var(--focus);
         outline-offset: 2px;
-    }
-
-    html[data-modality='pointer'] .form-segmented__option:has(:focus-visible) {
-        outline: none;
     }
 
     .form-segmented__input {
@@ -356,18 +343,9 @@
         border-color: var(--ink);
     }
 
-    .form-toggle__input:focus {
-        outline: none;
-        box-shadow: 0 0 0 1px var(--ink-strong);
-    }
-
     .form-toggle__input:focus-visible {
         outline: 2px solid var(--focus);
         outline-offset: 2px;
-    }
-
-    html[data-modality='pointer'] .form-toggle__input:focus-visible {
-        outline: none;
     }
 
     .form-toggle__input:disabled {

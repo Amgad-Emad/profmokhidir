@@ -20,6 +20,8 @@ class FormControlsTest extends TestCase
         $this->assertGreaterThanOrEqual(16, FormControls::TEXT_SIZE_PX);
         $this->assertSame(2, FormControls::FOCUS_RING_PX);
         $this->assertSame(2, FormControls::FOCUS_OFFSET_PX);
+        $this->assertSame(2, FormControls::FOCUS_LINE_PX);
+        $this->assertSame(200, FormControls::FOCUS_LINE_MS);
     }
 
     #[Test]
@@ -81,7 +83,7 @@ class FormControlsTest extends TestCase
     #[Test]
     public function every_state_is_listed_with_its_look_and_hook(): void
     {
-        $this->assertSame(['default', 'hover', 'focus', 'focus-keyboard', 'filled', 'invalid', 'valid', 'disabled', 'readonly', 'loading'], FormStates::keys());
+        $this->assertSame(['default', 'hover', 'focus', 'filled', 'invalid', 'valid', 'disabled', 'readonly', 'loading'], FormStates::keys());
 
         foreach (FormStates::all() as $state) {
             $this->assertNotSame('', $state['label']);

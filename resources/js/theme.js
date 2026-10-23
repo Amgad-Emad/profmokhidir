@@ -1,42 +1,45 @@
 /*
- | The colour theme on the client: applies a choice (System, Light or Dark) to
- | <html> with a soft 300ms cross-fade (instant under reduced motion), keeps the
- | theme-color metas in step, mirrors the choice to localStorage and the cookie
- | and saves it on the account through the theme route. Drives every
- | [data-theme-switch] control (a menu of three radio items) and follows changes
- | made in another tab. The inline script in <x-theme.head> handles the first
- | paint; this module only deals with changes.
+ | The colour theme on the client: Light or Dark. Until the visitor chooses, <html>
+ | carries no data-theme and prefers-color-scheme decides; one click (or Enter or
+ | Space) on any [data-theme-toggle] switches to the other theme at once with a soft
+ | 300ms cross-fade (instant under reduced motion), keeps the theme-color metas in
+ | step, mirrors the choice to localStorage and the cookie and saves it on the
+ | account through the theme route. Follows changes made in another tab. The inline
+ | script in <x-theme.head> handles the first paint, including a device that still
+ | remembers the retired "system" value (data-theme-resolved, saved here).
  */
 
 const STORAGE_KEY = 'theme';
 const COOKIE = 'theme';
 const COOKIE_MAX_AGE = 525600 * 60;
 const ATTRIBUTE = 'data-theme';
-const PREFERENCE = 'data-theme-preference';
+const RESOLVED = 'data-theme-resolved';
 const TRANSITION = 'data-theme-transition';
 const TRANSITION_MS = 300;
-const SYSTEM = 'system';
-const VALID = ['system', 'light', 'dark'];
+const VALID = ['light', 'dark'];
 const ENDPOINT = '/theme';
+const LABEL = 'Switch to %s theme';
 
 const html = document.documentElement;
 const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 let transitionTimer = null;
 
-export function preference() {
-    const value = html.getAttribute(PREFERENCE);
-
-    return VALID.includes(value) ? value : SYSTEM;
+/* True once the visitor (or their account) has chosen a theme. */
+export function chosen() {
+    return VALID.includes(html.getAttribute(ATTRIBUTE));
 }
 
-export function resolved(value = preference()) {
-    return value === SYSTEM ? (darkQuery.matches ? 'dark' : 'light') : value;
+/* The theme showing now: the choice, else what the device prefers. */
+export function current() {
+    return chosen() ? html.getAttribute(ATTRIBUTE) : darkQuery.matches ? 'dark' : 'light';
 }
 
-function updateMetas(value) {
+const opposite = (value) => (value === 'dark' ? 'light' : 'dark');
+
+function updateMetas() {
     for (const meta of document.querySelectorAll('meta[name="theme-color"]')) {
-        const scheme = value === SYSTEM ? (meta.media.includes('dark') ? 'dark' : 'light') : value;
+        const scheme = chosen() ? current() : meta.media.includes('dark') ? 'dark' : 'light';
         const colour = meta.dataset[scheme];
         if (colour) meta.setAttribute('content', colour);
     }
@@ -65,112 +68,62 @@ function remember(value, endpoint) {
     }).catch(() => { /* the cookie and localStorage already carry the choice */ });
 }
 
-/* Apply a preference to the page. `persist` false only mirrors a change made elsewhere. */
+/* The toggle names the theme it switches to and is pressed while the dark theme shows. */
+function syncToggle(toggle) {
+    const button = toggle.querySelector('[data-theme-toggle-button]');
+    if (!button) return;
+    const showing = current();
+    const next = opposite(showing);
+    button.setAttribute('aria-label', (toggle.dataset.themeLabel || LABEL).replace('%s', next));
+    button.setAttribute('aria-pressed', showing === 'dark' ? 'true' : 'false');
+    button.value = next;
+    toggle.dataset.themeShowing = showing;
+}
+
+function syncAll() {
+    updateMetas();
+    document.querySelectorAll('[data-theme-toggle]').forEach(syncToggle);
+}
+
+/* Apply a theme to the page. `persist` false only mirrors a change made elsewhere. */
 export function applyTheme(value, { persist = true, endpoint = null } = {}) {
     if (!VALID.includes(value)) return;
 
-    if (value !== preference() || (value === SYSTEM) !== !html.hasAttribute(ATTRIBUTE)) {
-        crossFade();
-    }
-
-    html.setAttribute(PREFERENCE, value);
-    if (value === SYSTEM) html.removeAttribute(ATTRIBUTE);
-    else html.setAttribute(ATTRIBUTE, value);
-    updateMetas(value);
-
-    for (const control of document.querySelectorAll('[data-theme-switch]')) syncControl(control, value);
-    for (const input of document.querySelectorAll('input[name="theme"][type="radio"]')) input.checked = input.value === value;
+    if (value !== current()) crossFade();
+    html.setAttribute(ATTRIBUTE, value);
+    syncAll();
 
     if (persist) remember(value, endpoint);
-    document.dispatchEvent(new CustomEvent('theme:change', { detail: { preference: value, resolved: resolved(value) } }));
+    document.dispatchEvent(new CustomEvent('theme:change', { detail: { theme: value } }));
 }
 
-function syncControl(control, value) {
-    for (const option of control.querySelectorAll('[data-theme-option]')) {
-        option.setAttribute('aria-checked', option.dataset.themeOption === value ? 'true' : 'false');
-    }
-}
-
-/* The menu: opens on click, arrow keys travel, Escape and focus leaving close it. */
-function mountControl(control) {
-    const button = control.querySelector('[data-theme-switch-button]');
-    const menu = control.querySelector('[data-theme-switch-menu]');
-    if (!button || !menu) return;
-    const options = [...menu.querySelectorAll('[data-theme-option]')];
-    const endpoint = control.dataset.themeEndpoint || null;
-
-    const isOpen = () => button.getAttribute('aria-expanded') === 'true';
-
-    const open = (focusIndex = null) => {
-        menu.hidden = false;
-        button.setAttribute('aria-expanded', 'true');
-        control.classList.add('is-open');
-        const index = focusIndex ?? Math.max(0, options.findIndex((o) => o.getAttribute('aria-checked') === 'true'));
-        options[index]?.focus();
-    };
-
-    const close = ({ refocus = true } = {}) => {
-        if (!isOpen()) return;
-        menu.hidden = true;
-        button.setAttribute('aria-expanded', 'false');
-        control.classList.remove('is-open');
-        if (refocus) button.focus();
-    };
-
-    button.addEventListener('click', () => (isOpen() ? close() : open()));
-    button.addEventListener('keydown', (event) => {
-        if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-            event.preventDefault();
-            open(event.key === 'ArrowUp' ? options.length - 1 : 0);
-        }
+/* The toggle is a one-button form (it works without script): the script switches in place instead. */
+function mountToggle(toggle) {
+    syncToggle(toggle);
+    toggle.addEventListener('submit', (event) => {
+        event.preventDefault();
+        applyTheme(opposite(current()), { endpoint: toggle.getAttribute('action') || null });
     });
-
-    options.forEach((option, index) => {
-        option.addEventListener('click', () => {
-            applyTheme(option.dataset.themeOption, { endpoint });
-            close();
-        });
-        option.addEventListener('keydown', (event) => {
-            const keys = { ArrowDown: index + 1, ArrowUp: index - 1, Home: 0, End: options.length - 1 };
-            if (event.key in keys) {
-                event.preventDefault();
-                options[(keys[event.key] + options.length) % options.length].focus();
-            } else if (event.key === 'Escape' || event.key === 'Tab') {
-                if (event.key === 'Escape') event.preventDefault();
-                close({ refocus: event.key === 'Escape' });
-            }
-        });
-    });
-
-    document.addEventListener('pointerdown', (event) => {
-        if (isOpen() && !control.contains(event.target)) close({ refocus: false });
-    });
-    control.addEventListener('focusout', (event) => {
-        if (isOpen() && event.relatedTarget && !control.contains(event.relatedTarget)) close({ refocus: false });
-    });
-}
-
-function mountForms() {
-    for (const input of document.querySelectorAll('input[name="theme"][type="radio"][data-theme-radio]')) {
-        input.addEventListener('change', () => {
-            if (input.checked) applyTheme(input.value, { endpoint: input.form?.getAttribute('action') || null });
-        });
-    }
 }
 
 function mount() {
-    document.querySelectorAll('[data-theme-switch]').forEach(mountControl);
-    mountForms();
-    updateMetas(preference());
+    document.querySelectorAll('[data-theme-toggle]').forEach(mountToggle);
+    updateMetas();
+
+    // A device that still remembered "system": the head script pinned the theme it resolves to; keep it on the account too.
+    if (html.hasAttribute(RESOLVED)) {
+        html.removeAttribute(RESOLVED);
+        remember(current(), document.querySelector('[data-theme-toggle]')?.getAttribute('action') || null);
+    }
 
     darkQuery.addEventListener('change', () => {
-        if (preference() === SYSTEM) {
-            document.dispatchEvent(new CustomEvent('theme:change', { detail: { preference: SYSTEM, resolved: resolved() } }));
-        }
+        if (chosen()) return;
+        syncAll();
+        document.dispatchEvent(new CustomEvent('theme:change', { detail: { theme: current() } }));
     });
 
     window.addEventListener('storage', (event) => {
-        if (event.key === STORAGE_KEY && VALID.includes(event.newValue) && event.newValue !== preference()) {
+        if (event.key === STORAGE_KEY && VALID.includes(event.newValue) && event.newValue !== html.getAttribute(ATTRIBUTE)) {
             applyTheme(event.newValue, { persist: false });
         }
     });

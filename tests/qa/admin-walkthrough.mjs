@@ -93,7 +93,7 @@ async function signIn(context) {
     await page.goto(`${BASE}/login`);
     await page.fill('input[name="email"]', EMAIL);
     await page.fill('input[name="password"]', PASSWORD);
-    await Promise.all([page.waitForURL((url) => !url.pathname.startsWith('/login')), page.click('button[type="submit"]')]);
+    await Promise.all([page.waitForURL((url) => !url.pathname.startsWith('/login')), page.click('form:has(input[name="password"]) button[type="submit"]')]);
     step('sign in lands on the dashboard', new URL(page.url()).pathname === '/admin', page.url());
     return page;
 }

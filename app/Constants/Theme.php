@@ -5,18 +5,22 @@ declare(strict_types=1);
 namespace App\Constants;
 
 /**
- * The colour theme a visitor has chosen. System follows prefers-color-scheme;
- * Light and Dark are forced through data-theme on <html>. Stored on the user
- * (users.theme), in a cookie for guests and mirrored in localStorage
- * (App\Constants\ThemeSettings).
+ * The colour theme: Light or Dark, nothing else. Before a visitor chooses,
+ * prefers-color-scheme decides (no value is stored); once they click the
+ * toggle, the choice is kept on the account (users.theme), in a cookie and in
+ * localStorage (App\Constants\ThemeSettings) and forced through data-theme.
  */
 enum Theme: string
 {
-    case System = 'system';
     case Light = 'light';
     case Dark = 'dark';
 
-    public const self DEFAULT = self::System;
+    /**
+     * Read only by the 2026_10_22 migration that added users.theme (migrations that
+     * have run are never edited). Since 2026_10_23 the column is NULL until the
+     * person chooses, so nothing else should use this.
+     */
+    public const self DEFAULT = self::Light;
 
     /**
      * @return list<string>
@@ -31,37 +35,35 @@ enum Theme: string
         return is_string($value) ? self::tryFrom($value) : null;
     }
 
-    /** Light or Dark: the page is forced to one scheme regardless of the system. */
-    public function isExplicit(): bool
+    /** The theme one click of the toggle switches to. */
+    public function opposite(): self
     {
-        return $this !== self::System;
+        return $this === self::Dark ? self::Light : self::Dark;
+    }
+
+    /** The toggle's accessible name while this theme is showing ("Switch to dark theme"). */
+    public function switchLabel(): string
+    {
+        return sprintf(ThemeSettings::SWITCH_LABEL, strtolower($this->opposite()->label()));
     }
 
     public function label(): string
     {
         return match ($this) {
-            self::System => 'System',
             self::Light => 'Light',
             self::Dark => 'Dark',
         };
     }
 
-    public function description(): string
-    {
-        return match ($this) {
-            self::System => 'Follow the device setting',
-            self::Light => 'Ivory page, evergreen ink',
-            self::Dark => 'Evergreen page, champagne ink',
-        };
-    }
-
-    /** Name of the inline icon in the theme control (see the x-icon component). */
+    /**
+     * The icon the toggle shows while this theme is showing: the sun in the dark theme
+     * (click for daylight), the moon in the light theme (see the x-icon component).
+     */
     public function icon(): string
     {
         return match ($this) {
-            self::System => 'theme-system',
-            self::Light => 'theme-light',
-            self::Dark => 'theme-dark',
+            self::Light => 'theme-dark',
+            self::Dark => 'theme-light',
         };
     }
 }

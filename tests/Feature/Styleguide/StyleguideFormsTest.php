@@ -27,7 +27,9 @@ class StyleguideFormsTest extends TestCase
         $this->assertStringContainsString('<a href="#forms" class="btn-pill-outline">Forms</a>', $html);
         $this->assertStringContainsString('<section id="forms" class="py-20" aria-labelledby="forms-title" data-styleguide-forms>', $html);
         $this->assertStringContainsString(FormControls::MIN_HEIGHT_PX.'px or taller with '.FormControls::TEXT_SIZE_PX.'px text', $html);
-        $this->assertStringContainsString('ring offset '.FormControls::FOCUS_OFFSET_PX.'px around the control only, never over the label', $html);
+        $this->assertStringContainsString('line turns from 1px muted to '.FormControls::FOCUS_LINE_PX.'px strong ink over '.FormControls::FOCUS_LINE_MS.'ms', $html);
+        $this->assertStringContainsString('no outline, ring or box', $html);
+        $this->assertStringContainsString(FormControls::FOCUS_RING_PX.'px ring offset '.FormControls::FOCUS_OFFSET_PX.'px for the keyboard only, never over the label', $html);
     }
 
     #[Test]
@@ -44,7 +46,8 @@ class StyleguideFormsTest extends TestCase
         }
 
         $this->assertStringContainsString('class="form-specimen form-specimen--dark"', $html);
-        $this->assertStringContainsString('data-demo-state="focus-keyboard"', $html);
+        $this->assertStringContainsString('data-demo-state="focus"', $html);
+        $this->assertStringNotContainsString('focus-keyboard', $html);
         $this->assertStringContainsString('data-corrected="data-corrected"', $html);
         $this->assertStringContainsString(FormControls::yearMessage(), $html);
     }

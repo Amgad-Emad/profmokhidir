@@ -11,8 +11,8 @@
                 FormStates::LOADING => ['data-loading' => true, 'aria-busy' => 'true'],
                 default => [],
             };
-            $frame = in_array($state, [FormStates::HOVER, FormStates::FOCUS, FormStates::FOCUS_KEYBOARD], true) ? ['data-demo-state' => $state] : [];
-            $value = in_array($state, [FormStates::DEFAULT, FormStates::HOVER, FormStates::FOCUS, FormStates::FOCUS_KEYBOARD], true) ? null : '1984';
+            $frame = in_array($state, [FormStates::HOVER, FormStates::FOCUS], true) ? ['data-demo-state' => $state] : [];
+            $value = in_array($state, [FormStates::DEFAULT, FormStates::HOVER, FormStates::FOCUS], true) ? null : '1984';
         @endphp
         <x-form.year :name="$id" :id="$id" :label="$meta['label']" :hint="$meta['look']" :value="$value" :optional="false"
                      :error="$state === FormStates::INVALID ? \App\Constants\FormControls::yearMessage() : null"

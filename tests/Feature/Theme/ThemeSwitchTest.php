@@ -6,12 +6,13 @@ use App\Constants\AdminNavigation;
 use App\Constants\Theme;
 use App\Constants\ThemeSettings;
 use App\Models\User;
+use App\Services\CommunityPageService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 /**
- * The theme route and how the stored choice reaches <html> on every layout.
+ * The theme route and how the stored choice reaches <html> and the toggle on every layout.
  */
 class ThemeSwitchTest extends TestCase
 {
@@ -30,7 +31,7 @@ class ThemeSwitchTest extends TestCase
     }
 
     #[Test]
-    public function the_plain_form_redirects_back_with_the_cookie(): void
+    public function the_toggle_works_without_script_and_redirects_back_with_the_cookie(): void
     {
         $this->from(route('home'))
             ->patch(route(ThemeSettings::ROUTE), [ThemeSettings::FIELD => Theme::Light->value])
@@ -39,11 +40,13 @@ class ThemeSwitchTest extends TestCase
     }
 
     #[Test]
-    public function an_unknown_theme_is_rejected(): void
+    public function only_light_and_dark_are_accepted(): void
     {
-        $this->patchJson(route(ThemeSettings::ROUTE), [ThemeSettings::FIELD => 'sepia'])
-            ->assertUnprocessable()
-            ->assertJsonValidationErrors(ThemeSettings::FIELD);
+        foreach (['sepia', ThemeSettings::LEGACY_SYSTEM] as $value) {
+            $this->patchJson(route(ThemeSettings::ROUTE), [ThemeSettings::FIELD => $value])
+                ->assertUnprocessable()
+                ->assertJsonValidationErrors(ThemeSettings::FIELD);
+        }
 
         $this->patchJson(route(ThemeSettings::ROUTE), [])->assertUnprocessable();
     }
@@ -62,12 +65,12 @@ class ThemeSwitchTest extends TestCase
     }
 
     #[Test]
-    public function the_default_is_system_and_prints_no_forced_scheme(): void
+    public function before_any_choice_the_device_decides_and_no_scheme_is_forced(): void
     {
         $this->get(route('home'))
             ->assertOk()
-            ->assertSee('data-theme-preference="system"', false)
             ->assertDontSee('data-theme="', false)
+            ->assertSee('data-theme-toggle', false)
             ->assertSee('name="theme-color"', false)
             ->assertSee('media="(prefers-color-scheme: dark)"', false)
             ->assertSee('name="csrf-token"', false);
@@ -79,16 +82,19 @@ class ThemeSwitchTest extends TestCase
         $this->withUnencryptedCookie(ThemeSettings::COOKIE, 'dark')
             ->get(route('home'))
             ->assertOk()
-            ->assertSee('data-theme-preference="dark" data-theme="dark"', false);
+            ->assertSee('<html lang="en" data-theme="dark">', false)
+            ->assertSee('aria-label="Switch to light theme" aria-pressed="true"', false);
     }
 
     #[Test]
-    public function a_bad_cookie_falls_back_to_system(): void
+    public function a_bad_or_retired_cookie_forces_nothing(): void
     {
-        $this->withUnencryptedCookie(ThemeSettings::COOKIE, 'neon')
-            ->get(route('home'))
-            ->assertOk()
-            ->assertSee('data-theme-preference="system"', false);
+        foreach (['neon', ThemeSettings::LEGACY_SYSTEM] as $value) {
+            $this->withUnencryptedCookie(ThemeSettings::COOKIE, $value)
+                ->get(route('home'))
+                ->assertOk()
+                ->assertDontSee('data-theme="', false);
+        }
     }
 
     #[Test]
@@ -100,15 +106,42 @@ class ThemeSwitchTest extends TestCase
             ->withUnencryptedCookie(ThemeSettings::COOKIE, 'light')
             ->get(route(AdminNavigation::DASHBOARD_ROUTE))
             ->assertOk()
-            ->assertSee('data-theme-preference="dark" data-theme="dark"', false)
-            ->assertSee('data-theme-switch', false);
+            ->assertSee('data-theme="dark"', false)
+            ->assertSee('id="theme-switch-admin" name="theme" value="light"', false);
+    }
+
+    #[Test]
+    public function the_account_page_offers_the_same_toggle_instead_of_three_choices(): void
+    {
+        $editor = User::factory()->editor()->darkTheme()->create();
 
         $this->actingAs($editor)
             ->get(route(AdminNavigation::ACCOUNT_ROUTE))
             ->assertOk()
             ->assertSee('data-theme-section', false)
-            ->assertSee('value="dark" class="theme-option__input sr-only" checked', false)
-            ->assertSee(route(ThemeSettings::ROUTE));
+            ->assertSee(ThemeSettings::ACCOUNT_INTRO)
+            ->assertSee('id="theme-switch-account" name="theme" value="light" class="theme-toggle__button" aria-label="Switch to light theme" aria-pressed="true"', false)
+            ->assertDontSee('theme-option', false)
+            ->assertDontSee('Save appearance')
+            ->assertDontSee('value="system"', false);
+    }
+
+    #[Test]
+    public function the_toggle_is_in_the_public_header_the_chat_header_the_sign_in_pages_and_the_admin_bar(): void
+    {
+        $this->get(route('home'))->assertOk()->assertSee('id="theme-switch-masthead"', false);
+        $this->get(route('login'))->assertOk()->assertSee('id="theme-switch-auth"', false);
+        $this->get(route('password.request'))->assertOk()->assertSee('id="theme-switch-auth"', false);
+
+        $this->actingAs(User::factory()->editor()->create())
+            ->get(route(AdminNavigation::DASHBOARD_ROUTE))
+            ->assertOk()
+            ->assertSee('id="theme-switch-admin"', false);
+
+        $this->actingAs(User::factory()->member()->create())
+            ->get(route(CommunityPageService::ROUTE_CHAT))
+            ->assertOk()
+            ->assertSee('id="theme-switch-chat"', false);
     }
 
     #[Test]

@@ -108,11 +108,29 @@
         color: var(--selection-ink);
     }
 
-    /* Visible focus: bronze on ivory, brass on evergreen, champagne on cypress (the --focus token follows the surface). */
+    /*
+     | Visible focus on buttons, links, checkboxes, radios and toggles: a thin ring for the keyboard only
+     | (:focus-visible), 2px offset 2px (App\Constants\FormControls::FOCUS_RING_PX / FOCUS_OFFSET_PX),
+     | bronze on ivory, brass on evergreen, champagne on cypress (the --focus token follows the surface).
+     */
     :focus-visible {
         outline: 2px solid var(--focus);
-        outline-offset: 3px;
+        outline-offset: 2px;
         border-radius: 2px;
+    }
+
+    /*
+     | Text entry never draws a ring or a box: browsers match :focus-visible on a text field even after
+     | a click. Its own line shows focus instead (forms.css), so the outline is withdrawn here for every
+     | kind of text control, inside the form system or not.
+     */
+    :is(
+        input:not([type='checkbox'], [type='radio'], [type='button'], [type='submit'], [type='reset'], [type='image'], [type='file'], [type='range'], [type='color']),
+        textarea,
+        select,
+        [contenteditable]:not([contenteditable='false'])
+    ):is(:focus, :focus-visible) {
+        outline: none;
     }
 
     /* Browser autofill keeps the field's own surface and ink in both themes. */

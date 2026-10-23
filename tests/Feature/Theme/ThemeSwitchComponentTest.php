@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Theme;
 
-use App\Constants\Theme;
 use App\Constants\ThemeSettings;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -11,44 +10,39 @@ use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 /**
- * The <x-theme.switch> control and the <x-theme.head> plumbing.
+ * The <x-theme.switch> toggle and the <x-theme.head> plumbing.
  */
 class ThemeSwitchComponentTest extends TestCase
 {
     use RefreshDatabase;
 
     #[Test]
-    public function the_control_is_a_menu_button_with_three_radio_items(): void
+    public function the_toggle_is_one_pressed_button_with_no_menu(): void
     {
         $html = Blade::render('<x-theme.switch id="t" />');
 
-        $this->assertStringContainsString('data-theme-switch', $html);
-        $this->assertStringContainsString('data-theme-endpoint="'.route(ThemeSettings::ROUTE).'"', $html);
-        $this->assertStringContainsString('aria-haspopup="menu" aria-expanded="false" aria-controls="t-menu"', $html);
-        $this->assertStringContainsString(ThemeSettings::CONTROL_LABEL, $html);
-        $this->assertStringContainsString('theme-switch__icon--light', $html);
-        $this->assertStringContainsString('theme-switch__icon--dark', $html);
-        $this->assertStringContainsString('role="menu" aria-labelledby="t"', $html);
-        $this->assertSame(3, substr_count($html, 'role="menuitemradio"'));
+        $this->assertStringContainsString('<form method="POST" action="'.route(ThemeSettings::ROUTE).'" class="theme-toggle" data-theme-toggle data-theme-label="Switch to %s theme" data-theme-showing="light">', $html);
+        $this->assertStringContainsString('name="_method" value="PATCH"', $html);
+        $this->assertStringContainsString('name="_token"', $html);
+        $this->assertStringContainsString('<button type="submit" id="t" name="theme" value="dark" class="theme-toggle__button" aria-label="Switch to dark theme" aria-pressed="false" data-theme-toggle-button>', $html);
+        $this->assertSame(1, substr_count($html, '<button'));
+        $this->assertStringContainsString('theme-toggle__icon--moon', $html);
+        $this->assertStringContainsString('theme-toggle__icon--sun', $html);
 
-        foreach (Theme::cases() as $theme) {
-            $this->assertStringContainsString('data-theme-option="'.$theme->value.'"', $html);
-            $this->assertStringContainsString($theme->label(), $html);
-            $this->assertStringContainsString($theme->description(), $html);
+        foreach (['role="menu"', 'menuitemradio', 'aria-haspopup', 'aria-expanded', 'System'] as $gone) {
+            $this->assertStringNotContainsString($gone, $html);
         }
-
-        $this->assertStringContainsString('aria-checked="true" tabindex="-1" data-theme-option="system"', $html);
     }
 
     #[Test]
-    public function the_current_choice_is_checked(): void
+    public function in_the_dark_theme_it_offers_the_light_one_and_is_pressed(): void
     {
         $this->actingAs(User::factory()->darkTheme()->create());
 
         $html = Blade::render('<x-theme.switch id="t" />');
 
-        $this->assertStringContainsString('aria-checked="true" tabindex="-1" data-theme-option="dark"', $html);
-        $this->assertStringContainsString('aria-checked="false" tabindex="-1" data-theme-option="system"', $html);
+        $this->assertStringContainsString('data-theme-showing="dark"', $html);
+        $this->assertStringContainsString('name="theme" value="light" class="theme-toggle__button" aria-label="Switch to light theme" aria-pressed="true"', $html);
     }
 
     #[Test]
@@ -62,6 +56,10 @@ class ThemeSwitchComponentTest extends TestCase
         $this->assertStringContainsString('<script data-theme-boot>', $html);
         $this->assertStringContainsString('localStorage', $html);
         $this->assertStringContainsString("'".ThemeSettings::STORAGE_KEY."'", $html);
+        // A device still holding the retired "system" pins the theme it resolves to and flags it for saving.
+        $this->assertStringContainsString("legacy = '".ThemeSettings::LEGACY_SYSTEM."'", $html);
+        $this->assertStringContainsString("'".ThemeSettings::LEGACY_ATTRIBUTE."'", $html);
+        $this->assertStringContainsString('prefers-color-scheme: dark', $html);
     }
 
     #[Test]
@@ -85,7 +83,10 @@ class ThemeSwitchComponentTest extends TestCase
         $js = file_get_contents(resource_path('js/theme.js'));
         $this->assertStringContainsString('prefers-reduced-motion', $js);
         $this->assertStringContainsString("'data-theme-transition'", $js);
+        $this->assertStringContainsString("'".ThemeSettings::LEGACY_ATTRIBUTE."'", $js);
+        $this->assertStringContainsString("'".ThemeSettings::SWITCH_LABEL."'", $js);
+        $this->assertStringContainsString('aria-pressed', $js);
         $this->assertStringContainsString('theme-color', $js);
-        $this->assertStringContainsString('menuitemradio', Blade::render('<x-theme.switch />'));
+        $this->assertStringNotContainsString('system', strtolower(preg_replace('/\/\*.*?\*\/|\/\/[^\n]*/s', '', $js)), 'no System option is left in the code');
     }
 }

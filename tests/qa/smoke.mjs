@@ -145,7 +145,7 @@ async function signIn(context, email, password) {
     await page.goto(`${BASE}/login`);
     await page.fill('input[name="email"]', email);
     await page.fill('input[name="password"]', password);
-    await Promise.all([page.waitForNavigation(), page.click('button[type="submit"]')]);
+    await Promise.all([page.waitForNavigation(), page.click('form:has(input[name="password"]) button[type="submit"]')]);
     const ok = !page.url().includes('/login') && !page.url().includes('two-factor-challenge');
     await page.close();
     return ok;

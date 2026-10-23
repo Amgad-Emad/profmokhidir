@@ -34,14 +34,19 @@ class ThemeServiceTest extends TestCase
     }
 
     #[Test]
-    public function current_prefers_the_account_then_the_cookie_then_system(): void
+    public function current_prefers_the_account_then_the_cookie_then_nothing(): void
     {
-        $this->assertSame(Theme::System, $this->service->current($this->request()));
+        $this->assertNull($this->service->current($this->request()));
         $this->assertSame(Theme::Dark, $this->service->current($this->request(cookie: 'dark')));
-        $this->assertSame(Theme::System, $this->service->current($this->request(cookie: 'nonsense')));
+        $this->assertNull($this->service->current($this->request(cookie: 'nonsense')));
+        $this->assertNull($this->service->current($this->request(cookie: ThemeSettings::LEGACY_SYSTEM)), 'the retired value is resolved on the client');
 
-        $user = User::factory()->theme(Theme::Light)->create();
+        $user = User::factory()->lightTheme()->create();
         $this->assertSame(Theme::Light, $this->service->current($this->request($user, 'dark')));
+
+        $undecided = User::factory()->create();
+        $this->assertSame(Theme::Dark, $this->service->current($this->request($undecided, 'dark')), 'an account without a choice follows the cookie');
+        $this->assertNull($this->service->current($this->request($undecided)));
     }
 
     #[Test]
@@ -62,11 +67,11 @@ class ThemeServiceTest extends TestCase
     }
 
     #[Test]
-    public function html_attributes_force_a_scheme_only_for_light_and_dark(): void
+    public function html_attributes_force_a_scheme_only_once_one_is_chosen(): void
     {
-        $this->assertSame('data-theme-preference="system"', (string) $this->service->htmlAttributes(Theme::System));
-        $this->assertSame('data-theme-preference="dark" data-theme="dark"', (string) $this->service->htmlAttributes(Theme::Dark));
-        $this->assertSame('data-theme-preference="light" data-theme="light"', (string) $this->service->htmlAttributes(Theme::Light));
+        $this->assertSame('', (string) $this->service->htmlAttributes(null));
+        $this->assertSame('data-theme="dark"', (string) $this->service->htmlAttributes(Theme::Dark));
+        $this->assertSame('data-theme="light"', (string) $this->service->htmlAttributes(Theme::Light));
     }
 
     #[Test]
@@ -77,13 +82,26 @@ class ThemeServiceTest extends TestCase
     }
 
     #[Test]
-    public function options_list_the_three_themes_in_order_with_the_current_one_marked(): void
+    public function the_toggle_names_the_other_theme_and_is_pressed_in_the_dark(): void
     {
-        $options = $this->service->options(Theme::Dark);
+        $this->assertSame(
+            ['theme' => 'dark', 'next' => 'light', 'label' => 'Switch to light theme', 'pressed' => 'true', 'chosen' => true],
+            $this->service->toggle(Theme::Dark),
+        );
+        $this->assertSame(
+            ['theme' => 'light', 'next' => 'dark', 'label' => 'Switch to dark theme', 'pressed' => 'false', 'chosen' => true],
+            $this->service->toggle(Theme::Light),
+        );
+    }
 
-        $this->assertSame(['system', 'light', 'dark'], array_column($options, 'value'));
-        $this->assertSame([false, false, true], array_column($options, 'current'));
-        $this->assertSame('theme-dark', $options[2]['icon']);
-        $this->assertSame(Theme::Dark->label(), $options[2]['label']);
+    #[Test]
+    public function with_nothing_chosen_the_toggle_assumes_light_until_the_script_reads_the_device(): void
+    {
+        $toggle = $this->service->toggle(null);
+
+        $this->assertSame('light', $toggle['theme']);
+        $this->assertSame('dark', $toggle['next']);
+        $this->assertSame('Switch to dark theme', $toggle['label']);
+        $this->assertFalse($toggle['chosen']);
     }
 }

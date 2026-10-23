@@ -20,11 +20,18 @@ final class ThemeSettings
     /** localStorage key mirroring the cookie, read before the first paint. */
     public const string STORAGE_KEY = 'theme';
 
-    /** <html data-theme="light|dark"> forces a scheme; absent, prefers-color-scheme decides. */
+    /** <html data-theme="light|dark"> forces a scheme; absent (nothing chosen yet), prefers-color-scheme decides. */
     public const string ATTRIBUTE = 'data-theme';
 
-    /** <html data-theme-preference="system|light|dark">: the stored choice, for the control. */
-    public const string PREFERENCE_ATTRIBUTE = 'data-theme-preference';
+    /**
+     * The retired third choice. A cookie or localStorage value still holding it is
+     * replaced on the client by the theme the device resolves to (and saved to the
+     * account); the users column was migrated to NULL.
+     */
+    public const string LEGACY_SYSTEM = 'system';
+
+    /** Set on <html> by the head script when it has just resolved a legacy value, so theme.js saves it. */
+    public const string LEGACY_ATTRIBUTE = 'data-theme-resolved';
 
     /** Set on <html> for the length of the colour transition when the theme changes. */
     public const string TRANSITION_ATTRIBUTE = 'data-theme-transition';
@@ -39,15 +46,16 @@ final class ThemeSettings
     /** Request field carrying the choice. */
     public const string FIELD = 'theme';
 
-    /** Column on users. */
+    /** Column on users (NULL until the person chooses). */
     public const string COLUMN = 'theme';
 
-    /** Shown by the control and the account page. */
+    /** The toggle's accessible name, with the theme it switches to ("Switch to dark theme"). */
+    public const string SWITCH_LABEL = 'Switch to %s theme';
+
+    /** Shown on the account page. */
     public const string LABEL = 'Appearance';
 
-    public const string CONTROL_LABEL = 'Change appearance';
-
-    public const string ACCOUNT_INTRO = 'Choose how the site is lit. System follows your device; the choice is kept on this account and on this device.';
+    public const string ACCOUNT_INTRO = 'Switch between the light and the dark theme. The site starts from your device setting; once you switch, the choice is kept on this account and on this device.';
 
     /** Name of the meta tag that tints the browser chrome. */
     public const string META_THEME_COLOR = 'theme-color';

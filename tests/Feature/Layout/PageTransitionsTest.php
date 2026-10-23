@@ -63,13 +63,14 @@ class PageTransitionsTest extends TestCase
     {
         $app = file_get_contents(resource_path('css/app.css'));
 
-        $this->assertMatchesRegularExpression('/:focus-visible \{\s*outline: 2px solid var\(--focus\);\s*outline-offset: 3px;/', $app);
+        $this->assertMatchesRegularExpression('/:focus-visible \{\s*outline: 2px solid var\(--focus\);\s*outline-offset: 2px;/', $app);
         // --focus is bronze on ivory, brass on the light-theme band and in the dark theme, champagne on cypress.
         $tokens = file_get_contents(resource_path('css/tokens.css'));
         $this->assertStringContainsString('--focus: light-dark(var(--brand-bronze), var(--brand-brass));', $tokens);
         $this->assertMatchesRegularExpression('/\.on-dark \{[^}]*--focus: light-dark\(var\(--brand-brass\), var\(--brand-champagne\)\);/s', $tokens);
-        // Form controls (the search fields among them) draw the ring around the frame, never inside it.
+        // Text fields (the search fields among them) draw no ring: their own line shows focus (tests/Unit/Design/FocusRulesTest).
         $forms = file_get_contents(resource_path('css/forms.css'));
-        $this->assertMatchesRegularExpression('/\.form-control:has\(\.form-control__input:focus-visible\),[^{]*\{\s*outline: 2px solid var\(--focus\);/s', $forms);
+        $this->assertStringNotContainsString('outline: 2px solid var(--focus)', $forms);
+        $this->assertStringContainsString('--form-line: var(--ink-strong);', $forms);
     }
 }

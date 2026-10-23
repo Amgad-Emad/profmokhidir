@@ -39,12 +39,12 @@ class UserFactory extends Factory
             'password' => static::$password ??= Hash::make('password'),
             'community_status' => CommunityStatus::None,
             'remember_token' => Str::random(10),
-            'theme' => Theme::DEFAULT,
+            'theme' => null,
         ];
     }
 
     /**
-     * A saved colour theme (System, Light or Dark).
+     * A saved colour theme (Light or Dark). Without one, theme is NULL and the device decides.
      */
     public function theme(Theme $theme): static
     {
@@ -54,6 +54,11 @@ class UserFactory extends Factory
     public function darkTheme(): static
     {
         return $this->theme(Theme::Dark);
+    }
+
+    public function lightTheme(): static
+    {
+        return $this->theme(Theme::Light);
     }
 
     /**

@@ -82,7 +82,7 @@ async function login(context, email, password, recovery) {
     await page.goto(`${BASE}/login`);
     await page.fill('input[name="email"]', email);
     await page.fill('input[name="password"]', password);
-    await Promise.all([page.waitForNavigation(), page.click('button[type="submit"]')]);
+    await Promise.all([page.waitForNavigation(), page.click('form:has(input[name="password"]) button[type="submit"]')]);
     if (page.url().includes('two-factor-challenge') && recovery) {
         await page.click('text=Use a recovery code').catch(() => {});
         await page.fill('input[name="recovery_code"]', recovery);
@@ -167,10 +167,13 @@ async function checkKeyboard(page, path, viewport) {
             const hit = document.elementFromPoint(Math.min(window.innerWidth - 1, Math.max(0, rect.left + rect.width / 2)), Math.min(window.innerHeight - 1, Math.max(0, rect.top + rect.height / 2)));
             const covered = hit !== null && hit !== el && !el.contains(hit) && !hit.contains(el);
             const style = getComputedStyle(el);
-            // Form controls draw their one ring on the frame around the input (resources/css/forms.css).
-            const frame = el.closest('.form-control, .form-drop, .form-segmented__option');
+            // Upload zones and segmented options draw their ring on the wrapper; text fields draw none:
+            // their frame's own line thickens to 2px (the inset shadow along the foot, resources/css/forms.css).
+            const frame = el.closest('.form-control, .palette__field, .form-drop, .form-segmented__option');
             const ringOf = (node) => { const s = getComputedStyle(node); return s.outlineStyle !== 'none' && parseFloat(s.outlineWidth) > 0; };
-            const outline = ringOf(el) || (frame !== null && ringOf(frame));
+            const lineOf = (node) => { const v = getComputedStyle(node).boxShadow; const m = v.match(/\)\s*(-?[\d.]+)px\s+(-?[\d.]+)px/); return v.includes('inset') && m !== null && parseFloat(m[2]) !== 0; };
+            frame?.getAnimations().forEach((animation) => animation.finish()); // read the line where its 200ms transition lands
+            const outline = ringOf(el) || (frame !== null && (ringOf(frame) || lineOf(frame)));
             const shadow = style.boxShadow !== 'none';
             const text = (el.getAttribute('aria-label') || el.textContent || el.getAttribute('name') || '').trim().replace(/\s+/g, ' ').slice(0, 40);
             const key = `${el.tagName}:${el.id || ''}:${text}:${Math.round(rect.top + window.scrollY)}`;

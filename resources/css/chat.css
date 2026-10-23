@@ -1305,6 +1305,10 @@
         font-size: 0.9375rem;
         font-weight: 300;
         color: var(--ink);
+        transition:
+            border-color 200ms var(--ease-rise),
+            box-shadow 200ms var(--ease-rise),
+            background-color 200ms var(--ease-rise);
     }
 
     .chat-tray__alt::placeholder {
@@ -1312,9 +1316,12 @@
         font-style: italic;
     }
 
-    .chat-tray__alt:focus-visible {
+    /* Focus, as on every text field (forms.css): the line turns to 2px strong ink over a faint tint, no ring. */
+    .chat-tray__alt:focus {
         outline: none;
-        border-bottom-color: var(--accent-line);
+        border-bottom-color: var(--ink-strong);
+        box-shadow: inset 0 -1px 0 var(--ink-strong);
+        background-color: color-mix(in srgb, var(--ink) 5%, transparent);
     }
 
     .chat-tray__alt[aria-invalid='true'] {
