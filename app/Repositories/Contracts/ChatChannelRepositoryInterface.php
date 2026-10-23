@@ -14,6 +14,19 @@ interface ChatChannelRepositoryInterface extends BaseRepositoryInterface
 {
     public function findBySlug(string $slug): ?ChatChannel;
 
+    /**
+     * The channel with this slug, created with the given attributes when it does
+     * not exist yet (safe when two requests race to create it).
+     *
+     * @param  array<string, mixed>  $attributes
+     */
+    public function findOrCreateBySlug(string $slug, array $attributes): ChatChannel;
+
+    /**
+     * The first channel ever created (lowest id).
+     */
+    public function oldest(): ?ChatChannel;
+
     public function slugExists(string $slug, ?int $ignoreId = null): bool;
 
     /**

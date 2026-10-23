@@ -92,6 +92,24 @@ final class SpatieMediaRepository implements MediaRepositoryInterface
         return $media->move($model, $collection, $disk);
     }
 
+    public function reassign(Media $media, HasMedia $model, string $collection, array $properties = []): Media
+    {
+        /** @var Model&HasMedia $model */
+        $media->forceFill([
+            'model_type' => $model->getMorphClass(),
+            'model_id' => $model->getKey(),
+            'collection_name' => $collection,
+        ]);
+
+        foreach ($properties as $key => $value) {
+            $media->setCustomProperty($key, $value);
+        }
+
+        $media->save();
+
+        return $media;
+    }
+
     public function countFor(HasMedia $model): int
     {
         return $model->media()->count();

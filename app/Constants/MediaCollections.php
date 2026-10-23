@@ -27,6 +27,12 @@ final class MediaCollections
     /** OtherItem: free-form images or files. */
     public const string MEDIA = 'media';
 
+    /** ChatUpload: a member's file waiting, in the temporary area, to be sent with a message. */
+    public const string CHAT_PENDING = 'chat_pending';
+
+    /** ChatMessage: the files sent with the message (private disk, signed downloads). */
+    public const string CHAT_ATTACHMENTS = 'chat_attachments';
+
     /**
      * Collections whose files are images and receive the responsive WebP conversions.
      *

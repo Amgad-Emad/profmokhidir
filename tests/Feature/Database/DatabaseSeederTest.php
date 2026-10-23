@@ -10,6 +10,7 @@ use App\Constants\SettingKeys;
 use App\Constants\TributeStatus;
 use App\Models\Album;
 use App\Models\Award;
+use App\Constants\ChatSettings;
 use App\Models\ChatChannel;
 use App\Models\ChatMessage;
 use App\Models\Commentary;
@@ -67,7 +68,7 @@ class DatabaseSeederTest extends TestCase
         $this->assertSame(6, Tribute::query()->withStatus(TributeStatus::Approved)->count());
         $this->assertSame(3, Tribute::query()->withStatus(TributeStatus::Pending)->count());
         $this->assertSame(1, Tribute::query()->published()->featured()->count());
-        $this->assertSame(1, ChatChannel::query()->where('slug', 'general')->count());
+        $this->assertSame(1, ChatChannel::query()->where('slug', ChatSettings::ROOM_SLUG)->count());
         $this->assertGreaterThanOrEqual(3, ChatMessage::query()->count());
         $this->assertSame(1, Revision::query()->where('revisionable_type', (new Profile)->getMorphClass())->count(), 'The profile starts with one version in its history.');
     }
@@ -148,7 +149,7 @@ class DatabaseSeederTest extends TestCase
 
     private function assertChat(): void
     {
-        $channel = ChatChannel::query()->where('slug', 'general')->firstOrFail();
+        $channel = ChatChannel::query()->where('slug', ChatSettings::ROOM_SLUG)->firstOrFail();
 
         $this->assertSame($channel->messages()->max('id'), $channel->last_message_id);
         $this->assertGreaterThanOrEqual(1, $channel->reads()->count());

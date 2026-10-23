@@ -44,6 +44,11 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(ChatSettings::SEND_LIMIT_PER_MINUTE)->by((string) ($request->user()?->getKey() ?? $request->ip()));
         });
 
+        // Chat upload requests per member per minute (each staged file also counts as a send).
+        RateLimiter::for(RateLimits::CHAT_UPLOAD, function (Request $request) {
+            return Limit::perMinute(RateLimits::CHAT_UPLOAD_PER_MINUTE)->by((string) ($request->user()?->getKey() ?? $request->ip()));
+        });
+
         // Livewire re-applies these route middleware on every component update,
         // so a suspended member is refused on the very next poll or send.
         Livewire::addPersistentMiddleware([EnsureCommunityMember::class, EnsureAccountIsActive::class]);

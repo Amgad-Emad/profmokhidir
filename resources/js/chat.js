@@ -6,11 +6,17 @@
  | state, tab visibility, and reconnecting with back-off after 419/401/network
  | failures. The server (ChatService) is the source of truth for ordering.
  | On top of that: runs of one author within five minutes, replies, permalinks,
- | pins, search, drafts per channel, keyboard travel between messages, and
- | KaTeX typesetting fetched only when a message carries maths.
+ | pins, search, a saved draft, keyboard travel between messages, the side panel
+ | (About, Pinned, Members), attachments (staged with a progress bar, then sent
+ | with the message under the same client uuid) and KaTeX typesetting fetched
+ | only when a message carries maths.
+ |
+ | The draft lives only in Alpine state: the shell is wire:ignore and the
+ | component never re-renders on a poll, so nothing replaces what is typed.
  */
 import './theme';
 import { initForms, registerForms } from './forms';
+import lightbox from './lightbox';
 
 initForms();
 
@@ -19,9 +25,10 @@ const STATE_FAILED = 'failed';
 const POLL_EXPRESSION = '$js.tick';
 const BOTTOM_THRESHOLD = 48;
 const TOP_THRESHOLD = 80;
-const WIDE_QUERY = '(min-width: 1280px)';
+const WIDE_QUERY = '(min-width: 1024px)';
 const PANEL_STORAGE_KEY = 'chat-panel';
-const COMPOSER_MAX_HEIGHT = 192;
+const STATE_UPLOADING = 'uploading';
+const STATE_READY = 'ready';
 /** How long a new message keeps its arrival class (the rise itself is 300ms in chat.css). */
 const ARRIVAL_MS = 600;
 
@@ -41,6 +48,38 @@ function uuid() {
         const r = (Math.random() * 16) | 0;
         return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
     });
+}
+
+function fileSize(bytes) {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(bytes < 10240 ? 1 : 0)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function extensionOf(name) {
+    const match = /\.([a-z0-9]+)$/i.exec(name || '');
+    return match ? match[1].toLowerCase() : '';
+}
+
+function csrfToken() {
+    return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+}
+
+/** A HEIC photo the browser itself can decode (Safari) becomes a JPEG before it leaves the device. */
+async function heicToJpeg(file) {
+    if (typeof createImageBitmap !== 'function') return file;
+    try {
+        const bitmap = await createImageBitmap(file);
+        const canvas = document.createElement('canvas');
+        canvas.width = bitmap.width;
+        canvas.height = bitmap.height;
+        canvas.getContext('2d').drawImage(bitmap, 0, 0);
+        const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.9));
+        if (!blob) return file;
+        return new File([blob], file.name.replace(/\.(heic|heif)$/i, '.jpg'), { type: 'image/jpeg' });
+    } catch {
+        return file; // the server converts it instead
+    }
 }
 
 function reducedMotion() {
@@ -119,6 +158,18 @@ function typesetMath(root, config) {
 
 document.addEventListener('alpine:init', () => {
     registerForms(Alpine);
+
+    // The site's lightbox (resources/js/lightbox.js), fed by the room instead of reading links from the page.
+    Alpine.data('chatLightbox', () => ({
+        ...lightbox(),
+        init() {},
+        openWith({ items, index, trigger }) {
+            if (!items || items.length === 0) return;
+            this.items = items;
+            this.show(index, trigger);
+        },
+    }));
+
     Alpine.data('chatRoom', (options) => ({
         channelId: options.channelId,
         channelSlug: options.channelSlug,
@@ -129,6 +180,13 @@ document.addEventListener('alpine:init', () => {
 
         messages: [],
         channels: [],
+        panelTab: 'about',
+        memberSearch: '',
+        memberMenu: null,
+        suspending: null,
+        attachments: [],
+        dragging: false,
+        dragDepth: 0,
         pins: [],
         members: [],
         online: [],
@@ -160,7 +218,6 @@ document.addEventListener('alpine:init', () => {
         reportError: '',
         reportSending: false,
 
-        mobileView: 'conversation',
         panelOpen: false,
         isWide: false,
         wideQuery: null,
@@ -269,6 +326,14 @@ document.addEventListener('alpine:init', () => {
             return this.config.bodyMaxLength - this.draft.length;
         },
 
+        /** Something to send, nothing still uploading, and within the length limit (checked again on the server). */
+        get canSend() {
+            if (this.sending || this.expired || this.accessLost) return false;
+            if (this.attachments.some((a) => a.state === STATE_UPLOADING)) return false;
+            const ready = this.attachments.filter((a) => a.state === STATE_READY).length;
+            return (this.draft.trim() !== '' || ready > 0) && this.remaining >= 0;
+        },
+
         /** "200 characters left" from 1,800 characters, "12 characters over" past the limit. */
         get countText() {
             const left = this.remaining;
@@ -287,10 +352,38 @@ document.addEventListener('alpine:init', () => {
             return this.members.filter((member) => ids.has(member.id));
         },
 
+        isOnline(member) {
+            return this.online.includes(member.id);
+        },
+
+        /** The Members tab: everyone, or those whose name or affiliation matches the search. */
+        get filteredMembers() {
+            const term = this.memberSearch.trim().toLowerCase();
+            if (term === '') return this.members;
+            return this.members.filter((m) => `${m.name} ${m.affiliation || ''}`.toLowerCase().includes(term));
+        },
+
         togglePanel() {
             this.panelOpen = !this.panelOpen;
             if (this.isWide) storage()?.setItem(PANEL_STORAGE_KEY, this.panelOpen ? 'open' : 'closed');
             if (this.panelOpen) this.$nextTick(() => this.$root.querySelector('[data-panel-close]')?.focus());
+        },
+
+        selectTab(tab, { focus = false } = {}) {
+            if (!this.config.tabs.includes(tab)) return;
+            this.panelTab = tab;
+            this.memberMenu = null;
+            if (focus) this.$nextTick(() => this.$root.querySelector(`[data-tab="${tab}"]`)?.focus());
+        },
+
+        /** Arrow keys, Home and End move between the panel's tabs (automatic activation). */
+        onTabKeydown(event) {
+            const tabs = this.config.tabs;
+            const index = tabs.indexOf(this.panelTab);
+            const next = { ArrowRight: index + 1, ArrowLeft: index - 1, Home: 0, End: tabs.length - 1 }[event.key];
+            if (next === undefined) return;
+            event.preventDefault();
+            this.selectTab(tabs[(next + tabs.length) % tabs.length], { focus: true });
         },
 
         closePanel() {
@@ -300,38 +393,66 @@ document.addEventListener('alpine:init', () => {
             this.$root.querySelector('[data-panel-toggle]')?.focus();
         },
 
-        /** The rail's "Members" link: open the side panel (a drawer below 1280px) at the members. */
+        /**
+         * "Members" in the header: open the side panel (a drawer below 1024px) on its Members
+         * tab and put focus on that tab. Nothing scrolls but the panel's own body.
+         */
         showMembers() {
-            this.mobileView = 'conversation';
             this.panelOpen = true;
             if (this.isWide) storage()?.setItem(PANEL_STORAGE_KEY, 'open');
-            this.$nextTick(() => {
-                const heading = this.$root.querySelector('#chat-panel-online');
-                heading?.scrollIntoView({ block: 'start', behavior: reducedMotion() ? 'auto' : 'smooth' });
-                heading?.focus({ preventScroll: true });
-            });
+            this.selectTab('members', { focus: true });
+        },
+
+        toggleMemberMenu(member) {
+            this.suspending = null;
+            this.memberMenu = this.memberMenu === member.id ? null : member.id;
+            if (this.memberMenu) this.$nextTick(() => this.$root.querySelector(`#chat-member-menu-${member.id} a:not([style*="display: none"]), #chat-member-menu-${member.id} button:not([style*="display: none"])`)?.focus());
+        },
+
+        closeMemberMenu(member) {
+            this.memberMenu = null;
+            this.suspending = null;
+            this.$root.querySelector(`[data-member-id="${member.id}"] [data-member-menu-button]`)?.focus();
+        },
+
+        askSuspend(member) {
+            this.memberMenu = null;
+            this.suspending = member.id;
+            this.$nextTick(() => this.$root.querySelector(`[data-member-id="${member.id}"] [data-suspend-yes]`)?.focus());
+        },
+
+        cancelSuspend(member) {
+            this.closeMemberMenu(member);
+        },
+
+        async suspend(member) {
+            try {
+                const result = await this.$wire.suspendMember(member.id);
+                if (result && result.ok) {
+                    this.members = result.members || this.members.filter((m) => m.id !== member.id);
+                    this.suspending = null;
+                    this.say(result.notice);
+                } else {
+                    this.handleResult(result, () => {});
+                    if (result?.message) this.say(result.message);
+                }
+            } catch (error) {
+                this.handleFailure(error);
+            }
         },
 
         toggleFormatting() {
             this.formattingOpen = !this.formattingOpen;
         },
 
-        showChannels() {
-            this.mobileView = 'channels';
-            try {
-                window.history.pushState({ chatView: 'channels' }, '');
-            } catch {
-                // History is optional.
-            }
-            this.$nextTick(() => this.$root.querySelector('[data-channels] a[aria-current="page"]')?.focus());
-        },
-
-        onPopState() {
-            this.mobileView = 'conversation';
-        },
-
         onEscape() {
             if (this.reporting) return; // the dialog handles its own escape
+            if (document.querySelector('dialog[open]')) return; // the lightbox closes itself
+            if (this.memberMenu || this.suspending) {
+                this.memberMenu = null;
+                this.suspending = null;
+                return;
+            }
             if (this.formattingOpen) {
                 this.formattingOpen = false;
                 this.$root.querySelector('[data-formatting-toggle]')?.focus();
@@ -390,10 +511,6 @@ document.addEventListener('alpine:init', () => {
             return dateTimeFormat.format(new Date(iso));
         },
 
-        channelUrl(channel) {
-            return window.location.pathname.replace(/\/[^/]*$/, '/' + encodeURIComponent(channel.slug));
-        },
-
         permalink(id) {
             const url = new URL(window.location.href);
             url.search = '';
@@ -403,7 +520,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         normalise(message, { arriving = false } = {}) {
-            return { ...message, key: message.client_uuid || String(message.id), state: null, error: null, local: ++this.localSeq, arriving };
+            return { attachments: [], ...message, key: message.client_uuid || String(message.id), state: null, error: null, local: ++this.localSeq, arriving };
         },
 
         /** Let a just-arrived message rise into place once, then drop the class so a re-render never replays it. */
@@ -693,6 +810,11 @@ document.addEventListener('alpine:init', () => {
             if (target.deleted && !incoming.deleted) return false;
             if (!incoming.deleted && target.version > incoming.version) return false;
 
+            // The server's copy of an optimistic send carries signed links: let go of the local previews.
+            if (incoming.attachments && target.attachments?.some((a) => a.preview)) {
+                target.attachments.forEach((a) => a.preview && URL.revokeObjectURL(a.preview));
+            }
+
             Object.assign(target, incoming, { key: target.key, local: target.local, state: null, error: null });
             return false;
         },
@@ -714,11 +836,16 @@ document.addEventListener('alpine:init', () => {
             });
         },
 
+        /**
+         * Browsers with CSS field-sizing grow the field themselves; elsewhere set its height
+         * from the text, up to 40% of the viewport (the CSS max-height), then it scrolls.
+         */
         grow() {
             const el = this.$refs.draft;
-            if (!el) return;
+            if (!el || CSS.supports?.('field-sizing', 'content')) return;
+            const max = window.innerHeight * (this.config.composerMaxViewportPercent / 100);
             el.style.height = 'auto';
-            el.style.height = `${Math.min(el.scrollHeight, COMPOSER_MAX_HEIGHT)}px`;
+            el.style.height = `${Math.min(el.scrollHeight + 2, max)}px`;
         },
 
         onEnter(event) {
@@ -749,9 +876,24 @@ document.addEventListener('alpine:init', () => {
 
         async send() {
             const body = this.draft.trim();
-            if (body === '' || this.sending || this.expired || this.accessLost) return;
+            if (this.sending || this.expired || this.accessLost) return;
+            if (this.attachments.some((a) => a.state === STATE_UPLOADING)) {
+                this.sendError = this.config.copy.attachWait;
+                return;
+            }
+
+            const files = this.attachments.filter((a) => a.state === STATE_READY);
+            if (body === '' && files.length === 0) return;
             if (body.length > this.config.bodyMaxLength) {
                 this.sendError = `Messages can be at most ${this.config.bodyMaxLength} characters.`;
+                return;
+            }
+
+            const undescribed = files.find((a) => a.kind === 'image' && a.alt.trim() === '');
+            if (undescribed) {
+                undescribed.altMissing = true;
+                this.sendError = this.config.copy.attachDescribe;
+                this.$nextTick(() => this.$root.querySelector(`#chat-alt-${undescribed.key}`)?.focus());
                 return;
             }
 
@@ -777,9 +919,16 @@ document.addEventListener('alpine:init', () => {
                 can_pin: false,
                 pinned: false,
                 reply_to: reply ? { id: reply.id, author: reply.author, excerpt: reply.excerpt, deleted: false } : null,
+                // Local previews until the server's copy (with signed links) replaces them.
+                attachments: files.map((a) => ({
+                    key: a.key, kind: a.kind, name: a.name, type: a.type, extension: a.extension,
+                    size_label: a.sizeLabel, alt: a.alt.trim(), preview: a.preview, thumb: null, url: null,
+                })),
             });
             message.state = STATE_SENDING;
             message.replyToId = reply ? reply.id : null;
+            // The same uuids go with every retry of this message, so files are attached once.
+            message.attachmentPayload = files.map((a) => ({ id: a.id, alt: a.alt.trim() }));
             message.arriving = true;
             this.messages.push(message);
             // Work on the reactive copy from here on: a state change on the plain
@@ -789,6 +938,7 @@ document.addEventListener('alpine:init', () => {
             this.formattingOpen = false;
             this.draft = '';
             this.replyTo = null;
+            this.attachments = this.attachments.filter((a) => !files.includes(a));
             this.$nextTick(() => {
                 this.grow();
                 this.scrollToBottom(false);
@@ -809,7 +959,7 @@ document.addEventListener('alpine:init', () => {
             this.sending = true;
 
             try {
-                const result = await this.$wire.send(message.body, message.client_uuid, this.cursor, this.since, message.replyToId ?? null);
+                const result = await this.$wire.send(message.body, message.client_uuid, this.cursor, this.since, message.replyToId ?? null, message.attachmentPayload || []);
 
                 if (result && result.ok) {
                     this.applySync(result.sync);
@@ -849,6 +999,189 @@ document.addEventListener('alpine:init', () => {
             if (result?.error === 'rate_limit') {
                 this.sendError = result.message;
             }
+        },
+
+        /* ---------------------------------------------------------- attachments */
+
+        openPicker() {
+            if (!this.config.attachments.enabled) return;
+            this.$refs.fileInput?.click();
+        },
+
+        pickFiles(event) {
+            this.addFiles(Array.from(event.target.files || []));
+            event.target.value = '';
+        },
+
+        onPaste(event) {
+            if (!this.config.attachments.enabled) return;
+            const files = Array.from(event.clipboardData?.files || []).filter((f) => f.type.startsWith('image/'));
+            if (files.length === 0) return; // plain text pastes as usual
+            event.preventDefault();
+            this.addFiles(files.map((f, i) => (f.name && f.name !== 'image.png' ? f : new File([f], `pasted-image-${Date.now()}-${i + 1}.${extensionOf(f.type.replace('image/', 'x.')) || 'png'}`, { type: f.type }))));
+        },
+
+        hasFiles(event) {
+            return this.config.attachments.enabled && Array.from(event.dataTransfer?.types || []).includes('Files');
+        },
+
+        onDragEnter(event) {
+            if (!this.hasFiles(event)) return;
+            event.preventDefault();
+            this.dragDepth++;
+            this.dragging = true;
+        },
+
+        onDragOver(event) {
+            if (!this.hasFiles(event)) return;
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'copy';
+        },
+
+        onDragLeave(event) {
+            if (!this.hasFiles(event)) return;
+            this.dragDepth = Math.max(0, this.dragDepth - 1);
+            if (this.dragDepth === 0) this.dragging = false;
+        },
+
+        onDrop(event) {
+            if (!this.hasFiles(event)) return;
+            event.preventDefault();
+            this.dragDepth = 0;
+            this.dragging = false;
+            this.addFiles(Array.from(event.dataTransfer.files || []));
+            this.$refs.draft?.focus();
+        },
+
+        /** Check type, size and count in the browser (the server checks again, by content), then upload each. */
+        async addFiles(files) {
+            const limits = this.config.attachments;
+            const copy = this.config.copy;
+            this.sendError = '';
+
+            for (let file of files) {
+                if (this.attachments.length >= limits.maxFiles) {
+                    this.sendError = copy.attachTooMany.replace(':max', limits.maxFiles);
+                    break;
+                }
+
+                let extension = extensionOf(file.name);
+                const image = limits.imageExtensions.includes(extension);
+                if (!image && !limits.documentExtensions.includes(extension)) {
+                    this.sendError = copy.attachUnsupported.replace(':name', file.name);
+                    continue;
+                }
+
+                const max = image ? limits.imageMaxBytes : limits.documentMaxBytes;
+                if (file.size > max) {
+                    this.sendError = copy.attachTooLarge.replace(':name', file.name).replace(':max', image ? limits.imageMaxMb : limits.documentMaxMb);
+                    continue;
+                }
+
+                if (extension === 'heic' || extension === 'heif') {
+                    file = await heicToJpeg(file);
+                    extension = extensionOf(file.name);
+                }
+
+                const canPreview = image && extension !== 'heic' && extension !== 'heif';
+                this.attachments.push({
+                    key: uuid(),
+                    id: null,
+                    kind: image ? 'image' : 'document',
+                    name: file.name,
+                    extension,
+                    type: extension.toUpperCase(),
+                    sizeLabel: fileSize(file.size),
+                    preview: canPreview ? URL.createObjectURL(file) : null,
+                    alt: '',
+                    altMissing: false,
+                    progress: 0,
+                    state: STATE_UPLOADING,
+                    error: '',
+                    xhr: null,
+                });
+                this.upload(this.attachments[this.attachments.length - 1], file);
+            }
+        },
+
+        /** Stage one file in the member's temporary area, with progress. */
+        upload(item, file) {
+            const form = new FormData();
+            form.append('file', file);
+            const xhr = new XMLHttpRequest();
+            item.xhr = xhr;
+            xhr.open('POST', this.config.attachments.uploadUrl);
+            xhr.setRequestHeader('X-CSRF-TOKEN', csrfToken());
+            xhr.setRequestHeader('Accept', 'application/json');
+            xhr.upload.addEventListener('progress', (event) => {
+                if (event.lengthComputable) item.progress = Math.min(99, Math.round((event.loaded / event.total) * 100));
+            });
+            xhr.addEventListener('load', () => {
+                item.xhr = null;
+                let data = {};
+                try {
+                    data = JSON.parse(xhr.responseText || '{}');
+                } catch {
+                    data = {};
+                }
+                if (xhr.status === 201 && data.upload) {
+                    item.id = data.upload.id;
+                    item.name = data.upload.name;
+                    item.progress = 100;
+                    item.state = STATE_READY;
+                    return;
+                }
+                if (xhr.status === 419 || xhr.status === 401) this.onRequestError({ status: xhr.status });
+                if (xhr.status === 403) this.loseAccess();
+                item.state = STATE_FAILED;
+                item.error = data.errors?.file?.[0] || data.message || this.config.copy.attachFailed;
+            });
+            xhr.addEventListener('error', () => {
+                item.xhr = null;
+                item.state = STATE_FAILED;
+                item.error = this.config.copy.attachFailed;
+            });
+            xhr.send(form);
+        },
+
+        removeAttachment(item) {
+            item.xhr?.abort();
+            if (item.preview) URL.revokeObjectURL(item.preview);
+            this.attachments = this.attachments.filter((a) => a.key !== item.key);
+            if (item.id) {
+                fetch(this.config.attachments.discardUrl.replace('__uuid__', item.id), {
+                    method: 'DELETE',
+                    headers: { 'X-CSRF-TOKEN': csrfToken(), Accept: 'application/json' },
+                }).catch(() => {
+                    // Anything left behind is pruned by the scheduler after a day.
+                });
+            }
+            this.$refs.draft?.focus();
+        },
+
+        imagesOf(message) {
+            return (message.attachments || []).filter((a) => a.kind === 'image');
+        },
+
+        documentsOf(message) {
+            return (message.attachments || []).filter((a) => a.kind === 'document');
+        },
+
+        /** The site's lightbox, with the message's images (the medium size; the original on demand). */
+        openLightbox(message, index, trigger) {
+            const items = this.imagesOf(message).map((a) => ({
+                src: a.medium || a.preview,
+                srcset: '',
+                alt: a.alt,
+                caption: a.alt,
+                meta: `${message.author} · ${this.formatDateTime(message.created_at)}`,
+                note: '',
+                credit: '',
+                treatment: '',
+                width: a.width || null,
+                height: a.height || null,
+            }));
+            window.dispatchEvent(new CustomEvent('chat-lightbox', { detail: { items, index, trigger } }));
         },
 
         /* ---------------------------------------------------------- editing */

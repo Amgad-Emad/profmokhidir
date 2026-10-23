@@ -96,6 +96,12 @@
     @case('redo')
         <path d="M15 7.5l4 4-4 4" /><path d="M19 11.5H9.5a4.5 4.5 0 0 0 0 9H12" />
         @break
+    @case('paperclip')
+        <path d="M19 11.5l-7.4 7.4a4.5 4.5 0 01-6.4-6.4l8-8a3 3 0 014.2 4.2l-8 8a1.5 1.5 0 01-2.1-2.1l7.4-7.4" />
+        @break
+    @case('download')
+        <path d="M12 4.5v11" /><path d="M7.5 11l4.5 4.5 4.5-4.5" /><path d="M5 19.5h14" />
+        @break
     @case('upload')
         <path d="M12 15.5V4.5" /><path d="M7.5 9L12 4.5 16.5 9" /><path d="M4.5 15v3.5a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1V15" />
         @break

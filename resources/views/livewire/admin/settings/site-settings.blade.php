@@ -34,6 +34,16 @@
             </div>
         </fieldset>
 
+        <fieldset class="space-y-6" data-chat-upload-settings>
+            <legend class="t-label text-accent-text">Community chat uploads</legend>
+            <p class="mt-2 text-sm font-light text-ink-muted">Approved members may attach up to {{ \App\Constants\ChatAttachments::MAX_FILES }} images or documents to a message. Files are private to members and administrators. Leave a limit blank for the default ({{ \App\Constants\ChatAttachments::IMAGE_MAX_MB }} MB for images, {{ \App\Constants\ChatAttachments::DOCUMENT_MAX_MB }} MB for documents).</p>
+            <x-form.toggle :model="'form.'.SettingKeys::CHAT_UPLOADS_ENABLED" :label="$labels[SettingKeys::CHAT_UPLOADS_ENABLED]" hint="When off, the paperclip is hidden and new uploads are refused; files already sent stay available." />
+            <div class="grid gap-6 sm:grid-cols-2">
+                <x-form.input :model="'form.'.SettingKeys::CHAT_IMAGE_MAX_MB" :label="$labels[SettingKeys::CHAT_IMAGE_MAX_MB]" type="number" inputmode="numeric" :min="\App\Constants\ChatAttachments::LIMIT_MIN_MB" :max="\App\Constants\ChatAttachments::LIMIT_MAX_MB" />
+                <x-form.input :model="'form.'.SettingKeys::CHAT_DOCUMENT_MAX_MB" :label="$labels[SettingKeys::CHAT_DOCUMENT_MAX_MB]" type="number" inputmode="numeric" :min="\App\Constants\ChatAttachments::LIMIT_MIN_MB" :max="\App\Constants\ChatAttachments::LIMIT_MAX_MB" />
+            </div>
+        </fieldset>
+
         <div class="flex flex-wrap items-center gap-4 border-t border-rule pt-8">
             <x-button type="submit" wire:loading.attr="disabled" data-save>Save settings</x-button>
             <x-button type="button" variant="outline" :href="route(\App\Constants\AdminNavigation::DASHBOARD_ROUTE)">Back to the dashboard</x-button>

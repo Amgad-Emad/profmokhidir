@@ -79,6 +79,15 @@ interface MediaRepositoryInterface
     public function moveToDisk(Media $media, HasMedia $model, string $collection, string $disk): Media;
 
     /**
+     * Hand a media row to another model and collection without touching its
+     * files (same disk, same path): one row update, so it can run inside the
+     * caller's transaction. Custom properties are merged in.
+     *
+     * @param  array<string, mixed>  $properties
+     */
+    public function reassign(Media $media, HasMedia $model, string $collection, array $properties = []): Media;
+
+    /**
      * Number of media rows attached to the given model.
      */
     public function countFor(HasMedia $model): int;

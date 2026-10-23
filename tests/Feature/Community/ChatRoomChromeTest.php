@@ -39,7 +39,7 @@ class ChatRoomChromeTest extends TestCase
 
     private function page(): string
     {
-        return $this->actingAs($this->member)->get(route('community.chat.channel', $this->channel))->assertOk()->getContent();
+        return $this->actingAs($this->member)->get(route('community.chat'))->assertOk()->getContent();
     }
 
     private function header(string $html): string
@@ -69,13 +69,15 @@ class ChatRoomChromeTest extends TestCase
     }
 
     #[Test]
-    public function the_rail_has_descriptions_a_members_link_and_the_members_own_card(): void
+    public function there_is_no_channel_rail_and_the_header_opens_the_members_tab(): void
     {
-        $this->actingAs($this->member)->get(route('community.chat.channel', $this->channel))->assertOk()
-            ->assertSee('data-channel-description', false)
-            ->assertSee('data-members-link', false)
-            ->assertSee(ChatCopy::MEMBERS_LINK)
-            ->assertSee('<span class="chat-avatar chat-avatar--large" aria-hidden="true">AH</span>', false);
+        $html = $this->page();
+
+        $this->assertStringNotContainsString('data-chat-rail', $html);
+        $this->assertStringNotContainsString('data-channels', $html);
+        $this->assertStringContainsString('<h1 id="room-heading" class="chat-room__title">'.ChatSettings::ROOM_NAME.'</h1>', $html);
+        $this->assertStringContainsString('x-on:click="showMembers()" aria-controls="chat-panel"', $html);
+        $this->assertStringContainsString(ChatCopy::MEMBERS_LINK, $html);
     }
 
     #[Test]
@@ -112,13 +114,29 @@ class ChatRoomChromeTest extends TestCase
     }
 
     #[Test]
-    public function the_panel_lists_who_is_online_and_folds_the_full_member_list(): void
+    public function the_panel_has_about_pinned_and_members_tabs_with_the_full_member_list(): void
     {
-        $this->actingAs($this->member)->get(route('community.chat.channel', $this->channel))->assertOk()
-            ->assertSee(ChatCopy::PANEL_ONLINE)
-            ->assertSee('data-online', false)
-            ->assertSee(ChatCopy::ALL_MEMBERS)
-            ->assertSee('data-members-all', false);
+        $html = $this->page();
+
+        foreach ([ChatSettings::TAB_ABOUT => ChatCopy::TAB_ABOUT, ChatSettings::TAB_PINNED => ChatCopy::TAB_PINNED, ChatSettings::TAB_MEMBERS => ChatCopy::TAB_MEMBERS] as $tab => $label) {
+            $this->assertMatchesRegularExpression('~role="tab" class="chat-tab" id="chat-tab-'.$tab.'" aria-controls="chat-tabpanel-'.$tab.'"[^>]*>\s*'.$label.'~', $html);
+            $this->assertStringContainsString('role="tabpanel" id="chat-tabpanel-'.$tab.'" aria-labelledby="chat-tab-'.$tab.'"', $html);
+        }
+
+        // Every member is listed (no folded "All members"), with "online" and the member's own "You".
+        $this->assertStringContainsString('x-for="member in filteredMembers"', $html);
+        $this->assertStringContainsString('data-online>'.ChatCopy::MEMBER_ONLINE.'</span>', $html);
+        $this->assertStringContainsString('data-you>'.ChatCopy::STATUS_YOU.'</span>', $html);
+        $this->assertStringNotContainsString('data-members-all', $html);
+        $this->assertStringContainsString('x-show="members.length > config.memberSearchThreshold" data-member-search', $html);
+    }
+
+    #[Test]
+    public function headings_in_the_panel_are_not_focus_targets(): void
+    {
+        $html = $this->page();
+
+        $this->assertDoesNotMatchRegularExpression('~<h[1-6][^>]*tabindex=~', $html);
     }
 
     #[Test]
@@ -135,7 +153,7 @@ class ChatRoomChromeTest extends TestCase
     #[Test]
     public function the_poll_returns_who_is_online_including_the_member_polling(): void
     {
-        $component = Livewire::actingAs($this->member)->test(Room::class, ['channel' => $this->channel]);
+        $component = Livewire::actingAs($this->member)->test(Room::class);
 
         $component->call('sync', 0, null)->assertReturned(fn (array $result): bool => $result['ok'] === true && $result['online'] === [$this->member->id]);
     }
@@ -143,7 +161,7 @@ class ChatRoomChromeTest extends TestCase
     #[Test]
     public function a_suspended_member_gets_no_presence_from_the_poll(): void
     {
-        $component = Livewire::actingAs($this->member)->test(Room::class, ['channel' => $this->channel]);
+        $component = Livewire::actingAs($this->member)->test(Room::class);
         $this->member->forceFill(['community_status' => CommunityStatus::Suspended])->save();
 
         $component->call('sync', 0, null)->assertReturned(fn (array $result): bool => $result['ok'] === false && ! isset($result['online']));

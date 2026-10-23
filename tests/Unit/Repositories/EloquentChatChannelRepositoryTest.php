@@ -94,4 +94,19 @@ class EloquentChatChannelRepositoryTest extends TestCase
 
         $this->assertNull($channel->fresh()->last_message_id);
     }
+
+    #[Test]
+    public function the_oldest_channel_is_the_lowest_id_and_find_or_create_never_duplicates_a_slug(): void
+    {
+        $first = ChatChannel::factory()->create(['name' => 'Zoology']);
+        ChatChannel::factory()->create(['name' => 'Agronomy']);
+
+        $this->assertTrue($first->is($this->repository->oldest()));
+
+        $room = $this->repository->findOrCreateBySlug('scientific-community', ['name' => 'Scientific Community']);
+        $again = $this->repository->findOrCreateBySlug('scientific-community', ['name' => 'Other name']);
+
+        $this->assertTrue($room->is($again));
+        $this->assertSame('Scientific Community', $again->name);
+    }
 }

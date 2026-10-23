@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Support;
 
+use App\Constants\ChatCopy;
 use App\Constants\ChatSettings;
 use App\Models\ChatMessage;
 use App\Models\User;
@@ -65,5 +66,17 @@ class ChatMessageDataTest extends TestCase
 
         $this->assertTrue($data['mine']);
         $this->assertFalse($data['can_edit'] || $data['can_delete']);
+    }
+
+    #[Test]
+    public function a_message_of_files_only_is_quoted_and_pinned_as_attachments_and_carries_an_empty_file_list_by_default(): void
+    {
+        $files = ChatMessage::factory()->create(['body' => '']);
+        $reply = ChatMessage::factory()->replyTo($files)->create();
+        $viewer = User::factory()->member()->create();
+
+        $this->assertSame(ChatCopy::ATTACHMENTS_LABEL, ChatMessageData::pin($files)['excerpt']);
+        $this->assertSame(ChatCopy::ATTACHMENTS_LABEL, ChatMessageData::from($reply->load('replyTo.user'), $viewer)['reply_to']['excerpt']);
+        $this->assertSame([], ChatMessageData::from($files, $viewer)['attachments']);
     }
 }

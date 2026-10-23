@@ -24,6 +24,13 @@ final class SettingKeys
 
     public const string MAIL_FROM_ADDRESS = 'mail_from_address';
 
+    /** Community chat uploads: on ("1") or off ("0"), and the size limits in megabytes. */
+    public const string CHAT_UPLOADS_ENABLED = 'chat_uploads_enabled';
+
+    public const string CHAT_IMAGE_MAX_MB = 'chat_image_max_mb';
+
+    public const string CHAT_DOCUMENT_MAX_MB = 'chat_document_max_mb';
+
     /**
      * @return list<string>
      */
@@ -36,7 +43,20 @@ final class SettingKeys
             self::NOTIFICATION_EMAIL,
             self::MAIL_FROM_NAME,
             self::MAIL_FROM_ADDRESS,
+            self::CHAT_UPLOADS_ENABLED,
+            self::CHAT_IMAGE_MAX_MB,
+            self::CHAT_DOCUMENT_MAX_MB,
         ];
+    }
+
+    /**
+     * Keys of the community chat uploads.
+     *
+     * @return list<string>
+     */
+    public static function chatUploads(): array
+    {
+        return [self::CHAT_UPLOADS_ENABLED, self::CHAT_IMAGE_MAX_MB, self::CHAT_DOCUMENT_MAX_MB];
     }
 
     /**
@@ -61,6 +81,9 @@ final class SettingKeys
             self::NOTIFICATION_EMAIL => 'Notification address',
             self::MAIL_FROM_NAME => 'Mail sender name',
             self::MAIL_FROM_ADDRESS => 'Mail sender address',
+            self::CHAT_UPLOADS_ENABLED => 'Members may attach files',
+            self::CHAT_IMAGE_MAX_MB => 'Largest image (MB)',
+            self::CHAT_DOCUMENT_MAX_MB => 'Largest document (MB)',
         ];
     }
 

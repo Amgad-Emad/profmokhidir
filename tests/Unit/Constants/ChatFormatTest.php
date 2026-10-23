@@ -59,7 +59,7 @@ class ChatFormatTest extends TestCase
         $this->assertSame('Enter to send · Shift+Enter for a new line', ChatCopy::COMPOSER_HINT);
         $this->assertSame('New', ChatCopy::NEW_DIVIDER);
         $this->assertSame('Original message removed', ChatCopy::REPLY_REMOVED);
-        $this->assertSame('About this channel', ChatCopy::PANEL_TITLE);
+        $this->assertSame('About this room', ChatCopy::PANEL_TITLE);
         $this->assertSame('Not sent', ChatCopy::NOT_SENT);
         $this->assertSame('Retry', ChatCopy::RETRY);
         $this->assertSame('Reconnecting…', ChatCopy::RECONNECTING);

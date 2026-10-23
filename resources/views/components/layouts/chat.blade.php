@@ -1,8 +1,9 @@
 {{--
     Community chat layout: the one public-facing layout (with /admin) that loads Livewire.
     A slim glassy evergreen bar with the lockup and the member's links above the
-    correspondence room, which fills the rest of the viewport (the conversation
-    scrolls inside it and the composer stays above the keyboard). Chat pages are
+    correspondence room, a fixed-height app shell that fills the rest of the
+    viewport: the document never scrolls, only the message list, the side panel
+    and the composer's field do, and the composer stays above the keyboard. Chat pages are
     private, so they are never indexed. KaTeX is fetched by the chat script only
     when a message contains maths.
 --}}

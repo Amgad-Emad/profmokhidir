@@ -1,18 +1,22 @@
 @use('App\Constants\ChatCopy')
 @use('App\Constants\ChatSettings')
-{{-- The conversation: channel header, offline banner, search, the log and the composer. --}}
-<section class="chat-room" aria-labelledby="room-heading" data-chat-conversation>
+{{--
+    The conversation: the room's header (title, Members, search, the panel toggle), the offline
+    banner, search, the log and the composer. Files dragged over it are attached to the draft.
+--}}
+<section class="chat-room" aria-labelledby="room-heading" data-chat-conversation
+         x-on:dragenter="onDragEnter($event)" x-on:dragover="onDragOver($event)" x-on:dragleave="onDragLeave($event)" x-on:drop="onDrop($event)">
     <header class="chat-room__header">
-        <button type="button" class="chat-back" x-on:click="showChannels()" data-back>
-            <x-icon name="chevron-left" class="size-5" />
-            <span class="t-label text-accent-text">{{ ChatCopy::BACK_TO_CHANNELS }}</span>
-        </button>
         <div class="chat-room__heading">
-            <h1 id="room-heading" class="chat-room__title">{{ $channelName }}</h1>
-            <p class="chat-room__description" x-text="currentChannel?.description || @js($chatIntro)">{{ $initial['channels'][array_search(true, array_column($initial['channels'], 'current'), true) ?: 0]['description'] ?? $chatIntro }}</p>
+            <h1 id="room-heading" class="chat-room__title">{{ ChatSettings::ROOM_NAME }}</h1>
+            <p class="chat-room__description" x-text="currentChannel?.description || @js($chatIntro)">{{ $initial['channels'][0]['description'] ?? $chatIntro }}</p>
         </div>
         <div class="chat-room__tools">
-            <span class="chat-room__count t-label text-accent-text" data-member-count><span x-text="members.length"></span> <span x-text="members.length === 1 ? 'member' : 'members'"></span></span>
+            <button type="button" class="chat-members-button" x-on:click="showMembers()" aria-controls="chat-panel" :aria-expanded="panelOpen && panelTab === 'members' ? 'true' : 'false'" data-members-link>
+                <x-icon name="users" class="size-4" />
+                <span class="chat-members-button__word">{{ ChatCopy::TAB_MEMBERS }}</span>
+                <span class="chat-members-button__count" data-member-count><span class="sr-only">{{ ChatCopy::TAB_MEMBERS }}: </span><span x-text="members.length">{{ count($initial['members'] ?? []) }}</span></span>
+            </button>
             <button type="button" class="chat-tool" x-on:click="toggleSearch()" :aria-expanded="searchOpen ? 'true' : 'false'" aria-controls="chat-search" data-search-toggle>
                 <x-icon name="search" :label="ChatCopy::SEARCH_LABEL" />
             </button>
@@ -95,6 +99,10 @@
     <button type="button" class="chat-new-pill" x-show="newCount > 0" x-cloak x-on:click="scrollToBottom(true)" data-new-messages>
         <span x-text="newCount === 1 ? config.copy.newOne : config.copy.newMany.replace(':count', newCount)"></span>
     </button>
+
+    <div class="chat-drop" x-show="dragging" x-cloak aria-hidden="true" data-drop-zone>
+        <p class="t-label text-accent-text">{{ ChatCopy::DROP_HINT }}</p>
+    </div>
 
     @include('livewire.community.chat.partials.composer')
 </section>

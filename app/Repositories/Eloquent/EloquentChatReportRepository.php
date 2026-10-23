@@ -70,7 +70,7 @@ class EloquentChatReportRepository extends BaseEloquentRepository implements Cha
     private function withRelations(Builder $query): Builder
     {
         return $query->with([
-            'message' => fn ($relation) => $relation->withTrashed()->with(['user', 'channel']),
+            'message' => fn ($relation) => $relation->withTrashed()->with(['user', 'channel', 'media']),
             'reporter',
             'resolver',
         ]);

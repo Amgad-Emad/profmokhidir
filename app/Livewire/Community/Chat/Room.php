@@ -9,6 +9,7 @@ use App\Constants\ChatFormat;
 use App\Constants\ChatSettings;
 use App\Constants\CommunityCopy;
 use App\Exceptions\ChatMessageConflictException;
+use App\Exceptions\CommunityApplicationException;
 use App\Exceptions\ChatMessageRemovedException;
 use App\Exceptions\ChatRateLimitException;
 use App\Http\Requests\ChatMessageRequest;
@@ -16,9 +17,11 @@ use App\Http\Requests\ChatReportRequest;
 use App\Models\ChatChannel;
 use App\Models\ChatMessage;
 use App\Models\User;
+use App\Services\ChatAttachmentService;
 use App\Services\ChatCorrespondenceService;
 use App\Services\ChatService;
 use App\Services\CommunityPageService;
+use App\Services\CommunityService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -31,9 +34,11 @@ use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 /**
- * One chat channel. The component is a thin transport: every action
- * authorises (policy), validates (Form Request rules), calls ChatService and
- * returns plain data for the chat script, which renders the conversation.
+ * The one Scientific Community room. The component is a thin transport: every
+ * action authorises (policy), validates (Form Request rules), calls ChatService
+ * and returns plain data for the chat script, which renders the conversation.
+ * Actions never re-render the component (skipRender), so a poll can never
+ * morph the composer while a member types; only losing access re-renders.
  * Reliability rules (id ordering, cursors, idempotent sends, locking) live in
  * the service and repositories, not here.
  */
@@ -67,8 +72,9 @@ class Room extends Component
     /** @var array<string, mixed> */
     public array $initial = [];
 
-    public function mount(ChatChannel $channel): void
+    public function mount(): void
     {
+        $channel = $this->chat()->room();
         $this->authorize('view', $channel);
 
         $this->channelId = (int) $channel->getKey();
@@ -105,14 +111,14 @@ class Room extends Component
      *
      * @return array<string, mixed>
      */
-    public function send(string $body, string $clientUuid, int $cursor = 0, ?string $since = null, ?int $replyToId = null): array
+    public function send(string $body, string $clientUuid, int $cursor = 0, ?string $since = null, ?int $replyToId = null, array $attachments = []): array
     {
-        return $this->guarded(function () use ($body, $clientUuid, $cursor, $since, $replyToId): array {
+        return $this->guarded(function () use ($body, $clientUuid, $cursor, $since, $replyToId, $attachments): array {
             $this->authorize('create', ChatMessage::class);
-            $this->validateAgainst(new ChatMessageRequest, ['body' => $body, 'client_uuid' => $clientUuid, 'reply_to_id' => $replyToId]);
+            $this->validateAgainst(new ChatMessageRequest, ['body' => $body, 'client_uuid' => $clientUuid, 'reply_to_id' => $replyToId, 'attachments' => $attachments]);
 
             $channel = $this->channel();
-            $message = $this->chat()->send($channel, $this->viewer(), $body, $clientUuid, $replyToId);
+            $message = $this->chat()->send($channel, $this->viewer(), $body, $clientUuid, $replyToId, array_values($attachments));
 
             return [
                 'ok' => true,
@@ -243,6 +249,41 @@ class Room extends Component
     }
 
     /**
+     * An administrator suspends a member from the Members tab (the same
+     * service and policy as the community screen in /admin).
+     *
+     * @return array<string, mixed>
+     */
+    public function suspendMember(int $userId): array
+    {
+        return $this->guarded(function () use ($userId): array {
+            $member = $this->community()->find($userId);
+
+            if ($member === null) {
+                throw new InvalidArgumentException('That member could not be found.');
+            }
+
+            $this->authorize('review', $member);
+
+            if ($member->is($this->viewer())) {
+                throw new InvalidArgumentException('You cannot suspend yourself.');
+            }
+
+            try {
+                $this->community()->suspend($member, $this->viewer(), ChatCopy::MEMBER_SUSPEND_NOTE);
+            } catch (CommunityApplicationException $exception) {
+                throw new InvalidArgumentException($exception->getMessage(), 0, $exception);
+            }
+
+            return [
+                'ok' => true,
+                'notice' => strtr(ChatCopy::MEMBER_SUSPENDED, [':name' => $member->name]),
+                'members' => $this->correspondence()->members($this->viewer()),
+            ];
+        });
+    }
+
+    /**
      * The current state of one message, for a client that was told its copy is stale.
      *
      * @return array<string, mixed>
@@ -275,7 +316,7 @@ class Room extends Component
     public function render(): View
     {
         return view('livewire.community.chat.room', [
-            'config' => ChatSettings::clientConfig(),
+            'config' => ChatSettings::clientConfig() + ['attachments' => app(ChatAttachmentService::class)->clientConfig()],
             'communityUrl' => route(CommunityPageService::ROUTE_INDEX),
             'suspendedHeading' => CommunityCopy::SUSPENDED_HEADING,
             'suspendedMessage' => CommunityCopy::SUSPENDED,
@@ -283,7 +324,7 @@ class Room extends Component
             'conduct' => CommunityCopy::conductRules(),
             'hints' => ChatFormat::hints(),
             'canModerate' => ! $this->accessRevoked && $this->chat()->canModerate($this->viewer()),
-        ])->title($this->channelName.' · '.ChatCopy::TITLE);
+        ])->title(ChatSettings::ROOM_NAME.' · '.ChatCopy::TITLE);
     }
 
     /**
@@ -300,6 +341,23 @@ class Room extends Component
             return $this->failure(self::ERROR_ACCESS, CommunityCopy::SUSPENDED);
         }
 
+        $result = $this->attempt($action);
+
+        // The script renders the room; a server render would morph the composer under the
+        // member's fingers. Only losing access changes the page (to the suspension notice).
+        if (! $this->accessRevoked) {
+            $this->skipRender();
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param  callable(): array<string, mixed>  $action
+     * @return array<string, mixed>
+     */
+    private function attempt(callable $action): array
+    {
         try {
             return $action();
         } catch (AuthorizationException $exception) {
@@ -382,5 +440,10 @@ class Room extends Component
     private function correspondence(): ChatCorrespondenceService
     {
         return app(ChatCorrespondenceService::class);
+    }
+
+    private function community(): CommunityService
+    {
+        return app(CommunityService::class);
     }
 }

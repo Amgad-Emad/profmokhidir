@@ -61,7 +61,7 @@ class ChatCorrespondenceTest extends TestCase
 
     private function room(?User $as = null): Testable
     {
-        return Livewire::actingAs($as ?? $this->member)->test(Room::class, ['channel' => $this->channel]);
+        return Livewire::actingAs($as ?? $this->member)->test(Room::class);
     }
 
     private function send(User $author, string $body): ChatMessage
@@ -74,8 +74,8 @@ class ChatCorrespondenceTest extends TestCase
     {
         $this->send($this->other, 'Welcome, friends');
 
-        $html = $this->actingAs($this->member)->get(route('community.chat.channel', $this->channel))->assertOk()
-            ->assertSee('data-chat-rail', false)
+        $html = $this->actingAs($this->member)->get(route('community.chat'))->assertOk()
+            ->assertDontSee('data-chat-rail', false)
             ->assertSee('data-chat-conversation', false)
             ->assertSee('data-chat-panel', false)
             ->assertSee('role="log" aria-live="polite"', false)
@@ -112,9 +112,9 @@ class ChatCorrespondenceTest extends TestCase
     }
 
     #[Test]
-    public function an_administrator_sees_their_status_in_the_rail(): void
+    public function an_administrator_sees_their_status_in_the_member_menu(): void
     {
-        $this->actingAs(User::factory()->admin()->create())->get(route('community.chat.channel', $this->channel))->assertOk()
+        $this->actingAs(User::factory()->admin()->create())->get(route('community.chat'))->assertOk()
             ->assertSee(ChatCopy::STATUS_ADMIN);
     }
 
@@ -130,19 +130,19 @@ class ChatCorrespondenceTest extends TestCase
         $this->assertNull($this->room()->get('initial')['focus']);
 
         $initial = $this->actingAs($this->member)
-            ->get(route('community.chat.channel', $this->channel).'?'.ChatSettings::MESSAGE_PARAM.'='.$ids[10])
+            ->get(route('community.chat').'?'.ChatSettings::MESSAGE_PARAM.'='.$ids[10])
             ->assertOk()
             ->getContent();
 
         $this->assertStringContainsString($this->inPageJson('"focus":'.$ids[10]), $initial);
 
-        $component = Livewire::actingAs($this->member)->withQueryParams([ChatSettings::MESSAGE_PARAM => $ids[10]])->test(Room::class, ['channel' => $this->channel]);
+        $component = Livewire::actingAs($this->member)->withQueryParams([ChatSettings::MESSAGE_PARAM => $ids[10]])->test(Room::class);
         $state = $component->get('initial');
         $this->assertSame($ids[10], $state['focus']);
         $this->assertContains($ids[10], array_column($state['messages'], 'id'));
         $this->assertContains($ids[0], array_column($state['messages'], 'id'));
 
-        $this->assertNull(Livewire::actingAs($this->member)->withQueryParams([ChatSettings::MESSAGE_PARAM => 'abc'])->test(Room::class, ['channel' => $this->channel])->get('initial')['focus']);
+        $this->assertNull(Livewire::actingAs($this->member)->withQueryParams([ChatSettings::MESSAGE_PARAM => 'abc'])->test(Room::class)->get('initial')['focus']);
     }
 
     #[Test]

@@ -39,6 +39,18 @@
                                     <p class="mt-2 font-display text-lg font-light italic text-ink-muted">{{ \App\Constants\ChatSettings::REMOVED_PLACEHOLDER }}</p>
                                 @else
                                     <p class="mt-2 whitespace-pre-wrap text-base font-light text-ink" data-message>{{ $message->body }}</p>
+                                    {{-- A report covers the message's files too: each opens through the same signed, access-checked link members use. --}}
+                                    @php $files = \App\Support\ChatAttachmentData::collection($message); @endphp
+                                    @if ($files !== [])
+                                        <ul class="mt-3 space-y-1 text-sm" aria-label="{{ \App\Constants\ChatCopy::ATTACHMENTS_LABEL }}" data-report-attachments>
+                                            @foreach ($files as $file)
+                                                <li class="flex flex-wrap items-baseline gap-x-2">
+                                                    <a href="{{ $file['url'] }}" class="text-ink underline decoration-accent-line underline-offset-4" target="_blank" rel="noopener">{{ $file['name'] }}</a>
+                                                    <span class="font-light text-ink-muted">{{ $file['type'] }} · {{ $file['size_label'] }}@if ($file['alt'] !== '') · “{{ $file['alt'] }}”@endif</span>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    @endif
                                 @endif
                             </div>
                             @if ($report->isResolved())
@@ -65,7 +77,7 @@
     @endif
 
     <x-admin.confirm-dialog :show="$this->isConfirming(Reports::ACTION_DELETE)" title="Remove this message?" action="deleteMessage" confirm-label="Remove message">
-        Members will see "{{ \App\Constants\ChatSettings::REMOVED_PLACEHOLDER }}" in its place and every report about it will be resolved.
+        Members will see "{{ \App\Constants\ChatSettings::REMOVED_PLACEHOLDER }}" in its place, its attached files are deleted, and every report about it will be resolved.
     </x-admin.confirm-dialog>
 
     @if ($this->isConfirming(Reports::ACTION_SUSPEND))

@@ -4,26 +4,21 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Services\ChatService;
 use App\Services\CommunityPageService;
-use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 
 /**
- * /community/chat opens the first channel; the Livewire room renders each channel.
+ * The chat used to have channels at /community/chat/{channel}. There is one
+ * room now: every old channel address moves permanently to /community/chat,
+ * keeping a permalink's ?message= parameter.
  */
 class ChatController extends Controller
 {
-    public function __invoke(ChatService $chat): RedirectResponse|View
+    public function __invoke(Request $request): RedirectResponse
     {
-        $channel = $chat->firstChannel();
+        $query = $request->getQueryString();
 
-        if ($channel === null) {
-            return view('community.chat.empty', [
-                'communityUrl' => route(CommunityPageService::ROUTE_INDEX),
-            ]);
-        }
-
-        return redirect()->route(CommunityPageService::ROUTE_CHAT.'.channel', $channel);
+        return redirect()->to(route(CommunityPageService::ROUTE_CHAT).($query ? '?'.$query : ''), 301);
     }
 }

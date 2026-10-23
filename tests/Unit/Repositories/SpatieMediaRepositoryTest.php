@@ -8,11 +8,14 @@ use App\Constants\MediaConversions;
 use App\Constants\MediaProperties;
 use App\Constants\MediaTreatment;
 use App\Models\Album;
+use App\Models\ChatMessage;
+use App\Models\ChatUpload;
 use App\Models\TeachingMaterial;
 use App\Repositories\Contracts\MediaRepositoryInterface;
 use App\Repositories\Eloquent\SpatieMediaRepository;
 use App\Support\PlaceholderImage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -202,4 +205,23 @@ class SpatieMediaRepositoryTest extends TestCase
         $this->assertTrue((bool) $updated->fresh()->getAttribute(Archive::FEATURED));
         $this->assertSame('Kept', $updated->fresh()->getCustomProperty(MediaProperties::CAPTION));
     }
+
+    #[Test]
+    public function reassign_hands_a_file_to_another_model_without_moving_it(): void
+    {
+        $upload = ChatUpload::factory()->create();
+        $media = $this->repository->attach($upload, UploadedFile::fake()->create('notes.pdf', 5, 'application/pdf'), MediaCollections::CHAT_PENDING, [], Disks::PRIVATE);
+        $path = $media->getPathRelativeToRoot();
+        $message = ChatMessage::factory()->create();
+
+        $moved = $this->repository->reassign($media, $message, MediaCollections::CHAT_ATTACHMENTS, [MediaProperties::ALT_TEXT => 'Notes']);
+
+        $this->assertSame([$message->getMorphClass(), $message->id, MediaCollections::CHAT_ATTACHMENTS], [$moved->model_type, (int) $moved->model_id, $moved->collection_name]);
+        $this->assertSame('Notes', $moved->getCustomProperty(MediaProperties::ALT_TEXT));
+        $this->assertSame($path, $moved->fresh()->getPathRelativeToRoot());
+        Storage::disk(Disks::PRIVATE)->assertExists($path);
+        $this->assertCount(1, $message->fresh()->attachments());
+        $this->assertCount(0, $upload->fresh()->getMedia(MediaCollections::CHAT_PENDING));
+    }
 }
+

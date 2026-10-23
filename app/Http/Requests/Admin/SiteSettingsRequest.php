@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Admin;
 
+use App\Constants\ChatAttachments;
 use App\Constants\Permissions;
 use App\Constants\SettingKeys;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * The site settings form: public contact details, the notification address
- * and the mail sender.
+ * the mail sender and the community chat upload switch and limits.
  */
 class SiteSettingsRequest extends FormRequest
 {
@@ -31,6 +32,9 @@ class SiteSettingsRequest extends FormRequest
             SettingKeys::NOTIFICATION_EMAIL => ['nullable', 'string', 'email', 'max:255'],
             SettingKeys::MAIL_FROM_NAME => ['nullable', 'string', 'max:120'],
             SettingKeys::MAIL_FROM_ADDRESS => ['nullable', 'string', 'email', 'max:255'],
+            SettingKeys::CHAT_UPLOADS_ENABLED => ['boolean'],
+            SettingKeys::CHAT_IMAGE_MAX_MB => ['nullable', 'integer', 'min:'.ChatAttachments::LIMIT_MIN_MB, 'max:'.ChatAttachments::LIMIT_MAX_MB],
+            SettingKeys::CHAT_DOCUMENT_MAX_MB => ['nullable', 'integer', 'min:'.ChatAttachments::LIMIT_MIN_MB, 'max:'.ChatAttachments::LIMIT_MAX_MB],
         ];
     }
 

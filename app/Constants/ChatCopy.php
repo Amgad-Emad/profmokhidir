@@ -24,9 +24,7 @@ final class ChatCopy
 
     public const string MEMBERS_LINK = 'Members';
 
-    public const string CHANNELS_HEADING = 'Channels';
-
-    public const string PANEL_TITLE = 'About this channel';
+    public const string PANEL_TITLE = 'About this room';
 
     public const string PANEL_CONDUCT = 'Conduct';
 
@@ -40,17 +38,45 @@ final class ChatCopy
 
     public const string ALL_MEMBERS = 'All members';
 
-    public const string PANEL_OPEN = 'About this channel';
+    public const string PANEL_OPEN = 'About this room';
 
     public const string PANEL_CLOSE = 'Close the panel';
 
-    public const string BACK_TO_CHANNELS = 'Channels';
+    /** The side panel's tabs. */
+    public const string TAB_ABOUT = 'About';
 
-    public const string SEARCH_LABEL = 'Search this channel';
+    public const string TAB_PINNED = 'Pinned';
+
+    public const string TAB_MEMBERS = 'Members';
+
+    public const string PANEL_TABS_LABEL = 'About this room';
+
+    /** The Members tab: search (from 21 members), "online", the member's own entry and the administrators' menu. */
+    public const string MEMBER_SEARCH_LABEL = 'Find a member';
+
+    public const string MEMBER_SEARCH_PLACEHOLDER = 'Name or affiliation…';
+
+    public const string MEMBER_SEARCH_NONE = 'No member answers to that.';
+
+    public const string MEMBER_ONLINE = 'online';
+
+    public const string MEMBER_MENU = 'Actions for :name';
+
+    public const string MEMBER_VIEW_PROFILE = 'View profile';
+
+    public const string MEMBER_SUSPEND = 'Suspend';
+
+    public const string MEMBER_SUSPEND_CONFIRM = 'Suspend :name from the community?';
+
+    public const string MEMBER_SUSPENDED = ':name has been suspended.';
+
+    public const string MEMBER_SUSPEND_NOTE = 'Suspended by an administrator from the chat.';
+
+    public const string SEARCH_LABEL = 'Search the conversation';
 
     public const string SEARCH_PLACEHOLDER = 'Search messages…';
 
-    public const string SEARCH_NONE = 'Nothing in this channel answers to that.';
+    public const string SEARCH_NONE = 'Nothing in the conversation answers to that.';
 
     public const string SEARCH_TOO_SHORT = 'Type a word or two to search.';
 
@@ -120,7 +146,7 @@ final class ChatCopy
 
     public const string STATUS_ADMIN = 'Administrator';
 
-    public const string STATUS_YOU = 'you';
+    public const string STATUS_YOU = 'You';
 
     public const string MESSAGE_FOCUSED = 'Linked message';
 
@@ -152,6 +178,45 @@ final class ChatCopy
 
     public const string COUNT_OVER = ':count characters over';
 
+    /** Attachments: the paperclip, its conduct note, drag and drop, previews and the cards in a message. */
+    public const string ATTACH = 'Attach files';
+
+    public const string ATTACH_NOTE = 'Do not upload material you do not have the right to share.';
+
+    public const string ATTACH_TYPES = 'Images (JPEG, PNG, WebP, HEIC) up to :image MB; PDF, Word, Excel, PowerPoint, CSV and ZIP up to :document MB; at most :max files.';
+
+    public const string DROP_HINT = 'Drop files to attach them';
+
+    public const string ATTACH_DESCRIPTION_LABEL = 'Describe the image';
+
+    public const string ATTACH_DESCRIPTION_PLACEHOLDER = 'A short description, for members who cannot see it';
+
+    public const string ATTACH_DESCRIPTION_REQUIRED = 'Describe each image in a few words before sending.';
+
+    public const string ATTACH_REMOVE = 'Remove :name';
+
+    public const string ATTACH_UPLOADING = 'Uploading';
+
+    public const string ATTACH_FAILED = 'Could not upload. Remove it and try again.';
+
+    public const string ATTACH_TOO_MANY = 'Attach at most :max files to one message.';
+
+    public const string ATTACH_TOO_LARGE = ':name is larger than :max MB.';
+
+    public const string ATTACH_UNSUPPORTED = ':name is not a file type the chat accepts.';
+
+    public const string ATTACH_WAIT = 'Wait for the files to finish uploading.';
+
+    public const string ATTACH_DOWNLOAD = 'Download';
+
+    public const string ATTACH_OPEN_IMAGE = 'Open image';
+
+    public const string ATTACHMENTS_LABEL = 'Attachments';
+
+    public const string ATTACH_GALLERY_LABEL = 'Images in the conversation';
+
+    public const string UPLOADS_OFF = 'File uploads are switched off for now.';
+
     /**
      * Everything the script needs as copy, keyed for the client config.
      *
@@ -174,6 +239,16 @@ final class ChatCopy
             'reportThanks' => self::REPORT_THANKS,
             'countLeft' => self::COUNT_LEFT,
             'countOver' => self::COUNT_OVER,
+            'attachTooMany' => self::ATTACH_TOO_MANY,
+            'attachTooLarge' => self::ATTACH_TOO_LARGE,
+            'attachUnsupported' => self::ATTACH_UNSUPPORTED,
+            'attachFailed' => self::ATTACH_FAILED,
+            'attachWait' => self::ATTACH_WAIT,
+            'attachDescribe' => self::ATTACH_DESCRIPTION_REQUIRED,
+            'attachRemove' => self::ATTACH_REMOVE,
+            'memberMenu' => self::MEMBER_MENU,
+            'suspendConfirm' => self::MEMBER_SUSPEND_CONFIRM,
+            'memberSearchNone' => self::MEMBER_SEARCH_NONE,
         ];
     }
 }

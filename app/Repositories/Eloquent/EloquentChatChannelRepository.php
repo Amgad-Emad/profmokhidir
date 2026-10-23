@@ -23,6 +23,16 @@ class EloquentChatChannelRepository extends BaseEloquentRepository implements Ch
         return $this->query()->where('slug', $slug)->first();
     }
 
+    public function findOrCreateBySlug(string $slug, array $attributes): ChatChannel
+    {
+        return $this->query()->firstOrCreate(['slug' => $slug], $attributes);
+    }
+
+    public function oldest(): ?ChatChannel
+    {
+        return $this->query()->orderBy('id')->first();
+    }
+
     public function slugExists(string $slug, ?int $ignoreId = null): bool
     {
         return $this->query()->where('slug', $slug)

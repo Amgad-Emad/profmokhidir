@@ -16,7 +16,9 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\AdminSearchController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\AwardController;
+use App\Http\Controllers\ChatAttachmentController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\ChatUploadController;
 use App\Http\Controllers\CommentaryController;
 use App\Http\Controllers\CommunityController;
 use App\Http\Controllers\CvController;
@@ -61,6 +63,7 @@ use App\Livewire\Admin\Users\Index as UserIndex;
 use App\Livewire\Admin\Videos\Form as VideoForm;
 use App\Livewire\Admin\Videos\Index as VideoIndex;
 use App\Livewire\Community\Chat\Room as ChatRoom;
+use App\Services\ChatAttachmentService;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
@@ -117,13 +120,30 @@ Route::post($sections[Sections::COMMUNITY]['path'].'/apply', [CommunityControlle
     ->middleware('throttle:'.RateLimits::COMMUNITY_SIGNUP)
     ->name($sections[Sections::COMMUNITY]['route'].'.apply');
 
+// One room: /community/chat. Attachments are staged in a temporary area first and
+// served only through signed links that check membership again.
 Route::middleware(['auth', 'verified', EnsureCommunityMember::ALIAS])
     ->prefix($sections[Sections::COMMUNITY]['path'].'/chat')
     ->name($sections[Sections::COMMUNITY]['route'].'.chat')
     ->group(function () {
-        Route::get('/', ChatController::class);
-        Route::get('/{channel:slug}', ChatRoom::class)->name('.channel');
+        Route::get('/', ChatRoom::class);
+        Route::post('/uploads', [ChatUploadController::class, 'store'])
+            ->middleware('throttle:'.RateLimits::CHAT_UPLOAD)
+            ->name('.uploads.store');
+        Route::delete('/uploads/{upload}', [ChatUploadController::class, 'destroy'])
+            ->whereUuid('upload')
+            ->name('.uploads.destroy');
+        Route::get('/attachments/{media}/{variant}', ChatAttachmentController::class)
+            ->middleware('signed')
+            ->whereNumber('media')
+            ->whereIn('variant', [ChatAttachmentService::VARIANT_ORIGINAL, ChatAttachmentService::VARIANT_THUMB, ChatAttachmentService::VARIANT_MEDIUM])
+            ->name('.attachments.show');
     });
+
+// The old channel addresses (/community/chat/general and so on) move permanently to the one room.
+Route::get($sections[Sections::COMMUNITY]['path'].'/chat/{channel}', ChatController::class)
+    ->where('channel', '[a-z0-9-]+')
+    ->name($sections[Sections::COMMUNITY]['route'].'.chat.legacy');
 
 $built = [Sections::ABOUT, Sections::CV, Sections::PUBLICATIONS, Sections::AWARDS, Sections::VIDEOS, Sections::PICTURES, Sections::TEACHING, Sections::COMMENTARY, Sections::COMMUNITY, Sections::OTHER, Sections::TRIBUTES];
 

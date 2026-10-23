@@ -13,8 +13,9 @@ use Illuminate\Support\Collection;
 /**
  * The one shape in which a chat message leaves the server for the browser.
  * Bodies are rendered to allowlisted HTML here, deleted messages carry only a
- * placeholder, a reply carries a plain excerpt of the message it answers, and
- * times are UTC ISO-8601 for the viewer's clock to format.
+ * placeholder, a reply carries a plain excerpt of the message it answers,
+ * attached files come with signed links (ChatAttachmentData), and times are
+ * UTC ISO-8601 for the viewer's clock to format.
  */
 final class ChatMessageData
 {
@@ -24,7 +25,7 @@ final class ChatMessageData
      *     body: string, html: string, created_at: string, updated_at: string, edited_at: ?string,
      *     version: int, deleted: bool, mine: bool, can_edit: bool, can_delete: bool, can_report: bool,
      *     reply_to: ?array{id: int, author: string, excerpt: string, deleted: bool},
-     *     pinned: bool, pinned_at: ?string, can_pin: bool
+     *     pinned: bool, pinned_at: ?string, can_pin: bool, attachments: list<array<string, mixed>>
      * }
      */
     public static function from(ChatMessage $message, User $viewer, bool $moderator = false): array
@@ -55,6 +56,7 @@ final class ChatMessageData
             'pinned' => ! $deleted && $message->isPinned(),
             'pinned_at' => $deleted ? null : $message->pinned_at?->toIso8601ZuluString(),
             'can_pin' => ! $deleted && $moderator,
+            'attachments' => ChatAttachmentData::collection($message),
         ];
     }
 
@@ -80,7 +82,7 @@ final class ChatMessageData
         return [
             'id' => (int) $message->getKey(),
             'author' => $message->user?->name ?? 'Former member',
-            'excerpt' => ChatText::excerpt((string) $message->body, ChatSettings::PIN_EXCERPT_LENGTH),
+            'excerpt' => ChatText::excerpt((string) $message->body, ChatSettings::PIN_EXCERPT_LENGTH) ?: ChatCopy::ATTACHMENTS_LABEL,
             'created_at' => $message->created_at?->toIso8601ZuluString() ?? now()->toIso8601ZuluString(),
             'pinned_at' => $message->pinned_at?->toIso8601ZuluString(),
             'pinned_by' => $message->relationLoaded('pinnedBy') ? $message->pinnedBy?->name : null,
@@ -112,7 +114,7 @@ final class ChatMessageData
         return [
             'id' => (int) $original->getKey(),
             'author' => $removed ? '' : ($original->user?->name ?? 'Former member'),
-            'excerpt' => $removed ? ChatCopy::REPLY_REMOVED : ChatText::excerpt((string) $original->body),
+            'excerpt' => $removed ? ChatCopy::REPLY_REMOVED : (ChatText::excerpt((string) $original->body) ?: ChatCopy::ATTACHMENTS_LABEL),
             'deleted' => $removed,
         ];
     }

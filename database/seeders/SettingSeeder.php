@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Constants\ChatAttachments;
 use App\Constants\SettingKeys;
 use App\Services\SettingService;
 use Illuminate\Database\Seeder;
@@ -24,6 +25,9 @@ class SettingSeeder extends Seeder
             SettingKeys::NOTIFICATION_EMAIL => 'admin@example.com',
             SettingKeys::MAIL_FROM_NAME => (string) config('app.name'),
             SettingKeys::MAIL_FROM_ADDRESS => (string) config('mail.from.address'),
+            SettingKeys::CHAT_UPLOADS_ENABLED => '1',
+            SettingKeys::CHAT_IMAGE_MAX_MB => (string) ChatAttachments::IMAGE_MAX_MB,
+            SettingKeys::CHAT_DOCUMENT_MAX_MB => (string) ChatAttachments::DOCUMENT_MAX_MB,
         ];
 
         $settings->seedDefaults($defaults);

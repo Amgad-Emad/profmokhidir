@@ -56,7 +56,7 @@ class ChatRoomTest extends TestCase
 
     private function room(?User $as = null): Testable
     {
-        return Livewire::actingAs($as ?? $this->member)->test(Room::class, ['channel' => $this->channel]);
+        return Livewire::actingAs($as ?? $this->member)->test(Room::class);
     }
 
     private function send(User $author, string $body): ChatMessage
@@ -333,7 +333,7 @@ class ChatRoomTest extends TestCase
         $this->assertSame([5, 10, 30], $config['backoff']);
         $this->assertSame(ChatSettings::BODY_MAX_LENGTH, $config['bodyMaxLength']);
 
-        $html = $this->actingAs($this->member)->get(route('community.chat.channel', $this->channel))->assertOk()
+        $html = $this->actingAs($this->member)->get(route('community.chat'))->assertOk()
             ->assertSee('data-chat-room', false)
             ->assertSee('chatRoom({', false)
             ->getContent();

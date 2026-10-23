@@ -13,6 +13,7 @@ use App\Repositories\Contracts\ChatChannelRepositoryInterface;
 use App\Repositories\Contracts\ChatMessageRepositoryInterface;
 use App\Repositories\Contracts\ChatReadRepositoryInterface;
 use App\Repositories\Contracts\ChatReportRepositoryInterface;
+use App\Repositories\Contracts\ChatUploadRepositoryInterface;
 use App\Repositories\Contracts\CommentaryRepositoryInterface;
 use App\Repositories\Contracts\CvEntryRepositoryInterface;
 use App\Repositories\Contracts\HomeQuoteRepositoryInterface;
@@ -39,6 +40,7 @@ use App\Repositories\Eloquent\EloquentChatChannelRepository;
 use App\Repositories\Eloquent\EloquentChatMessageRepository;
 use App\Repositories\Eloquent\EloquentChatReadRepository;
 use App\Repositories\Eloquent\EloquentChatReportRepository;
+use App\Repositories\Eloquent\EloquentChatUploadRepository;
 use App\Repositories\Eloquent\EloquentCommentaryRepository;
 use App\Repositories\Eloquent\EloquentCvEntryRepository;
 use App\Repositories\Eloquent\EloquentHomeQuoteRepository;
@@ -85,6 +87,7 @@ class RepositoryServiceProvider extends ServiceProvider
         ChatMessageRepositoryInterface::class => EloquentChatMessageRepository::class,
         ChatReadRepositoryInterface::class => EloquentChatReadRepository::class,
         ChatReportRepositoryInterface::class => EloquentChatReportRepository::class,
+        ChatUploadRepositoryInterface::class => EloquentChatUploadRepository::class,
         SearchRepositoryInterface::class => EloquentSearchRepository::class,
         AuditLogRepositoryInterface::class => EloquentAuditLogRepository::class,
         SettingRepositoryInterface::class => EloquentSettingRepository::class,

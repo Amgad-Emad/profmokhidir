@@ -11,6 +11,32 @@ namespace App\Constants;
  */
 final class ChatSettings
 {
+    /**
+     * The one room: a single Scientific Community conversation. It is still a row in
+     * chat_channels (every message keeps its channel_id) so the reliability code is unchanged.
+     */
+    public const string ROOM_SLUG = 'scientific-community';
+
+    public const string ROOM_NAME = 'Scientific Community';
+
+    public const string ROOM_DESCRIPTION = 'One conversation for the approved members of the Scientific Community.';
+
+    /** The side panel's tabs, in order. */
+    public const string TAB_ABOUT = 'about';
+
+    public const string TAB_PINNED = 'pinned';
+
+    public const string TAB_MEMBERS = 'members';
+
+    /** @var list<string> */
+    public const array TABS = [self::TAB_ABOUT, self::TAB_PINNED, self::TAB_MEMBERS];
+
+    /** The Members tab offers a search once the list is longer than this. */
+    public const int MEMBER_SEARCH_THRESHOLD = 20;
+
+    /** The composer grows with its text up to this share of the viewport height, then scrolls inside itself. */
+    public const int COMPOSER_MAX_VIEWPORT_PERCENT = 40;
+
     /** Longest message body, in characters, enforced on the server. */
     public const int BODY_MAX_LENGTH = 2000;
 
@@ -51,10 +77,10 @@ final class ChatSettings
 
     public const int SEARCH_LIMIT = 20;
 
-    /** Query-string parameter of a message permalink (/community/chat/{channel}?message=123). */
+    /** Query-string parameter of a message permalink (/community/chat?message=123). */
     public const string MESSAGE_PARAM = 'message';
 
-    /** Prefix of the localStorage key that keeps a member's draft per channel. */
+    /** Prefix of the localStorage key that keeps a member's draft. */
     public const string DRAFT_STORAGE_PREFIX = 'chat-draft:';
 
     /** How long a linked message stays highlighted, in milliseconds. */
@@ -129,6 +155,9 @@ final class ChatSettings
             'mathAttribute' => ChatFormat::MATH_ATTRIBUTE,
             'katexStylesheet' => asset(self::KATEX_STYLESHEET),
             'copy' => ChatCopy::client(),
+            'tabs' => self::TABS,
+            'memberSearchThreshold' => self::MEMBER_SEARCH_THRESHOLD,
+            'composerMaxViewportPercent' => self::COMPOSER_MAX_VIEWPORT_PERCENT,
         ];
     }
 }

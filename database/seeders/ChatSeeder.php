@@ -16,8 +16,8 @@ class ChatSeeder extends Seeder
      */
     public function run(ChatService $chat, ChatCorrespondenceService $correspondence, UserRepositoryInterface $users): void
     {
-        $channel = $chat->findChannel('general')
-            ?? $chat->createChannel('General', 'Open discussion for approved members of the Scientific Community.');
+        // The one Scientific Community room (created on first use).
+        $channel = $chat->room();
 
         if ($channel->messages()->exists()) {
             return;

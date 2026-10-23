@@ -16,7 +16,8 @@ use Livewire\Component;
 
 /**
  * Site settings (admin only): public contact details, the address that
- * receives tribute and community notifications, and the mail sender.
+ * receives tribute and community notifications, the mail sender, and the
+ * community chat upload switch and size limits.
  */
 class SiteSettings extends Component
 {
@@ -24,13 +25,14 @@ class SiteSettings extends Component
 
     public const string FIELD_PREFIX = 'form.';
 
-    /** @var array<string, string|null> */
+    /** @var array<string, string|bool|null> */
     public array $form = [];
 
     public function mount(): void
     {
         $this->authorize('viewAny', Setting::class);
         $this->form = $this->settings()->all();
+        $this->form[SettingKeys::CHAT_UPLOADS_ENABLED] = $this->form[SettingKeys::CHAT_UPLOADS_ENABLED] !== '0';
     }
 
     public function save(): void
@@ -50,7 +52,10 @@ class SiteSettings extends Component
             $values[$key] = $validated[$key] ?? null;
         }
 
+        $values[SettingKeys::CHAT_UPLOADS_ENABLED] = (bool) ($validated[SettingKeys::CHAT_UPLOADS_ENABLED] ?? false);
+
         $this->form = $this->settings()->update($values, auth()->user());
+        $this->form[SettingKeys::CHAT_UPLOADS_ENABLED] = $this->form[SettingKeys::CHAT_UPLOADS_ENABLED] !== '0';
         $this->toast('Site settings saved.');
     }
 

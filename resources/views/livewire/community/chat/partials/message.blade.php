@@ -28,12 +28,40 @@
         <div class="chat-message__body" dir="auto" x-html="m.html" data-message-body></div>
     </template>
 
+    {{-- Attached files: images as a grid of thumbnails that open in the lightbox, documents as cards with Download. --}}
+    <template x-if="!m.deleted && m.attachments && m.attachments.length > 0">
+        <div class="chat-attachments" data-attachments>
+            <ul class="chat-gallery" :class="'is-' + imagesOf(m).length" x-show="imagesOf(m).length > 0" aria-label="{{ ChatCopy::ATTACHMENTS_LABEL }}">
+                <template x-for="(a, i) in imagesOf(m)" :key="a.id || a.key">
+                    <li>
+                        <button type="button" class="chat-gallery__item" x-on:click="openLightbox(m, i, $event.currentTarget)" :aria-label="'{{ ChatCopy::ATTACH_OPEN_IMAGE }}: ' + a.alt" data-attachment-image>
+                            <img :src="a.thumb || a.preview" :alt="a.alt" loading="lazy" decoding="async" :width="a.width || null" :height="a.height || null">
+                        </button>
+                    </li>
+                </template>
+            </ul>
+            <ul class="chat-files" x-show="documentsOf(m).length > 0" aria-label="{{ ChatCopy::ATTACHMENTS_LABEL }}">
+                <template x-for="a in documentsOf(m)" :key="a.id || a.key">
+                    <li class="chat-file" data-attachment-document>
+                        <span class="chat-filemark" aria-hidden="true" x-text="a.extension"></span>
+                        <span class="min-w-0">
+                            <span class="chat-file__name" dir="auto" x-text="a.name"></span>
+                            <span class="chat-file__meta"><span x-text="a.type"></span> · <span x-text="a.size_label"></span></span>
+                        </span>
+                        <a class="chat-file__download" :href="a.url" x-show="a.url" download :aria-label="'{{ ChatCopy::ATTACH_DOWNLOAD }} ' + a.name" data-download>
+                            <x-icon name="download" class="size-4" /><span class="chat-file__download-word" aria-hidden="true">{{ ChatCopy::ATTACH_DOWNLOAD }}</span>
+                        </a>
+                    </li>
+                </template>
+            </ul>
+        </div>
+    </template>
+
     <template x-if="editing && editing.key === m.key">
         <form class="chat-edit" x-on:submit.prevent="saveEdit()">
             <x-form.textarea name="edit" id="chat-edit" :label="ChatCopy::EDIT_LABEL" hide-label :optional="false" :counter="false" rows="3"
                              :control="[
                                  'x-model' => 'editing.body',
-                                 ':maxlength' => 'config.bodyMaxLength',
                                  'x-on:keydown.enter.prevent' => 'if (!$event.shiftKey) saveEdit(); else insertNewline($event)',
                                  'x-on:keydown.escape.prevent.stop' => 'cancelEdit()',
                                  'x-init' => '$el.focus()',

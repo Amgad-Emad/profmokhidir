@@ -127,6 +127,16 @@ class MediaService
     }
 
     /**
+     * Move a media row onto another model's collection, leaving its files in place.
+     *
+     * @param  array<string, mixed>  $properties  keyed by MediaProperties
+     */
+    public function reassign(Media $media, HasMedia $model, string $collection, array $properties = []): Media
+    {
+        return $this->media->reassign($media, $model, $collection, $this->normaliseProperties($properties));
+    }
+
+    /**
      * Whether an image carries everything the public site needs (alt, caption, place, year).
      *
      * @return list<string> missing property keys

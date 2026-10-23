@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Constants\AuditAction;
 use App\Constants\CacheKeys;
+use App\Constants\ChatAttachments;
 use App\Constants\SettingKeys;
 use App\Models\User;
 use App\Repositories\Contracts\SettingRepositoryInterface;
@@ -15,7 +16,8 @@ use InvalidArgumentException;
 /**
  * Site settings: the public contact details, the address that receives staff
  * notifications (tributes awaiting review, new community applications) and
- * the mail sender. Values are cached; saving flushes the cache, writes the
+ * the mail sender, and whether (and how large) members may attach files in the
+ * community chat. Values are cached; saving flushes the cache, writes the
  * audit log and re-applies the mail sender to the running configuration.
  */
 class SettingService
@@ -74,6 +76,9 @@ class SettingService
             SettingKeys::NOTIFICATION_EMAIL => null,
             SettingKeys::MAIL_FROM_NAME => self::$configuredSender[SettingKeys::MAIL_FROM_NAME] ?? null,
             SettingKeys::MAIL_FROM_ADDRESS => self::$configuredSender[SettingKeys::MAIL_FROM_ADDRESS] ?? null,
+            SettingKeys::CHAT_UPLOADS_ENABLED => '1',
+            SettingKeys::CHAT_IMAGE_MAX_MB => (string) ChatAttachments::IMAGE_MAX_MB,
+            SettingKeys::CHAT_DOCUMENT_MAX_MB => (string) ChatAttachments::DOCUMENT_MAX_MB,
         ];
     }
 
@@ -204,6 +209,10 @@ class SettingService
 
     private static function clean(mixed $value): ?string
     {
+        if (is_bool($value)) {
+            return $value ? '1' : '0';
+        }
+
         if (! is_string($value) && ! is_numeric($value)) {
             return null;
         }

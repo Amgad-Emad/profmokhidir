@@ -19,11 +19,19 @@ final class RateLimits
     public const string CHAT_SEND = 'chat-send';
 
     /**
+     * Upload requests per member per minute at the HTTP layer. Each staged file also
+     * counts toward CHAT_SEND inside ChatAttachmentService, which is the real limit.
+     */
+    public const string CHAT_UPLOAD = 'chat-upload';
+
+    public const int CHAT_UPLOAD_PER_MINUTE = 30;
+
+    /**
      * @return list<string>
      */
     public static function all(): array
     {
-        return [self::COMMUNITY_SIGNUP, self::CHAT_SEND];
+        return [self::COMMUNITY_SIGNUP, self::CHAT_SEND, self::CHAT_UPLOAD];
     }
 
     public static function chatSendKey(int $userId): string

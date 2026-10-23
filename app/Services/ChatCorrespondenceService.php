@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Constants\AdminNavigation;
 use App\Constants\AuditAction;
 use App\Constants\ChatChange;
 use App\Constants\ChatSettings;
+use App\Constants\Permissions;
 use App\Events\ChatMessageChanged;
 use App\Exceptions\ChatMessageRemovedException;
 use App\Models\ChatChannel;
@@ -120,20 +122,33 @@ class ChatCorrespondenceService
     }
 
     /**
-     * Approved members, by name, for the side panel.
+     * Approved members, by name, for the side panel's Members tab. For an
+     * administrator each entry also carries a link to the member's account
+     * (Users & roles) and whether they may be suspended from here.
      *
-     * @return list<array{id: int, name: string, affiliation: ?string, initials: string}>
+     * @return list<array{id: int, name: string, affiliation: ?string, initials: string, profile_url?: ?string, can_suspend?: bool}>
      */
-    public function members(): array
+    public function members(?User $viewer = null): array
     {
+        $profiles = $viewer?->can(Permissions::MANAGE_USERS) ?? false;
+
         return $this->community->members()
             ->sortBy(fn (User $user): string => mb_strtolower($user->name), SORT_NATURAL)
-            ->map(fn (User $user): array => [
-                'id' => (int) $user->getKey(),
-                'name' => $user->name,
-                'affiliation' => $user->affiliation,
-                'initials' => Initials::of($user->name),
-            ])
+            ->map(function (User $user) use ($viewer, $profiles): array {
+                $entry = [
+                    'id' => (int) $user->getKey(),
+                    'name' => $user->name,
+                    'affiliation' => $user->affiliation,
+                    'initials' => Initials::of($user->name),
+                ];
+
+                if ($viewer !== null && ChatAccess::canModerate($viewer)) {
+                    $entry['profile_url'] = $profiles ? route(AdminNavigation::routeFor(AdminNavigation::USERS), ['search' => $user->email]) : null;
+                    $entry['can_suspend'] = ! $user->is($viewer) && $viewer->can('review', $user);
+                }
+
+                return $entry;
+            })
             ->values()
             ->all();
     }

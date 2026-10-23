@@ -9,7 +9,8 @@
         "perf": "node tests/perf/lighthouse.mjs",
         "qa:smoke": "node tests/qa/smoke.mjs",
         "qa:admin": "node tests/qa/admin-walkthrough.mjs",
-        "katex": "node scripts/copy-katex.mjs"
+        "katex": "node scripts/copy-katex.mjs",
+        "qa:chat": "node tests/qa/chat-fixes.mjs"
     },
     "devDependencies": {
         "@axe-core/playwright": "^4.11.1",

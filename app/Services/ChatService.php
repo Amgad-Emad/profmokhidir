@@ -52,6 +52,7 @@ class ChatService
         private readonly ConnectionInterface $db,
         private readonly TypesetterService $typesetter,
         private readonly ChatCorrespondenceService $correspondence,
+        private readonly ChatAttachmentService $attachments,
     ) {}
 
     // -- Channels -----------------------------------------------------------
@@ -72,6 +73,20 @@ class ChatService
     public function firstChannel(): ?ChatChannel
     {
         return $this->channels->allOrdered()->first();
+    }
+
+    /**
+     * The one Scientific Community room: the channel with the room's slug, else
+     * the oldest channel, else a new room (so /community/chat always opens).
+     */
+    public function room(): ChatChannel
+    {
+        return $this->channels->findBySlug(ChatSettings::ROOM_SLUG)
+            ?? $this->channels->oldest()
+            ?? $this->channels->findOrCreateBySlug(ChatSettings::ROOM_SLUG, [
+                'name' => ChatSettings::ROOM_NAME,
+                'description' => ChatSettings::ROOM_DESCRIPTION,
+            ]);
     }
 
     public function createChannel(string $name, ?string $description = null): ChatChannel
@@ -117,14 +132,20 @@ class ChatService
      *
      * A reply names the message it answers, which must belong to the same channel.
      *
+     * Attachments are files the author staged beforehand ([['id' => uuid, 'alt' => description]]):
+     * they are claimed inside the same transaction as the insert, so a retry with the same client
+     * uuid returns the original message and never attaches a file twice. A message may be files only.
+     *
+     * @param  list<array{id: string, alt?: string}>  $attachments
+     *
      * @throws AuthorizationException
      * @throws ChatRateLimitException
      */
-    public function send(ChatChannel $channel, User $author, string $body, string $clientUuid, ?int $replyToId = null): ChatMessage
+    public function send(ChatChannel $channel, User $author, string $body, string $clientUuid, ?int $replyToId = null, array $attachments = []): ChatMessage
     {
         $this->guardAccess($author);
 
-        $body = $this->cleanBody($body);
+        $body = $this->cleanBody($body, allowEmpty: $attachments !== []);
 
         if (! Str::isUuid($clientUuid)) {
             throw new InvalidArgumentException('client_uuid must be a UUID.');
@@ -148,10 +169,12 @@ class ChatService
             throw ChatRateLimitException::make($this->limiter->availableIn($limitKey));
         }
 
+        $prepared = $this->attachments->prepare($author, $attachments);
+
         // The channel row is NOT touched inside this transaction: the insert holds a
         // shared lock on it (foreign key), so two members sending at the same moment
         // would deadlock trying to upgrade it. The pointer moves forward after commit.
-        [$message, $created] = $this->db->transaction(function () use ($channel, $author, $body, $clientUuid, $replyTo): array {
+        [$message, $created] = $this->db->transaction(function () use ($channel, $author, $body, $clientUuid, $replyTo, $prepared): array {
             [$message, $created] = $this->messages->firstOrCreateByClientUuid((int) $author->getKey(), $clientUuid, [
                 'channel_id' => $channel->getKey(),
                 'body' => $body,
@@ -160,6 +183,7 @@ class ChatService
             ]);
 
             if ($created) {
+                $this->attachments->claim($message, $author, $prepared);
                 $this->reads->markRead((int) $channel->getKey(), (int) $author->getKey(), (int) $message->getKey());
                 ChatMessageChanged::dispatch((int) $channel->getKey(), (int) $message->getKey(), ChatChange::Sent);
             }
@@ -207,8 +231,8 @@ class ChatService
     }
 
     /**
-     * Soft-delete a message: the author or a moderator. Deleting twice is a
-     * no-op. Always audited.
+     * Soft-delete a message: the author or a moderator. Its attached files
+     * are deleted with it. Deleting twice is a no-op. Always audited.
      *
      * @throws AuthorizationException
      */
@@ -237,6 +261,7 @@ class ChatService
         return $this->db->transaction(function () use ($current, $actor, $isAuthor): bool {
             $channelId = (int) $current->channel_id;
             $deleted = $this->messages->delete($current);
+            $this->attachments->purge($current);
 
             $channel = $this->channels->find($channelId);
 
@@ -344,7 +369,7 @@ class ChatService
             'channels' => $this->channelSummaries($channel, $viewer),
             'focus' => $focus === null ? null : (int) $focus->getKey(),
             'pins' => $this->correspondence->pins($channel, $viewer),
-            'members' => $this->correspondence->members(),
+            'members' => $this->correspondence->members($viewer),
             'online' => $this->correspondence->online(),
         ];
     }
@@ -612,9 +637,13 @@ class ChatService
         }
     }
 
-    private function cleanBody(string $body): string
+    private function cleanBody(string $body, bool $allowEmpty = false): string
     {
         $body = ChatText::normalise($body);
+
+        if ($body === '' && $allowEmpty) {
+            return '';
+        }
 
         if ($body === '') {
             throw new InvalidArgumentException('A message cannot be empty.');

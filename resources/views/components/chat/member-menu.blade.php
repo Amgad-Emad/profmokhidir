@@ -1,6 +1,6 @@
 {{--
     The member's menu in the chat header: a disclosure button with their initials in a hairline
-    ring (and their name from 768px), opening their name and affiliation, Account and Sign out.
+    ring (and their name from 768px), opening their standing (member or administrator), name and affiliation, Account and Sign out.
     Escape and a click outside close it and return focus to the button.
 --}}
 @use('App\Constants\AdminNavigation')
@@ -15,7 +15,8 @@
     </button>
     <div id="chat-member-menu" class="chat-member-menu__panel bg-surface-panel" x-show="open" x-cloak>
         <p class="chat-member-menu__who">
-            <span class="smallcaps block text-lg text-ink">{{ $user->name }}</span>
+            <span class="t-label block text-accent-text">{{ $user->isAdmin() ? ChatCopy::STATUS_ADMIN : ChatCopy::STATUS_MEMBER }}</span>
+            <span class="smallcaps mt-1 block text-lg text-ink">{{ $user->name }}</span>
             @if (filled($user->affiliation))
                 <span class="t-label mt-1 block text-accent-text">{{ $user->affiliation }}</span>
             @endif

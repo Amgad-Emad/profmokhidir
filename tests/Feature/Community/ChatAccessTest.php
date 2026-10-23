@@ -36,7 +36,7 @@ class ChatAccessTest extends TestCase
     public function logged_out_visitors_are_redirected_to_sign_in(): void
     {
         $this->get(route('community.chat'))->assertRedirect(route('login'));
-        $this->get(route('community.chat.channel', $this->channel))->assertRedirect(route('login'));
+        $this->get(route('community.chat'))->assertRedirect(route('login'));
     }
 
     #[Test]
@@ -46,7 +46,7 @@ class ChatAccessTest extends TestCase
             $user = $factory->create();
 
             $this->actingAs($user)->get(route('community.chat'))->assertRedirect(route('community'));
-            $this->actingAs($user)->get(route('community.chat.channel', $this->channel))->assertRedirect(route('community'));
+            $this->actingAs($user)->get(route('community.chat'))->assertRedirect(route('community'));
         }
     }
 
@@ -54,7 +54,7 @@ class ChatAccessTest extends TestCase
     public function applicants_rejected_and_suspended_users_cannot_mount_the_component_or_call_send_directly(): void
     {
         foreach ([User::factory()->applicant(), User::factory()->rejectedApplicant(), User::factory()->suspendedMember(), User::factory()->editor()] as $factory) {
-            Livewire::actingAs($factory->create())->test(Room::class, ['channel' => $this->channel])->assertForbidden();
+            Livewire::actingAs($factory->create())->test(Room::class)->assertForbidden();
         }
 
         $this->assertSame(0, ChatMessage::query()->count());
@@ -65,7 +65,7 @@ class ChatAccessTest extends TestCase
     {
         // A member mounts legitimately, then their standing changes before the next request.
         $member = User::factory()->member()->create();
-        $component = Livewire::actingAs($member)->test(Room::class, ['channel' => $this->channel]);
+        $component = Livewire::actingAs($member)->test(Room::class);
 
         app(CommunityService::class)->reject(User::factory()->applicant()->create(), User::factory()->admin()->create());
         app(CommunityService::class)->remove($member, User::factory()->admin()->create());
@@ -83,9 +83,10 @@ class ChatAccessTest extends TestCase
         $other = User::factory()->member()->create(['name' => 'Yusuf Abdallah', 'affiliation' => 'Gezira']);
         ChatMessage::factory()->for($this->channel, 'channel')->for($other, 'user')->create(['body' => 'Welcome, friends']);
 
-        $this->actingAs($member)->get(route('community.chat'))->assertRedirect(route('community.chat.channel', $this->channel));
+        // The old channel addresses move permanently to the one room.
+        $this->actingAs($member)->get('/community/chat/general')->assertStatus(301)->assertRedirect(route('community.chat'));
 
-        $this->actingAs($member)->get(route('community.chat.channel', $this->channel))->assertOk()
+        $this->actingAs($member)->get(route('community.chat'))->assertOk()
             ->assertSee('<meta name="robots" content="noindex, nofollow">', false)
             ->assertSee('wire:poll.'.ChatSettings::pollIntervalSeconds().'s', false)
             ->assertSee('Welcome, friends')
@@ -95,7 +96,7 @@ class ChatAccessTest extends TestCase
 
         $uuid = (string) Str::uuid();
 
-        Livewire::actingAs($member)->test(Room::class, ['channel' => $this->channel])
+        Livewire::actingAs($member)->test(Room::class)
             ->call('send', 'Hello from a member', $uuid, 0, null)
             ->assertReturned(fn (array $result): bool => $result['ok'] === true && $result['message']['body'] === 'Hello from a member' && $result['message']['mine'] === true);
 
@@ -107,9 +108,9 @@ class ChatAccessTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
 
-        $this->actingAs($admin)->get(route('community.chat.channel', $this->channel))->assertOk();
+        $this->actingAs($admin)->get(route('community.chat'))->assertOk();
 
-        Livewire::actingAs($admin)->test(Room::class, ['channel' => $this->channel])
+        Livewire::actingAs($admin)->test(Room::class)
             ->call('sync', 0, null)
             ->assertReturned(fn (array $result): bool => $result['ok'] === true);
     }
@@ -120,7 +121,7 @@ class ChatAccessTest extends TestCase
         $member = User::factory()->member()->create();
         $admin = User::factory()->admin()->create();
 
-        $component = Livewire::actingAs($member)->test(Room::class, ['channel' => $this->channel])
+        $component = Livewire::actingAs($member)->test(Room::class)
             ->call('sync', 0, null)
             ->assertReturned(fn (array $result): bool => $result['ok'] === true)
             ->assertSet('accessRevoked', false);
@@ -138,16 +139,18 @@ class ChatAccessTest extends TestCase
         $this->assertDatabaseMissing('chat_messages', ['body' => 'Still here?']);
 
         // And the page itself is now refused.
-        $this->actingAs($member)->get(route('community.chat.channel', $this->channel))->assertRedirect(route('community'));
+        $this->actingAs($member)->get(route('community.chat'))->assertRedirect(route('community'));
     }
 
     #[Test]
-    public function the_chat_page_shows_an_empty_state_when_no_channel_exists(): void
+    public function the_room_is_opened_on_first_use_when_no_channel_exists(): void
     {
         $this->channel->delete();
 
         $this->actingAs(User::factory()->member()->create())->get(route('community.chat'))->assertOk()
-            ->assertSee('No channels have been opened yet')
+            ->assertSee(ChatSettings::ROOM_NAME)
             ->assertSee('<meta name="robots" content="noindex, nofollow">', false);
+
+        $this->assertSame([ChatSettings::ROOM_SLUG], ChatChannel::query()->pluck('slug')->all());
     }
 }

@@ -17,8 +17,8 @@ use Illuminate\Database\UniqueConstraintViolationException;
  */
 class EloquentChatMessageRepository extends BaseEloquentRepository implements ChatMessageRepositoryInterface
 {
-    /** Loaded with every listing: the author, and the answered message with its author. */
-    private const array RELATIONS = ['user', 'replyTo.user'];
+    /** Loaded with every listing: the author, the answered message with its author, and the attached files. */
+    private const array RELATIONS = ['user', 'replyTo.user', 'media'];
 
     public function __construct(ChatMessage $message)
     {
