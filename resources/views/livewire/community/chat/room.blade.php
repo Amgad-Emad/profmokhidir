@@ -13,7 +13,7 @@
         initial: @js($initial),
         config: @js($config),
         accessRevoked: @js($accessRevoked),
-        viewer: @js(['id' => auth()->id(), 'name' => auth()->user()->name, 'affiliation' => auth()->user()->affiliation]),
+        viewer: @js(['id' => auth()->id(), 'name' => auth()->user()->name, 'affiliation' => auth()->user()->affiliation, 'initials' => \App\Support\Initials::of(auth()->user()->name)]),
         canModerate: @js($canModerate),
         notices: @js(['suspendedHeading' => $suspendedHeading, 'suspended' => $suspendedMessage]),
      })"

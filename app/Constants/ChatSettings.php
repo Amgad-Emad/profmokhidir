@@ -66,6 +66,18 @@ final class ChatSettings
     /** Shown in place of the body of a deleted message. */
     public const string REMOVED_PLACEHOLDER = 'Message removed';
 
+    /** A member counts as online while their read cursor was touched within this window. */
+    public const int ONLINE_WINDOW_SECONDS = 300;
+
+    /** The poll refreshes the reader's cursor timestamp at most this often (presence without extra requests). */
+    public const int PRESENCE_TOUCH_SECONDS = 60;
+
+    /** The Enter / Shift+Enter hint under the composer is hidden once a member has sent this many messages. */
+    public const int HINT_HIDDEN_AFTER_SENDS = 3;
+
+    /** localStorage key counting the messages this browser has sent, for the hint above. */
+    public const string SENT_COUNT_STORAGE_KEY = 'chat-sent-count';
+
     /** Reconnect delays, in seconds, after a failed poll or send. */
     public const array BACKOFF_SECONDS = [5, 10, 30];
 
@@ -104,6 +116,8 @@ final class ChatSettings
             'backoff' => self::BACKOFF_SECONDS,
             'bodyMaxLength' => self::BODY_MAX_LENGTH,
             'countWarningRemaining' => self::COUNT_WARNING_REMAINING,
+            'hintHiddenAfterSends' => self::HINT_HIDDEN_AFTER_SENDS,
+            'sentCountKey' => self::SENT_COUNT_STORAGE_KEY,
             'pageSize' => self::PAGE_SIZE,
             'removedPlaceholder' => self::REMOVED_PLACEHOLDER,
             'groupWindowSeconds' => self::GROUP_WINDOW_SECONDS,

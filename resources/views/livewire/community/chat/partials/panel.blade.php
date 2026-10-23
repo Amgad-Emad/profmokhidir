@@ -1,5 +1,5 @@
 @use('App\Constants\ChatCopy')
-{{-- "About this channel": description, conduct in brief, pinned messages and the members. A column from 1280px, a drawer below. --}}
+{{-- "About this channel": description, conduct in brief, pinned messages, who is online and the members. A column from 1280px, a drawer below. --}}
 <div class="chat-panel__backdrop" x-show="panelOpen && !isWide" x-cloak x-on:click="closePanel()" aria-hidden="true"></div>
 <aside id="chat-panel" class="chat-panel" aria-labelledby="chat-panel-title" x-show="panelOpen" x-cloak x-trap.inert.noscroll="panelOpen && !isWide" data-chat-panel>
     <div class="chat-panel__head">
@@ -33,7 +33,7 @@
                     <button type="button" class="chat-pin" x-on:click="jumpTo(p.id)" data-pin-link>
                         <span class="smallcaps text-ink" x-text="p.author"></span>
                         <time class="chat-time ml-2" :datetime="p.created_at" x-text="formatDateTime(p.created_at)"></time>
-                        <span class="chat-pin__excerpt" x-text="p.excerpt"></span>
+                        <span class="chat-pin__excerpt" dir="auto" x-text="p.excerpt"></span>
                     </button>
                     <button type="button" class="chat-action ml-3" x-show="canModerate" x-on:click="unpin({ id: p.id })" data-unpin-panel>{{ ChatCopy::ACTION_UNPIN }}</button>
                 </li>
@@ -41,16 +41,42 @@
         </ol>
     </section>
 
-    <section class="chat-panel__section" aria-labelledby="chat-panel-members" data-members>
-        <h3 id="chat-panel-members" class="t-label text-accent-text">{{ ChatCopy::PANEL_MEMBERS }} <span class="ml-1 font-mono normal-case tracking-normal" x-text="members.length"></span></h3>
-        <ul class="chat-panel__list">
-            <template x-for="member in members" :key="member.id">
+    {{-- Who had the chat open in the last five minutes, from the read cursors the poll already refreshes; then everyone. --}}
+    <section class="chat-panel__section" aria-labelledby="chat-panel-online" data-members>
+        <h3 id="chat-panel-online" class="t-label text-accent-text" tabindex="-1">{{ ChatCopy::PANEL_ONLINE }} <span class="ml-1 normal-case tracking-normal" x-text="onlineMembers.length"></span></h3>
+        <p class="mt-2 text-sm font-light text-ink-muted" x-show="onlineMembers.filter((m) => m.id !== viewer.id).length === 0" data-online-none>{{ ChatCopy::ONLINE_NONE }}</p>
+        <ul class="chat-panel__list" data-online>
+            <template x-for="member in onlineMembers" :key="member.id">
                 <li class="chat-member">
-                    <span class="smallcaps text-ink" x-text="member.name"></span>
-                    <span class="t-label text-accent-text" x-show="member.id === viewer.id">{{ ChatCopy::STATUS_YOU }}</span>
-                    <span class="chat-member__affiliation" x-show="member.affiliation" x-text="member.affiliation"></span>
+                    <span class="chat-avatar" aria-hidden="true" x-text="member.initials"></span>
+                    <span class="min-w-0">
+                        <span class="smallcaps text-ink" x-text="member.name"></span>
+                        <span class="t-label text-accent-text ml-1" x-show="member.id === viewer.id">{{ ChatCopy::STATUS_YOU }}</span>
+                        <span class="chat-member__affiliation" x-show="member.affiliation" x-text="member.affiliation"></span>
+                    </span>
                 </li>
             </template>
         </ul>
+
+        <details class="chat-members-all mt-6" data-members-all>
+            <summary class="chat-members-all__summary">
+                <span class="t-label text-accent-text">{{ ChatCopy::ALL_MEMBERS }}</span>
+                <span class="ml-1 text-sm text-ink-muted" x-text="members.length"></span>
+                <span class="sr-only">{{ ChatCopy::PANEL_MEMBERS }}</span>
+                <x-icon name="chevron-down" class="chat-members-all__chevron size-4" />
+            </summary>
+            <ul class="chat-panel__list">
+                <template x-for="member in members" :key="member.id">
+                    <li class="chat-member">
+                        <span class="chat-avatar" aria-hidden="true" x-text="member.initials"></span>
+                        <span class="min-w-0">
+                            <span class="smallcaps text-ink" x-text="member.name"></span>
+                            <span class="t-label text-accent-text ml-1" x-show="member.id === viewer.id">{{ ChatCopy::STATUS_YOU }}</span>
+                            <span class="chat-member__affiliation" x-show="member.affiliation" x-text="member.affiliation"></span>
+                        </span>
+                    </li>
+                </template>
+            </ul>
+        </details>
     </section>
 </aside>

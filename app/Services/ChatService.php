@@ -306,7 +306,8 @@ class ChatService
      * @return array{
      *     messages: list<array<string, mixed>>, cursor: int, since: string, lastRead: int,
      *     hasOlder: bool, channels: list<array{id: int, name: string, slug: string, numeral: string, description: ?string, unread: int, current: bool}>,
-     *     focus: ?int, pins: list<array<string, mixed>>, members: list<array{id: int, name: string, affiliation: ?string}>
+     *     focus: ?int, pins: list<array<string, mixed>>, members: list<array{id: int, name: string, affiliation: ?string, initials: string}>,
+     *     online: list<int>
      * }
      */
     public function initialState(ChatChannel $channel, User $viewer, ?int $focusId = null): array
@@ -332,6 +333,7 @@ class ChatService
 
         $cursor = (int) ($messages->last()?->getKey() ?? $this->messages->latestIdInChannel((int) $channel->getKey()) ?? 0);
         $read = $this->reads->forUser((int) $channel->getKey(), (int) $viewer->getKey());
+        $this->correspondence->notePresence($channel, $viewer);
 
         return [
             'messages' => ChatMessageData::collection($messages, $viewer, $this->canModerate($viewer)),
@@ -343,6 +345,7 @@ class ChatService
             'focus' => $focus === null ? null : (int) $focus->getKey(),
             'pins' => $this->correspondence->pins($channel, $viewer),
             'members' => $this->correspondence->members(),
+            'online' => $this->correspondence->online(),
         ];
     }
 
@@ -350,7 +353,10 @@ class ChatService
      * One poll: new messages after the cursor plus edits and deletions of
      * messages the client already has, and the next cursors.
      *
-     * @return array{messages: list<array<string, mixed>>, changed: list<array<string, mixed>>, cursor: int, since: string, channels: list<array<string, mixed>>, pins: list<array<string, mixed>>}
+     * Each poll also refreshes the viewer's presence (at most once a minute)
+     * and returns who is online.
+     *
+     * @return array{messages: list<array<string, mixed>>, changed: list<array<string, mixed>>, cursor: int, since: string, channels: list<array<string, mixed>>, pins: list<array<string, mixed>>, online: list<int>}
      */
     public function sync(ChatChannel $channel, User $viewer, int $cursor, ?string $since): array
     {
@@ -362,6 +368,7 @@ class ChatService
 
         $new = $this->since($channel, $viewer, $cursor);
         $changed = $this->changedSince($channel, $viewer, $sinceAt, $cursor);
+        $this->correspondence->notePresence($channel, $viewer);
 
         return [
             'messages' => ChatMessageData::collection($new, $viewer, $moderator),
@@ -370,6 +377,7 @@ class ChatService
             'since' => $now,
             'channels' => $this->channelSummaries($channel, $viewer),
             'pins' => $this->correspondence->pins($channel, $viewer),
+            'online' => $this->correspondence->online(),
         ];
     }
 

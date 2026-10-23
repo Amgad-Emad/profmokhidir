@@ -39,7 +39,7 @@
                     <button type="button" class="chat-search__result" x-on:click="jumpTo(r.id)">
                         <span class="smallcaps text-ink" x-text="r.author"></span>
                         <time class="chat-time ml-2" :datetime="r.created_at" x-text="formatDateTime(r.created_at)"></time>
-                        <span class="chat-search__excerpt" x-text="r.body"></span>
+                        <span class="chat-search__excerpt" dir="auto" x-text="r.body"></span>
                     </button>
                 </li>
             </template>
@@ -71,12 +71,14 @@
                                 <template x-if="unreadFrom && run.messages[0].id === unreadFrom">
                                     <p class="chat-unread" data-unread-divider><span>{{ ChatCopy::NEW_DIVIDER }}</span></p>
                                 </template>
+                                {{-- Initials in a hairline ring (never the MK mark), then name, affiliation and time. --}}
+                                <span class="chat-avatar chat-run__avatar" aria-hidden="true" x-text="run.initials" data-avatar></span>
                                 <p class="chat-run__head">
                                     <span class="smallcaps chat-run__author" x-text="run.author"></span>
-                                    <span class="t-label text-accent-text" x-show="run.affiliation" x-text="run.affiliation"></span>
-                                    <time class="chat-time" :datetime="run.messages[0].created_at" x-text="formatTime(run.messages[0].created_at)"></time>
+                                    <span class="t-label chat-run__affiliation" x-show="run.affiliation" x-text="run.affiliation"></span>
+                                    <time class="t-label chat-time" :datetime="run.messages[0].created_at" x-text="formatTime(run.messages[0].created_at)"></time>
                                 </p>
-                                <ol>
+                                <ol class="chat-run__messages">
                                     <template x-for="(m, index) in run.messages" :key="m.key">
                                         @include('livewire.community.chat.partials.message')
                                     </template>

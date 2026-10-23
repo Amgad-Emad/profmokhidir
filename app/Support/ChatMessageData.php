@@ -39,6 +39,7 @@ final class ChatMessageData
             'user_id' => (int) $message->user_id,
             'author' => $author?->name ?? 'Former member',
             'affiliation' => $author?->affiliation,
+            'initials' => Initials::of($author?->name),
             'body' => $deleted ? '' : (string) $message->body,
             'html' => $deleted ? '' : ChatText::toHtml((string) $message->body),
             'created_at' => $message->created_at?->toIso8601ZuluString() ?? now()->toIso8601ZuluString(),

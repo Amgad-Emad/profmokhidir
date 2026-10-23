@@ -1,7 +1,7 @@
 @use('App\Constants\ChatCopy')
 {{-- One message inside a run. Rendered by Alpine inside x-for="(m, index) in run.messages". --}}
 <li class="chat-message"
-    :class="{ 'is-sending': m.state === 'sending', 'is-failed': m.state === 'failed', 'is-deleted': m.deleted, 'is-open': openKey === m.key }"
+    :class="{ 'is-sending': m.state === 'sending', 'is-failed': m.state === 'failed', 'is-deleted': m.deleted, 'is-open': openKey === m.key, 'is-arriving': m.arriving }"
     :id="m.id ? 'message-' + m.id : 'pending-' + m.key"
     :data-message-id="m.id" :data-client-uuid="m.client_uuid"
     tabindex="-1" data-chat-message
@@ -15,7 +15,7 @@
         <button type="button" class="chat-reply" x-on:click="jumpTo(m.reply_to.id)" data-reply-quote>
             <span class="t-label text-accent-text mr-2">{{ ChatCopy::REPLYING_TO }}</span>
             <span class="smallcaps chat-reply__author" x-show="!m.reply_to.deleted" x-text="m.reply_to.author"></span>
-            <span class="chat-reply__excerpt" :class="{ 'chat-reply__removed': m.reply_to.deleted }" x-text="m.reply_to.excerpt"></span>
+            <span class="chat-reply__excerpt" :class="{ 'chat-reply__removed': m.reply_to.deleted }" dir="auto" x-text="m.reply_to.excerpt"></span>
         </button>
     </template>
 
@@ -24,7 +24,8 @@
     </template>
 
     <template x-if="!m.deleted && !(editing && editing.key === m.key)">
-        <div class="chat-message__body" x-html="m.html"></div>
+        {{-- dir="auto" per message, and each line finds its own direction (unicode-bidi: plaintext), so Arabic and English read correctly side by side. --}}
+        <div class="chat-message__body" dir="auto" x-html="m.html" data-message-body></div>
     </template>
 
     <template x-if="editing && editing.key === m.key">
@@ -56,19 +57,29 @@
         </span>
     </p>
 
-    {{-- The toolbar is in the document (and the Tab order) only while the message is hovered, focused, or opened with Enter or a long press. --}}
-    <div class="chat-message__toolbar" role="toolbar" aria-label="Message actions" x-show="toolbarShown(m)" data-toolbar>
-        <button type="button" class="chat-action" x-on:click="startReply(m)" data-reply>{{ ChatCopy::ACTION_REPLY }}</button>
-        <button type="button" class="chat-action" x-on:click="copyLink(m)" data-copy-link>{{ ChatCopy::ACTION_COPY_LINK }}</button>
-        <button type="button" class="chat-action" x-show="m.can_pin && !m.pinned" x-on:click="pin(m)" data-pin>{{ ChatCopy::ACTION_PIN }}</button>
-        <button type="button" class="chat-action" x-show="m.can_pin && m.pinned" x-on:click="unpin(m)" data-unpin>{{ ChatCopy::ACTION_UNPIN }}</button>
-        <button type="button" class="chat-action" x-show="m.can_edit" x-on:click="startEdit(m)" data-edit>{{ ChatCopy::ACTION_EDIT }}</button>
-        <template x-if="m.can_delete">
-            <span>
-                <button type="button" class="chat-action" x-show="deleting !== m.key" x-on:click="deleting = m.key" data-delete>{{ ChatCopy::ACTION_DELETE }}</button>
-                <span x-show="deleting === m.key" x-cloak class="text-sm font-light text-ink-muted">{{ ChatCopy::DELETE_CONFIRM }} <button type="button" class="chat-action" x-on:click="remove(m)" data-delete-confirm>Yes</button> <button type="button" class="chat-action" x-on:click="deleting = null">No</button></span>
+    {{--
+        A small floating toolbar, shown only while the message is hovered, focused, or opened with
+        Enter or a long press (hidden ones are out of the Tab order). Icon buttons carry their name
+        as aria-label and as a tooltip (data-tip) on hover and focus.
+    --}}
+    <div class="chat-toolbar" role="toolbar" aria-label="Message actions" x-show="toolbarShown(m)" x-on:keydown.left.prevent.stop="toolbarStep($event, -1)" x-on:keydown.right.prevent.stop="toolbarStep($event, 1)" data-toolbar>
+        <template x-if="deleting !== m.key">
+            <span class="contents">
+                <button type="button" class="chat-toolbar__button" x-show="m.id" x-on:click="startReply(m)" aria-label="{{ ChatCopy::ACTION_REPLY }}" data-tip="{{ ChatCopy::ACTION_REPLY }}" data-reply><x-icon name="reply" class="size-4" /></button>
+                <button type="button" class="chat-toolbar__button" x-show="m.id" x-on:click="copyLink(m)" aria-label="{{ ChatCopy::ACTION_COPY_LINK }}" data-tip="{{ ChatCopy::ACTION_COPY_LINK }}" data-copy-link><x-icon name="link" class="size-4" /></button>
+                <button type="button" class="chat-toolbar__button" x-show="m.can_pin && !m.pinned" x-on:click="pin(m)" aria-label="{{ ChatCopy::ACTION_PIN }}" data-tip="{{ ChatCopy::ACTION_PIN }}" data-pin><x-icon name="pin" class="size-4" /></button>
+                <button type="button" class="chat-toolbar__button" x-show="m.can_pin && m.pinned" x-on:click="unpin(m)" aria-label="{{ ChatCopy::ACTION_UNPIN }}" data-tip="{{ ChatCopy::ACTION_UNPIN }}" data-unpin><x-icon name="pin" class="size-4" /></button>
+                <button type="button" class="chat-toolbar__button" x-show="m.can_edit" x-on:click="startEdit(m)" aria-label="{{ ChatCopy::ACTION_EDIT }}" data-tip="{{ ChatCopy::ACTION_EDIT }}" data-edit><x-icon name="pencil" class="size-4" /></button>
+                <button type="button" class="chat-toolbar__button" x-show="m.can_delete" x-on:click="confirmDelete(m)" aria-label="{{ ChatCopy::ACTION_DELETE }}" data-tip="{{ ChatCopy::ACTION_DELETE }}" data-delete><x-icon name="trash" class="size-4" /></button>
+                <button type="button" class="chat-toolbar__button" x-show="m.can_report" x-on:click="startReport(m)" aria-label="{{ ChatCopy::ACTION_REPORT }}" data-tip="{{ ChatCopy::ACTION_REPORT }}" data-report><x-icon name="flag" class="size-4" /></button>
             </span>
         </template>
-        <button type="button" class="chat-action" x-show="m.can_report" x-on:click="startReport(m)" data-report>{{ ChatCopy::ACTION_REPORT }}</button>
+        <template x-if="deleting === m.key">
+            <span class="chat-toolbar__confirm">
+                <span>{{ ChatCopy::DELETE_CONFIRM }}</span>
+                <button type="button" class="chat-action" x-on:click="remove(m)" x-init="$nextTick(() => $el.focus())" data-delete-confirm>Yes</button>
+                <button type="button" class="chat-action" x-on:click="cancelDelete(m)">No</button>
+            </span>
+        </template>
     </div>
 </li>

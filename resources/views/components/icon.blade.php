@@ -156,6 +156,15 @@
     @case('trash')
         <path d="M5 7h14" /><path d="M9.5 7V5h5v2" /><path d="M7 7l.8 12h8.4L17 7" />
         @break
+    @case('pencil')
+        <path d="M4.5 19.5l1-4L16 5l3 3L8.5 18.5z" /><path d="M14 7l3 3" />
+        @break
+    @case('flag')
+        <path d="M6 20.5V4.5" /><path d="M6 5h11l-2.5 4L17 13H6" />
+        @break
+    @case('send')
+        <path d="M4.5 12h11" /><path d="M4 5l16 7-16 7 2.5-7z" />
+        @break
     @case('keyboard')
         <rect x="3.5" y="6.5" width="17" height="11" rx="1" /><path d="M7 10h.01M10 10h.01M13 10h.01M16 10h.01M8 14h8" />
         @break

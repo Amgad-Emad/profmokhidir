@@ -114,14 +114,16 @@ final class BrandAudit
      * Named keyframe animations that may exist (each unhurried, nothing bounces):
      * the lightbox fade, the skeleton's slow breath, and the hairline that draws
      * along the foot of a form control while it loads (1600ms, the rule timing),
-     * and in the dashboard the drawer that slides in from the edge and the toast
-     * that fades in (600ms on the brand easing, off for reduced motion).
+     * in the dashboard the drawer that slides in from the edge and the toast
+     * that fades in (600ms on the brand easing, off for reduced motion), and in
+     * the community chat a new message rising 8px into place (300ms, off for
+     * reduced motion).
      *
      * @return list<string>
      */
     public static function permittedKeyframes(): array
     {
-        return ['lightbox-fade', 'skeleton-breathe', 'form-draw', 'admin-drawer-in', 'admin-toast-in'];
+        return ['lightbox-fade', 'skeleton-breathe', 'form-draw', 'admin-drawer-in', 'admin-toast-in', 'chat-arrive'];
     }
 
     /**

@@ -176,7 +176,10 @@
 .quick-action,
 .launch-checklist__list,
 .activity-feed,
-.library-tile {
+.library-tile,
+.chat-run.is-mine,
+.chat-toolbar,
+.chat-formatting {
     --accent-text: var(--accent-text-on-raised);
     --danger-tone: var(--accent-text-on-raised);
     --pending-tone: var(--accent-text-on-raised);

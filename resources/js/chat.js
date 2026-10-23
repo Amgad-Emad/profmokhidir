@@ -22,6 +22,8 @@ const TOP_THRESHOLD = 80;
 const WIDE_QUERY = '(min-width: 1280px)';
 const PANEL_STORAGE_KEY = 'chat-panel';
 const COMPOSER_MAX_HEIGHT = 192;
+/** How long a new message keeps its arrival class (the rise itself is 300ms in chat.css). */
+const ARRIVAL_MS = 600;
 
 function escapeHtml(text) {
     return String(text)
@@ -129,6 +131,7 @@ document.addEventListener('alpine:init', () => {
         channels: [],
         pins: [],
         members: [],
+        online: [],
         cursor: 0,
         since: null,
         hasOlder: false,
@@ -149,6 +152,8 @@ document.addEventListener('alpine:init', () => {
         hoverKey: null,
         focusKey: null,
         pressTimer: null,
+        sentCount: 0,
+        formattingOpen: false,
         reporting: false,
         reportTarget: null,
         reportReason: '',
@@ -189,6 +194,8 @@ document.addEventListener('alpine:init', () => {
             this.channels = initial.channels || [];
             this.pins = initial.pins || [];
             this.members = initial.members || [];
+            this.online = initial.online || [];
+            this.sentCount = Number(storage()?.getItem(this.config.sentCountKey)) || 0;
             this.cursor = initial.cursor || 0;
             this.since = initial.since || new Date().toISOString();
             this.hasOlder = Boolean(initial.hasOlder);
@@ -262,6 +269,24 @@ document.addEventListener('alpine:init', () => {
             return this.config.bodyMaxLength - this.draft.length;
         },
 
+        /** "200 characters left" from 1,800 characters, "12 characters over" past the limit. */
+        get countText() {
+            const left = this.remaining;
+            const n = Math.abs(left).toLocaleString();
+            return (left < 0 ? this.config.copy.countOver : this.config.copy.countLeft).replace(':count', n);
+        },
+
+        /** The Enter / Shift+Enter hint, until this browser has sent a few messages. */
+        get hintShown() {
+            return this.sentCount < this.config.hintHiddenAfterSends;
+        },
+
+        /** Members whose read cursor moved in the last five minutes (the poll keeps it fresh). */
+        get onlineMembers() {
+            const ids = new Set(this.online);
+            return this.members.filter((member) => ids.has(member.id));
+        },
+
         togglePanel() {
             this.panelOpen = !this.panelOpen;
             if (this.isWide) storage()?.setItem(PANEL_STORAGE_KEY, this.panelOpen ? 'open' : 'closed');
@@ -273,6 +298,22 @@ document.addEventListener('alpine:init', () => {
             this.panelOpen = false;
             if (this.isWide) storage()?.setItem(PANEL_STORAGE_KEY, 'closed');
             this.$root.querySelector('[data-panel-toggle]')?.focus();
+        },
+
+        /** The rail's "Members" link: open the side panel (a drawer below 1280px) at the members. */
+        showMembers() {
+            this.mobileView = 'conversation';
+            this.panelOpen = true;
+            if (this.isWide) storage()?.setItem(PANEL_STORAGE_KEY, 'open');
+            this.$nextTick(() => {
+                const heading = this.$root.querySelector('#chat-panel-online');
+                heading?.scrollIntoView({ block: 'start', behavior: reducedMotion() ? 'auto' : 'smooth' });
+                heading?.focus({ preventScroll: true });
+            });
+        },
+
+        toggleFormatting() {
+            this.formattingOpen = !this.formattingOpen;
         },
 
         showChannels() {
@@ -291,6 +332,11 @@ document.addEventListener('alpine:init', () => {
 
         onEscape() {
             if (this.reporting) return; // the dialog handles its own escape
+            if (this.formattingOpen) {
+                this.formattingOpen = false;
+                this.$root.querySelector('[data-formatting-toggle]')?.focus();
+                return;
+            }
             if (this.searchOpen) {
                 this.closeSearch();
                 return;
@@ -325,7 +371,7 @@ document.addEventListener('alpine:init', () => {
                 const sameRun = run && previous && previous.user_id === m.user_id && gap <= this.config.groupWindowSeconds && m.id !== this.unreadFrom;
 
                 if (!sameRun) {
-                    run = { key: m.key, mine: m.mine, author: m.author, affiliation: m.affiliation, messages: [] };
+                    run = { key: m.key, mine: m.mine, author: m.author, affiliation: m.affiliation, initials: m.initials || '', messages: [] };
                     day.runs.push(run);
                 }
 
@@ -356,8 +402,15 @@ document.addEventListener('alpine:init', () => {
             return url.toString();
         },
 
-        normalise(message) {
-            return { ...message, key: message.client_uuid || String(message.id), state: null, error: null, local: ++this.localSeq };
+        normalise(message, { arriving = false } = {}) {
+            return { ...message, key: message.client_uuid || String(message.id), state: null, error: null, local: ++this.localSeq, arriving };
+        },
+
+        /** Let a just-arrived message rise into place once, then drop the class so a re-render never replays it. */
+        settleArrival(message) {
+            setTimeout(() => {
+                message.arriving = false;
+            }, ARRIVAL_MS);
         },
 
         scheduleTypeset() {
@@ -486,10 +539,18 @@ document.addEventListener('alpine:init', () => {
             const message = this.messages.find((m) => m.key === key || String(m.id) === String(key));
             if (!message || message.deleted || !message.id) return;
             this.openKey = message.key;
-            this.$nextTick(() => {
+            // Wait a frame after Alpine renders: the toolbar may only just have been shown.
+            this.$nextTick(() => requestAnimationFrame(() => {
                 const toolbar = (element || this.$refs.scroller.querySelector(`#message-${message.id}`))?.querySelector('[data-toolbar] button:not([style*="display: none"])');
                 toolbar?.focus();
-            });
+            }));
+        },
+
+        /** Left and Right move between the visible buttons of a message's toolbar. */
+        toolbarStep(event, step) {
+            const buttons = Array.from(event.currentTarget.querySelectorAll('button')).filter((b) => b.offsetParent !== null);
+            const index = buttons.indexOf(document.activeElement);
+            buttons[(index + step + buttons.length) % buttons.length]?.focus();
         },
 
         closeActions(message) {
@@ -580,7 +641,7 @@ document.addEventListener('alpine:init', () => {
             let added = 0;
 
             for (const incoming of payload.messages || []) {
-                if (this.merge(incoming)) added++;
+                if (this.merge(incoming, { arriving: true })) added++;
             }
 
             for (const incoming of payload.changed || []) {
@@ -591,6 +652,7 @@ document.addEventListener('alpine:init', () => {
             if (payload.since) this.since = payload.since;
             if (payload.channels) this.channels = payload.channels;
             if (payload.pins) this.applyPins(payload.pins);
+            if (payload.online) this.online = payload.online;
 
             if (added > 0) {
                 this.$nextTick(() => {
@@ -617,12 +679,13 @@ document.addEventListener('alpine:init', () => {
          * Insert or update a message. Returns true when it was new to this client.
          * Matching is by id, then by client uuid (confirming an optimistic send).
          */
-        merge(incoming) {
+        merge(incoming, { arriving = false } = {}) {
             const byId = incoming.id ? this.messages.find((m) => m.id === incoming.id) : null;
             const target = byId || this.messages.find((m) => m.client_uuid && m.client_uuid === incoming.client_uuid);
 
             if (!target) {
-                this.messages.push(this.normalise(incoming));
+                this.messages.push(this.normalise(incoming, { arriving }));
+                if (arriving) this.settleArrival(this.messages[this.messages.length - 1]);
                 return true;
             }
 
@@ -700,6 +763,7 @@ document.addEventListener('alpine:init', () => {
                 user_id: this.viewer.id,
                 author: this.viewer.name,
                 affiliation: this.viewer.affiliation,
+                initials: this.viewer.initials,
                 body,
                 html: escapeHtml(body),
                 created_at: new Date().toISOString(),
@@ -716,10 +780,13 @@ document.addEventListener('alpine:init', () => {
             });
             message.state = STATE_SENDING;
             message.replyToId = reply ? reply.id : null;
+            message.arriving = true;
             this.messages.push(message);
             // Work on the reactive copy from here on: a state change on the plain
             // object would not re-render the "sending" / "not sent" flags.
             const tracked = this.messages[this.messages.length - 1];
+            this.settleArrival(tracked);
+            this.formattingOpen = false;
             this.draft = '';
             this.replyTo = null;
             this.$nextTick(() => {
@@ -747,6 +814,7 @@ document.addEventListener('alpine:init', () => {
                 if (result && result.ok) {
                     this.applySync(result.sync);
                     this.merge(result.message); // confirms the optimistic entry by client uuid
+                    this.countSent();
                     this.recovered();
                 } else {
                     this.failSend(message, result);
@@ -757,6 +825,15 @@ document.addEventListener('alpine:init', () => {
                 this.handleFailure(error);
             } finally {
                 this.sending = false;
+            }
+        },
+
+        countSent() {
+            this.sentCount += 1;
+            try {
+                storage()?.setItem(this.config.sentCountKey, String(this.sentCount));
+            } catch {
+                // The hint simply stays a little longer.
             }
         },
 
@@ -840,6 +917,17 @@ document.addEventListener('alpine:init', () => {
             } catch (error) {
                 this.handleFailure(error);
             }
+        },
+
+        /** The trash button asks first, inside the toolbar, which stays open while it asks. */
+        confirmDelete(message) {
+            this.openKey = message.key;
+            this.deleting = message.key;
+        },
+
+        cancelDelete(message) {
+            this.deleting = null;
+            this.$nextTick(() => this.$refs.scroller.querySelector(`#message-${message.id} [data-delete]`)?.focus());
         },
 
         async remove(message) {

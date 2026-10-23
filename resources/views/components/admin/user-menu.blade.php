@@ -4,9 +4,7 @@
     close it and return focus to the button.
 --}}
 @props(['user'])
-@php
-    $initials = collect(preg_split('/\s+/', trim($user->name)) ?: [])->filter()->map(fn (string $part): string => mb_strtoupper(mb_substr($part, 0, 1)))->take(2)->implode('');
-@endphp
+@php $initials = \App\Support\Initials::of($user->name); @endphp
 <div class="admin-user-menu" x-data="{ open: false }" x-on:keydown.escape="if (open) { open = false; $refs.button.focus() }" x-on:click.outside="open = false">
     <button type="button" class="admin-user-menu__button" x-ref="button" x-on:click="open = !open" aria-expanded="false" x-bind:aria-expanded="open.toString()" aria-controls="admin-user-menu" data-user-menu>
         <span class="admin-user-menu__initials" aria-hidden="true">{{ $initials }}</span>

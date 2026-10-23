@@ -6,6 +6,7 @@ namespace App\Repositories\Eloquent;
 
 use App\Models\ChatRead;
 use App\Repositories\Contracts\ChatReadRepositoryInterface;
+use DateTimeInterface;
 
 /**
  * @extends BaseEloquentRepository<ChatRead>
@@ -58,6 +59,42 @@ class EloquentChatReadRepository extends BaseEloquentRepository implements ChatR
         return $this->query()->where('user_id', $userId)
             ->pluck('last_read_message_id', 'channel_id')
             ->map(fn ($id): int => (int) $id)
+            ->all();
+    }
+
+    public function touch(int $channelId, int $userId, DateTimeInterface $staleBefore): bool
+    {
+        $now = now();
+
+        $created = $this->query()->toBase()->insertOrIgnore([
+            'channel_id' => $channelId,
+            'user_id' => $userId,
+            'last_read_message_id' => null,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]) > 0;
+
+        if ($created) {
+            return true;
+        }
+
+        return $this->query()
+            ->where('channel_id', $channelId)
+            ->where('user_id', $userId)
+            ->where('updated_at', '<', $staleBefore)
+            ->toBase()
+            ->update(['updated_at' => $now]) > 0;
+    }
+
+    public function activeUserIdsSince(DateTimeInterface $since): array
+    {
+        return $this->query()
+            ->where('updated_at', '>=', $since)
+            ->distinct()
+            ->orderBy('user_id')
+            ->pluck('user_id')
+            ->map(fn ($id): int => (int) $id)
+            ->values()
             ->all();
     }
 }

@@ -13,6 +13,17 @@ final class ChatCopy
 {
     public const string TITLE = 'Correspondence';
 
+    /** The one label beside the lockup in the chat header (a link to the community page). */
+    public const string HEADER_LABEL = 'Community';
+
+    public const string MEMBER_MENU_LABEL = 'Account menu';
+
+    public const string MENU_ACCOUNT = 'Account';
+
+    public const string MENU_SIGN_OUT = 'Sign out';
+
+    public const string MEMBERS_LINK = 'Members';
+
     public const string CHANNELS_HEADING = 'Channels';
 
     public const string PANEL_TITLE = 'About this channel';
@@ -22,6 +33,12 @@ final class ChatCopy
     public const string PANEL_PINNED = 'Pinned';
 
     public const string PANEL_MEMBERS = 'Members';
+
+    public const string PANEL_ONLINE = 'Online now';
+
+    public const string ONLINE_NONE = 'No one else has been here in the last five minutes.';
+
+    public const string ALL_MEMBERS = 'All members';
 
     public const string PANEL_OPEN = 'About this channel';
 
@@ -125,6 +142,16 @@ final class ChatCopy
 
     public const string FORMATTING_HEADING = 'Formatting';
 
+    /** The small "Aa" button that opens the formatting help, and its accessible name. */
+    public const string FORMATTING_BUTTON = 'Aa';
+
+    public const string FORMATTING_TOGGLE = 'Formatting help';
+
+    /** The late character count under the composer. */
+    public const string COUNT_LEFT = ':count characters left';
+
+    public const string COUNT_OVER = ':count characters over';
+
     /**
      * Everything the script needs as copy, keyed for the client config.
      *
@@ -145,6 +172,8 @@ final class ChatCopy
             'searchNone' => self::SEARCH_NONE,
             'searchTooShort' => self::SEARCH_TOO_SHORT,
             'reportThanks' => self::REPORT_THANKS,
+            'countLeft' => self::COUNT_LEFT,
+            'countOver' => self::COUNT_OVER,
         ];
     }
 }

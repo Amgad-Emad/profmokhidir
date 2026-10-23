@@ -13,15 +13,18 @@ use App\Models\ChatChannel;
 use App\Models\ChatMessage;
 use App\Models\User;
 use App\Repositories\Contracts\ChatMessageRepositoryInterface;
+use App\Repositories\Contracts\ChatReadRepositoryInterface;
 use App\Support\ChatAccess;
 use App\Support\ChatMessageData;
+use App\Support\Initials;
+use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Str;
 
 /**
  * The correspondence-room features around the message stream: pins (moderators
  * only, audited), search within a channel and the members list for the side
- * panel. Access is checked here on every call, as in ChatService.
+ * panel with who is online. Access is checked here on every call, as in ChatService.
  */
 class ChatCorrespondenceService
 {
@@ -29,6 +32,7 @@ class ChatCorrespondenceService
         private readonly ChatMessageRepositoryInterface $messages,
         private readonly AuditLogService $audit,
         private readonly CommunityService $community,
+        private readonly ChatReadRepositoryInterface $reads,
     ) {}
 
     /**
@@ -118,7 +122,7 @@ class ChatCorrespondenceService
     /**
      * Approved members, by name, for the side panel.
      *
-     * @return list<array{id: int, name: string, affiliation: ?string}>
+     * @return list<array{id: int, name: string, affiliation: ?string, initials: string}>
      */
     public function members(): array
     {
@@ -128,8 +132,36 @@ class ChatCorrespondenceService
                 'id' => (int) $user->getKey(),
                 'name' => $user->name,
                 'affiliation' => $user->affiliation,
+                'initials' => Initials::of($user->name),
             ])
             ->values()
             ->all();
+    }
+
+    /**
+     * Record that the viewer has the channel open. Called from the page load
+     * and the existing poll, and written at most once per
+     * ChatSettings::PRESENCE_TOUCH_SECONDS, so presence costs no extra requests.
+     */
+    public function notePresence(ChatChannel $channel, User $viewer, ?CarbonImmutable $now = null): void
+    {
+        ChatAccess::guard($viewer);
+
+        $now ??= CarbonImmutable::now();
+
+        $this->reads->touch((int) $channel->getKey(), (int) $viewer->getKey(), $now->subSeconds(ChatSettings::PRESENCE_TOUCH_SECONDS));
+    }
+
+    /**
+     * Ids of the people who had the chat open in the last
+     * ChatSettings::ONLINE_WINDOW_SECONDS, for "Online now" in the side panel.
+     *
+     * @return list<int>
+     */
+    public function online(?CarbonImmutable $now = null): array
+    {
+        $now ??= CarbonImmutable::now();
+
+        return $this->reads->activeUserIdsSince($now->subSeconds(ChatSettings::ONLINE_WINDOW_SECONDS));
     }
 }
