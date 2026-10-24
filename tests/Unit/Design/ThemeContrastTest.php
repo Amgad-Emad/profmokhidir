@@ -24,13 +24,13 @@ class ThemeContrastTest extends TestCase
     private const float UI_MINIMUM = 3.0;
 
     /** Inks that carry text of any size. */
-    private const array TEXT_INKS = ['ink', 'ink-strong', 'ink-muted', 'ink-quiet', 'accent-text', 'danger-tone', 'pending-tone', 'success-tone', 'neutral-tone'];
+    private const array TEXT_INKS = ['ink', 'ink-strong', 'ink-muted', 'ink-quiet', 'accent-text', 'danger', 'pending-tone', 'success-tone', 'neutral-tone'];
 
     /** Inks that sit inside a form field (its text, placeholder and hint). */
     private const array FIELD_INKS = ['ink', 'ink-strong', 'ink-muted', 'ink-quiet'];
 
     /** Tokens that mark a user-interface boundary (WCAG 1.4.11). */
-    private const array UI_INKS = ['focus', 'rule-strong'];
+    private const array UI_INKS = ['focus', 'rule-strong', 'danger'];
 
     protected function setUp(): void
     {
@@ -45,6 +45,69 @@ class ThemeContrastTest extends TestCase
         foreach (Brand::colours() as $name => $hex) {
             $this->assertSame(strtolower($hex), strtolower($this->blocks[':root']["--brand-{$name}"] ?? ''), "--brand-{$name}");
         }
+    }
+
+    #[Test]
+    public function the_danger_red_is_declared_once_and_matches_the_functional_constants(): void
+    {
+        foreach (Brand::functionalColours() as $name => $hex) {
+            $this->assertSame(strtolower($hex), strtolower($this->blocks[':root']["--functional-{$name}"] ?? ''), "--functional-{$name}");
+        }
+
+        $light = ['theme' => 'light', 'layers' => [], 'raised' => false];
+        $dark = ['theme' => 'dark', 'layers' => [], 'raised' => false];
+        $band = ['theme' => 'light', 'layers' => ['.on-dark'], 'raised' => false];
+
+        $this->assertSame(strtolower(Brand::DANGER_LIGHT), $this->hex($this->resolve('danger', $light)));
+        $this->assertSame(strtolower(Brand::DANGER_DARK), $this->hex($this->resolve('danger', $dark)));
+        $this->assertSame(strtolower(Brand::DANGER_DARK), $this->hex($this->resolve('danger', $band)), 'an evergreen band in the light theme takes the dark danger');
+    }
+
+    /**
+     * The danger tokens in every context: the red as text on every surface and on the
+     * error-summary wash, and the ink of the final confirm button on its solid fill
+     * (default, hover and pressed).
+     */
+    #[Test]
+    public function the_danger_tokens_reach_4_5_to_1_in_both_themes_on_every_surface(): void
+    {
+        $failures = [];
+        $checked = 0;
+
+        foreach (self::contexts() as $label => $context) {
+            $danger = $this->resolve('danger', $context);
+
+            foreach ($this->surfacesFor($context) as $surfaceName => $surface) {
+                $checked += 2;
+                $wash = $this->over($this->resolve('danger-wash', $context), $this->over($surface, [1, 1, 1, 1]));
+
+                foreach (["--{$surfaceName}" => $surface, "--danger-wash on --{$surfaceName}" => $wash] as $name => $background) {
+                    if (($ratio = $this->ratio($danger, $background)) < self::TEXT_MINIMUM) {
+                        $failures[] = sprintf('%s: --danger on %s is %.2f:1', $label, $name, $ratio);
+                    }
+                }
+
+                // The error summary's ink on the wash as well.
+                foreach (['ink', 'ink-strong'] as $ink) {
+                    $checked++;
+
+                    if (($ratio = $this->ratio($this->resolve($ink, $context), $wash)) < self::TEXT_MINIMUM) {
+                        $failures[] = sprintf('%s: --%s on --danger-wash over --%s is %.2f:1', $label, $ink, $surfaceName, $ratio);
+                    }
+                }
+            }
+
+            foreach (['danger-surface', 'danger-surface-hover', 'danger-surface-pressed'] as $fill) {
+                $checked++;
+
+                if (($ratio = $this->ratio($this->resolve('danger-ink', $context), $this->resolve($fill, $context))) < self::TEXT_MINIMUM) {
+                    $failures[] = sprintf('%s: --danger-ink on --%s is %.2f:1', $label, $fill, $ratio);
+                }
+            }
+        }
+
+        $this->assertGreaterThan(100, $checked);
+        $this->assertSame([], $failures, "Danger below 4.5:1:\n".implode("\n", $failures));
     }
 
     #[Test]
@@ -147,11 +210,12 @@ class ThemeContrastTest extends TestCase
 
     /**
      * Black is accepted only as a mix partner that deepens evergreen (the solid button's hover).
+     * The functional danger red is the one exception to the palette.
      */
     #[Test]
     public function every_token_mixes_only_brand_colours(): void
     {
-        $palette = array_map('strtolower', [...Brand::colours(), '#000000']);
+        $palette = array_map('strtolower', [...Brand::colours(), ...Brand::functionalColours(), '#000000']);
 
         foreach (self::contexts() as $label => $context) {
             foreach ($this->tokenNames() as $token) {

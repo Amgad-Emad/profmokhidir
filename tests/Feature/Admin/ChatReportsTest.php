@@ -77,7 +77,7 @@ class ChatReportsTest extends TestCase
 
         Livewire::actingAs($this->admin)->test(Reports::class)
             ->call('confirm', Reports::ACTION_DELETE, $this->report->id)
-            ->assertSee('Remove this message?')
+            ->assertSee('Remove this message permanently?')
             ->call('deleteMessage')
             ->assertSee('No reports are waiting.');
 

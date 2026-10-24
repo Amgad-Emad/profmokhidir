@@ -195,11 +195,11 @@ class Applications extends Component
     public function dialogCopy(): ?array
     {
         return match ($this->decidingAction) {
-            self::ACTION_APPROVE => ['title' => 'Approve this application?', 'body' => 'They become a member and can use the chat straight away. They will be emailed.', 'confirm' => 'Approve'],
-            self::ACTION_REJECT => ['title' => 'Reject this application?', 'body' => 'They will be emailed. You can still approve them later from the Rejected tab.', 'confirm' => 'Reject'],
-            self::ACTION_SUSPEND => ['title' => 'Suspend this member?', 'body' => 'Their chat access ends immediately and they will be emailed. You can reinstate them later.', 'confirm' => 'Suspend'],
-            self::ACTION_REINSTATE => ['title' => 'Reinstate this member?', 'body' => 'Their chat access returns immediately and they will be emailed.', 'confirm' => 'Reinstate'],
-            self::ACTION_REMOVE => ['title' => 'Remove this member?', 'body' => 'Their membership ends and they will be emailed. Their account and messages remain; they may apply again.', 'confirm' => 'Remove'],
+            self::ACTION_APPROVE => ['title' => 'Approve this application?', 'body' => 'They become a member and can use the chat straight away. They will be emailed.', 'confirm' => 'Approve', 'danger' => false],
+            self::ACTION_REJECT => ['title' => 'Reject this application?', 'body' => 'They will be emailed. You can still approve them later from the Rejected tab.', 'confirm' => 'Reject', 'danger' => true],
+            self::ACTION_SUSPEND => ['title' => 'Suspend this member?', 'body' => 'Their chat access ends immediately and they will be emailed. You can reinstate them later.', 'confirm' => 'Suspend', 'danger' => true],
+            self::ACTION_REINSTATE => ['title' => 'Reinstate this member?', 'body' => 'Their chat access returns immediately and they will be emailed.', 'confirm' => 'Reinstate', 'danger' => false],
+            self::ACTION_REMOVE => ['title' => 'Remove this member?', 'body' => 'Their membership ends and they will be emailed. Their account and messages remain; they may apply again.', 'confirm' => 'Remove', 'danger' => true],
             default => null,
         };
     }

@@ -18,6 +18,12 @@
  | (labels, focus and strong rules), because brass on cypress is 2.9:1.
  | tests/Unit/Design/ThemeContrastTest reads this file and checks every pair.
  |
+ | Danger. The one colour outside the palette (App\Constants\Brand::functionalColours(),
+ | --functional-*): a deep oxblood on light surfaces and a softer tint on dark ones, for
+ | destructive actions and error states only, never for decoration. --danger is the text,
+ | border and icon colour; --danger-surface the solid fill of the final confirm button;
+ | --danger-ink the text on that fill; --danger-wash the faint tint behind an error summary.
+ |
  | Never set color-scheme below the root: light-dark() is resolved where a token is
  | used, so a nested color-scheme would flip the band tokens inside it.
  */
@@ -32,6 +38,10 @@
     --brand-stone: #d3d1c5;
     --brand-ash: #575a55;
     --brand-bronze: #6f5a34;
+
+    /* The functional exception: danger red, only for destructive actions and errors. */
+    --functional-danger-light: #9b2c2c;
+    --functional-danger-dark: #efb0a5;
 
     color-scheme: light dark;
 
@@ -88,8 +98,21 @@
     --selection: light-dark(var(--brand-linen), var(--brand-cypress));
     --selection-ink: light-dark(var(--brand-evergreen), var(--brand-ivory));
 
+    /* ---- Danger (destructive actions and errors; meaning never rests on colour alone: each carries an icon or a word). */
+    --danger: light-dark(var(--functional-danger-light), var(--functional-danger-dark));
+    --danger-surface: light-dark(var(--functional-danger-light), var(--functional-danger-dark));
+    --danger-surface-hover: light-dark(
+        color-mix(in srgb, var(--functional-danger-light) 84%, var(--brand-evergreen)),
+        color-mix(in srgb, var(--functional-danger-dark) 78%, var(--brand-ivory))
+    );
+    --danger-surface-pressed: light-dark(
+        color-mix(in srgb, var(--functional-danger-light) 70%, var(--brand-evergreen)),
+        color-mix(in srgb, var(--functional-danger-dark) 62%, var(--brand-ivory))
+    );
+    --danger-ink: light-dark(var(--brand-ivory), var(--brand-evergreen));
+    --danger-wash: color-mix(in srgb, var(--danger) 6%, transparent);
+
     /* ---- Status tones (meaning never rests on colour alone: each tone carries an icon). */
-    --danger-tone: light-dark(var(--brand-bronze), var(--brand-brass));
     --pending-tone: light-dark(var(--brand-bronze), var(--brand-brass));
     --success-tone: light-dark(var(--brand-cypress), var(--brand-champagne));
     --neutral-tone: light-dark(var(--brand-ash), color-mix(in srgb, var(--brand-stone) 80%, transparent));
@@ -135,7 +158,11 @@
     --focus: light-dark(var(--brand-brass), var(--brand-champagne));
     --selection: var(--brand-champagne);
     --selection-ink: var(--brand-evergreen);
-    --danger-tone: light-dark(var(--brand-brass), var(--brand-champagne));
+    --danger: var(--functional-danger-dark);
+    --danger-surface: var(--functional-danger-dark);
+    --danger-surface-hover: color-mix(in srgb, var(--functional-danger-dark) 78%, var(--brand-ivory));
+    --danger-surface-pressed: color-mix(in srgb, var(--functional-danger-dark) 62%, var(--brand-ivory));
+    --danger-ink: var(--brand-evergreen);
     --pending-tone: light-dark(var(--brand-brass), var(--brand-champagne));
     --success-tone: var(--brand-champagne);
     --neutral-tone: color-mix(in srgb, var(--brand-champagne) 80%, transparent);
@@ -154,7 +181,11 @@
     --accent-text: var(--brand-brass);
     --focus: var(--brand-brass);
     --rule-strong: var(--brand-brass);
-    --danger-tone: var(--brand-brass);
+    --danger: var(--functional-danger-dark);
+    --danger-surface: var(--functional-danger-dark);
+    --danger-surface-hover: color-mix(in srgb, var(--functional-danger-dark) 78%, var(--brand-ivory));
+    --danger-surface-pressed: color-mix(in srgb, var(--functional-danger-dark) 62%, var(--brand-ivory));
+    --danger-ink: var(--brand-evergreen);
     --pending-tone: var(--brand-brass);
     --accent-text-on-raised: var(--brand-champagne);
     --focus-on-raised: var(--brand-champagne);
@@ -169,6 +200,7 @@
 .admin-topbar,
 .admin-table-wrap,
 .admin-dialog,
+.confirm-dialog,
 .admin-drawer,
 .admin-toast,
 .admin-user-menu__panel,
@@ -188,7 +220,6 @@
 .chat-toolbar,
 .chat-formatting {
     --accent-text: var(--accent-text-on-raised);
-    --danger-tone: var(--accent-text-on-raised);
     --pending-tone: var(--accent-text-on-raised);
     --focus: var(--focus-on-raised);
     --rule-strong: var(--rule-strong-on-raised);
@@ -210,8 +241,8 @@
 .btn {
     --btn-tint: color-mix(in srgb, var(--ink) 8%, transparent);
     --btn-tint-strong: color-mix(in srgb, var(--ink) 14%, transparent);
-    --btn-danger-tint: color-mix(in srgb, var(--danger-tone) 6%, transparent);
-    --btn-danger-tint-strong: color-mix(in srgb, var(--danger-tone) 10%, transparent);
+    --btn-danger-tint: color-mix(in srgb, var(--danger) 5%, transparent);
+    --btn-danger-tint-strong: color-mix(in srgb, var(--danger) 8%, transparent);
 
     /* Primary: the solid pill. */
     --btn-primary-bg: var(--fill);
@@ -265,7 +296,7 @@
     --btn-secondary-border-loading: var(--ink);
     --btn-secondary-icon-loading: var(--ink);
 
-    /* Quiet: underlined text; the underline turns from brass to the ink on hover. With `danger` the ink follows the danger rows below. */
+    /* Quiet: underlined text; the underline turns from brass to the ink on hover. Never for a destructive action: that is danger. */
     --btn-quiet-bg: transparent;
     --btn-quiet-ink: var(--ink);
     --btn-quiet-border: transparent;
@@ -317,33 +348,59 @@
     --btn-icon-border-loading: transparent;
     --btn-icon-icon-loading: var(--ink);
 
-    /* Danger: the outline pill in the danger tone (bronze on ivory, brass on evergreen, champagne on cypress).
-       Any tint behind bronze or brass lowers its contrast, so under the pointer the label takes the strong ink
-       and the danger-tone border carries the meaning. */
+    /* Danger: the outline pill in the danger red, for secondary destructive actions (Move to trash, Remove,
+       Reject, Suspend, Delete message). Hover lays a faint wash of the red behind the red label. */
     --btn-danger-bg: transparent;
-    --btn-danger-ink: var(--danger-tone);
-    --btn-danger-border: var(--danger-tone);
-    --btn-danger-icon: var(--danger-tone);
+    --btn-danger-ink: var(--danger);
+    --btn-danger-border: var(--danger);
+    --btn-danger-icon: var(--danger);
     --btn-danger-bg-hover: var(--btn-danger-tint);
-    --btn-danger-ink-hover: var(--ink-strong);
-    --btn-danger-border-hover: var(--danger-tone);
-    --btn-danger-icon-hover: var(--ink-strong);
+    --btn-danger-ink-hover: var(--danger);
+    --btn-danger-border-hover: var(--danger);
+    --btn-danger-icon-hover: var(--danger);
     --btn-danger-bg-active: var(--btn-danger-tint-strong);
-    --btn-danger-ink-active: var(--ink-strong);
-    --btn-danger-border-active: var(--danger-tone);
-    --btn-danger-icon-active: var(--ink-strong);
+    --btn-danger-ink-active: var(--danger);
+    --btn-danger-border-active: var(--danger);
+    --btn-danger-icon-active: var(--danger);
     --btn-danger-bg-focus: var(--btn-danger-tint);
-    --btn-danger-ink-focus: var(--ink-strong);
-    --btn-danger-border-focus: var(--danger-tone);
-    --btn-danger-icon-focus: var(--ink-strong);
+    --btn-danger-ink-focus: var(--danger);
+    --btn-danger-border-focus: var(--danger);
+    --btn-danger-icon-focus: var(--danger);
     --btn-danger-bg-disabled: transparent;
     --btn-danger-ink-disabled: var(--ink-muted);
     --btn-danger-border-disabled: var(--rule-strong);
     --btn-danger-icon-disabled: var(--ink-muted);
     --btn-danger-bg-loading: transparent;
-    --btn-danger-ink-loading: var(--danger-tone);
-    --btn-danger-border-loading: var(--danger-tone);
-    --btn-danger-icon-loading: var(--danger-tone);
+    --btn-danger-ink-loading: var(--danger);
+    --btn-danger-border-loading: var(--danger);
+    --btn-danger-icon-loading: var(--danger);
+
+    /* Danger filled: the solid red pill, only for the final confirm button inside a confirmation
+       dialog ("Delete permanently"). Hover deepens the fill (light) or lifts it (dark); the ink never changes. */
+    --btn-danger-filled-bg: var(--danger-surface);
+    --btn-danger-filled-ink: var(--danger-ink);
+    --btn-danger-filled-border: var(--danger-surface);
+    --btn-danger-filled-icon: var(--danger-ink);
+    --btn-danger-filled-bg-hover: var(--danger-surface-hover);
+    --btn-danger-filled-ink-hover: var(--danger-ink);
+    --btn-danger-filled-border-hover: var(--danger-surface-hover);
+    --btn-danger-filled-icon-hover: var(--danger-ink);
+    --btn-danger-filled-bg-active: var(--danger-surface-pressed);
+    --btn-danger-filled-ink-active: var(--danger-ink);
+    --btn-danger-filled-border-active: var(--danger-surface-pressed);
+    --btn-danger-filled-icon-active: var(--danger-ink);
+    --btn-danger-filled-bg-focus: var(--danger-surface-hover);
+    --btn-danger-filled-ink-focus: var(--danger-ink);
+    --btn-danger-filled-border-focus: var(--danger-surface-hover);
+    --btn-danger-filled-icon-focus: var(--danger-ink);
+    --btn-danger-filled-bg-disabled: transparent;
+    --btn-danger-filled-ink-disabled: var(--ink-muted);
+    --btn-danger-filled-border-disabled: var(--rule-strong);
+    --btn-danger-filled-icon-disabled: var(--ink-muted);
+    --btn-danger-filled-bg-loading: var(--danger-surface);
+    --btn-danger-filled-ink-loading: var(--danger-ink);
+    --btn-danger-filled-border-loading: var(--danger-surface);
+    --btn-danger-filled-icon-loading: var(--danger-ink);
 }
 
 /* Tailwind's default palette is removed: the only colour utilities are the semantic tokens below. */
@@ -384,7 +441,10 @@
     --color-focus: var(--focus);
     --color-selection: var(--selection);
     --color-selection-ink: var(--selection-ink);
-    --color-danger-tone: var(--danger-tone);
+    --color-danger: var(--danger);
+    --color-danger-surface: var(--danger-surface);
+    --color-danger-ink: var(--danger-ink);
+    --color-danger-wash: var(--danger-wash);
     --color-pending-tone: var(--pending-tone);
     --color-success-tone: var(--success-tone);
     --color-neutral-tone: var(--neutral-tone);

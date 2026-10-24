@@ -8,9 +8,9 @@
     <section id="upload" class="mt-10 rounded-card border border-rule bg-surface-panel p-5 sm:p-6" aria-labelledby="upload-heading" data-upload>
         <h2 id="upload-heading" class="font-display text-2xl font-light">Upload photos</h2>
         <p class="mt-1 text-sm font-light text-ink-muted">Choose the album first, then drop up to 20 photos at once. They upload one batch at a time; the line shows how far it has got.</p>
-        <div class="mt-5 grid gap-4 md:grid-cols-[minmax(0,18rem)_1fr]">
-            <x-form.combobox model="uploadAlbumId" label="Into album" :options="$albums" placeholder="Type to find an album" required />
-            <x-form.upload model="uploads" label="Photos" :hint="$uploadHint" :accept="$uploadAccept" multiple image />
+        <div class="form-row mt-5">
+            <x-form.combobox class="form-col--third" model="uploadAlbumId" label="Into album" :options="$albums" placeholder="Type to find an album" required />
+            <x-form.upload class="form-col--two-thirds" model="uploads" label="Photos" :hint="$uploadHint" :accept="$uploadAccept" multiple image />
         </div>
     </section>
 
@@ -26,10 +26,10 @@
                 </button>
             @endforeach
         </div>
-        <form novalidate class="grid gap-4 md:grid-cols-4" wire:submit.prevent role="search" aria-label="Search images">
-            <x-form.input type="search" model="search" id="search" live label="Search" :optional="false" loading="search" class="md:col-span-2" placeholder="File name, alt text, caption or place" autocomplete="off" data-shortcut="search" />
-            <x-form.select model="album" id="filter-album" live label="Album" :optional="false" placeholder="All albums" :options="$albums" data-filter="album" />
-            <x-form.select model="collection" id="filter-collection" live label="Used as" :optional="false" placeholder="Anything" :options="$collections" />
+        <form novalidate class="form-row" wire:submit.prevent role="search" aria-label="Search images">
+            <x-form.input type="search" model="search" id="search" live label="Search" :optional="false" loading="search" class="form-col--half" placeholder="File name, alt text, caption or place" autocomplete="off" data-shortcut="search" />
+            <x-form.select model="album" id="filter-album" class="form-col--quarter" live label="Album" :optional="false" placeholder="All albums" :options="$albums" data-filter="album" />
+            <x-form.select model="collection" id="filter-collection" class="form-col--quarter" live label="Used as" :optional="false" placeholder="Anything" :options="$collections" />
         </form>
     </div>
 
@@ -82,7 +82,7 @@
                 <form wire:submit="saveDetails" class="mt-6 space-y-4" novalidate>
                     <x-admin.image-details prefix="details" :required="$editingRequired" />
                     <div class="flex flex-wrap items-center justify-between gap-3 border-t border-rule pt-5">
-                        <x-button variant="quiet" size="sm" danger type="button" wire:click="confirm('delete', {{ (int) $editing->getKey() }})" data-delete><x-icon name="trash" class="size-4" />Delete image</x-button>
+                        <x-button variant="danger" size="sm" type="button" wire:click="confirm('delete', {{ (int) $editing->getKey() }})" data-delete><x-icon name="trash" class="size-4" />Delete image</x-button>
                         <div class="flex flex-wrap gap-3">
                             <x-button type="button" variant="quiet" wire:click="cancelEdit">Cancel</x-button>
                             <x-button type="submit" variant="primary" wire:loading.attr="disabled">Save details</x-button>
@@ -93,7 +93,7 @@
         @endif
     </x-admin.drawer>
 
-    <x-admin.confirm-dialog :show="$confirming !== null" title="Delete this image for good?" action="delete" confirm-label="Delete image">
+    <x-admin.confirm-dialog :show="$confirming !== null" danger title="Delete this image permanently?" action="delete" confirm-label="Delete permanently">
         @if ($confirming)
             @php
                 $role = match ($confirmingUsage['collection']) {
@@ -103,7 +103,7 @@
                 };
             @endphp
             <p data-usage><strong class="font-medium">{{ $confirming->file_name }}</strong> is used by <strong class="font-medium">{{ $confirmingUsage['type_label'] }}: {{ $confirmingUsage['label'] }}</strong>{{ $confirmingUsage['trashed'] ? ' (in the trash)' : '' }}{{ $role }}.</p>
-            <p class="mt-2">The file is removed from that page at once and cannot be restored.</p>
+            <p class="mt-2">The file is removed from that page at once. {{ \App\Constants\ConfirmDialog::IRREVERSIBLE }}</p>
         @endif
     </x-admin.confirm-dialog>
 </div>

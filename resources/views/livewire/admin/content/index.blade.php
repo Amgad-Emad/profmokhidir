@@ -6,7 +6,7 @@
 
     <x-admin.flash />
     @error('publish')
-        <x-alert tone="bronze" role="alert" class="mt-8">{{ $message }}</x-alert>
+        <x-alert tone="danger" role="alert" class="mt-8">{{ $message }}</x-alert>
     @enderror
 
     {{-- Active / Trash tabs --}}
@@ -126,7 +126,10 @@
                             </td>
                             <td class="text-right">
                                 @if ($view === ContentIndex::VIEW_TRASH)
-                                    <x-button variant="quiet" size="sm" type="button" wire:click="restoreMany([{{ $item->getKey() }}])" data-restore>Restore<span class="sr-only"> {{ $label }}</span></x-button>
+                                    <div class="flex flex-wrap items-center justify-end gap-x-4 gap-y-2">
+                                        <x-button variant="quiet" size="sm" type="button" wire:click="restoreMany([{{ $item->getKey() }}])" data-restore>Restore<span class="sr-only"> {{ $label }}</span></x-button>
+                                        <x-button variant="danger" size="sm" type="button" wire:click="confirm('{{ ContentIndex::ACTION_PURGE }}', {{ $item->getKey() }})" data-purge><x-icon name="trash" class="size-4" />{{ \App\Constants\ConfirmDialog::PURGE_LABEL }}<span class="sr-only"> {{ $label }}</span></x-button>
+                                    </div>
                                 @else
                                     <x-admin.row-menu :label="$label">
                                         <a href="{{ $editUrl }}" class="row-menu__item"><x-icon name="feather" class="size-4" />Edit</a>
@@ -155,4 +158,10 @@
     @endif
 
     <x-admin.bulk-bar :count="count($selected)" />
+
+    @if ($purging)
+        <x-admin.confirm-dialog :show="true" danger :title="$purging['title']" action="purge" :confirm-label="$purging['confirm']" data-purge-dialog>
+            {{ $purging['body'] }}
+        </x-admin.confirm-dialog>
+    @endif
 </div>

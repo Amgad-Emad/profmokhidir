@@ -40,7 +40,7 @@
                             </span>
                         </template>
                     </span>
-                    <x-button variant="icon" type="button" class="chat-tool" x-on:click="removeAttachment(a)" x-bind:aria-label="config.copy.attachRemove.replace(':name', a.name)" data-remove-attachment>
+                    <x-button variant="danger" size="round" type="button" class="chat-tool" x-on:click="removeAttachment(a)" x-bind:aria-label="config.copy.attachRemove.replace(':name', a.name)" data-remove-attachment>
                         <x-icon name="close" class="size-4" />
                     </x-button>
                 </li>

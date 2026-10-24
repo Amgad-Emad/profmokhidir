@@ -5,10 +5,10 @@
     <x-admin.edit-layout :editor="$editor" :sections="['video' => 'The recording', 'source' => 'Where it plays', 'filing' => 'Filing', 'poster' => 'Poster image']" class="mt-10">
         <x-admin.form-section id="video" title="The recording">
             <x-form.input model="form.title" label="Title" required hint="For example Inaugural lecture, University of Khartoum." />
-            <div class="grid gap-6 sm:grid-cols-3">
-                <x-form.date model="form.date" label="Date" hint="When it was recorded." />
-                <x-form.input model="form.event" label="Event" hint="The occasion." />
-                <x-form.input model="form.location" label="Location" hint="City or hall." />
+            <div class="form-row">
+                <x-form.date class="form-col--third" model="form.date" label="Date" hint="When it was recorded." />
+                <x-form.input class="form-col--third" model="form.event" label="Event" hint="The occasion." />
+                <x-form.input class="form-col--third" model="form.location" label="Location" hint="City or hall." />
             </div>
             <x-form.textarea model="form.description" label="Description" rows="4" hint="What the recording is about, in two or three sentences." />
         </x-admin.form-section>
@@ -19,9 +19,9 @@
             <x-form.input model="form.captions_url" label="Captions link" type="url" placeholder="https://" hint="A WebVTT captions file, so people who cannot hear can follow." />
         </x-admin.form-section>
         <x-admin.form-section id="filing" title="Filing">
-            <div class="grid gap-6 sm:grid-cols-2">
-                <x-form.select model="form.decade" label="Decade" :options="$decades" placeholder="From the date" hint="Where the recording is filed when videos are grouped by decade. Leave empty to use its date." />
-                <x-form.toggle model="form.is_featured" label="Featured recording" hint="Opens the Videos page. Keep it to one or two." class="sm:self-end" />
+            <div class="form-row">
+                <x-form.select class="form-col--half" model="form.decade" label="Decade" :options="$decades" placeholder="From the date" hint="Where the recording is filed when videos are grouped by decade. Leave empty to use its date." />
+                <x-form.toggle model="form.is_featured" label="Featured recording" hint="Opens the Videos page. Keep it to one or two." class="form-col--half" />
             </div>
             @unless ($isNew)
                 <x-form.input model="form.slug" label="Web address" hint="The last part of the page's address. Leave it as it is unless the link must change." class="font-mono" />

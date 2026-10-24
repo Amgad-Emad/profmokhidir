@@ -39,7 +39,7 @@
     }
 
     .form-drop:has([aria-invalid='true']) {
-        border-color: var(--danger-tone);
+        border-color: var(--danger);
     }
 
     /* The real file input covers the zone, so a click or a drop anywhere reaches it. */
@@ -122,7 +122,7 @@
     }
 
     .form-file__action--remove {
-        color: var(--danger-tone);
+        color: var(--danger);
         text-decoration-color: currentColor;
     }
 
@@ -298,9 +298,9 @@
         align-items: flex-start;
         gap: 1rem;
         padding: 1.5rem;
-        border: 1px solid var(--danger-tone);
+        border: 1px solid var(--danger);
         border-radius: var(--radius-card);
-        background-color: var(--surface-raised);
+        background-color: var(--danger-wash);
         color: var(--ink);
         font-size: 1rem;
         font-weight: 300;
@@ -316,9 +316,13 @@
         outline-offset: 2px;
     }
 
+    .form-summary > svg,
+    .form-summary__title {
+        color: var(--danger);
+    }
+
     .form-summary__title {
         font-weight: 500;
-        color: var(--ink-strong);
     }
 
     .form-summary a {

@@ -37,6 +37,7 @@
             @include('livewire.community.chat.partials.conversation')
             @include('livewire.community.chat.partials.panel')
             @include('livewire.community.chat.partials.report-dialog')
+            @include('livewire.community.chat.partials.delete-dialog')
 
             {{-- The site's lightbox, fed with the images of the message that was opened. --}}
             <div x-data="chatLightbox" x-on:chat-lightbox.window="openWith($event.detail)" data-chat-lightbox>

@@ -7,15 +7,15 @@
             <x-form.input model="form.title" label="Title" required hint="For example Lecture 3: Soil water." />
             <x-form.select model="form.type" label="Type" :options="$types" required hint="What kind of material it is." />
             <x-form.textarea model="form.description" label="Description" rows="4" hint="What a student will find in it." />
-            <div class="grid gap-6 sm:grid-cols-2">
-                <x-form.input model="form.version" label="Version" hint="For example 2nd edition." />
-                <x-form.date model="form.material_date" label="Date" hint="When this version was written." />
+            <div class="form-row">
+                <x-form.input class="form-col--half" model="form.version" label="Version" hint="For example 2nd edition." />
+                <x-form.date class="form-col--half" model="form.material_date" label="Date" hint="When this version was written." />
             </div>
         </x-admin.form-section>
         <x-admin.form-section id="course" title="Course">
-            <div class="grid gap-6 sm:grid-cols-2">
-                <x-form.input model="form.course" label="Course" hint="Materials with the same course are shown together." />
-                <x-form.input model="form.topic" label="Topic" hint="A finer grouping inside the course." />
+            <div class="form-row">
+                <x-form.input class="form-col--half" model="form.course" label="Course" hint="Materials with the same course are shown together." />
+                <x-form.input class="form-col--half" model="form.topic" label="Topic" hint="A finer grouping inside the course." />
             </div>
             <x-form.textarea model="form.course_description" label="Course description" rows="2" hint="A sentence or two under the course heading. Only one material per course needs it; the first filled in is used." />
         </x-admin.form-section>

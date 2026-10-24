@@ -40,6 +40,12 @@ abstract class ContentPolicy
         return $user->can(Permissions::MANAGE_CONTENT);
     }
 
+    /** Delete a trashed record for good. */
+    public function forceDelete(User $user, Model $model): bool
+    {
+        return $user->can(Permissions::MANAGE_CONTENT);
+    }
+
     public function publish(User $user, Model $model): bool
     {
         return $user->can(Permissions::MANAGE_CONTENT);

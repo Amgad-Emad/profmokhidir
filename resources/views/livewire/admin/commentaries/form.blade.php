@@ -5,14 +5,14 @@
     <x-admin.edit-layout :editor="$editor" :sections="['opening' => 'Title & summary', 'text' => 'The text', 'topics' => 'Topics & links']" class="mt-10">
         <x-admin.form-section id="opening" title="Title & summary">
             <x-form.input model="form.title" label="Title" required hint="The heading readers see first." />
-            <div class="grid gap-6 sm:grid-cols-2">
-                <x-form.date model="form.date" label="Date" hint="When it was written or published." />
-                <x-form.input model="form.byline" label="Byline" hint="Who wrote it, if not the Professor." />
+            <div class="form-row">
+                <x-form.date class="form-col--half" model="form.date" label="Date" hint="When it was written or published." />
+                <x-form.input class="form-col--half" model="form.byline" label="Byline" hint="Who wrote it, if not the Professor." />
             </div>
             <x-form.textarea model="form.summary" label="Summary" rows="3" hint="Two sentences shown in the list and in search results." />
-            <div class="grid gap-6 sm:grid-cols-[2fr_1fr]">
-                <x-form.textarea model="form.epigraph" label="Epigraph" rows="2" hint="An optional short quotation set under the title." />
-                <x-form.input model="form.epigraph_attribution" label="Epigraph source" hint="Who said it." />
+            <x-form.textarea model="form.epigraph" label="Epigraph" rows="2" hint="An optional short quotation set under the title." />
+            <div class="form-row">
+                <x-form.input class="form-col--half" model="form.epigraph_attribution" label="Epigraph source" hint="Who said it." />
             </div>
         </x-admin.form-section>
         <x-admin.form-section id="text" title="The text">

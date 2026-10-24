@@ -10,10 +10,10 @@
             <x-form.textarea model="form.role_description" label="Description" rows="4" hint="A sentence or two about the role, if it needs explaining." />
         </x-admin.form-section>
         <x-admin.form-section id="dates" title="Dates">
-            <div class="grid gap-6 sm:grid-cols-3">
-                <x-form.year model="form.start_year" label="Start year" hint="Four digits." />
-                <x-form.year model="form.end_year" label="End year" hint="Leave empty while it is ongoing." />
-                <x-form.date model="form.last_updated_at" label="Last updated" hint="Only for long-running entries." />
+            <div class="form-row">
+                <x-form.year class="form-col--third" model="form.start_year" label="Start year" hint="Four digits." />
+                <x-form.year class="form-col--third" model="form.end_year" label="End year" hint="Leave empty while it is ongoing." />
+                <x-form.date class="form-col--third" model="form.last_updated_at" label="Last updated" hint="Only for long-running entries." />
             </div>
         </x-admin.form-section>
     </x-admin.edit-layout>

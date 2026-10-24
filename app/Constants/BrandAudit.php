@@ -42,8 +42,9 @@ final class BrandAudit
     }
 
     /**
-     * Hex colours allowed besides the nine brand tokens: pure white and black
-     * (Brand::permittedExtras) and fully transparent values.
+     * Hex colours allowed besides the nine brand tokens: the functional danger
+     * red (Brand::functionalColours, exactly these two values), pure white and
+     * black (Brand::permittedExtras) and fully transparent values.
      *
      * @return list<string>
      */
@@ -51,6 +52,7 @@ final class BrandAudit
     {
         return array_map('strtoupper', [
             ...Brand::colours(),
+            ...Brand::functionalColours(),
             ...Brand::permittedExtras(),
             '#FFF', '#000', '#0000', '#00000000', '#FFF0', '#FFFFFF00',
         ]);
@@ -83,13 +85,15 @@ final class BrandAudit
     }
 
     /**
-     * Matches a raw brand colour variable (--brand-brass, --color-evergreen) wherever it is read.
+     * Matches a raw brand colour variable (--brand-brass, --color-evergreen) or a raw
+     * functional colour (--functional-danger-light) wherever it is read.
      */
     public static function rawColourVariablePattern(): string
     {
         $names = implode('|', array_keys(Brand::colours()));
+        $functional = implode('|', array_keys(Brand::functionalColours()));
 
-        return '/--(?:brand|color)-(?:'.$names.')(?![\w-])/';
+        return '/--(?:(?:brand|color)-(?:'.$names.')|functional-(?:'.$functional.'))(?![\w-])/';
     }
 
     /**

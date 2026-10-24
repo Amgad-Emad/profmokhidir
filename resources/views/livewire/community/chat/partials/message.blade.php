@@ -94,23 +94,14 @@
         as aria-label and as a tooltip (data-tip) on hover and focus.
     --}}
     <div class="chat-toolbar" role="toolbar" aria-label="Message actions" x-show="toolbarShown(m)" x-on:keydown.left.prevent.stop="toolbarStep($event, -1)" x-on:keydown.right.prevent.stop="toolbarStep($event, 1)" data-toolbar>
-        <template x-if="deleting !== m.key">
-            <span class="contents">
-                <x-button variant="icon" type="button" class="chat-toolbar__button" x-show="m.id" x-on:click="startReply(m)" aria-label="{{ ChatCopy::ACTION_REPLY }}" data-tip="{{ ChatCopy::ACTION_REPLY }}" data-reply><x-icon name="reply" class="size-4" /></x-button>
-                <x-button variant="icon" type="button" class="chat-toolbar__button" x-show="m.id" x-on:click="copyLink(m)" aria-label="{{ ChatCopy::ACTION_COPY_LINK }}" data-tip="{{ ChatCopy::ACTION_COPY_LINK }}" data-copy-link><x-icon name="link" class="size-4" /></x-button>
-                <x-button variant="icon" type="button" class="chat-toolbar__button" x-show="m.can_pin && !m.pinned" x-on:click="pin(m)" aria-label="{{ ChatCopy::ACTION_PIN }}" data-tip="{{ ChatCopy::ACTION_PIN }}" data-pin><x-icon name="pin" class="size-4" /></x-button>
-                <x-button variant="icon" type="button" class="chat-toolbar__button" x-show="m.can_pin && m.pinned" x-on:click="unpin(m)" aria-label="{{ ChatCopy::ACTION_UNPIN }}" data-tip="{{ ChatCopy::ACTION_UNPIN }}" data-unpin><x-icon name="pin" class="size-4" /></x-button>
-                <x-button variant="icon" type="button" class="chat-toolbar__button" x-show="m.can_edit" x-on:click="startEdit(m)" aria-label="{{ ChatCopy::ACTION_EDIT }}" data-tip="{{ ChatCopy::ACTION_EDIT }}" data-edit><x-icon name="pencil" class="size-4" /></x-button>
-                <x-button variant="icon" type="button" class="chat-toolbar__button" x-show="m.can_delete" x-on:click="confirmDelete(m)" aria-label="{{ ChatCopy::ACTION_DELETE }}" data-tip="{{ ChatCopy::ACTION_DELETE }}" data-delete><x-icon name="trash" class="size-4" /></x-button>
-                <x-button variant="icon" type="button" class="chat-toolbar__button" x-show="m.can_report" x-on:click="startReport(m)" aria-label="{{ ChatCopy::ACTION_REPORT }}" data-tip="{{ ChatCopy::ACTION_REPORT }}" data-report><x-icon name="flag" class="size-4" /></x-button>
-            </span>
-        </template>
-        <template x-if="deleting === m.key">
-            <span class="chat-toolbar__confirm">
-                <span>{{ ChatCopy::DELETE_CONFIRM }}</span>
-                <x-button variant="quiet" size="sm" type="button" class="chat-action" x-on:click="remove(m)" x-init="$nextTick(() => $el.focus())" data-delete-confirm>Yes</x-button>
-                <x-button variant="quiet" size="sm" type="button" class="chat-action" x-on:click="cancelDelete(m)">No</x-button>
-            </span>
-        </template>
+        <span class="contents">
+            <x-button variant="icon" type="button" class="chat-toolbar__button" x-show="m.id" x-on:click="startReply(m)" aria-label="{{ ChatCopy::ACTION_REPLY }}" data-tip="{{ ChatCopy::ACTION_REPLY }}" data-reply><x-icon name="reply" class="size-4" /></x-button>
+            <x-button variant="icon" type="button" class="chat-toolbar__button" x-show="m.id" x-on:click="copyLink(m)" aria-label="{{ ChatCopy::ACTION_COPY_LINK }}" data-tip="{{ ChatCopy::ACTION_COPY_LINK }}" data-copy-link><x-icon name="link" class="size-4" /></x-button>
+            <x-button variant="icon" type="button" class="chat-toolbar__button" x-show="m.can_pin && !m.pinned" x-on:click="pin(m)" aria-label="{{ ChatCopy::ACTION_PIN }}" data-tip="{{ ChatCopy::ACTION_PIN }}" data-pin><x-icon name="pin" class="size-4" /></x-button>
+            <x-button variant="icon" type="button" class="chat-toolbar__button" x-show="m.can_pin && m.pinned" x-on:click="unpin(m)" aria-label="{{ ChatCopy::ACTION_UNPIN }}" data-tip="{{ ChatCopy::ACTION_UNPIN }}" data-unpin><x-icon name="pin" class="size-4" /></x-button>
+            <x-button variant="icon" type="button" class="chat-toolbar__button" x-show="m.can_edit" x-on:click="startEdit(m)" aria-label="{{ ChatCopy::ACTION_EDIT }}" data-tip="{{ ChatCopy::ACTION_EDIT }}" data-edit><x-icon name="pencil" class="size-4" /></x-button>
+            <x-button variant="icon" type="button" class="chat-toolbar__button" x-show="m.can_delete" x-on:click="confirmDelete(m)" aria-label="{{ ChatCopy::ACTION_DELETE }}" data-tip="{{ ChatCopy::ACTION_DELETE }}" data-delete><x-icon name="trash" class="size-4" /></x-button>
+            <x-button variant="icon" type="button" class="chat-toolbar__button" x-show="m.can_report" x-on:click="startReport(m)" aria-label="{{ ChatCopy::ACTION_REPORT }}" data-tip="{{ ChatCopy::ACTION_REPORT }}" data-report><x-icon name="flag" class="size-4" /></x-button>
+        </span>
     </div>
 </li>

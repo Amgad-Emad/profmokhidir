@@ -98,7 +98,7 @@
     }
 
     .form-error {
-        color: var(--danger-tone);
+        color: var(--danger);
     }
 
     .form-note,
@@ -118,7 +118,7 @@
     }
 
     .form-counter[data-over='true'] {
-        color: var(--danger-tone);
+        color: var(--danger);
         font-weight: 500;
     }
 
@@ -131,6 +131,127 @@
 
     .form-fieldset > legend {
         padding: 0;
+    }
+
+    /* ------------------------------------------------------------ the form grid */
+    /*
+     | Every form lays its fields out the same way (App\Constants\FormGrid).
+     |
+     | `.form-grid` stacks the parts of a form (fields, rows, notes) with one vertical gap.
+     | `.form-row` is one row of fields side by side: 12 columns from 768px, one column below.
+     | A field spans the full row unless it carries a width class (form-col--half, --third,
+     | --two-thirds, --quarter): short fields (phone, year, postcode) take a half or a third;
+     | long ones and textareas the full row (outside a .form-row).
+     |
+     | Fields in a row always line up. Each spans five rows of the row's grid and lays its
+     | parts on them as a subgrid: label (with "· Required"), hint, control, counter, message.
+     | Each grid row is as tall as that part in the tallest neighbour, so the controls share one
+     | top edge whether or not a neighbour has a hint or a two-line label, and an error under
+     | one field grows only the message row, below every control. All controls are 48px high.
+     */
+    .form-grid {
+        --form-row-gap: 1.75rem;
+        display: flex;
+        flex-direction: column;
+        gap: var(--form-row-gap);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        column-gap: 1.5rem;
+        row-gap: 0;
+    }
+
+    .form-row > * {
+        grid-column: 1 / -1;
+    }
+
+    .form-row > .form-field {
+        grid-row: span 5;
+    }
+
+    .form-row > .form-field:not(.form-fieldset) {
+        display: grid;
+        grid-template-rows: subgrid;
+        grid-template-columns: minmax(0, max-content) 1fr;
+        row-gap: 0;
+        align-content: start;
+    }
+
+    /* The label sits on the foot of its row (beside a two-line neighbour it lines up with the last line). */
+    .form-row > .form-field > .form-label:not(.form-label--hidden) {
+        grid-area: 1 / 1;
+        align-self: last baseline;
+    }
+
+    .form-row > .form-field > .form-requirement:not(.form-label--hidden) {
+        grid-area: 1 / 2;
+        align-self: last baseline;
+        justify-self: start;
+        white-space: nowrap;
+    }
+
+    .form-row > .form-field > .form-hint {
+        grid-area: 2 / 1 / 3 / -1;
+    }
+
+    .form-row > .form-field > :is(.form-field__control, .form-check, .form-toggle) {
+        grid-area: 3 / 1 / 4 / -1;
+        align-self: start;
+    }
+
+    /* A checkbox or toggle beside a text field starts on the same line as the field's frame. */
+    .form-row > .form-field > :is(.form-check, .form-toggle) {
+        margin-top: 0.75rem;
+    }
+
+    .form-row > .form-field > .form-counter {
+        grid-area: 4 / 1 / 5 / -1;
+    }
+
+    .form-row > .form-field > .form-error {
+        grid-area: 5 / 1 / 6 / -1;
+    }
+
+    /* A small action beside the fields of a row (Remove a key fact): on the controls' row. */
+    .form-row > .form-col--action {
+        justify-self: start;
+    }
+
+    /* One column: the fields of a row stack, with the form's gap between them. */
+    @media (max-width: 47.99rem) {
+        .form-row > * + * {
+            margin-top: var(--form-row-gap, 1.75rem);
+        }
+    }
+
+    @media (min-width: 48rem) {
+        .form-row {
+            grid-template-columns: repeat(12, minmax(0, 1fr));
+        }
+
+        .form-row > .form-col--two-thirds {
+            grid-column: span 8;
+        }
+
+        .form-row > .form-col--half {
+            grid-column: span 6;
+        }
+
+        .form-row > .form-col--third {
+            grid-column: span 4;
+        }
+
+        .form-row > .form-col--quarter {
+            grid-column: span 3;
+        }
+
+        .form-row > .form-col--action {
+            grid-column: -3 / -1;
+            grid-row: 3;
+            align-self: center;
+        }
     }
 
     /* ------------------------------------------------------------ the control frame */
@@ -262,16 +383,16 @@
     /* invalid */
     .form-control:has([aria-invalid='true']),
     .form-control[aria-invalid='true'] {
-        --form-rule: var(--danger-tone);
+        --form-rule: var(--danger);
     }
 
     /* Composite controls (editor, tags, upload) take the state from their field's message. */
     .form-field:has(> [data-form-error]:not(:empty)) > .form-field__control > .form-control {
-        --form-rule: var(--danger-tone);
+        --form-rule: var(--danger);
     }
 
     .form-control:has([aria-invalid='true']):focus-within {
-        --form-line: var(--danger-tone);
+        --form-line: var(--danger);
     }
 
     /* valid, only once a field that was wrong has been put right (forms.js sets data-corrected) */

@@ -23,7 +23,7 @@
             <h2 id="profile-heading" class="font-display text-3xl font-light">Name and email</h2>
             <p class="mt-2 text-sm font-light text-ink-muted">Changing your email address will ask you to verify it again.</p>
 
-            <form novalidate method="POST" action="{{ route('user-profile-information.update') }}" class="mt-6 space-y-6">
+            <form novalidate method="POST" action="{{ route('user-profile-information.update') }}" class="form-grid mt-6">
                 @csrf
                 @method('PUT')
                 <x-form.input name="name" label="Name" :value="$user->name" required autocomplete="name" bag="updateProfileInformation" />
@@ -37,7 +37,7 @@
             <h2 id="password-heading" class="font-display text-3xl font-light">Password</h2>
             <p class="mt-2 text-sm font-light text-ink-muted">Use a long passphrase you do not use anywhere else.</p>
 
-            <form novalidate method="POST" action="{{ route('user-password.update') }}" class="mt-6 space-y-6">
+            <form novalidate method="POST" action="{{ route('user-password.update') }}" class="form-grid mt-6">
                 @csrf
                 @method('PUT')
                 <x-form.password name="current_password" label="Current password" autocomplete="current-password" bag="updatePassword" />
@@ -78,7 +78,7 @@
             </p>
 
             @error('code', 'confirmTwoFactorAuthentication')
-                <x-alert :tone="StatusTone::Bronze" role="alert" class="mt-6">{{ $message }}</x-alert>
+                <x-alert :tone="StatusTone::Danger" role="alert" class="mt-6">{{ $message }}</x-alert>
             @enderror
 
             @if (! $twoFactor['enabled'])

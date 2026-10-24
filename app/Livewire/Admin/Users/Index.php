@@ -285,9 +285,9 @@ class Index extends Component
     public function dialogCopy(): ?array
     {
         return match ($this->confirmingAction) {
-            self::ACTION_DEACTIVATE => ['title' => 'Deactivate this account?', 'body' => 'They will be signed out and cannot sign in again until the account is reactivated. Nothing they created is removed.', 'confirm' => 'Deactivate'],
-            self::ACTION_REACTIVATE => ['title' => 'Reactivate this account?', 'body' => 'They can sign in again with their existing password and role.', 'confirm' => 'Reactivate'],
-            self::ACTION_RESEND => ['title' => 'Resend the invitation?', 'body' => 'A new set-password link will be emailed. Any earlier link stops working.', 'confirm' => 'Send the link'],
+            self::ACTION_DEACTIVATE => ['title' => 'Deactivate this account?', 'body' => 'They will be signed out and cannot sign in again until the account is reactivated. Nothing they created is removed.', 'confirm' => 'Deactivate', 'danger' => true],
+            self::ACTION_REACTIVATE => ['title' => 'Reactivate this account?', 'body' => 'They can sign in again with their existing password and role.', 'confirm' => 'Reactivate', 'danger' => false],
+            self::ACTION_RESEND => ['title' => 'Resend the invitation?', 'body' => 'A new set-password link will be emailed. Any earlier link stops working.', 'confirm' => 'Send the link', 'danger' => false],
             default => null,
         };
     }

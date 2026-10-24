@@ -1,6 +1,6 @@
 /*
- | The button system (<x-button>, App\Services\ButtonService). Five variants
- | (App\Constants\ButtonVariant: primary, secondary, quiet, icon, danger), three sizes
+ | The button system (<x-button>, App\Services\ButtonService). Six variants
+ | (App\Constants\ButtonVariant: primary, secondary, quiet, icon, danger, danger-filled), three sizes
  | (ButtonSize: the 44px pill, the small pill, the round icon button) and six states
  | (ButtonState: default, hover, active, focus-visible, disabled, loading).
  |
@@ -208,6 +208,34 @@
     }
 
 
+    .btn--danger-filled {
+        --btn-bg: var(--btn-danger-filled-bg);
+        --btn-ink: var(--btn-danger-filled-ink);
+        --btn-border: var(--btn-danger-filled-border);
+        --btn-icon: var(--btn-danger-filled-icon);
+    }
+
+    .btn--danger-filled:hover {
+        --btn-bg: var(--btn-danger-filled-bg-hover);
+        --btn-ink: var(--btn-danger-filled-ink-hover);
+        --btn-border: var(--btn-danger-filled-border-hover);
+        --btn-icon: var(--btn-danger-filled-icon-hover);
+    }
+
+    .btn--danger-filled:focus-visible {
+        --btn-bg: var(--btn-danger-filled-bg-focus);
+        --btn-ink: var(--btn-danger-filled-ink-focus);
+        --btn-border: var(--btn-danger-filled-border-focus);
+        --btn-icon: var(--btn-danger-filled-icon-focus);
+    }
+
+    .btn--danger-filled:active {
+        --btn-bg: var(--btn-danger-filled-bg-active);
+        --btn-ink: var(--btn-danger-filled-ink-active);
+        --btn-border: var(--btn-danger-filled-border-active);
+        --btn-icon: var(--btn-danger-filled-icon-active);
+    }
+
     /* ------------------------------------------------- loading and disabled */
     /* Loading: the busy label shows (resources/js/auth.js), the colours stay, a second press does nothing. */
     .btn--primary[aria-busy='true'] {
@@ -243,6 +271,13 @@
         --btn-ink: var(--btn-danger-ink-loading);
         --btn-border: var(--btn-danger-border-loading);
         --btn-icon: var(--btn-danger-icon-loading);
+    }
+
+    .btn--danger-filled[aria-busy='true'] {
+        --btn-bg: var(--btn-danger-filled-bg-loading);
+        --btn-ink: var(--btn-danger-filled-ink-loading);
+        --btn-border: var(--btn-danger-filled-border-loading);
+        --btn-icon: var(--btn-danger-filled-icon-loading);
     }
 
     .btn[aria-busy='true'] {
@@ -286,39 +321,15 @@
         --btn-icon: var(--btn-danger-icon-disabled);
     }
 
+    .btn--danger-filled:is(:disabled, [aria-disabled='true']) {
+        --btn-bg: var(--btn-danger-filled-bg-disabled);
+        --btn-ink: var(--btn-danger-filled-ink-disabled);
+        --btn-border: var(--btn-danger-filled-border-disabled);
+        --btn-icon: var(--btn-danger-filled-icon-disabled);
+    }
+
     .btn:is(:disabled, [aria-disabled='true']) {
         cursor: not-allowed;
-    }
-
-    /* A quiet button in the danger tone (row actions such as Reject or Delete): quiet's surface, danger's ink in each state. */
-    .btn--quiet.btn--tone-danger {
-        --btn-ink: var(--btn-danger-ink);
-        --btn-icon: var(--btn-danger-icon);
-    }
-
-    .btn--quiet.btn--tone-danger:hover {
-        --btn-ink: var(--btn-danger-ink-hover);
-        --btn-icon: var(--btn-danger-icon-hover);
-    }
-
-    .btn--quiet.btn--tone-danger:focus-visible {
-        --btn-ink: var(--btn-danger-ink-focus);
-        --btn-icon: var(--btn-danger-icon-focus);
-    }
-
-    .btn--quiet.btn--tone-danger:active {
-        --btn-ink: var(--btn-danger-ink-active);
-        --btn-icon: var(--btn-danger-icon-active);
-    }
-
-    .btn--quiet.btn--tone-danger[aria-busy='true'] {
-        --btn-ink: var(--btn-danger-ink-loading);
-        --btn-icon: var(--btn-danger-icon-loading);
-    }
-
-    .btn--quiet.btn--tone-danger:is(:disabled, [aria-disabled='true']) {
-        --btn-ink: var(--btn-danger-ink-disabled);
-        --btn-icon: var(--btn-danger-icon-disabled);
     }
 
     /* ---------------------------------------------------------------- sizes */

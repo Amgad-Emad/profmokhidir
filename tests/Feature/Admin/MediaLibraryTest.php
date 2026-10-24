@@ -134,7 +134,7 @@ class MediaLibraryTest extends TestCase
 
         Livewire::actingAs($this->editor)->test(Library::class)
             ->call('confirm', 'delete', $photo->getKey())
-            ->assertSee('Delete this image for good?')
+            ->assertSee('Delete this image permanently?')
             ->assertSee('is used by')
             ->assertSee('Album: Field days')
             ->call('delete')

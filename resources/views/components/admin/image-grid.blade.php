@@ -52,7 +52,7 @@
                                     <button type="button" wire:click="movePhotoDown({{ $id }})" @disabled($loop->last) class="inline-flex size-8 items-center justify-center rounded-full border border-rule hover:border-focus disabled:opacity-40"><span aria-hidden="true">↓</span><span class="sr-only">Move photo down</span></button>
                                 </span>
                             @endif
-                            <x-button variant="quiet" size="sm" danger type="button" wire:click="confirmRemoveImage({{ $id }})" data-remove-image>Remove</x-button>
+                            <x-button variant="danger" size="sm" type="button" wire:click="confirmRemoveImage({{ $id }})" data-remove-image><x-icon name="trash" class="size-4" />Remove</x-button>
                         </div>
                     </div>
                     <div class="space-y-8">
@@ -64,11 +64,11 @@
                             </div>
                         </form>
                         @if ($archive !== null && array_key_exists($id, $archive))
-                            <form novalidate wire:submit="savePhotoArchive({{ $id }})" class="space-y-4 border-t border-rule pt-6" data-photo-archive>
+                            <form novalidate wire:submit="savePhotoArchive({{ $id }})" class="form-grid border-t border-rule pt-6" data-photo-archive>
                                 <p class="t-label text-accent-text">In the archive</p>
-                                <div class="grid gap-5 sm:grid-cols-2">
-                                    <x-form.select :model="'archive.'.$id.'.'.\App\Constants\Archive::DECADE" label="Decade" :options="$decades" placeholder="From the year" hint="Through the decades files the photo under its year unless you choose another decade." />
-                                    <x-form.toggle :model="'archive.'.$id.'.'.\App\Constants\Archive::FEATURED" label="Featured on the wall" hint="Hangs one size larger in the album." class="sm:self-end" />
+                                <div class="form-row">
+                                    <x-form.select class="form-col--half" :model="'archive.'.$id.'.'.\App\Constants\Archive::DECADE" label="Decade" :options="$decades" placeholder="From the year" hint="Through the decades files the photo under its year unless you choose another decade." />
+                                    <x-form.toggle :model="'archive.'.$id.'.'.\App\Constants\Archive::FEATURED" label="Featured on the wall" hint="Hangs one size larger in the album." class="form-col--half" />
                                 </div>
                                 <div class="flex items-center gap-4">
                                     <x-button type="submit" variant="quiet" size="sm">Save archive details</x-button>
@@ -82,7 +82,7 @@
         </ul>
     @endif
 
-    <x-admin.confirm-dialog :show="$confirmingId !== null" title="Remove this image?" action="removeImage" cancel="cancelRemoveImage" confirm-label="Remove image">
-        The file is deleted from the site and cannot be restored.
+    <x-admin.confirm-dialog :show="$confirmingId !== null" danger title="Remove this image permanently?" action="removeImage" cancel="cancelRemoveImage" confirm-label="Remove image">
+        The file is deleted from the site. {{ \App\Constants\ConfirmDialog::IRREVERSIBLE }}
     </x-admin.confirm-dialog>
 </section>

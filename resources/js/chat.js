@@ -143,7 +143,7 @@ function typesetMath(root, config) {
                 katex.render(tex, el, {
                     displayMode: el.getAttribute(config.mathAttribute) === 'display',
                     throwOnError: false,
-                    errorColor: 'var(--danger-tone)',
+                    errorColor: 'var(--danger)',
                     strict: 'ignore',
                     trust: false,
                 });
@@ -206,6 +206,7 @@ document.addEventListener('alpine:init', () => {
 
         editing: null,
         deleting: null,
+        deleteTarget: null,
         openKey: null,
         hoverKey: null,
         focusKey: null,
@@ -446,7 +447,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         onEscape() {
-            if (this.reporting) return; // the dialog handles its own escape
+            if (this.reporting || this.deleting) return; // the dialogs handle their own escape
             if (document.querySelector('dialog[open]')) return; // the lightbox closes itself
             if (this.memberMenu || this.suspending) {
                 this.memberMenu = null;
@@ -1251,19 +1252,24 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-        /** The trash button asks first, inside the toolbar, which stays open while it asks. */
+        /** The trash button asks first, in the danger dialog (deleting cannot be undone); Cancel has focus. */
         confirmDelete(message) {
             this.openKey = message.key;
+            this.deleteTarget = message;
             this.deleting = message.key;
         },
 
         cancelDelete(message) {
             this.deleting = null;
+            this.deleteTarget = null;
+            if (!message) return;
             this.$nextTick(() => this.$refs.scroller.querySelector(`#message-${message.id} [data-delete]`)?.focus());
         },
 
         async remove(message) {
+            if (!message) return;
             this.deleting = null;
+            this.deleteTarget = null;
             this.openKey = null;
             try {
                 const result = await this.$wire.remove(message.id);

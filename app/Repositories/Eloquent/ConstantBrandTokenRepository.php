@@ -28,6 +28,16 @@ final class ConstantBrandTokenRepository implements BrandTokenRepositoryInterfac
         return Brand::roles();
     }
 
+    public function functionalColours(): array
+    {
+        return Brand::functionalColours();
+    }
+
+    public function functionalColourRoles(): array
+    {
+        return Brand::functionalRoles();
+    }
+
     public function fonts(): array
     {
         return Typography::fonts();

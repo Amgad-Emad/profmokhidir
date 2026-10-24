@@ -5,9 +5,9 @@
     <x-admin.edit-layout :editor="$editor" :sections="['identity' => 'Identity', 'biography' => 'Biography', 'expertise' => 'Expertise & key facts', 'portrait' => 'Portrait', 'contact' => 'Contact']" class="mt-10">
         <x-admin.form-section id="identity" title="Identity" intro="How he is named at the top of the About page and in search results.">
             <x-form.input model="form.name" label="Name" required hint="His full name, as it should appear on the site." />
-            <div class="grid gap-6 sm:grid-cols-2">
-                <x-form.input model="form.title" label="Title" hint="For example Professor of Agronomy." />
-                <x-form.input model="form.affiliation" label="Affiliation" hint="The university or institution he is known for." />
+            <div class="form-row">
+                <x-form.input class="form-col--half" model="form.title" label="Title" hint="For example Professor of Agronomy." />
+                <x-form.input class="form-col--half" model="form.affiliation" label="Affiliation" hint="The university or institution he is known for." />
             </div>
         </x-admin.form-section>
 
@@ -22,19 +22,21 @@
             <fieldset class="form-fieldset" data-key-facts>
                 <legend class="t-label form-label">Key facts<span class="form-requirement"><span aria-hidden="true">{{ trim(\App\Constants\FormControls::HINT_SEPARATOR) }}</span> {{ \App\Constants\FormControls::OPTIONAL }}</span></legend>
                 <p class="form-hint">A short label and its value, such as Born and 1940. They are listed beside the biography.</p>
-                <div class="mt-4 space-y-4">
+                <div class="mt-4 form-grid">
                     @foreach ($form['key_facts'] as $index => $fact)
-                        <div class="grid items-end gap-4 sm:grid-cols-[1fr_2fr_auto]" wire:key="fact-{{ $index }}">
-                            <x-form.input :model="'form.key_facts.'.$index.'.label'" :label="'Fact '.($index + 1).' label'" :optional="false" />
-                            <x-form.input :model="'form.key_facts.'.$index.'.value'" :label="'Fact '.($index + 1).' value'" :optional="false" />
-                            <x-button variant="quiet" size="sm" danger type="button" class="mb-1" wire:click="removeKeyFact({{ $index }})">Remove<span class="sr-only"> key fact {{ $index + 1 }}</span></x-button>
+                        <div class="form-row" wire:key="fact-{{ $index }}">
+                            <x-form.input class="form-col--third" :model="'form.key_facts.'.$index.'.label'" :label="'Fact '.($index + 1).' label'" :optional="false" />
+                            <x-form.input class="form-col--half" :model="'form.key_facts.'.$index.'.value'" :label="'Fact '.($index + 1).' value'" :optional="false" />
+                            <x-button variant="danger" size="sm" type="button" class="form-col--action" wire:click="removeKeyFact({{ $index }})">Remove<span class="sr-only"> key fact {{ $index + 1 }}</span></x-button>
                         </div>
                     @endforeach
                 </div>
                 <x-button variant="quiet" size="sm" type="button" class="mt-4" wire:click="addKeyFact"><x-icon name="plus" class="size-4" />Add a key fact</x-button>
             </fieldset>
 
-            <x-form.input model="form.students_supervised" label="Students supervised" type="number" inputmode="numeric" min="0" class="sm:max-w-xs" hint="Only if the family or university has confirmed the number. It appears in the figures on the home page; leave it blank to leave it out." />
+            <div class="form-row">
+                <x-form.input model="form.students_supervised" label="Students supervised" type="number" inputmode="numeric" min="0" class="form-col--third" hint="Only if the family or university has confirmed the number. It appears in the figures on the home page; leave it blank to leave it out." />
+            </div>
         </x-admin.form-section>
 
         <x-admin.form-section id="portrait" title="Portrait" intro="The photograph that opens the About page and the sign-in screens. It needs alt text, a caption, a place and a year before the profile can be published." :form="false">
@@ -45,9 +47,9 @@
         </x-admin.form-section>
 
         <x-admin.form-section id="contact" title="Contact" intro="Shown at the foot of the About page. Leave both empty to use the site's contact details from Site settings.">
-            <div class="grid gap-6 sm:grid-cols-2">
-                <x-form.input model="form.contact_email_public" label="Public contact email" type="email" hint="An address the family is happy to publish." />
-                <x-form.input model="form.contact_note" label="Contact note" hint="For example Enquiries are answered by the family." />
+            <div class="form-row">
+                <x-form.input class="form-col--half" model="form.contact_email_public" label="Public contact email" type="email" hint="An address the family is happy to publish." />
+                <x-form.input class="form-col--half" model="form.contact_note" label="Contact note" hint="For example Enquiries are answered by the family." />
             </div>
         </x-admin.form-section>
 

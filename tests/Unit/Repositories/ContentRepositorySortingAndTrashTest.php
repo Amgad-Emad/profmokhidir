@@ -102,4 +102,20 @@ class ContentRepositorySortingAndTrashTest extends TestCase
         $this->expectException(LogicException::class);
         $profiles->trashed();
     }
+
+    #[Test]
+    public function force_delete_removes_a_trashed_record_for_good_and_refuses_a_live_one(): void
+    {
+        $trashed = Award::factory()->create(['name' => 'Gone']);
+        $live = Award::factory()->create(['name' => 'Kept']);
+        $trashed->delete();
+
+        $this->awards->forceDelete($trashed->getKey());
+
+        $this->assertNull(Award::withTrashed()->find($trashed->getKey()));
+        $this->assertSame(0, $this->awards->countTrashed());
+
+        $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+        $this->awards->forceDelete($live->getKey());
+    }
 }

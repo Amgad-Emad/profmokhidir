@@ -122,9 +122,9 @@ class AlbumPhotosTest extends TestCase
         $this->assertTrue($album->fresh()->cover()->is($third));
 
         $component->call('confirmRemoveImage', $first->getKey())
-            ->assertSee('Remove this image?')
+            ->assertSee('Remove this image permanently?')
             ->call('cancelRemoveImage')
-            ->assertDontSee('Remove this image?')
+            ->assertDontSee('Remove this image permanently?')
             ->call('confirmRemoveImage', $first->getKey())
             ->call('removeImage')
             ->assertSee('Image removed.');

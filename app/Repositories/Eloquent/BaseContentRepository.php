@@ -124,6 +124,13 @@ abstract class BaseContentRepository extends BaseEloquentRepository implements C
         return $model->refresh();
     }
 
+    public function forceDelete(int $id): void
+    {
+        $this->assertSoftDeletes();
+
+        $this->query()->onlyTrashed()->findOrFail($id)->forceDelete();
+    }
+
     public function countTrashed(): int
     {
         return $this->softDeletes() ? $this->query()->onlyTrashed()->count() : 0;

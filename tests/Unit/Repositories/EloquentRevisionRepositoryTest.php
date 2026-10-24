@@ -92,4 +92,17 @@ class EloquentRevisionRepositoryTest extends TestCase
         $this->assertSame(2, $this->repository->countFor($publication));
         $this->assertSame(1, $this->repository->countFor($other));
     }
+
+    #[Test]
+    public function forget_deletes_every_revision_of_the_record_and_only_that_record(): void
+    {
+        $publication = Publication::factory()->create();
+        $other = Publication::factory()->create();
+        Revision::factory()->count(3)->of($publication)->create();
+        Revision::factory()->of($other)->create();
+
+        $this->assertSame(3, $this->repository->forget($publication));
+        $this->assertSame(0, $this->repository->countFor($publication));
+        $this->assertSame(1, $this->repository->countFor($other));
+    }
 }

@@ -23,6 +23,18 @@ interface BrandTokenRepositoryInterface
     public function colourRoles(): array;
 
     /**
+     * The functional exception to the palette (the danger red), token name => hex.
+     *
+     * @return array<string, string>
+     */
+    public function functionalColours(): array;
+
+    /**
+     * @return array<string, array{role: string, usage: string}>
+     */
+    public function functionalColourRoles(): array;
+
+    /**
      * @return array<string, array{family: string, weights: list<int>, italic: bool, use: string}>
      */
     public function fonts(): array;

@@ -79,11 +79,31 @@ class StyleguideServiceTest extends TestCase
     }
 
     #[Test]
+    public function functional_colours_list_exactly_the_danger_red_and_pass_aa_where_each_is_used(): void
+    {
+        $rows = $this->service->functionalColours();
+
+        $this->assertSame(['danger-light', 'danger-dark'], array_column($rows, 'name'));
+        $this->assertSame([Brand::DANGER_LIGHT, Brand::DANGER_DARK], array_column($rows, 'hex'));
+        $this->assertSame(['ivory', 'linen'], array_keys($rows[0]['contrast']));
+        $this->assertSame(['evergreen', 'cypress'], array_keys($rows[1]['contrast']));
+
+        foreach ($rows as $row) {
+            $this->assertTrue(Brand::isFunctionalColour($row['hex']));
+            $this->assertFalse(Brand::isBrandColour($row['hex']));
+
+            foreach ($row['contrast'] as $surface => $contrast) {
+                $this->assertTrue($contrast['normal'], "{$row['name']} on {$surface} is {$contrast['ratio']}:1");
+            }
+        }
+    }
+
+    #[Test]
     public function sections_contains_everything_the_view_needs(): void
     {
         $sections = $this->service->sections();
 
-        $this->assertSame(['colours', 'fonts', 'typeScale', 'motion', 'typesetting', 'ornaments', 'typesetExamples', 'components'], array_keys($sections));
+        $this->assertSame(['colours', 'functionalColours', 'fonts', 'typeScale', 'motion', 'typesetting', 'ornaments', 'typesetExamples', 'components'], array_keys($sections));
         $this->assertSame(array_keys(Components::groups()), array_keys($sections['components']));
         $this->assertCount(count(Components::all()), array_merge(...array_column($sections['components'], 'components')));
         $this->assertCount(9, $sections['colours']);

@@ -73,9 +73,9 @@
             @endif
             <x-button variant="quiet" size="sm" type="button" x-on:click="$refs.input.click()">{{ FormControls::UPLOAD_REPLACE }}<span class="sr-only"> {{ \Illuminate\Support\Str::lower($label) }}</span></x-button>
             @if ($remove)
-                <x-button variant="quiet" size="sm" danger type="button" wire:click="{{ $remove }}" x-on:click="clear()">{{ FormControls::UPLOAD_REMOVE }}<span class="sr-only"> {{ \Illuminate\Support\Str::lower($label) }}</span></x-button>
+                <x-button variant="danger" size="sm" type="button" wire:click="{{ $remove }}" x-on:click="clear()">{{ FormControls::UPLOAD_REMOVE }}<span class="sr-only"> {{ \Illuminate\Support\Str::lower($label) }}</span></x-button>
             @elseif ($model === null)
-                <x-button variant="quiet" size="sm" danger type="button" x-on:click="clear()">{{ FormControls::UPLOAD_REMOVE }}<span class="sr-only"> {{ \Illuminate\Support\Str::lower($label) }}</span></x-button>
+                <x-button variant="danger" size="sm" type="button" x-on:click="clear()">{{ FormControls::UPLOAD_REMOVE }}<span class="sr-only"> {{ \Illuminate\Support\Str::lower($label) }}</span></x-button>
             @endif
         </div>
     </div>

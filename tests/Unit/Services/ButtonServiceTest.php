@@ -66,7 +66,7 @@ class ButtonServiceTest extends TestCase
             'background' => ['bg-surface-raised'],
             'hover background' => ['hover:bg-fill'],
             'border' => ['border-rule'],
-            'danger tone' => ['text-danger-tone underline'],
+            'danger tone' => ['text-danger underline'],
         ];
     }
 

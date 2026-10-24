@@ -465,7 +465,7 @@
     }
 
     .chat-math .katex-error {
-        color: var(--danger-tone);
+        color: var(--danger);
     }
 
     .chat-message.is-sending .chat-message__body {
@@ -501,7 +501,7 @@
     }
 
     .chat-flag--alert {
-        color: var(--danger-tone);
+        color: var(--danger);
     }
 
     .chat-flag .chat-action {
@@ -566,15 +566,9 @@
         border-radius: var(--radius-card);
     }
 
-    .chat-toolbar__confirm {
-        display: inline-flex;
-        align-items: center;
-        gap: var(--space-2);
-        padding-inline: var(--space-2);
-        font-size: 0.875rem;
-        font-weight: 300;
-        color: var(--ink);
-        white-space: nowrap;
+    /* Delete is the one destructive tool: its icon stays danger red in every state (it opens the danger dialog). */
+    .chat-toolbar__button[data-delete] {
+        --btn-icon: var(--danger);
     }
 
     /* Tooltips: the button's name, in a small evergreen label, on hover and keyboard focus. */
@@ -1015,6 +1009,10 @@
         text-decoration: none;
     }
 
+    .chat-member-menu__item[data-suspend] {
+        color: var(--danger);
+    }
+
     /* ---------------------------------------------------------- panel tabs */
     .chat-tabs {
         display: flex;
@@ -1210,7 +1208,7 @@
         display: block;
         margin-top: 0.25rem;
         font-size: 0.8125rem;
-        color: var(--danger-tone);
+        color: var(--danger);
     }
 
     .chat-tray__alt {
@@ -1244,7 +1242,7 @@
     }
 
     .chat-tray__alt[aria-invalid='true'] {
-        border-bottom-color: var(--danger-tone);
+        border-bottom-color: var(--danger);
     }
 
     /* Upload progress: a hairline that fills from left to right. */

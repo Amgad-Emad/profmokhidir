@@ -7,7 +7,8 @@ namespace App\Constants;
 /**
  * How a status is coloured in the dashboard. Brand colours stand in for the
  * usual traffic lights: pending is bronze, approved/published is cypress and
- * rejected/draft/inactive is ash. Every tone also carries an icon and label,
+ * rejected/draft/inactive is ash. Errors (a failed action, a refused save)
+ * take the functional danger red. Every tone also carries an icon and label,
  * so state is never shown by colour alone.
  */
 enum StatusTone: string
@@ -15,6 +16,9 @@ enum StatusTone: string
     case Bronze = 'bronze';
     case Cypress = 'cypress';
     case Ash = 'ash';
+
+    /** An error: the action failed or was refused (the danger tokens). */
+    case Danger = 'danger';
 
     public static function forTribute(TributeStatus $status): self
     {
@@ -51,6 +55,7 @@ enum StatusTone: string
             self::Bronze => 'border-pending-tone text-pending-tone',
             self::Cypress => 'border-success-tone text-success-tone',
             self::Ash => 'border-neutral-tone text-neutral-tone',
+            self::Danger => 'border-danger text-danger',
         };
     }
 
@@ -63,6 +68,7 @@ enum StatusTone: string
             self::Bronze => 'text-pending-tone',
             self::Cypress => 'text-success-tone',
             self::Ash => 'text-neutral-tone',
+            self::Danger => 'text-danger',
         };
     }
 
@@ -75,6 +81,7 @@ enum StatusTone: string
             self::Bronze => 'clock',
             self::Cypress => 'check',
             self::Ash => 'minus',
+            self::Danger => 'warning',
         };
     }
 }

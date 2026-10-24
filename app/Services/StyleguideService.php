@@ -57,6 +57,34 @@ class StyleguideService
     }
 
     /**
+     * The functional danger red with its contrast on the four surfaces it is used on
+     * (the light value on ivory and linen, the dark value on evergreen and cypress).
+     *
+     * @return list<array{name: string, hex: string, role: string, usage: string, contrast: array<string, array{ratio: float, normal: bool, large: bool}>}>
+     */
+    public function functionalColours(): array
+    {
+        $roles = $this->tokens->functionalColourRoles();
+        $surfaces = [
+            Brand::DANGER_LIGHT => ['ivory' => Brand::IVORY, 'linen' => Brand::LINEN],
+            Brand::DANGER_DARK => ['evergreen' => Brand::EVERGREEN, 'cypress' => Brand::CYPRESS],
+        ];
+        $rows = [];
+
+        foreach ($this->tokens->functionalColours() as $name => $hex) {
+            $rows[] = [
+                'name' => $name,
+                'hex' => $hex,
+                'role' => $roles[$name]['role'] ?? '',
+                'usage' => $roles[$name]['usage'] ?? '',
+                'contrast' => array_map(fn (string $surface): array => $this->contrast($hex, $surface), $surfaces[$hex] ?? []),
+            ];
+        }
+
+        return $rows;
+    }
+
+    /**
      * @return array<string, array{family: string, weights: list<int>, italic: bool, use: string}>
      */
     public function fonts(): array
@@ -136,6 +164,7 @@ class StyleguideService
     {
         return [
             'colours' => $this->colours(),
+            'functionalColours' => $this->functionalColours(),
             'fonts' => $this->fonts(),
             'typeScale' => $this->typeScale(),
             'motion' => $this->motion(),

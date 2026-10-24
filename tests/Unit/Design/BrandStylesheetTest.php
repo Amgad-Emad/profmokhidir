@@ -41,11 +41,19 @@ class BrandStylesheetTest extends TestCase
             );
         }
 
+        foreach (Brand::functionalColours() as $name => $hex) {
+            $this->assertMatchesRegularExpression(
+                sprintf('/--functional-%s:\s*%s;/i', $name, preg_quote($hex, '/')),
+                $this->tokens,
+                "Functional variable --functional-{$name} must be {$hex}",
+            );
+        }
+
         preg_match_all('/#[0-9a-f]{6}\b/i', $this->tokens, $matches);
-        $allowed = array_map('strtoupper', [...Brand::colours(), ...Brand::permittedExtras()]);
+        $allowed = array_map('strtoupper', [...Brand::colours(), ...Brand::functionalColours(), ...Brand::permittedExtras()]);
 
         foreach (array_unique(array_map('strtoupper', $matches[0])) as $hex) {
-            $this->assertContains($hex, $allowed, "{$hex} is not a brand colour");
+            $this->assertContains($hex, $allowed, "{$hex} is not a brand colour or the functional danger red");
         }
 
         $this->assertDoesNotMatchRegularExpression('/#[0-9a-f]{3,8}\b/i', preg_replace('/url\([^)]*\)/', '', $this->css), 'app.css names no colour: it uses the tokens');
@@ -54,7 +62,7 @@ class BrandStylesheetTest extends TestCase
     #[Test]
     public function the_semantic_tokens_exist_in_both_themes_and_as_utilities(): void
     {
-        foreach (['surface', 'surface-raised', 'surface-sunken', 'ink', 'ink-muted', 'ink-quiet', 'rule', 'rule-strong', 'accent-line', 'accent-text', 'focus', 'danger-tone', 'success-tone', 'pending-tone', 'selection'] as $token) {
+        foreach (['surface', 'surface-raised', 'surface-sunken', 'ink', 'ink-muted', 'ink-quiet', 'rule', 'rule-strong', 'accent-line', 'accent-text', 'focus', 'danger', 'success-tone', 'pending-tone', 'selection'] as $token) {
             $this->assertMatchesRegularExpression('/^\s*--'.preg_quote($token, '/').':/m', $this->tokens, "--{$token} is declared");
             $this->assertStringContainsString("--color-{$token}: var(--{$token});", $this->tokens, "{$token} is a Tailwind colour utility");
         }

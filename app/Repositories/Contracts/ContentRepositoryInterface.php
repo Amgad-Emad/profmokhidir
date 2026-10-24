@@ -66,6 +66,11 @@ interface ContentRepositoryInterface extends BaseRepositoryInterface
      */
     public function restore(int $id): Model;
 
+    /**
+     * Delete a trashed record for good (its media goes with it).
+     */
+    public function forceDelete(int $id): void;
+
     public function countTrashed(): int;
 
     /**

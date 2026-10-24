@@ -73,6 +73,20 @@ class BrandAuditTest extends TestCase
     }
 
     #[Test]
+    public function the_only_colours_outside_the_palette_are_exactly_the_danger_red_and_white_and_black(): void
+    {
+        $outside = array_values(array_diff(
+            BrandAudit::permittedHex(),
+            array_map('strtoupper', Brand::colours()),
+            ['#FFFFFF', '#000000', '#FFF', '#000', '#0000', '#00000000', '#FFF0', '#FFFFFF00'],
+        ));
+
+        $this->assertSame(['#9B2C2C', '#EFB0A5'], $outside);
+        $this->assertSame(['danger-light' => '#9B2C2C', 'danger-dark' => '#EFB0A5'], Brand::functionalColours());
+        $this->assertMatchesRegularExpression(BrandAudit::rawColourVariablePattern(), 'color: var(--functional-danger-light);', 'the raw danger red may only be read in the token file');
+    }
+
+    #[Test]
     public function only_brand_colours_appear_in_sources_and_built_css(): void
     {
         $offenders = [];

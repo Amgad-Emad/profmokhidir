@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Constants;
 
 /**
- * The five button variants of the design system (<x-button variant="…">). Each one
+ * The six button variants of the design system (<x-button variant="…">). Each one
  * takes its background, text, border and icon colours for every ButtonState from the
  * `.btn` token table in resources/css/tokens.css (--btn-{variant}-{part}[-{state}]);
  * resources/css/buttons.css applies them. Inside an `.on-dark` region the same
@@ -27,8 +27,11 @@ enum ButtonVariant: string
     /** A tool with an icon and no visible label (it needs an accessible name). */
     case Icon = 'icon';
 
-    /** An action that removes or blocks something: the outline pill in the danger tone. */
+    /** A secondary destructive action (Move to trash, Remove, Reject, Suspend, Delete message): the outline pill in danger red. */
     case Danger = 'danger';
+
+    /** The final confirm button inside a confirmation dialog ("Delete permanently"), and only there: the solid danger pill. */
+    case DangerFilled = 'danger-filled';
 
     /** The colour parts every variant declares for every state. */
     public const array PARTS = ['bg', 'ink', 'border', 'icon'];
@@ -47,7 +50,13 @@ enum ButtonVariant: string
     /** Whether the variant draws a visible border that marks the control (outline pills). */
     public function hasBoundary(): bool
     {
-        return in_array($this, [self::Secondary, self::Danger], true);
+        return in_array($this, [self::Secondary, self::Danger, self::DangerFilled], true);
+    }
+
+    /** Whether the variant marks a destructive action (it uses the danger tokens). */
+    public function isDestructive(): bool
+    {
+        return in_array($this, [self::Danger, self::DangerFilled], true);
     }
 
     /**

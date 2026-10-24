@@ -39,4 +39,9 @@ interface RevisionRepositoryInterface extends BaseRepositoryInterface
      * Delete all but the newest $keep revisions of a record; returns how many went.
      */
     public function prune(Model $record, int $keep): int;
+
+    /**
+     * Delete every revision of a record (when the record itself is deleted for good).
+     */
+    public function forget(Model $record): int;
 }

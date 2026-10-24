@@ -36,6 +36,12 @@ Colours, as Tailwind theme tokens, and no others:
 - linen #E7E5DC, stone #D3D1C5, ash #575A55, bronze #6F5A34 (bronze replaces brass for small text on ivory, since brass lacks contrast under 24px)
 No gradients except a soft brass radial glow on evergreen. No bright accent colours.
 
+Functional exception: danger red, only for destructive actions and errors (never decoration), approved by the owner:
+- danger-light #9B2C2C on light surfaces (6.7:1 on ivory, 6.0:1 on linen), danger-dark #EFB0A5 on dark surfaces (9.0:1 on evergreen, 5.3:1 on cypress).
+- Declared once in tokens.css (--functional-*, App\Constants\Brand::functionalColours()) and used only through the semantic tokens --danger (text, borders, icons), --danger-surface (the solid fill), --danger-ink (text on that fill) and --danger-wash (behind an error summary).
+- Destructive actions use `<x-button variant="danger">` (outline; trash icon on deletes); `variant="danger-filled"` only for the final confirm inside a confirmation dialog. Irreversible actions confirm in `<x-admin.confirm-dialog danger>` (danger icon, clear title, what will happen, Cancel focused); reversible ones (move to trash) act at once with the 10-second Undo toast.
+- Form error text, error borders, error summaries and error alerts (StatusTone::Danger) use the danger tokens.
+
 Type:
 - Cormorant Garamond 300 and 300 italic: display, headings, quotes.
 - Hanken Grotesk 300/400/500: body and UI (300 for reading, 500 for emphasis).

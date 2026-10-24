@@ -9,12 +9,14 @@ use App\Constants\CacheKeys;
 use App\Constants\ContentStatus;
 use App\Models\User;
 use App\Repositories\Contracts\ContentRepositoryInterface;
+use App\Repositories\Contracts\RevisionRepositoryInterface;
 use Closure;
 use DateTimeInterface;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 /**
  * Shared behaviour for draft/published content: CRUD, publish/unpublish,
@@ -225,6 +227,30 @@ abstract class AbstractContentService
     public function countTrashed(): int
     {
         return $this->repository->countTrashed();
+    }
+
+    /**
+     * Delete a record from the trash for good, with its media and its revisions. Only
+     * trashed records can be purged: a live record goes to the trash first.
+     */
+    public function forceDelete(int $id, ?User $actor = null): void
+    {
+        $model = $this->repository->findTrashed($id) ?? throw new ModelNotFoundException("No record [{$id}] in the trash.");
+
+        $this->audit->record($actor, AuditAction::CONTENT_PURGED, $model, $this->auditMeta($model));
+        app(RevisionRepositoryInterface::class)->forget($model);
+        $this->repository->forceDelete($id);
+        $this->flushCache();
+    }
+
+    /**
+     * Find a trashed record (for the permanent delete dialog).
+     *
+     * @return TModel|null
+     */
+    public function findTrashed(int $id): ?Model
+    {
+        return $this->repository->findTrashed($id);
     }
 
     /**

@@ -62,10 +62,10 @@
                             @if (! $report->isResolved())
                                 <x-button variant="quiet" size="sm" type="button" wire:click="resolve({{ $report->getKey() }})" data-resolve>Resolve</x-button>
                                 @if ($message !== null && ! $message->trashed())
-                                    <x-button variant="quiet" size="sm" danger type="button" wire:click="confirm('{{ Reports::ACTION_DELETE }}', {{ $report->getKey() }})" data-delete-message>Remove message</x-button>
+                                    <x-button variant="danger" size="sm" type="button" wire:click="confirm('{{ Reports::ACTION_DELETE }}', {{ $report->getKey() }})" data-delete-message><x-icon name="trash" class="size-4" />Remove message</x-button>
                                 @endif
                                 @if ($message?->user !== null && $message->user->community_status->canChat())
-                                    <x-button variant="quiet" size="sm" type="button" wire:click="confirm('{{ Reports::ACTION_SUSPEND }}', {{ $report->getKey() }})" data-suspend-author>Suspend author</x-button>
+                                    <x-button variant="danger" size="sm" type="button" wire:click="confirm('{{ Reports::ACTION_SUSPEND }}', {{ $report->getKey() }})" data-suspend-author>Suspend author</x-button>
                                 @endif
                             @endif
                         </div>
@@ -76,21 +76,24 @@
         {{ $reports->links('components.admin.pagination') }}
     @endif
 
-    <x-admin.confirm-dialog :show="$this->isConfirming(Reports::ACTION_DELETE)" title="Remove this message?" action="deleteMessage" confirm-label="Remove message">
-        Members will see "{{ \App\Constants\ChatSettings::REMOVED_PLACEHOLDER }}" in its place, its attached files are deleted, and every report about it will be resolved.
+    <x-admin.confirm-dialog :show="$this->isConfirming(Reports::ACTION_DELETE)" danger title="Remove this message permanently?" action="deleteMessage" confirm-label="Remove message">
+        Members will see "{{ \App\Constants\ChatSettings::REMOVED_PLACEHOLDER }}" in its place, its attached files are deleted, and every report about it will be resolved. {{ \App\Constants\ConfirmDialog::IRREVERSIBLE }}
     </x-admin.confirm-dialog>
 
     @if ($this->isConfirming(Reports::ACTION_SUSPEND))
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-surface-overlay p-4" x-data x-trap.noscroll.inert="true" x-on:keydown.escape.window="$wire.cancelConfirmation()" data-confirm-dialog>
-            <form wire:submit="suspendAuthor" role="dialog" aria-modal="true" aria-labelledby="suspend-title" class="w-full max-w-lg rounded-card border border-rule bg-surface-panel p-6 sm:p-8" novalidate>
-                <h2 id="suspend-title" class="font-display text-3xl font-light leading-tight">Suspend the author?</h2>
-                <p class="mt-3 text-base font-light text-ink">Their chat access ends immediately, they will be emailed, and this report is resolved.</p>
+            <form wire:submit="suspendAuthor" role="alertdialog" aria-modal="true" aria-labelledby="suspend-title" aria-describedby="suspend-description" class="confirm-dialog confirm-dialog--danger max-w-lg" novalidate>
+                <div class="confirm-dialog__head">
+                    <span class="confirm-dialog__icon" data-danger-icon><x-icon name="warning" class="size-6" /></span>
+                    <h2 id="suspend-title" class="confirm-dialog__title">Suspend the author?</h2>
+                </div>
+                <p id="suspend-description" class="confirm-dialog__body">Their chat access ends immediately, they will be emailed, and this report is resolved.</p>
                 <div class="mt-6">
                     <x-form.textarea model="note" label="Note to the member (optional)" rows="3" />
                 </div>
-                <div class="mt-8 flex flex-wrap justify-end gap-3">
-                    <x-button type="button" variant="quiet" wire:click="cancelConfirmation">Cancel</x-button>
-                    <x-button type="submit" wire:loading.attr="disabled" data-confirm>Suspend</x-button>
+                <div class="confirm-dialog__actions">
+                    <x-button type="button" variant="quiet" wire:click="cancelConfirmation" x-init="$nextTick(() => $el.focus())" data-cancel>Cancel</x-button>
+                    <x-button type="submit" variant="danger-filled" wire:loading.attr="disabled" data-confirm>Suspend</x-button>
                 </div>
             </form>
         </div>

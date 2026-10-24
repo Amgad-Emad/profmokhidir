@@ -164,7 +164,13 @@ final class ChatCopy
 
     public const string REPORT_THANKS = 'Thank you. An administrator will look at this message.';
 
-    public const string DELETE_CONFIRM = 'Remove this message?';
+    public const string DELETE_CONFIRM = 'Delete this message permanently?';
+
+    /** What deleting does, in the delete dialog. */
+    public const string DELETE_CONSEQUENCE = 'Everyone in the room will see “Message deleted” in its place, and its attached files are removed.';
+
+    /** The filled danger button of the delete dialog. */
+    public const string DELETE_LABEL = 'Delete message';
 
     public const string FORMATTING_HEADING = 'Formatting';
 

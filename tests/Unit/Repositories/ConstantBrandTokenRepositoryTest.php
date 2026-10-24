@@ -28,6 +28,13 @@ class ConstantBrandTokenRepositoryTest extends TestCase
     }
 
     #[Test]
+    public function it_returns_exactly_the_two_functional_danger_colours_with_their_roles(): void
+    {
+        $this->assertSame(['danger-light' => '#9B2C2C', 'danger-dark' => '#EFB0A5'], $this->repository->functionalColours());
+        $this->assertSame(array_keys($this->repository->functionalColours()), array_keys($this->repository->functionalColourRoles()));
+    }
+
+    #[Test]
     public function it_returns_exactly_the_nine_brand_colours(): void
     {
         $this->assertSame([

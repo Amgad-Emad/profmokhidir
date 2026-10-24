@@ -14,7 +14,7 @@ use Tests\Unit\Design\Concerns\ResolvesDesignTokens;
  * computed from the .btn token table in resources/css/tokens.css: the label and
  * the icon reach 4.5:1 against the button's own background (composited over the
  * surface), outline pills keep a 3:1 boundary, and hover never changes the ink
- * of a solid pill. The quiet danger tone (row actions) is checked as well.
+ * of a solid pill or of the filled danger pill.
  */
 class ButtonContrastTest extends TestCase
 {
@@ -152,11 +152,30 @@ class ButtonContrastTest extends TestCase
         }
     }
 
+    #[Test]
+    public function the_danger_variants_are_red_in_every_context_and_the_filled_pill_keeps_its_ink(): void
+    {
+        foreach (self::contexts() as $label => $context) {
+            $danger = $this->hex($this->resolve('danger', $context));
+
+            foreach (['ink', 'border', 'icon'] as $part) {
+                $this->assertSame($danger, $this->hex($this->resolve(substr(ButtonVariant::Danger->token($part), 2), $context)), "{$label}: the danger outline's {$part} is not the danger red");
+                $this->assertSame($danger, $this->hex($this->resolve(substr(ButtonVariant::Danger->token($part, ButtonState::Hover), 2), $context)), "{$label}: the danger outline's {$part} leaves the red on hover");
+            }
+
+            $filled = ButtonVariant::DangerFilled;
+            $this->assertSame($this->hex($this->resolve('danger-surface', $context)), $this->hex($this->resolve(substr($filled->token('bg'), 2), $context)), "{$label}: the filled danger pill is not filled with --danger-surface");
+
+            foreach ([ButtonState::Hover, ButtonState::Active, ButtonState::FocusVisible] as $state) {
+                $this->assertSame($this->hex($this->resolve(substr($filled->token('ink'), 2), $context)), $this->hex($this->resolve(substr($filled->token('ink', $state), 2), $context)), "{$label}: {$state->value} changes the filled danger pill's ink");
+            }
+        }
+    }
+
     // ------------------------------------------------------------------ helpers
 
     /**
-     * Each variant, plus the quiet button in the danger tone (its background follows
-     * quiet, its ink follows danger).
+     * Each variant with its own background and ink.
      *
      * @return array<string, array{ButtonVariant, ButtonVariant}>
      */
@@ -167,8 +186,6 @@ class ButtonContrastTest extends TestCase
         foreach (ButtonVariant::cases() as $variant) {
             $combinations[$variant->value] = [$variant, $variant];
         }
-
-        $combinations['quiet danger'] = [ButtonVariant::Quiet, ButtonVariant::Danger];
 
         return $combinations;
     }

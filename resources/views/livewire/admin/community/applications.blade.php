@@ -72,16 +72,16 @@
                                 <x-button variant="quiet" size="sm" type="button" wire:click="decide('{{ Applications::ACTION_APPROVE }}', {{ $user->getKey() }})" data-approve>Approve<span class="sr-only"> {{ $user->name }}</span></x-button>
                             @endif
                             @if ($user->community_status === CommunityStatus::Pending)
-                                <x-button variant="quiet" size="sm" danger type="button" wire:click="decide('{{ Applications::ACTION_REJECT }}', {{ $user->getKey() }})" data-reject>Reject<span class="sr-only"> {{ $user->name }}</span></x-button>
+                                <x-button variant="danger" size="sm" type="button" wire:click="decide('{{ Applications::ACTION_REJECT }}', {{ $user->getKey() }})" data-reject>Reject<span class="sr-only"> {{ $user->name }}</span></x-button>
                             @endif
                             @if ($user->community_status === CommunityStatus::Approved)
-                                <x-button variant="quiet" size="sm" danger type="button" wire:click="decide('{{ Applications::ACTION_SUSPEND }}', {{ $user->getKey() }})" data-suspend>Suspend<span class="sr-only"> {{ $user->name }}</span></x-button>
+                                <x-button variant="danger" size="sm" type="button" wire:click="decide('{{ Applications::ACTION_SUSPEND }}', {{ $user->getKey() }})" data-suspend>Suspend<span class="sr-only"> {{ $user->name }}</span></x-button>
                             @endif
                             @if ($user->community_status === CommunityStatus::Suspended)
                                 <x-button variant="quiet" size="sm" type="button" wire:click="decide('{{ Applications::ACTION_REINSTATE }}', {{ $user->getKey() }})" data-reinstate>Reinstate<span class="sr-only"> {{ $user->name }}</span></x-button>
                             @endif
                             @if (in_array($user->community_status, [CommunityStatus::Approved, CommunityStatus::Suspended], true))
-                                <x-button variant="quiet" size="sm" type="button" wire:click="decide('{{ Applications::ACTION_REMOVE }}', {{ $user->getKey() }})" data-remove>Remove<span class="sr-only"> {{ $user->name }}</span></x-button>
+                                <x-button variant="danger" size="sm" type="button" wire:click="decide('{{ Applications::ACTION_REMOVE }}', {{ $user->getKey() }})" data-remove>Remove<span class="sr-only"> {{ $user->name }}</span></x-button>
                             @endif
                         </div>
                     </div>
@@ -93,15 +93,20 @@
 
     @if ($deciding !== null && $dialog !== null)
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-surface-overlay p-4" x-data x-trap.noscroll.inert="true" x-on:keydown.escape.window="$wire.cancelDecision()" data-decision-dialog="{{ $decidingAction }}">
-            <form wire:submit="confirmDecision" role="dialog" aria-modal="true" aria-labelledby="decision-title" aria-describedby="decision-description" class="w-full max-w-lg rounded-card border border-rule bg-surface-panel p-6 sm:p-8" novalidate>
-                <h2 id="decision-title" class="font-display text-3xl font-light leading-tight">{{ $dialog['title'] }}</h2>
-                <p id="decision-description" class="mt-3 text-base font-light text-ink">{{ $deciding->name }} · {{ $deciding->email }}. {{ $dialog['body'] }}</p>
+            <form novalidate wire:submit="confirmDecision" role="{{ $dialog['danger'] ? 'alertdialog' : 'dialog' }}" aria-modal="true" aria-labelledby="decision-title" aria-describedby="decision-description" @class(['confirm-dialog max-w-lg', 'confirm-dialog--danger' => $dialog['danger']]) >
+                <div class="confirm-dialog__head">
+                    @if ($dialog['danger'])
+                        <span class="confirm-dialog__icon" data-danger-icon><x-icon name="warning" class="size-6" /></span>
+                    @endif
+                    <h2 id="decision-title" class="confirm-dialog__title">{{ $dialog['title'] }}</h2>
+                </div>
+                <p id="decision-description" class="confirm-dialog__body">{{ $deciding->name }} · {{ $deciding->email }}. {{ $dialog['body'] }}</p>
                 <div class="mt-6">
                     <x-form.textarea model="note" label="Note to the applicant (optional)" rows="4" hint="Included in the email and kept in the audit log." />
                 </div>
-                <div class="mt-8 flex flex-wrap justify-end gap-3">
-                    <x-button type="button" variant="quiet" wire:click="cancelDecision">Cancel</x-button>
-                    <x-button type="submit" wire:loading.attr="disabled" data-confirm>{{ $dialog['confirm'] }}</x-button>
+                <div class="confirm-dialog__actions">
+                    <x-button type="button" variant="quiet" wire:click="cancelDecision" x-init="$nextTick(() => $el.focus())" data-cancel>Cancel</x-button>
+                    <x-button type="submit" :variant="$dialog['danger'] ? 'danger-filled' : 'primary'" wire:loading.attr="disabled" data-confirm>{{ $dialog['confirm'] }}</x-button>
                 </div>
             </form>
         </div>

@@ -59,6 +59,28 @@ SVG);
                 <div class="card card-ivory"><p class="t-label text-bronze">Cypress</p><p class="font-display text-4xl">{{ Brand::CYPRESS_SHARE }}%</p></div>
                 <div class="card card-ivory"><p class="t-label text-bronze">Brass</p><p class="font-display text-4xl">{{ Brand::BRASS_SHARE }}%</p></div>
             </div>
+            <h3 class="t-label mt-14 text-bronze" data-rise>Functional exception: danger red, only for destructive actions and errors</h3>
+            <p class="t-body mt-3 max-w-2xl text-ash" data-rise>Never decoration. Used only through the <code class="font-mono text-sm">--danger</code>, <code class="font-mono text-sm">--danger-surface</code> and <code class="font-mono text-sm">--danger-ink</code> tokens: the outline danger button, the filled danger button inside a confirmation dialog, error text, error borders and error summaries.</p>
+            <ul class="mt-6 grid gap-5 sm:grid-cols-2" data-rise-group data-functional-colours>
+                @foreach ($functionalColours as $colour)
+                    <li class="card card-ivory flex flex-col gap-4 !p-0 overflow-hidden" data-functional-colour="{{ $colour['name'] }}">
+                        <div class="h-20 w-full" style="background-color: var(--functional-{{ $colour['name'] }})"></div>
+                        <div class="px-6 pb-6">
+                            <div class="flex items-baseline justify-between gap-3">
+                                <h4 class="font-display text-2xl">{{ $colour['name'] }}</h4>
+                                <code class="font-mono text-sm text-ash">{{ $colour['hex'] }}</code>
+                            </div>
+                            <p class="t-label mt-2 text-bronze">{{ $colour['role'] }}</p>
+                            <p class="mt-3 text-sm leading-relaxed text-ash">{{ $colour['usage'] }}</p>
+                            <dl class="mt-4 grid grid-cols-2 gap-2 font-mono text-xs text-ash">
+                                @foreach ($colour['contrast'] as $surface => $contrast)
+                                    <div><dt class="t-label !tracking-[0.2em]">On {{ $surface }}</dt><dd class="mt-1">{{ $ratio($contrast) }}</dd></div>
+                                @endforeach
+                            </dl>
+                        </div>
+                    </li>
+                @endforeach
+            </ul>
         </section>
 
         {{-- Type --}}
@@ -108,7 +130,7 @@ SVG);
             <hr class="rule-brass mb-10" data-rule>
             <p class="t-label text-bronze" data-rise>03 · Buttons</p>
             <h2 id="buttons-title" class="t-heading mt-3" data-rise>Buttons</h2>
-            <p class="t-body mt-4 max-w-measure text-ink-muted" data-rise>One component, <code class="font-mono text-sm">&lt;x-button variant="…"&gt;</code>, five variants. Each variant takes its background, text, border and icon for every state (default, hover, active, focus, disabled, loading) from the <code class="font-mono text-sm">.btn</code> token table in tokens.css, in both themes. Hover is subtle and never changes the ink of a solid pill: evergreen deepens, ivory takes a linen tint, outlines gain a faint tint. Never add colour utilities to a button.</p>
+            <p class="t-body mt-4 max-w-measure text-ink-muted" data-rise>One component, <code class="font-mono text-sm">&lt;x-button variant="…"&gt;</code>, six variants. Destructive actions are always danger: the outline (Move to trash, Remove, Reject, Suspend, Delete message, with the trash icon for deletes) and, only as the final confirm inside a confirmation dialog, the filled danger pill. Each variant takes its background, text, border and icon for every state (default, hover, active, focus, disabled, loading) from the <code class="font-mono text-sm">.btn</code> token table in tokens.css, in both themes. Hover is subtle and never changes the ink of a solid pill: evergreen deepens, ivory takes a linen tint, outlines gain a faint tint. Never add colour utilities to a button.</p>
             @php
                 $buttonSurfaces = [
                     'page' => ['label' => 'On the page', 'class' => 'bg-surface'],
@@ -133,8 +155,8 @@ SVG);
                                     @endif
                                 </li>
                             @endforeach
-                            <li class="flex flex-wrap items-center gap-3" data-button-row="quiet-danger">
-                                <x-button type="button" variant="quiet" danger data-button-sample="quiet-danger">Reject</x-button>
+                            <li class="flex flex-wrap items-center gap-3" data-button-row="danger-use">
+                                <x-button type="button" variant="danger" size="sm" data-button-sample="danger-trash"><x-icon name="trash" class="size-4" />Move to trash</x-button>
                                 <x-button type="button" variant="primary" size="sm">Small</x-button>
                                 <x-button type="button" variant="primary" size="round"><x-icon name="send" label="Send" /></x-button>
                                 <x-button href="#buttons">As a link</x-button>
@@ -424,7 +446,8 @@ SVG);
                     <p class="t-label text-bronze">&lt;x-alert&gt; · one per tone</p>
                     <div class="mt-4 flex flex-col gap-3">
                         <x-alert tone="cypress">The publication was saved and is now live.</x-alert>
-                        <x-alert tone="bronze" role="alert">Add alt text before publishing this photograph.</x-alert>
+                        <x-alert tone="bronze">Add alt text before publishing this photograph.</x-alert>
+                        <x-alert tone="danger" role="alert">The publication could not be published: two images still need alt text.</x-alert>
                         <x-alert tone="ash" title="Draft">Only staff can see this item.</x-alert>
                     </div>
                     <p class="t-label mt-10 text-bronze">&lt;x-admin.status-badge&gt;</p>

@@ -24,7 +24,7 @@
                 <x-button variant="quiet" size="sm" type="button" wire:click="approveSelected" :disabled="$selected === []" data-bulk-approve>Approve selected</x-button>
             @endif
             @if ($current !== TributeStatus::Rejected)
-                <x-button variant="quiet" size="sm" danger type="button" wire:click="rejectSelected" :disabled="$selected === []" data-bulk-reject>Decline selected</x-button>
+                <x-button variant="danger" size="sm" type="button" wire:click="rejectSelected" :disabled="$selected === []" data-bulk-reject>Decline selected</x-button>
             @endif
         </div>
 
@@ -42,10 +42,10 @@
                             <p class="mt-1 font-mono text-xs text-ink-muted" data-email>{{ $tribute->email ?: 'No email given' }}</p>
 
                             @if ($editingId === (int) $tribute->getKey())
-                                <form wire:submit="saveEdit" class="mt-4 space-y-4" novalidate data-edit-form>
-                                    <div class="grid gap-4 sm:grid-cols-2">
-                                        <x-form.input model="edit.name" label="Name" required />
-                                        <x-form.input model="edit.location" label="Location" />
+                                <form wire:submit="saveEdit" class="form-grid mt-4" novalidate data-edit-form>
+                                    <div class="form-row">
+                                        <x-form.input class="form-col--half" model="edit.name" label="Name" required />
+                                        <x-form.input class="form-col--half" model="edit.location" label="Location" />
                                     </div>
                                     <x-form.textarea model="edit.message" label="Tribute" rows="5" required />
                                     <div class="flex flex-wrap gap-3">
@@ -66,7 +66,7 @@
                                 <x-button type="button" variant="primary" size="sm" wire:click="approve({{ $tribute->getKey() }})" data-approve>Approve<span class="sr-only"> tribute from {{ $tribute->name }}</span></x-button>
                             @endif
                             @if ($tribute->status !== TributeStatus::Rejected)
-                                <x-button variant="quiet" size="sm" type="button" wire:click="decline({{ $tribute->getKey() }})" data-reject>Decline<span class="sr-only"> tribute from {{ $tribute->name }}</span></x-button>
+                                <x-button variant="danger" size="sm" type="button" wire:click="decline({{ $tribute->getKey() }})" data-reject>Decline<span class="sr-only"> tribute from {{ $tribute->name }}</span></x-button>
                             @endif
                             @if ($tribute->isApproved() || $editingId !== (int) $tribute->getKey())
                                 <x-admin.row-menu :label="'tribute from '.$tribute->name">

@@ -10,16 +10,16 @@
     <div class="mt-8">
         <x-admin.flash />
         @error('action')
-            <x-alert tone="bronze" role="alert" class="mb-6" data-action-error>{{ $message }}</x-alert>
+            <x-alert tone="danger" role="alert" class="mb-6" data-action-error>{{ $message }}</x-alert>
         @enderror
     </div>
 
     <p class="text-sm font-light text-ink-muted" data-active-admins>Active administrators: <span class="font-mono text-ink">{{ $activeAdmins }}</span>. The last one can never be demoted or deactivated.</p>
 
-    <form novalidate class="mt-6 grid gap-4 md:grid-cols-4" wire:submit.prevent role="search" aria-label="Search users">
-        <x-form.input type="search" model="search" id="search" live label="Search" :optional="false" loading="search" class="md:col-span-2" placeholder="Name or email" autocomplete="off" />
-        <x-form.select model="role" id="filter-role" live label="Role" :optional="false" placeholder="All roles" :options="$roleOptions" data-filter="role" />
-        <x-form.select model="status" id="filter-status" live label="Community status" :optional="false" placeholder="Any" :options="$statusOptions" data-filter="status" />
+    <form novalidate class="form-row mt-6" wire:submit.prevent role="search" aria-label="Search users">
+        <x-form.input type="search" model="search" id="search" live label="Search" :optional="false" loading="search" class="form-col--half" placeholder="Name or email" autocomplete="off" />
+        <x-form.select model="role" id="filter-role" class="form-col--quarter" live label="Role" :optional="false" placeholder="All roles" :options="$roleOptions" data-filter="role" />
+        <x-form.select model="status" id="filter-status" class="form-col--quarter" live label="Community status" :optional="false" placeholder="Any" :options="$statusOptions" data-filter="status" />
     </form>
 
     @if ($users->isEmpty())
@@ -90,7 +90,7 @@
                                         @endif
                                         @if ($isStaff || ! $user->isActive())
                                             @if ($user->isActive())
-                                                <x-button variant="quiet" size="sm" danger type="button" wire:click="confirm('{{ Index::ACTION_DEACTIVATE }}', {{ $user->getKey() }})" data-deactivate>Deactivate<span class="sr-only"> {{ $user->name }}</span></x-button>
+                                                <x-button variant="danger" size="sm" type="button" wire:click="confirm('{{ Index::ACTION_DEACTIVATE }}', {{ $user->getKey() }})" data-deactivate>Deactivate<span class="sr-only"> {{ $user->name }}</span></x-button>
                                             @else
                                                 <x-button variant="quiet" size="sm" type="button" wire:click="confirm('{{ Index::ACTION_REACTIVATE }}', {{ $user->getKey() }})" data-reactivate>Reactivate<span class="sr-only"> {{ $user->name }}</span></x-button>
                                             @endif
@@ -112,7 +112,7 @@
             <form wire:submit="sendInvite" role="dialog" aria-modal="true" aria-labelledby="invite-title" aria-describedby="invite-description" class="w-full max-w-lg rounded-card border border-rule bg-surface-panel p-6 sm:p-8" novalidate>
                 <h2 id="invite-title" class="font-display text-3xl font-light leading-tight">Invite a staff member</h2>
                 <p id="invite-description" class="mt-3 text-base font-light text-ink">They receive an email with a link to choose their password. No password is shown here or sent by email.</p>
-                <div class="mt-6 space-y-5">
+                <div class="form-grid mt-6">
                     <x-form.input model="invite.name" label="Name" required />
                     <x-form.input model="invite.email" label="Email" type="email" required />
                     <x-form.select model="invite.role" label="Role" :options="array_intersect_key(Roles::labels(), array_flip(Roles::staff()))" required hint="Administrators manage users, settings and the community and must use two-factor authentication. Editors manage content and tributes." />
@@ -143,7 +143,7 @@
     @endif
 
     @if ($confirming !== null && $dialog !== null)
-        <x-admin.confirm-dialog :show="true" :title="$dialog['title']" action="runConfirmed" :confirm-label="$dialog['confirm']">
+        <x-admin.confirm-dialog :show="true" :danger="$dialog['danger']" :icon="null" :title="$dialog['title']" action="runConfirmed" :confirm-label="$dialog['confirm']">
             {{ $confirming->name }} · {{ $confirming->email }}. {{ $dialog['body'] }}
         </x-admin.confirm-dialog>
     @endif

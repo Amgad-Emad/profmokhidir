@@ -44,4 +44,18 @@
             <div class="mt-6">@include('styleguide.partials.form-set', ['suffix' => 'dark'])</div>
         </div>
     </form>
+
+    <h3 class="mt-16 font-display text-3xl font-light" data-rise>The form grid</h3>
+    <p class="t-body mt-4 max-w-measure text-ink-muted" data-rise>Fields side by side sit in a <code class="font-mono text-sm">.form-row</code>: 12 columns from {{ \App\Constants\FormGrid::BREAKPOINT_PX }}px, one below. Each field lays its label, hint, control and message on shared subgrid rows, so the inputs line up whether or not a neighbour has a hint, and an error never pushes a neighbour down. Short fields take a half or a third; textareas the full row.</p>
+    <form novalidate class="form-specimen form-specimen--light form-grid mt-8" action="#forms" method="get" data-form-grid-specimen>
+        <div class="form-row">
+            <x-form.input name="grid_email" id="grid-email" label="Public contact email" type="email" class="form-col--half" />
+            <x-form.input name="grid_phone" id="grid-phone" label="Public contact phone" type="tel" hint="Digits, spaces and a leading + only." class="form-col--half" />
+        </div>
+        <div class="form-row">
+            <x-form.input name="grid_place" id="grid-place" label="Place" class="form-col--two-thirds" error="Name the place, for example Khartoum." />
+            <x-form.year name="grid_year" id="grid-year" label="Year" class="form-col--third" />
+        </div>
+        <x-form.textarea name="grid_note" id="grid-note" label="Note" rows="3" />
+    </form>
 </section>

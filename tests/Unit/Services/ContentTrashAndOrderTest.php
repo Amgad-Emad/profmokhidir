@@ -174,4 +174,35 @@ class ContentTrashAndOrderTest extends TestCase
     {
         return Award::query()->ordered()->pluck('name')->all();
     }
+
+    #[Test]
+    public function force_delete_purges_a_trashed_record_with_its_revisions_and_is_audited(): void
+    {
+        $award = Award::factory()->create(['name' => 'Old prize']);
+        \App\Models\Revision::factory()->count(2)->of($award)->create();
+        $this->service->delete($award, $this->editor);
+
+        $this->service->forceDelete($award->getKey(), $this->editor);
+
+        $this->assertNull(Award::withTrashed()->find($award->getKey()));
+        $this->assertSame(0, \App\Models\Revision::query()->where('revisionable_id', $award->getKey())->count());
+        $log = AuditLog::query()->where('action', AuditAction::CONTENT_PURGED)->firstOrFail();
+        $this->assertSame($award->getKey(), (int) $log->subject_id);
+        $this->assertSame('Old prize', $log->meta['label']);
+    }
+
+    #[Test]
+    public function force_delete_refuses_a_record_that_is_not_in_the_trash(): void
+    {
+        $award = Award::factory()->create();
+
+        $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+
+        try {
+            $this->service->forceDelete($award->getKey(), $this->editor);
+        } finally {
+            $this->assertNotNull(Award::query()->find($award->getKey()));
+            $this->assertSame(0, AuditLog::query()->where('action', AuditAction::CONTENT_PURGED)->count());
+        }
+    }
 }

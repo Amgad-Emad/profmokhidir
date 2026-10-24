@@ -173,7 +173,7 @@
     }
 
     .form-check__box[aria-invalid='true'] {
-        border-color: var(--danger-tone);
+        border-color: var(--danger);
     }
 
     .form-check__box:disabled {

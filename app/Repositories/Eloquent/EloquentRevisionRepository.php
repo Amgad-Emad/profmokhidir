@@ -61,6 +61,11 @@ class EloquentRevisionRepository extends BaseEloquentRepository implements Revis
         return $this->ofRecord($record)->whereNotIn('id', $keepIds)->delete();
     }
 
+    public function forget(Model $record): int
+    {
+        return $this->ofRecord($record)->delete();
+    }
+
     /**
      * @return Builder<Revision>
      */

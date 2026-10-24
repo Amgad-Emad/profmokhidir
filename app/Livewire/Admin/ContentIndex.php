@@ -6,10 +6,12 @@ namespace App\Livewire\Admin;
 
 use App\Constants\AdminUx;
 use App\Constants\ContentStatus;
+use App\Constants\ConfirmDialog;
 use App\Constants\ContentTypes;
 use App\Constants\DateFormats;
 use App\Constants\StatusTone;
 use App\Exceptions\ImagesNotReadyException;
+use App\Livewire\Admin\Concerns\ConfirmsActions;
 use App\Livewire\Admin\Concerns\NotifiesEditors;
 use App\Repositories\Contracts\ContentRepositoryInterface;
 use App\Services\AbstractContentService;
@@ -28,11 +30,15 @@ use Livewire\WithPagination;
  * columns, drag-and-drop reordering (with move up/down buttons as the keyboard
  * alternative), publish/unpublish (one or a ticked selection), trash with Undo
  * (no dialog: the trash is reversible) and a Trash view to
- * restore from. Subclasses name the type, its service and its columns.
+ * restore from or delete permanently (irreversible, so it asks first in the
+ * danger confirmation dialog). Subclasses name the type, its service and its columns.
  */
 abstract class ContentIndex extends Component
 {
-    use AuthorizesRequests, NotifiesEditors, WithPagination;
+    use AuthorizesRequests, ConfirmsActions, NotifiesEditors, WithPagination;
+
+    /** The confirmation that guards a permanent delete from the trash. */
+    public const string ACTION_PURGE = 'purge';
 
     public const string VIEW_ACTIVE = 'active';
 
@@ -170,6 +176,7 @@ abstract class ContentIndex extends Component
 
     public function showActive(): void
     {
+        $this->cancelConfirmation();
         $this->view = self::VIEW_ACTIVE;
         $this->resetPage();
     }
@@ -324,6 +331,30 @@ abstract class ContentIndex extends Component
         $this->notify(sprintf('%s restored.', $this->singular()));
     }
 
+    /**
+     * Delete one record from the trash for good, after the dialog's "Delete permanently".
+     */
+    public function purge(): void
+    {
+        if (! $this->isConfirming(self::ACTION_PURGE)) {
+            return;
+        }
+
+        $id = (int) $this->confirmingId;
+        $this->cancelConfirmation();
+
+        $model = $this->service()->findTrashed($id);
+
+        if ($model === null) {
+            return;
+        }
+
+        $this->authorize('forceDelete', $model);
+
+        $this->service()->forceDelete($id, auth()->user());
+        $this->toast(sprintf('%s deleted permanently.', $this->singular()));
+    }
+
     public function moveUp(int $id): void
     {
         $this->move($id, -1);
@@ -389,6 +420,7 @@ abstract class ContentIndex extends Component
             'hasFilters' => trim($this->search) !== '' || array_filter($this->filters, fn ($value): bool => $value !== null && $value !== '') !== [],
             'placeholderFilter' => ContentRepositoryInterface::FILTER_PLACEHOLDER,
             'maxChips' => self::MAX_CHIPS,
+            'purging' => $this->purgeDialog(),
         ])->layout('components.layouts.admin', ['title' => $type['plural']]);
     }
 
@@ -432,6 +464,30 @@ abstract class ContentIndex extends Component
         return $type['public_param'] === null
             ? route($type['public_route'])
             : route($type['public_route'], [$item->getAttribute($type['public_param'])]);
+    }
+
+    /**
+     * The permanent delete dialog's copy while it is open.
+     *
+     * @return array{title: string, body: string, confirm: string}|null
+     */
+    protected function purgeDialog(): ?array
+    {
+        if (! $this->isConfirming(self::ACTION_PURGE) || $this->view !== self::VIEW_TRASH) {
+            return null;
+        }
+
+        $model = $this->service()->findTrashed((int) $this->confirmingId);
+
+        if ($model === null) {
+            return null;
+        }
+
+        return [
+            'title' => ConfirmDialog::purgeTitle($this->singular()),
+            'body' => ConfirmDialog::purgeBody($this->cell($model, array_key_first($this->columns()))['text']),
+            'confirm' => ConfirmDialog::PURGE_LABEL,
+        ];
     }
 
     protected function singular(): string

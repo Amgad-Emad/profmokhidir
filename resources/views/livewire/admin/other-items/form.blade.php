@@ -5,10 +5,10 @@
     <x-admin.edit-layout :editor="$editor" :sections="['item' => 'The item', 'text' => 'Text & link', 'images' => 'Images']" class="mt-10">
         <x-admin.form-section id="item" title="The item">
             <x-form.input model="form.title" label="Title" required hint="The heading readers see." />
-            <div class="grid gap-6 sm:grid-cols-3">
-                <x-form.input model="form.category" label="Category" hint="Items with the same category are shown together." />
-                <x-form.input model="form.item_type" label="Type" hint="For example interview, article or event." />
-                <x-form.date model="form.date" label="Date" hint="When it happened." />
+            <div class="form-row">
+                <x-form.input class="form-col--third" model="form.category" label="Category" hint="Items with the same category are shown together." />
+                <x-form.input class="form-col--third" model="form.item_type" label="Type" hint="For example interview, article or event." />
+                <x-form.date class="form-col--third" model="form.date" label="Date" hint="When it happened." />
             </div>
             <x-form.textarea model="form.summary" label="Summary" rows="3" hint="One or two sentences for the list." />
         </x-admin.form-section>

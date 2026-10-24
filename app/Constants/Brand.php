@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Constants;
 
 /**
- * Brand colour palette. These nine values are the only colours in the UI,
- * mirrored one-to-one by the Tailwind theme in resources/css/app.css.
+ * Brand colour palette. These nine values are the only decorative colours in
+ * the UI, declared once as --brand-* in resources/css/tokens.css. The one
+ * functional exception is the danger red (functionalColours()), approved by
+ * the owner for destructive actions and error states only, never decoration.
  */
 final class Brand
 {
@@ -27,6 +29,12 @@ final class Brand
     public const string ASH = '#575A55';
 
     public const string BRONZE = '#6F5A34';
+
+    /** Danger red on light surfaces (ivory, linen): destructive actions and errors only. */
+    public const string DANGER_LIGHT = '#9B2C2C';
+
+    /** Danger red on dark surfaces (evergreen, cypress): a softer tint that holds 4.5:1 on cypress. */
+    public const string DANGER_DARK = '#EFB0A5';
 
     /** Share of surfaces each colour should roughly occupy, as a percentage. */
     public const int EVERGREEN_SHARE = 40;
@@ -81,6 +89,31 @@ final class Brand
     }
 
     /**
+     * The functional exception to the palette, token name => hex (--functional-* in tokens.css).
+     * Used only through the --danger, --danger-surface and --danger-ink tokens.
+     *
+     * @return array<string, string>
+     */
+    public static function functionalColours(): array
+    {
+        return [
+            'danger-light' => self::DANGER_LIGHT,
+            'danger-dark' => self::DANGER_DARK,
+        ];
+    }
+
+    /**
+     * @return array<string, array{role: string, usage: string}>
+     */
+    public static function functionalRoles(): array
+    {
+        return [
+            'danger-light' => ['role' => 'Functional', 'usage' => 'Danger on ivory and linen: destructive actions (outline, or filled for the final confirm in a dialog), error text, error borders and error summaries. Never decoration.'],
+            'danger-dark' => ['role' => 'Functional', 'usage' => 'Danger on evergreen and cypress, in the dark theme and inside dark bands. The same rules as on light.'],
+        ];
+    }
+
+    /**
      * Non-brand values that remain available in Tailwind (white, black, transparent, current).
      *
      * @return list<string>
@@ -93,5 +126,10 @@ final class Brand
     public static function isBrandColour(string $hex): bool
     {
         return in_array(strtoupper($hex), self::colours(), true);
+    }
+
+    public static function isFunctionalColour(string $hex): bool
+    {
+        return in_array(strtoupper($hex), self::functionalColours(), true);
     }
 }

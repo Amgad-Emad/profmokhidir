@@ -106,8 +106,8 @@
                         <div class="chat-member__confirm" x-show="suspending === member.id" data-suspend-confirm>
                             <span x-text="config.copy.suspendConfirm.replace(':name', member.name)"></span>
                             <span class="flex gap-4">
-                                <x-button variant="quiet" size="sm" type="button" class="chat-action" x-on:click="suspend(member)" data-suspend-yes>Yes, suspend</x-button>
-                                <x-button variant="quiet" size="sm" type="button" class="chat-action" x-on:click="cancelSuspend(member)">No</x-button>
+                                <x-button variant="danger" size="sm" type="button" x-on:click="suspend(member)" data-suspend-yes>Yes, suspend</x-button>
+                                <x-button variant="quiet" size="sm" type="button" class="chat-action" x-on:click="cancelSuspend(member)">Cancel</x-button>
                             </span>
                         </div>
                     </li>
