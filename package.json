@@ -12,7 +12,8 @@
         "katex": "node scripts/copy-katex.mjs",
         "qa:chat": "node tests/qa/chat-fixes.mjs",
         "qa:chat-width": "node tests/qa/chat-width.mjs",
-        "qa:focus": "node tests/qa/focus.mjs"
+        "qa:focus": "node tests/qa/focus.mjs",
+        "qa:buttons": "node tests/qa/buttons-auth.mjs"
     },
     "devDependencies": {
         "@axe-core/playwright": "^4.11.1",

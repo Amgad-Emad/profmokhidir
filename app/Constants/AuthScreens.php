@@ -144,6 +144,9 @@ final class AuthScreens
     }
 
     /** The intro shown once the challenge has switched to a recovery code. */
+    /** The label of every sign-out button (<x-account.sign-out>). */
+    public const string SIGN_OUT = 'Sign out';
+
     public const string TWO_FACTOR_RECOVERY_INTRO = 'Enter one of the recovery codes you stored when you set up two-factor authentication.';
 
     /**

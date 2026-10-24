@@ -125,19 +125,20 @@ class MastheadTest extends TestCase
     }
 
     #[Test]
-    public function the_right_side_holds_only_the_search_button_the_tribute_pill_and_the_menu_button(): void
+    public function the_right_side_holds_the_search_button_the_tribute_pill_the_theme_toggle_sign_in_and_the_menu_button(): void
     {
         preg_match('/<div class="flex items-center gap-1 sm:gap-3">(.*?)<\/div>\s*<\/div>\s*<\/div>/s', $this->header(), $right);
         preg_match_all('/<(a|button)\b/', $right[1], $controls);
 
-        // Search, the tribute pill, the theme toggle (one button, no menu) and the menu toggle.
-        $this->assertSame(['a', 'a', 'button', 'button'], $controls[1]);
+        // Search, the tribute pill, the theme toggle (one button, no menu), the quiet Sign in link and the menu toggle.
+        $this->assertSame(['a', 'a', 'button', 'a', 'button'], $controls[1]);
+        $this->assertStringContainsString('data-sign-in-link>'.Masthead::SIGN_IN_SHORT.'</a>', $right[1]);
         $this->assertStringContainsString('data-theme-toggle', $right[1]);
-        $this->assertStringContainsString('<a href="'.route(Search::ROUTE).'" id="'.Masthead::SEARCH_OPENER_ID.'" class="site-search-toggle" aria-keyshortcuts="'.Search::keyShortcuts().'" @click.prevent="$dispatch(\'search-open\', { opener: $el })">', $right[1]);
+        $this->assertStringContainsString('<a href="'.route(Search::ROUTE).'" id="'.Masthead::SEARCH_OPENER_ID.'" class="site-search-toggle max-sm:hidden" aria-keyshortcuts="'.Search::keyShortcuts().'" @click.prevent="$dispatch(\'search-open\', { opener: $el })">', $right[1]);
         $this->assertStringContainsString('<span class="sr-only">'.Search::TITLE.'</span>', $right[1]);
         $this->assertStringContainsString('<kbd class="site-search-toggle__key" aria-hidden="true">/</kbd>', $right[1]);
-        $this->assertStringContainsString('<a href="'.route('tributes.create').'" class="btn-pill-outline btn-pill--small site-header__tribute hidden xl:inline-flex">'.Masthead::LEAVE_TRIBUTE.'</a>', $right[1]);
-        $this->assertMatchesRegularExpression('/<button type="button" x-ref="toggle" class="site-menu-toggle lg:hidden" aria-expanded="false" :aria-expanded="[^"]+" aria-controls="'.Masthead::MENU_ID.'" @click="toggleMenu\(\)">\s*<span class="t-label">'.Masthead::MENU.'<\/span>/', $right[1]);
+        $this->assertStringContainsString('<a href="'.route('tributes.create').'" class="btn btn--secondary btn--small site-header__tribute hidden xl:inline-flex">'.Masthead::LEAVE_TRIBUTE.'</a>', $right[1]);
+        $this->assertMatchesRegularExpression('/<button type="button" x-ref="toggle" class="site-menu-toggle lg:hidden" aria-expanded="false" :aria-expanded="[^"]+" aria-controls="'.Masthead::MENU_ID.'" @click="toggleMenu\(\)">\s*<span class="t-label max-sm:sr-only">'.Masthead::MENU.'<\/span>/', $right[1]);
     }
 
     #[Test]
@@ -220,7 +221,7 @@ class MastheadTest extends TestCase
         $this->assertStringContainsString('Other Information', $menu);
 
         preg_match('/<div class="site-menu__foot[^"]*">(.*?)<\/div>\s*<\/div>\s*<\/div>/s', $menu, $foot);
-        $this->assertStringContainsString('<a href="'.route('tributes.create').'" class="btn-pill-outline on-dark">'.Masthead::LEAVE_TRIBUTE.'</a>', $foot[1]);
+        $this->assertStringContainsString('<a href="'.route('tributes.create').'" class="btn btn--secondary on-dark">'.Masthead::LEAVE_TRIBUTE.'</a>', $foot[1]);
         $this->assertStringContainsString('>'.Masthead::SIGN_IN.'</a>', $foot[1]);
         $this->assertStringContainsString('x-ref="close"', $menu);
 

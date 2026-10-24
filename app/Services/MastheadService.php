@@ -14,6 +14,7 @@ use App\Models\Publication;
 use App\Models\Tribute;
 use App\Models\User;
 use App\Repositories\Contracts\ChapterRepositoryInterface;
+use App\Support\Initials;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
@@ -27,6 +28,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  *
  * @phpstan-type Link array{key: string, label: string, description: string, url: string, active: bool}
  * @phpstan-type Featured array{kind: string, label: string, title: string, meta: string|null, quote: string|null, url: string, media: Media|null}
+ * @phpstan-type AccountMenu array{name: string, initials: string, role: string, items: list<array{key: string, label: string, url: string, icon: string}>}
  * @phpstan-type Chapter array{key: string, numeral: string, label: string, strap: string, panelId: string, buttonId: string, items: list<Link>, active: bool, featured: Featured|null}
  */
 class MastheadService
@@ -41,6 +43,7 @@ class MastheadService
         private readonly PublicationService $publications,
         private readonly AlbumService $albums,
         private readonly TributeService $tributes,
+        private readonly AuthenticationService $auth,
     ) {}
 
     /**
@@ -101,6 +104,37 @@ class MastheadService
         };
 
         return ['line' => Masthead::UTILITY_LINE, 'link' => $link];
+    }
+
+    /**
+     * The signed-in user's account menu (null for visitors, who see a quiet Sign in link):
+     * the name, initials and role, then Your account, Community chat for those who may use
+     * it and Dashboard for staff. The theme toggle and Sign out are drawn by the view.
+     *
+     * @return AccountMenu|null
+     */
+    public function account(?User $user): ?array
+    {
+        if ($user === null) {
+            return null;
+        }
+
+        $items = [['key' => 'account', 'label' => Masthead::ACCOUNT, 'url' => route(AdminNavigation::ACCOUNT_ROUTE), 'icon' => 'user']];
+
+        if ($user->canAccessChat()) {
+            $items[] = ['key' => 'chat', 'label' => Masthead::ACCOUNT_MENU_CHAT, 'url' => route('community.chat'), 'icon' => 'users'];
+        }
+
+        if ($this->auth->isStaff($user)) {
+            $items[] = ['key' => 'dashboard', 'label' => Masthead::ACCOUNT_MENU_DASHBOARD, 'url' => route(AdminNavigation::DASHBOARD_ROUTE), 'icon' => 'panel'];
+        }
+
+        return [
+            'name' => $user->name,
+            'initials' => Initials::of($user->name),
+            'role' => $user->primaryRoleLabel(),
+            'items' => $items,
+        ];
     }
 
     /**

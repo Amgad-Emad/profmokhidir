@@ -28,25 +28,28 @@ class FormFieldServiceTest extends TestCase
     }
 
     #[Test]
-    public function a_plain_field_is_described_by_its_hint_and_counter_and_marked_required(): void
+    public function a_plain_field_is_described_by_its_requirement_hint_and_counter(): void
     {
         $field = $this->forms->describe(['name' => 'message', 'label' => 'Your tribute', 'hint' => 'A memory or a lesson.', 'required' => true, 'maxlength' => 600]);
 
         $this->assertSame('message', $field['id']);
         $this->assertSame('message', $field['key']);
         $this->assertSame(FormControls::REQUIRED, $field['requirement']);
-        $this->assertSame(FormControls::REQUIRED.FormControls::HINT_SEPARATOR.'A memory or a lesson.', $field['hint']);
+        $this->assertSame('A memory or a lesson.', $field['hint'], 'The requirement sits beside the label, not in the hint');
         $this->assertSame('A memory or a lesson.', $field['hintText']);
         $this->assertTrue($field['counter']);
-        $this->assertSame('message-hint message-count', $field['describedBy']);
+        $this->assertSame('message-requirement', $field['requirementId']);
+        $this->assertSame('message-requirement message-hint message-count', $field['describedBy']);
         $this->assertFalse($field['invalid']);
     }
 
     #[Test]
     public function a_field_that_is_not_required_says_optional_unless_it_opts_out(): void
     {
-        $this->assertSame(FormControls::OPTIONAL, $this->forms->describe(['name' => 'location', 'label' => 'Place'])['hint']);
-        $this->assertSame('', $this->forms->describe(['name' => 'q', 'label' => 'Search', 'optional' => false])['hint']);
+        $this->assertSame(FormControls::OPTIONAL, $this->forms->describe(['name' => 'location', 'label' => 'Place'])['requirement']);
+        $this->assertSame('', $this->forms->describe(['name' => 'location', 'label' => 'Place'])['hint']);
+        $this->assertNull($this->forms->describe(['name' => 'q', 'label' => 'Search', 'optional' => false])['requirement']);
+        $this->assertSame('', $this->forms->describe(['name' => 'q', 'label' => 'Search', 'optional' => false])['describedBy']);
         $this->assertNull($this->forms->describe(['name' => 'remember', 'label' => 'Remember', 'required' => true, 'marker' => false])['requirement']);
     }
 
@@ -85,10 +88,10 @@ class FormFieldServiceTest extends TestCase
     public function plain_controls_get_a_name_and_native_required_and_livewire_controls_get_wire_model(): void
     {
         $plain = (string) $this->forms->controlAttributes($this->forms->describe(['name' => 'email', 'label' => 'Email', 'required' => true]), ['type' => 'email']);
-        $this->assertSame('id="email" name="email" required="required" aria-describedby="email-hint" data-label="email" type="email"', $plain);
+        $this->assertSame('id="email" name="email" required="required" aria-describedby="email-requirement" data-label="email" type="email"', $plain);
 
         $bound = (string) $this->forms->controlAttributes($this->forms->describe(['model' => 'form.title', 'wire' => 'live.blur', 'label' => 'Title', 'required' => true]));
-        $this->assertSame('id="form-title" wire:model.live.blur="form.title" aria-required="true" aria-describedby="form-title-hint" data-label="title"', $bound);
+        $this->assertSame('id="form-title" wire:model.live.blur="form.title" aria-required="true" aria-describedby="form-title-requirement" data-label="title"', $bound);
 
         $live = (string) $this->forms->controlAttributes($this->forms->describe(['model' => 'search', 'wire' => 'live.debounce.400ms', 'label' => 'Search', 'optional' => false]));
         $this->assertStringContainsString('wire:model.live.debounce.400ms="search"', $live);

@@ -63,7 +63,7 @@ class ChatRoomChromeTest extends TestCase
         $this->assertStringContainsString('University of Khartoum', $header);
         $this->assertStringContainsString(route(AdminNavigation::ACCOUNT_ROUTE), $header);
         $this->assertStringContainsString('action="'.route('logout').'"', $header);
-        $this->assertMatchesRegularExpression('~</svg>\s*'.ChatCopy::MENU_SIGN_OUT.'</button>~', $header);
+        $this->assertMatchesRegularExpression('~</svg>\s*<span class="sign-out__label">'.ChatCopy::MENU_SIGN_OUT.'</span></button>~', $header);
         // Sign out lives only in the menu now: no uppercase nav-link buttons in the bar.
         $this->assertStringNotContainsString('class="nav-link t-label">Sign out', $header);
     }

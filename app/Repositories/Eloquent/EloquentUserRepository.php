@@ -48,6 +48,13 @@ class EloquentUserRepository extends BaseEloquentRepository implements UserRepos
         return $user->refresh();
     }
 
+    public function dismissTwoFactorReminder(User $user): User
+    {
+        $user->forceFill(['two_factor_reminder_dismissed_at' => now()])->save();
+
+        return $user->refresh();
+    }
+
     public function countActiveWithRole(string $role, ?int $excludeId = null): int
     {
         try {

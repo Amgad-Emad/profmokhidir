@@ -20,7 +20,7 @@ SVG);
             <p class="t-body max-w-2xl">Every colour, type style, button, card, rule, image treatment and motion pattern in one place. This page is served only in the local environment.</p>
             <nav aria-label="Sections" class="flex flex-wrap gap-3">
                 @foreach (['colours' => 'Colours', 'type' => 'Type', 'buttons' => 'Buttons', 'forms' => 'Forms', 'cards' => 'Cards', 'rules' => 'Rules', 'mark' => 'Mark', 'photos' => 'Photos', 'motion' => 'Motion', 'press' => 'Press', 'components' => 'Components'] as $id => $label)
-                    <a href="#{{ $id }}" class="btn-pill-outline">{{ $label }}</a>
+                    <x-button href="#{{ $id }}">{{ $label }}</x-button>
                 @endforeach
             </nav>
         </div>
@@ -94,11 +94,11 @@ SVG);
             <div class="mt-10 grid gap-5 md:grid-cols-2" data-rise-group>
                 <div class="card">
                     <p class="t-label text-bronze">Links, focus and selection on light</p>
-                    <p class="t-body mt-3">Links <a href="#type">underline on hover</a>. Tab to a <button type="button" class="btn-pill-outline ml-1">control</button> to see the bronze focus ring. Select this text to see the linen highlight.</p>
+                    <p class="t-body mt-3">Links <a href="#type">underline on hover</a>. Tab to a <x-button type="button" class="ml-1">control</x-button> to see the bronze focus ring. Select this text to see the linen highlight.</p>
                 </div>
                 <div class="card on-dark border-cypress bg-evergreen text-champagne">
                     <p class="t-label text-brass">Links, focus and selection on dark</p>
-                    <p class="t-body mt-3">Links <a href="#type">underline on hover</a>. Tab to a <button type="button" class="btn-pill-outline ml-1">control</button> to see the brass focus ring. Monospace is for <code class="font-mono text-sm">technical specs</code> only.</p>
+                    <p class="t-body mt-3">Links <a href="#type">underline on hover</a>. Tab to a <x-button type="button" class="ml-1">control</x-button> to see the brass focus ring. Monospace is for <code class="font-mono text-sm">technical specs</code> only.</p>
                 </div>
             </div>
         </section>
@@ -107,34 +107,41 @@ SVG);
         <section id="buttons" class="py-20" aria-labelledby="buttons-title">
             <hr class="rule-brass mb-10" data-rule>
             <p class="t-label text-bronze" data-rise>03 · Buttons</p>
-            <h2 id="buttons-title" class="t-heading mt-3" data-rise>Pill buttons</h2>
-            <div class="mt-8 grid gap-5 md:grid-cols-2" data-rise-group>
-                <div class="card">
-                    <p class="t-label text-bronze">On ivory / linen</p>
-                    <div class="mt-5 flex flex-wrap gap-4">
-                        <button type="button" class="btn-pill-filled border border-stone">.btn-pill-filled</button>
-                        <button type="button" class="btn-pill-outline">.btn-pill-outline</button>
-                        <a href="#buttons" class="btn-pill-outline">As a link</a>
+            <h2 id="buttons-title" class="t-heading mt-3" data-rise>Buttons</h2>
+            <p class="t-body mt-4 max-w-measure text-ink-muted" data-rise>One component, <code class="font-mono text-sm">&lt;x-button variant="…"&gt;</code>, five variants. Each variant takes its background, text, border and icon for every state (default, hover, active, focus, disabled, loading) from the <code class="font-mono text-sm">.btn</code> token table in tokens.css, in both themes. Hover is subtle and never changes the ink of a solid pill: evergreen deepens, ivory takes a linen tint, outlines gain a faint tint. Never add colour utilities to a button.</p>
+            @php
+                $buttonSurfaces = [
+                    'page' => ['label' => 'On the page', 'class' => 'bg-surface'],
+                    'raised' => ['label' => 'On a card', 'class' => 'card'],
+                    'band' => ['label' => 'On evergreen', 'class' => 'on-dark bg-surface text-ink'],
+                ];
+            @endphp
+            <div class="mt-8 grid gap-5 lg:grid-cols-3" data-rise-group>
+                @foreach ($buttonSurfaces as $surfaceKey => $surface)
+                    <div class="{{ $surface['class'] }} rounded-card border border-rule p-6" data-button-surface="{{ $surfaceKey }}">
+                        <p class="t-label text-accent-text">{{ $surface['label'] }}</p>
+                        <ul class="mt-5 space-y-5">
+                            @foreach (\App\Constants\ButtonVariant::cases() as $buttonVariant)
+                                <li class="flex flex-wrap items-center gap-3" data-button-row="{{ $buttonVariant->value }}">
+                                    @if ($buttonVariant === \App\Constants\ButtonVariant::Icon)
+                                        <x-button type="button" :variant="$buttonVariant->value" data-button-sample="{{ $buttonVariant->value }}"><x-icon name="search" label="Search" /></x-button>
+                                        <x-button type="button" :variant="$buttonVariant->value" disabled><x-icon name="search" label="Search (disabled)" /></x-button>
+                                    @else
+                                        <x-button type="button" :variant="$buttonVariant->value" data-button-sample="{{ $buttonVariant->value }}">{{ ucfirst($buttonVariant->value) }}</x-button>
+                                        <x-button type="button" :variant="$buttonVariant->value" disabled>Disabled</x-button>
+                                        <x-button type="button" :variant="$buttonVariant->value" aria-busy="true">Saving…</x-button>
+                                    @endif
+                                </li>
+                            @endforeach
+                            <li class="flex flex-wrap items-center gap-3" data-button-row="quiet-danger">
+                                <x-button type="button" variant="quiet" danger data-button-sample="quiet-danger">Reject</x-button>
+                                <x-button type="button" variant="primary" size="sm">Small</x-button>
+                                <x-button type="button" variant="primary" size="round"><x-icon name="send" label="Send" /></x-button>
+                                <x-button href="#buttons">As a link</x-button>
+                            </li>
+                        </ul>
                     </div>
-                    <p class="mt-4 text-sm text-ash">The outline button borders in the current text colour, so it inherits evergreen here.</p>
-                </div>
-                <div class="card card-ivory" data-styleguide-primary-pill>
-                    <p class="t-label text-bronze">Primary action of a form on ivory</p>
-                    <div class="mt-5 flex flex-wrap gap-4">
-                        <button type="button" class="btn-pill-solid">.btn-pill-solid</button>
-                        <button type="button" class="btn-pill-solid" aria-busy="true">Signing in…</button>
-                    </div>
-                    <p class="mt-4 text-sm text-ash">Evergreen filled with ivory text: the one main action of a sign-in, password or application form (<code class="font-mono text-xs">&lt;x-button variant="primary" busy="Signing in…"&gt;</code>), full width of its column. This extends the pill rule (ivory filled or outline) to "evergreen-filled on ivory surfaces" for forms only; page actions keep the outline pill. While submitting, the label changes to the busy wording and nothing spins.</p>
-                </div>
-                <div class="card on-dark border-cypress bg-evergreen text-champagne">
-                    <p class="t-label text-brass">On evergreen</p>
-                    <div class="mt-5 flex flex-wrap gap-4">
-                        <button type="button" class="btn-pill-filled">.btn-pill-filled</button>
-                        <button type="button" class="btn-pill-outline">.btn-pill-outline</button>
-                        <a href="#buttons" class="btn-pill-outline">As a link</a>
-                    </div>
-                    <p class="mt-4 text-sm text-champagne/80">Ivory fill with evergreen text; outline in champagne.</p>
-                </div>
+                @endforeach
             </div>
         </section>
 
@@ -434,11 +441,11 @@ SVG);
             <h3 class="mt-12 font-display text-3xl" data-rise>Buttons, filters and links</h3>
             <div class="mt-6 grid gap-5 md:grid-cols-2" data-rise-group>
                 <div class="card card-ivory">
-                    <p class="t-label text-bronze">&lt;x-button&gt; on light · primary is the outline pill, secondary is quiet</p>
+                    <p class="t-label text-bronze">&lt;x-button&gt; on light · secondary is the outline pill, quiet the text action</p>
                     <div class="mt-5 flex flex-wrap items-center gap-4">
                         <x-button type="button">Save</x-button>
-                        <x-button type="button" variant="outline">Back to the list</x-button>
-                        <x-button href="#components" variant="filled">As a link</x-button>
+                        <x-button type="button" variant="quiet">Back to the list</x-button>
+                        <x-button href="#components">As a link</x-button>
                     </div>
                     <p class="t-label mt-10 text-bronze">&lt;x-filter-pills&gt;</p>
                     <x-filter-pills class="mt-2" label="Topics" :options="[['label' => 'agronomy', 'url' => '#components', 'active' => false], ['label' => 'soil fertility', 'url' => '#components', 'active' => true]]" all-url="#components" :all-active="false" all-label="All topics" />
@@ -448,9 +455,9 @@ SVG);
                 <div class="card on-dark border-cypress bg-evergreen text-champagne">
                     <p class="t-label text-brass">&lt;x-button&gt; on evergreen</p>
                     <div class="mt-5 flex flex-wrap items-center gap-4">
-                        <x-button type="button" variant="filled-light">Leave a tribute</x-button>
-                        <x-button type="button" variant="outline-light">Read his story</x-button>
-                        <x-button type="button" variant="outline">Cancel</x-button>
+                        <x-button type="button" variant="primary" on-dark>Leave a tribute</x-button>
+                        <x-button type="button" variant="secondary" on-dark>Read his story</x-button>
+                        <x-button type="button" variant="quiet">Cancel</x-button>
                     </div>
                     <p class="t-label mt-10 text-brass">&lt;x-site.breadcrumbs&gt; · tone ivory</p>
                     <x-site.breadcrumbs class="mt-3" tone="ivory" :trail="[['label' => 'Home', 'url' => '#', 'current' => false], ['label' => 'Pictures', 'url' => '#', 'current' => false], ['label' => 'In the field', 'url' => '#', 'current' => true]]" />

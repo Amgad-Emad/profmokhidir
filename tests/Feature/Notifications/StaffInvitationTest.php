@@ -37,12 +37,12 @@ class StaffInvitationTest extends TestCase
     }
 
     #[Test]
-    public function administrators_are_told_about_two_factor_authentication(): void
+    public function administrators_are_not_sent_to_set_up_two_factor(): void
     {
-        $user = User::factory()->admin()->withoutTwoFactor()->invited()->create();
+        $user = User::factory()->admin()->invited()->create();
         $rendered = (new StaffInvitation('token', Roles::ADMIN))->toMail($user)->render()->toHtml();
 
         $this->assertStringContainsString('as an administrator', $rendered);
-        $this->assertStringContainsString('two-factor authentication', $rendered);
+        $this->assertStringNotContainsString('two-factor', $rendered);
     }
 }

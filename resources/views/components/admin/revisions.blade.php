@@ -19,7 +19,7 @@
                         </p>
                     </div>
                     @unless ($loop->first)
-                        <button type="button" class="save-bar__link" wire:click="restoreRevision({{ $revision->getKey() }})" data-restore-revision="{{ $revision->getKey() }}">Load this version<span class="sr-only"> from {{ $revision->created_at->format(\App\Constants\DateFormats::LONG.', H:i') }}</span></button>
+                        <x-button variant="quiet" size="sm" type="button" wire:click="restoreRevision({{ $revision->getKey() }})" data-restore-revision="{{ $revision->getKey() }}">Load this version<span class="sr-only"> from {{ $revision->created_at->format(\App\Constants\DateFormats::LONG.', H:i') }}</span></x-button>
                     @endunless
                 </li>
             @endforeach

@@ -37,7 +37,7 @@
 
     @if ($view === ContentIndex::VIEW_ACTIVE && ! $canReorder && ! $items->isEmpty())
         <p class="mt-4 text-sm font-light text-ink-muted">Clear the search, filters and sorting to change the display order.
-            @if ($sort !== '')<button type="button" wire:click="clearSort" class="ml-1 text-accent-text underline-offset-4 hover:underline">Reset sorting</button>@endif
+            @if ($sort !== '')<x-button variant="quiet" size="sm" type="button" class="ml-1" wire:click="clearSort">Reset sorting</x-button>@endif
         </p>
     @endif
 
@@ -126,7 +126,7 @@
                             </td>
                             <td class="text-right">
                                 @if ($view === ContentIndex::VIEW_TRASH)
-                                    <button type="button" wire:click="restoreMany([{{ $item->getKey() }}])" class="save-bar__link" data-restore>Restore<span class="sr-only"> {{ $label }}</span></button>
+                                    <x-button variant="quiet" size="sm" type="button" wire:click="restoreMany([{{ $item->getKey() }}])" data-restore>Restore<span class="sr-only"> {{ $label }}</span></x-button>
                                 @else
                                     <x-admin.row-menu :label="$label">
                                         <a href="{{ $editUrl }}" class="row-menu__item"><x-icon name="feather" class="size-4" />Edit</a>

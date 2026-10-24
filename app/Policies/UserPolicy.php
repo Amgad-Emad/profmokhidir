@@ -66,6 +66,12 @@ class UserPolicy
         return ! $user->is($subject) && $user->can(Permissions::MANAGE_USERS);
     }
 
+    /** Hide the dashboard's two-factor card: only for one's own account. */
+    public function dismissTwoFactorReminder(User $user, User $subject): bool
+    {
+        return $user->is($subject);
+    }
+
     /** Approve, reject or suspend a community application or membership. */
     public function review(User $user, User $subject): bool
     {

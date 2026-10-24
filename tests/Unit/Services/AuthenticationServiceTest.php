@@ -23,12 +23,19 @@ class AuthenticationServiceTest extends TestCase
     }
 
     #[Test]
-    public function only_admins_require_two_factor(): void
+    public function two_factor_is_recommended_to_admins_only(): void
     {
-        $this->assertTrue($this->service->requiresTwoFactor(User::factory()->admin()->create()));
-        $this->assertFalse($this->service->requiresTwoFactor(User::factory()->editor()->create()));
-        $this->assertFalse($this->service->requiresTwoFactor(User::factory()->member()->create()));
-        $this->assertFalse($this->service->requiresTwoFactor(User::factory()->create()));
+        $this->assertTrue($this->service->recommendsTwoFactor(User::factory()->admin()->create()));
+        $this->assertFalse($this->service->recommendsTwoFactor(User::factory()->editor()->create()));
+        $this->assertFalse($this->service->recommendsTwoFactor(User::factory()->member()->create()));
+        $this->assertFalse($this->service->recommendsTwoFactor(User::factory()->create()));
+    }
+
+    #[Test]
+    public function admins_come_without_two_factor_by_default(): void
+    {
+        $this->assertFalse($this->service->hasConfirmedTwoFactor(User::factory()->admin()->create()));
+        $this->assertTrue($this->service->hasConfirmedTwoFactor(User::factory()->admin()->withTwoFactor()->create()));
     }
 
     #[Test]
@@ -58,12 +65,26 @@ class AuthenticationServiceTest extends TestCase
     }
 
     #[Test]
-    public function admins_without_confirmed_two_factor_must_set_it_up(): void
+    public function the_dashboard_reminds_admins_without_confirmed_two_factor_until_dismissed(): void
     {
-        $this->assertTrue($this->service->mustSetUpTwoFactor(User::factory()->admin()->withoutTwoFactor()->create()));
-        $this->assertTrue($this->service->mustSetUpTwoFactor(User::factory()->admin()->withPendingTwoFactor()->create()));
-        $this->assertFalse($this->service->mustSetUpTwoFactor(User::factory()->admin()->create()));
-        $this->assertFalse($this->service->mustSetUpTwoFactor(User::factory()->editor()->withoutTwoFactor()->create()));
+        $this->assertTrue($this->service->shouldRemindTwoFactor(User::factory()->admin()->create()));
+        $this->assertTrue($this->service->shouldRemindTwoFactor(User::factory()->admin()->withPendingTwoFactor()->create()));
+        $this->assertFalse($this->service->shouldRemindTwoFactor(User::factory()->admin()->withTwoFactor()->create()));
+        $this->assertFalse($this->service->shouldRemindTwoFactor(User::factory()->admin()->dismissedTwoFactorReminder()->create()));
+        $this->assertFalse($this->service->shouldRemindTwoFactor(User::factory()->editor()->create()));
+    }
+
+    #[Test]
+    public function dismissing_the_reminder_is_remembered_for_that_user_only(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $other = User::factory()->admin()->create();
+
+        $dismissed = $this->service->dismissTwoFactorReminder($admin);
+
+        $this->assertNotNull($dismissed->two_factor_reminder_dismissed_at);
+        $this->assertFalse($this->service->shouldRemindTwoFactor($admin->fresh()));
+        $this->assertTrue($this->service->shouldRemindTwoFactor($other->fresh()));
     }
 
     #[Test]
@@ -71,7 +92,7 @@ class AuthenticationServiceTest extends TestCase
     {
         $pending = $this->service->twoFactorState(User::factory()->admin()->withPendingTwoFactor()->create());
 
-        $this->assertTrue($pending['required']);
+        $this->assertTrue($pending['recommended']);
         $this->assertTrue($pending['enabled']);
         $this->assertTrue($pending['pending']);
         $this->assertFalse($pending['confirmed']);
@@ -81,7 +102,7 @@ class AuthenticationServiceTest extends TestCase
 
         $confirmed = $this->service->twoFactorState(User::factory()->editor()->withTwoFactor()->create());
 
-        $this->assertFalse($confirmed['required']);
+        $this->assertFalse($confirmed['recommended']);
         $this->assertTrue($confirmed['confirmed']);
         $this->assertNull($confirmed['qr_code']);
         $this->assertNull($confirmed['setup_key']);

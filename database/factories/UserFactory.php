@@ -84,13 +84,20 @@ class UserFactory extends Factory
     }
 
     /**
-     * An administrator. Admin accounts must use two-factor authentication, so
-     * the state comes with a confirmed TOTP secret; chain withoutTwoFactor()
-     * to test the enforcement itself.
+     * An administrator. Two-factor authentication is recommended, not required,
+     * so the state has none; chain withTwoFactor() for an admin who turned it on.
      */
     public function admin(): static
     {
-        return $this->withRole(Roles::ADMIN)->withTwoFactor();
+        return $this->withRole(Roles::ADMIN);
+    }
+
+    /**
+     * Dismissed the dashboard card recommending two-factor authentication.
+     */
+    public function dismissedTwoFactorReminder(): static
+    {
+        return $this->state(fn (array $attributes) => ['two_factor_reminder_dismissed_at' => now()->subDay()]);
     }
 
     /**

@@ -60,12 +60,12 @@
                         <div class="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 text-sm lg:flex-col lg:items-end">
                             <x-admin.status-badge :tone="$report->isResolved() ? StatusTone::Cypress : StatusTone::Bronze" :label="$report->isResolved() ? 'Resolved' : 'Open'" />
                             @if (! $report->isResolved())
-                                <button type="button" wire:click="resolve({{ $report->getKey() }})" class="text-success-tone underline-offset-4 hover:underline" data-resolve>Resolve</button>
+                                <x-button variant="quiet" size="sm" type="button" wire:click="resolve({{ $report->getKey() }})" data-resolve>Resolve</x-button>
                                 @if ($message !== null && ! $message->trashed())
-                                    <button type="button" wire:click="confirm('{{ Reports::ACTION_DELETE }}', {{ $report->getKey() }})" class="text-danger-tone underline-offset-4 hover:underline" data-delete-message>Remove message</button>
+                                    <x-button variant="quiet" size="sm" danger type="button" wire:click="confirm('{{ Reports::ACTION_DELETE }}', {{ $report->getKey() }})" data-delete-message>Remove message</x-button>
                                 @endif
                                 @if ($message?->user !== null && $message->user->community_status->canChat())
-                                    <button type="button" wire:click="confirm('{{ Reports::ACTION_SUSPEND }}', {{ $report->getKey() }})" class="text-ink-muted underline-offset-4 hover:underline" data-suspend-author>Suspend author</button>
+                                    <x-button variant="quiet" size="sm" type="button" wire:click="confirm('{{ Reports::ACTION_SUSPEND }}', {{ $report->getKey() }})" data-suspend-author>Suspend author</x-button>
                                 @endif
                             @endif
                         </div>
@@ -89,7 +89,7 @@
                     <x-form.textarea model="note" label="Note to the member (optional)" rows="3" />
                 </div>
                 <div class="mt-8 flex flex-wrap justify-end gap-3">
-                    <x-button type="button" variant="outline" wire:click="cancelConfirmation">Cancel</x-button>
+                    <x-button type="button" variant="quiet" wire:click="cancelConfirmation">Cancel</x-button>
                     <x-button type="submit" wire:loading.attr="disabled" data-confirm>Suspend</x-button>
                 </div>
             </form>

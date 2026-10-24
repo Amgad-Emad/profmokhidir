@@ -19,7 +19,7 @@ class BrandStylesheetTest extends TestCase
     {
         parent::setUp();
 
-        $this->css = file_get_contents(resource_path('css/app.css'));
+        $this->css = file_get_contents(resource_path('css/app.css')).file_get_contents(resource_path('css/buttons.css'));
         $this->tokens = file_get_contents(resource_path('css/tokens.css'));
     }
 
@@ -74,7 +74,7 @@ class BrandStylesheetTest extends TestCase
 
         foreach ([
             '.t-display', '.t-heading', '.t-quote', '.t-body', '.t-label',
-            '.btn-pill-filled', '.btn-pill-outline', '.card', '.rule-brass', '.glow-brass',
+            '.btn', '.btn--primary', '.btn--secondary', '.btn--quiet', '.btn--icon', '.btn--danger', '.card', '.rule-brass', '.glow-brass',
             '.photo-portrait', '.photo-archive', '.glass-header',
         ] as $selector) {
             $this->assertMatchesRegularExpression('/'.preg_quote($selector, '/').'[\s,{]/', $this->css, "{$selector} is missing");

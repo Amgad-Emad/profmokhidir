@@ -14,9 +14,9 @@
                 <span class="smallcaps ml-2 text-ink" x-text="replyTo?.author"></span>
                 <span class="chat-reply__excerpt" dir="auto" x-text="replyTo?.excerpt"></span>
             </p>
-            <button type="button" class="chat-tool" x-on:click="cancelReply()" data-cancel-reply>
+            <x-button variant="icon" type="button" class="chat-tool" x-on:click="cancelReply()" data-cancel-reply>
                 <x-icon name="close" class="size-4" :label="ChatCopy::CANCEL_REPLY" />
-            </button>
+            </x-button>
         </div>
 
         <ul class="chat-tray" x-show="attachments.length > 0" x-cloak aria-label="{{ ChatCopy::ATTACHMENTS_LABEL }}" data-tray>
@@ -40,9 +40,9 @@
                             </span>
                         </template>
                     </span>
-                    <button type="button" class="chat-tool" x-on:click="removeAttachment(a)" :aria-label="config.copy.attachRemove.replace(':name', a.name)" data-remove-attachment>
+                    <x-button variant="icon" type="button" class="chat-tool" x-on:click="removeAttachment(a)" x-bind:aria-label="config.copy.attachRemove.replace(':name', a.name)" data-remove-attachment>
                         <x-icon name="close" class="size-4" />
-                    </button>
+                    </x-button>
                 </li>
             </template>
         </ul>
@@ -72,18 +72,18 @@
                                  'dir' => 'auto',
                                  'aria-describedby' => 'chat-composer-hint',
                              ]" />
-            <button type="button" class="chat-clip" x-show="config.attachments.enabled" x-on:click="openPicker()" aria-label="{{ ChatCopy::ATTACH }}" data-tip="{{ ChatCopy::ATTACH }}" aria-describedby="chat-attach-note" data-attach>
+            <x-button size="round" type="button" class="chat-clip" x-show="config.attachments.enabled" x-on:click="openPicker()" aria-label="{{ ChatCopy::ATTACH }}" data-tip="{{ ChatCopy::ATTACH }}" aria-describedby="chat-attach-note" data-attach>
                 <x-icon name="paperclip" class="size-5" />
-            </button>
+            </x-button>
             <input type="file" multiple hidden :accept="config.attachments.accept" x-ref="fileInput" x-on:change="pickFiles($event)" data-file-input>
-            <button type="button" class="chat-aa" x-on:click="toggleFormatting()" :aria-expanded="formattingOpen ? 'true' : 'false'" aria-controls="chat-formatting"
+            <x-button size="round" type="button" class="chat-aa" x-on:click="toggleFormatting()" x-bind:aria-expanded="formattingOpen ? 'true' : 'false'" aria-controls="chat-formatting"
                     aria-label="{{ ChatCopy::FORMATTING_TOGGLE }}" data-tip="{{ ChatCopy::FORMATTING_TOGGLE }}" data-formatting-toggle>
                 <span aria-hidden="true">{{ ChatCopy::FORMATTING_BUTTON }}</span>
-            </button>
-            <button type="submit" class="chat-send" x-bind:disabled="!canSend" :aria-busy="sending ? 'true' : 'false'"
+            </x-button>
+            <x-button variant="primary" size="round" type="submit" class="chat-send" x-bind:disabled="!canSend" x-bind:aria-busy="sending ? 'true' : 'false'"
                     aria-label="{{ ChatCopy::SEND }}" data-tip="{{ ChatCopy::SEND }}" data-send>
                 <x-icon name="send" class="size-5" />
-            </button>
+            </x-button>
         </div>
 
         <div class="chat-composer__meta">

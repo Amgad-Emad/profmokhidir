@@ -30,6 +30,11 @@ class Header extends Component
     /** @var array{line: string, link: array{label: string, url: string}} */
     public array $utility;
 
+    /** @var array{name: string, initials: string, role: string, items: list<array{key: string, label: string, url: string, icon: string}>}|null */
+    public ?array $account;
+
+    public string $signInUrl;
+
     public string $searchUrl;
 
     public string $searchParam = Search::PARAM;
@@ -50,6 +55,8 @@ class Header extends Component
         $this->chapters = $masthead->chapters($current, $user);
         $this->activeChapter = $masthead->activeChapter($current);
         $this->utility = $masthead->utility($user);
+        $this->account = $masthead->account($user);
+        $this->signInUrl = route('login');
         $this->searchUrl = route(Search::ROUTE);
         $this->searchShortcuts = Search::keyShortcuts();
         $this->tributeUrl = route('tributes.create');

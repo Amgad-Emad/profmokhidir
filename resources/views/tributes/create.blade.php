@@ -44,7 +44,7 @@
 
             <div class="flex flex-wrap items-center gap-4">
                 <x-button>Preview your tribute</x-button>
-                <x-button variant="outline" :href="$indexUrl">Back to tributes</x-button>
+                <x-button variant="quiet" :href="$indexUrl">Back to tributes</x-button>
             </div>
         </form>
     </section>

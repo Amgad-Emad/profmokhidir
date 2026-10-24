@@ -212,6 +212,23 @@
         }
     }
 
+    /* Sign out at the foot of the sidebar: a nav row; collapsed, only the arrow shows (the label stays for screen readers). */
+    .admin-nav__sign-out {
+        width: 100%;
+        margin-top: 0.25rem;
+        font-size: 0.875rem;
+        text-align: left;
+    }
+
+    .admin-shell[data-collapsed='true'] .admin-nav__sign-out .sign-out__label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
+
     /* ------------------------------------------------------------ top bar */
     .admin-topbar {
         position: sticky;
@@ -246,22 +263,6 @@
         .admin-topbar__tools {
             gap: 0.75rem;
         }
-    }
-
-    .admin-icon-button {
-        display: inline-flex;
-        width: 2.75rem;
-        height: 2.75rem;
-        flex-shrink: 0;
-        align-items: center;
-        justify-content: center;
-        border-radius: 9999px;
-        color: var(--ink);
-    }
-
-    .admin-icon-button:hover {
-        color: var(--ink-strong);
-        background-color: var(--surface-sunken);
     }
 
     .admin-breadcrumbs {
@@ -799,12 +800,6 @@
         }
     }
 
-    /* A smaller solid pill for the main action of a row (Approve). */
-    .btn-pill-solid.btn-pill--small {
-        padding-inline: 1.25rem;
-        font-size: 0.875rem;
-    }
-
     /* ------------------------------------------------------------ edit screens */
     .edit-layout {
         position: relative;
@@ -983,7 +978,7 @@
             justify-content: flex-end;
         }
 
-        .save-bar__link svg,
+        .save-bar__actions .btn svg,
         .save-bar [data-view-on-site] {
             display: none;
         }
@@ -1254,6 +1249,23 @@
         .attention-grid {
             grid-template-columns: repeat(3, minmax(0, 1fr));
         }
+    }
+
+    /* The dashboard's two-factor recommendation: a panel with the accent hairline on its left, dismissible. */
+    .two-factor-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1.5rem;
+        border: 1px solid var(--rule);
+        border-left: 1px solid var(--accent-line);
+        border-radius: var(--radius-card);
+        background-color: var(--surface-panel);
+    }
+
+    .two-factor-card__icon {
+        margin-top: 0.25rem;
+        color: var(--accent-text);
     }
 
     .attention-card {

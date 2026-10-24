@@ -21,10 +21,7 @@
             <li><a href="{{ route(\App\Constants\AdminNavigation::ACCOUNT_ROUTE) }}" class="admin-user-menu__item"><x-icon name="user" class="size-4" />Your account</a></li>
             <li><button type="button" class="admin-user-menu__item" x-on:click="open = false; $dispatch('admin-shortcuts-open')"><x-icon name="keyboard" class="size-4" />Keyboard shortcuts</button></li>
             <li>
-                <form novalidate method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="admin-user-menu__item" data-leave-ok><x-icon name="arrow" class="size-4" />Sign out</button>
-                </form>
+                <x-account.sign-out item-class="admin-user-menu__item" />
             </li>
         </ul>
     </div>

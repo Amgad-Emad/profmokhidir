@@ -17,12 +17,12 @@
                 <span class="chat-members-button__word">{{ ChatCopy::TAB_MEMBERS }}</span>
                 <span class="chat-members-button__count" data-member-count><span class="sr-only">{{ ChatCopy::TAB_MEMBERS }}: </span><span x-text="members.length">{{ count($initial['members'] ?? []) }}</span></span>
             </button>
-            <button type="button" class="chat-tool" x-on:click="toggleSearch()" :aria-expanded="searchOpen ? 'true' : 'false'" aria-controls="chat-search" data-search-toggle>
+            <x-button variant="icon" type="button" class="chat-tool" x-on:click="toggleSearch()" x-bind:aria-expanded="searchOpen ? 'true' : 'false'" aria-controls="chat-search" data-search-toggle>
                 <x-icon name="search" :label="ChatCopy::SEARCH_LABEL" />
-            </button>
-            <button type="button" class="chat-tool" x-on:click="togglePanel()" :aria-expanded="panelOpen ? 'true' : 'false'" aria-controls="chat-panel" data-panel-toggle>
+            </x-button>
+            <x-button variant="icon" type="button" class="chat-tool" x-on:click="togglePanel()" x-bind:aria-expanded="panelOpen ? 'true' : 'false'" aria-controls="chat-panel" data-panel-toggle>
                 <x-icon name="panel" :label="ChatCopy::PANEL_OPEN" />
-            </button>
+            </x-button>
         </div>
     </header>
 
@@ -52,10 +52,10 @@
 
     <div class="chat-scroller" x-ref="scroller" x-on:scroll.passive="onScroll()" x-on:keydown="onKeydown($event)" tabindex="0" aria-label="Messages" data-scroller>
         <div class="py-3 text-center" x-show="hasOlder">
-            <button type="button" class="chat-action" x-on:click="loadOlder()" x-bind:disabled="loadingOlder" data-load-older>
+            <x-button variant="quiet" size="sm" type="button" class="chat-action" x-on:click="loadOlder()" x-bind:disabled="loadingOlder" data-load-older>
                 <span x-show="!loadingOlder">{{ ChatCopy::LOAD_OLDER }}</span>
                 <span x-show="loadingOlder" x-cloak>Loading…</span>
-            </button>
+            </x-button>
         </div>
 
         <div class="chat-empty" x-show="messages.length === 0" data-empty>
@@ -96,9 +96,9 @@
         </div>
     </div>
 
-    <button type="button" class="chat-new-pill" x-show="newCount > 0" x-cloak x-on:click="scrollToBottom(true)" data-new-messages>
+    <x-button variant="primary" size="sm" type="button" class="chat-new-pill" x-show="newCount > 0" x-cloak x-on:click="scrollToBottom(true)" data-new-messages>
         <span x-text="newCount === 1 ? config.copy.newOne : config.copy.newMany.replace(':count', newCount)"></span>
-    </button>
+    </x-button>
 
     <div class="chat-drop" x-show="dragging" x-cloak aria-hidden="true" data-drop-zone>
         <p class="t-label text-accent-text">{{ ChatCopy::DROP_HINT }}</p>

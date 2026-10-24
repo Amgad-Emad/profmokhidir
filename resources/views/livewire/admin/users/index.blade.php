@@ -25,7 +25,7 @@
     @if ($users->isEmpty())
         <x-empty-state :message="trim($search) !== '' || $role !== '' || $status !== '' ? 'Nobody matches your search.' : 'There are no accounts yet. Invite the first staff member.'" />
         @if (trim($search) !== '' || $role !== '' || $status !== '')
-            <p class="mt-4 text-sm"><button type="button" wire:click="clearFilters" class="text-accent-text underline-offset-4 hover:underline">Clear the search and filters</button></p>
+            <p class="mt-4 text-sm"><x-button variant="quiet" size="sm" type="button" wire:click="clearFilters">Clear the search and filters</x-button></p>
         @endif
     @else
         <div class="relative mt-6 overflow-x-auto rounded-card border border-rule bg-surface-panel">
@@ -84,15 +84,15 @@
                             <td class="text-right">
                                 @unless ($isSelf)
                                     <div class="flex flex-wrap items-center justify-end gap-x-4 gap-y-2">
-                                        <button type="button" wire:click="editRole({{ $user->getKey() }})" class="link-meta" data-change-role>Change role<span class="sr-only"> of {{ $user->name }}</span></button>
+                                        <x-button variant="quiet" size="sm" type="button" wire:click="editRole({{ $user->getKey() }})" data-change-role>Change role<span class="sr-only"> of {{ $user->name }}</span></x-button>
                                         @if ($row['pendingInvite'] && $user->isActive())
-                                            <button type="button" wire:click="confirm('{{ Index::ACTION_RESEND }}', {{ $user->getKey() }})" class="text-success-tone underline-offset-4 hover:underline" data-resend>Resend invite<span class="sr-only"> to {{ $user->name }}</span></button>
+                                            <x-button variant="quiet" size="sm" type="button" wire:click="confirm('{{ Index::ACTION_RESEND }}', {{ $user->getKey() }})" data-resend>Resend invite<span class="sr-only"> to {{ $user->name }}</span></x-button>
                                         @endif
                                         @if ($isStaff || ! $user->isActive())
                                             @if ($user->isActive())
-                                                <button type="button" wire:click="confirm('{{ Index::ACTION_DEACTIVATE }}', {{ $user->getKey() }})" class="text-danger-tone underline-offset-4 hover:underline" data-deactivate>Deactivate<span class="sr-only"> {{ $user->name }}</span></button>
+                                                <x-button variant="quiet" size="sm" danger type="button" wire:click="confirm('{{ Index::ACTION_DEACTIVATE }}', {{ $user->getKey() }})" data-deactivate>Deactivate<span class="sr-only"> {{ $user->name }}</span></x-button>
                                             @else
-                                                <button type="button" wire:click="confirm('{{ Index::ACTION_REACTIVATE }}', {{ $user->getKey() }})" class="text-success-tone underline-offset-4 hover:underline" data-reactivate>Reactivate<span class="sr-only"> {{ $user->name }}</span></button>
+                                                <x-button variant="quiet" size="sm" type="button" wire:click="confirm('{{ Index::ACTION_REACTIVATE }}', {{ $user->getKey() }})" data-reactivate>Reactivate<span class="sr-only"> {{ $user->name }}</span></x-button>
                                             @endif
                                         @endif
                                     </div>
@@ -118,7 +118,7 @@
                     <x-form.select model="invite.role" label="Role" :options="array_intersect_key(Roles::labels(), array_flip(Roles::staff()))" required hint="Administrators manage users, settings and the community and must use two-factor authentication. Editors manage content and tributes." />
                 </div>
                 <div class="mt-8 flex flex-wrap justify-end gap-3">
-                    <x-button type="button" variant="outline" wire:click="cancelInvite">Cancel</x-button>
+                    <x-button type="button" variant="quiet" wire:click="cancelInvite">Cancel</x-button>
                     <x-button type="submit" wire:loading.attr="disabled" data-send-invite>Send the invitation</x-button>
                 </div>
             </form>
@@ -135,7 +135,7 @@
                     <x-form.select model="newRole" label="Dashboard role" :options="$staffRoleOptions" required />
                 </div>
                 <div class="mt-8 flex flex-wrap justify-end gap-3">
-                    <x-button type="button" variant="outline" wire:click="cancelRole">Cancel</x-button>
+                    <x-button type="button" variant="quiet" wire:click="cancelRole">Cancel</x-button>
                     <x-button type="submit" wire:loading.attr="disabled" data-save-role>Save role</x-button>
                 </div>
             </form>

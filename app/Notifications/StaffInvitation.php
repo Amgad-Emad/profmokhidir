@@ -14,8 +14,8 @@ use Illuminate\Notifications\Notification;
 /**
  * Invites a new administrator or editor to set their password. The link is a
  * password-broker token (the same one "forgot password" uses), so no password
- * ever travels by email. Administrators are told that two-factor
- * authentication is required on first sign-in.
+ * ever travels by email. Two-factor authentication is not part of the
+ * invitation: the dashboard recommends it once they are signed in.
  */
 class StaffInvitation extends Notification implements ShouldQueue
 {
@@ -45,10 +45,6 @@ class StaffInvitation extends Notification implements ShouldQueue
             ->line('You have been invited to join the dashboard of '.config('app.name').' as '.$role.'.')
             ->line('Choose a password with the link below to activate your account. For security the link can only be used once and expires after '.$minutes.' minutes; if it has expired, ask an administrator to resend the invitation.')
             ->action('Set your password', $this->url($notifiable));
-
-        if ($this->role === Roles::ADMIN) {
-            $mail->line('Administrator accounts must use two-factor authentication. When you first sign in you will be asked to set up an authenticator app before the dashboard opens.');
-        }
 
         return $mail->line('If you were not expecting this invitation you can ignore this email; nothing happens until the link is used.');
     }

@@ -10,9 +10,9 @@
 <aside id="chat-panel" class="chat-panel" aria-labelledby="chat-panel-title" x-show="panelOpen" x-cloak x-trap.inert.noscroll="panelOpen && !isWide" data-chat-panel>
     <div class="chat-panel__head">
         <h2 id="chat-panel-title" class="chat-panel__title">{{ ChatCopy::PANEL_TITLE }}</h2>
-        <button type="button" class="chat-tool" x-on:click="closePanel()" data-panel-close>
+        <x-button variant="icon" type="button" class="chat-tool" x-on:click="closePanel()" data-panel-close>
             <x-icon name="close" :label="ChatCopy::PANEL_CLOSE" />
-        </button>
+        </x-button>
     </div>
 
     @php($tabs = [ChatSettings::TAB_ABOUT => ChatCopy::TAB_ABOUT, ChatSettings::TAB_PINNED => ChatCopy::TAB_PINNED, ChatSettings::TAB_MEMBERS => ChatCopy::TAB_MEMBERS])
@@ -57,7 +57,7 @@
                             <time class="chat-time ml-2" :datetime="p.created_at" x-text="formatDateTime(p.created_at)"></time>
                             <span class="chat-pin__excerpt" dir="auto" x-text="p.excerpt"></span>
                         </button>
-                        <button type="button" class="chat-action ml-3" x-show="canModerate" x-on:click="unpin({ id: p.id })" data-unpin-panel>{{ ChatCopy::ACTION_UNPIN }}</button>
+                        <x-button variant="quiet" size="sm" type="button" class="chat-action ml-3" x-show="canModerate" x-on:click="unpin({ id: p.id })" data-unpin-panel>{{ ChatCopy::ACTION_UNPIN }}</x-button>
                     </li>
                 </template>
             </ol>
@@ -91,11 +91,11 @@
                             </span>
                             <template x-if="member.profile_url || member.can_suspend">
                                 <span class="chat-member__actions" x-on:keydown.escape.stop="closeMemberMenu(member)">
-                                    <button type="button" class="chat-tool" aria-haspopup="true" :aria-expanded="memberMenu === member.id ? 'true' : 'false'"
-                                            :aria-controls="'chat-member-menu-' + member.id" :aria-label="config.copy.memberMenu.replace(':name', member.name)"
+                                    <x-button variant="icon" type="button" class="chat-tool" aria-haspopup="true" x-bind:aria-expanded="memberMenu === member.id ? 'true' : 'false'"
+                                            x-bind:aria-controls="'chat-member-menu-' + member.id" x-bind:aria-label="config.copy.memberMenu.replace(':name', member.name)"
                                             x-on:click="toggleMemberMenu(member)" data-member-menu-button>
                                         <x-icon name="more" class="size-4" />
-                                    </button>
+                                    </x-button>
                                     <span class="chat-member__menu" :id="'chat-member-menu-' + member.id" x-show="memberMenu === member.id" x-on:click.outside="memberMenu = null" data-member-menu>
                                         <a class="chat-member-menu__item" :href="member.profile_url" x-show="member.profile_url" data-view-profile>{{ ChatCopy::MEMBER_VIEW_PROFILE }}</a>
                                         <button type="button" class="chat-member-menu__item" x-show="member.can_suspend" x-on:click="askSuspend(member)" data-suspend>{{ ChatCopy::MEMBER_SUSPEND }}</button>
@@ -106,8 +106,8 @@
                         <div class="chat-member__confirm" x-show="suspending === member.id" data-suspend-confirm>
                             <span x-text="config.copy.suspendConfirm.replace(':name', member.name)"></span>
                             <span class="flex gap-4">
-                                <button type="button" class="chat-action" x-on:click="suspend(member)" data-suspend-yes>Yes, suspend</button>
-                                <button type="button" class="chat-action" x-on:click="cancelSuspend(member)">No</button>
+                                <x-button variant="quiet" size="sm" type="button" class="chat-action" x-on:click="suspend(member)" data-suspend-yes>Yes, suspend</x-button>
+                                <x-button variant="quiet" size="sm" type="button" class="chat-action" x-on:click="cancelSuspend(member)">No</x-button>
                             </span>
                         </div>
                     </li>

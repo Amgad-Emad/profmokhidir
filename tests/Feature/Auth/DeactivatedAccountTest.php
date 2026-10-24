@@ -81,8 +81,9 @@ class DeactivatedAccountTest extends TestCase
         $this->post(route('login'), ['email' => $invited->email, 'password' => 'a-long-new-password-1'])->assertRedirect();
         $this->assertAuthenticatedAs($invited);
 
+        // Two-factor is recommended, not required: the new admin lands on the dashboard, which suggests it.
         $this->get(route(AdminNavigation::DASHBOARD_ROUTE))
-            ->assertRedirect()
-            ->assertSessionHas('status', AuthStatus::TWO_FACTOR_REQUIRED);
+            ->assertOk()
+            ->assertSee('data-two-factor-card', false);
     }
 }

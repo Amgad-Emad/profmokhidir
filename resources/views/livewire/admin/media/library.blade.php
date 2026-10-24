@@ -82,9 +82,9 @@
                 <form wire:submit="saveDetails" class="mt-6 space-y-4" novalidate>
                     <x-admin.image-details prefix="details" :required="$editingRequired" />
                     <div class="flex flex-wrap items-center justify-between gap-3 border-t border-rule pt-5">
-                        <button type="button" wire:click="confirm('delete', {{ (int) $editing->getKey() }})" class="save-bar__link save-bar__link--danger" data-delete><x-icon name="trash" class="size-4" />Delete image</button>
+                        <x-button variant="quiet" size="sm" danger type="button" wire:click="confirm('delete', {{ (int) $editing->getKey() }})" data-delete><x-icon name="trash" class="size-4" />Delete image</x-button>
                         <div class="flex flex-wrap gap-3">
-                            <x-button type="button" variant="outline" wire:click="cancelEdit">Cancel</x-button>
+                            <x-button type="button" variant="quiet" wire:click="cancelEdit">Cancel</x-button>
                             <x-button type="submit" variant="primary" wire:loading.attr="disabled">Save details</x-button>
                         </div>
                     </div>

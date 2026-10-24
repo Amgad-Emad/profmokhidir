@@ -44,7 +44,7 @@
 
             <div class="flex flex-wrap items-center gap-4">
                 <x-button>Send tribute</x-button>
-                <x-button type="submit" variant="outline" formaction="{{ $editUrl }}" formnovalidate>Change something</x-button>
+                <x-button type="submit" variant="quiet" formaction="{{ $editUrl }}" formnovalidate>Change something</x-button>
             </div>
         </form>
     </section>

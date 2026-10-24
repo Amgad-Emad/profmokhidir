@@ -29,9 +29,30 @@
         min-width: 0;
     }
 
+    /* Inline so "· Required" or "· Optional" can sit beside it; the hint below starts its own line. */
     .form-label {
-        display: block;
+        display: inline;
         color: var(--accent-text);
+    }
+
+    legend.form-label {
+        display: block;
+    }
+
+    /* "Name · Required": the requirement in the muted hint style, never louder than the label. */
+    .form-requirement {
+        margin-left: 0.5rem;
+        font-family: var(--font-sans);
+        font-size: 0.875rem;
+        font-weight: 300;
+        line-height: 1.5rem;
+        letter-spacing: normal;
+        text-transform: none;
+        color: var(--ink-muted);
+    }
+
+    .form-requirement > span {
+        margin-right: 0.125rem;
     }
 
     .form-label--hidden {
@@ -49,11 +70,6 @@
         font-weight: 300;
         line-height: 1.5rem;
         color: var(--ink-muted);
-    }
-
-    .form-hint__requirement {
-        font-weight: 500;
-        color: var(--ink);
     }
 
     /* 12px below the hint keeps the ring (2px, offset 2px) well clear of the label and hint. */

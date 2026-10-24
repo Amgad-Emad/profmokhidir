@@ -7,10 +7,10 @@
     <div class="bulk-bar" role="region" aria-label="Selected rows" data-bulk-bar>
         <p class="bulk-bar__count" aria-live="polite"><span class="font-medium">{{ $count }}</span> selected</p>
         <div class="bulk-bar__actions">
-            <button type="button" class="save-bar__link" wire:click="bulkPublish" wire:loading.attr="disabled" data-bulk="publish">Publish</button>
-            <button type="button" class="save-bar__link" wire:click="bulkUnpublish" wire:loading.attr="disabled" data-bulk="unpublish">Unpublish</button>
-            <button type="button" class="save-bar__link save-bar__link--danger" wire:click="bulkTrash" wire:loading.attr="disabled" data-bulk="trash"><x-icon name="trash" class="size-4" />Move to trash</button>
-            <button type="button" class="save-bar__link" wire:click="clearSelection" data-bulk="clear">Clear selection</button>
+            <x-button variant="quiet" size="sm" type="button" wire:click="bulkPublish" wire:loading.attr="disabled" data-bulk="publish">Publish</x-button>
+            <x-button variant="quiet" size="sm" type="button" wire:click="bulkUnpublish" wire:loading.attr="disabled" data-bulk="unpublish">Unpublish</x-button>
+            <x-button variant="quiet" size="sm" danger type="button" wire:click="bulkTrash" wire:loading.attr="disabled" data-bulk="trash"><x-icon name="trash" class="size-4" />Move to trash</x-button>
+            <x-button variant="quiet" size="sm" type="button" wire:click="clearSelection" data-bulk="clear">Clear selection</x-button>
         </div>
     </div>
 @endif

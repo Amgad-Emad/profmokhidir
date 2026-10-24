@@ -9,7 +9,7 @@
                          :control="['x-model' => 'reportReason']" />
         <p class="form-message form-error" role="alert" x-show="reportError" x-cloak><x-icon name="warning" class="mt-1 size-4 shrink-0" /><span x-text="reportError"></span></p>
         <div class="mt-8 flex flex-wrap justify-end gap-3">
-            <x-button type="button" variant="outline" x-on:click="cancelReport()">Cancel</x-button>
+            <x-button type="button" variant="quiet" x-on:click="cancelReport()">Cancel</x-button>
             <x-button type="submit" x-bind:disabled="reportSending" data-report-submit>Send report</x-button>
         </div>
     </form>

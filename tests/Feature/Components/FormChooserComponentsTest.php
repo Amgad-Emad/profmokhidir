@@ -68,7 +68,7 @@ class FormChooserComponentsTest extends TestCase
         $this->assertStringContainsString('<div class="form-segmented" data-status-field="data-status-field">', $html);
         $this->assertSame(2, substr_count($html, 'wire:model.live="form.status"'));
         $this->assertSame(2, substr_count($html, '<label class="form-segmented__option"'));
-        $this->assertStringContainsString('<span class="form-hint__requirement">Required</span>', $html);
+        $this->assertStringContainsString('class="form-requirement"><span aria-hidden="true">·</span> Required</span>', $html);
     }
 
     #[Test]
@@ -120,7 +120,7 @@ class FormChooserComponentsTest extends TestCase
     {
         $html = $this->render('<x-form.upload model="photo" label="Portrait" image alt="details.alt_text" :alt-required="true" accept="image/*" remove="removePhoto" />');
 
-        $this->assertStringContainsString('<input class="form-drop__input" id="photo" wire:model="photo" aria-describedby="photo-hint" type="file" accept="image/*"', $html);
+        $this->assertStringContainsString('<input class="form-drop__input" id="photo" wire:model="photo" aria-describedby="photo-requirement" type="file" accept="image/*"', $html);
         $this->assertStringContainsString('x-on:livewire-upload-progress="progress($event.detail.progress)"', $html);
         $this->assertStringContainsString('class="form-progress"', $html);
         $this->assertStringContainsString(FormControls::UPLOAD_REPLACE, $html);

@@ -24,7 +24,7 @@ class StyleguideFormsTest extends TestCase
     {
         $html = $this->html();
 
-        $this->assertStringContainsString('<a href="#forms" class="btn-pill-outline">Forms</a>', $html);
+        $this->assertStringContainsString('<a href="#forms" class="btn btn--secondary">Forms</a>', $html);
         $this->assertStringContainsString('<section id="forms" class="py-20" aria-labelledby="forms-title" data-styleguide-forms>', $html);
         $this->assertStringContainsString(FormControls::MIN_HEIGHT_PX.'px or taller with '.FormControls::TEXT_SIZE_PX.'px text', $html);
         $this->assertStringContainsString('line turns from 1px muted to '.FormControls::FOCUS_LINE_PX.'px strong ink over '.FormControls::FOCUS_LINE_MS.'ms', $html);

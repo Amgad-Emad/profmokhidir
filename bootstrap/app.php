@@ -4,7 +4,6 @@ use App\Constants\ThemeSettings;
 use App\Http\Middleware\EnablePreview;
 use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\EnsureCommunityMember;
-use App\Http\Middleware\EnsureTwoFactorIsEnabled;
 use App\Http\Responses\LoginResponse;
 use App\Services\AuthenticationService;
 use Illuminate\Foundation\Application;
@@ -27,7 +26,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
-            'two-factor' => EnsureTwoFactorIsEnabled::class,
             EnsureCommunityMember::ALIAS => EnsureCommunityMember::class,
             EnsureAccountIsActive::ALIAS => EnsureAccountIsActive::class,
         ]);

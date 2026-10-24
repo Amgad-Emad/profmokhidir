@@ -14,7 +14,7 @@
                         <p id="{{ $id }}-description" class="mt-1 text-sm font-light text-ink-muted">{{ $description }}</p>
                     @endif
                 </div>
-                <button type="button" class="admin-icon-button" wire:click="{{ $close }}"><span class="sr-only">Close</span><x-icon name="close" /></button>
+                <x-button variant="icon" type="button" wire:click="{{ $close }}"><span class="sr-only">Close</span><x-icon name="close" /></x-button>
             </div>
             <div class="admin-drawer__body">{{ $slot }}</div>
         </div>

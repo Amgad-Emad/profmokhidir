@@ -61,6 +61,22 @@ final class Masthead
 
     public const string ACCOUNT = 'Your account';
 
+    /** The quiet link a signed-out visitor sees in the bar. */
+    public const string SIGN_IN_SHORT = 'Sign in';
+
+    /** The account menu of a signed-in user (initials avatar in the bar). */
+    public const string ACCOUNT_MENU_LABEL = 'Account menu';
+
+    public const string ACCOUNT_MENU_ID = 'site-account-menu';
+
+    public const string ACCOUNT_MENU_CHAT = 'Community chat';
+
+    public const string ACCOUNT_MENU_DASHBOARD = 'Dashboard';
+
+    public const string ACCOUNT_MENU_THEME = 'Appearance';
+
+    public const string SIGNED_IN_AS = 'Signed in as';
+
     public const string LEAVE_TRIBUTE = 'Leave a tribute';
 
     public const string MENU = 'Menu';

@@ -10,6 +10,24 @@
         <p class="smallcaps text-xl text-ink-muted" data-greeting-date><time datetime="{{ $greeting['datetime'] }}">{{ $greeting['date'] }}</time></p>
     </header>
 
+    {{-- Two-factor is recommended for admins, never required: a quiet card until they turn it on or dismiss it. --}}
+    @if ($twoFactorReminder)
+        <section class="two-factor-card mt-10" aria-labelledby="two-factor-card-heading" data-two-factor-card>
+            <x-icon name="shield" class="two-factor-card__icon size-6" />
+            <div class="min-w-0 flex-1">
+                <h2 id="two-factor-card-heading" class="font-display text-2xl font-light text-ink-strong">{{ \App\Constants\AdminUx::TWO_FACTOR_REMINDER_TITLE }}</h2>
+                <p class="mt-2 max-w-2xl text-base font-light text-ink-muted">{{ \App\Constants\AdminUx::TWO_FACTOR_REMINDER_TEXT }}</p>
+                <div class="mt-5 flex flex-wrap items-center gap-4">
+                    <x-button variant="primary" size="sm" :href="route(\App\Constants\AdminNavigation::ACCOUNT_ROUTE).'#two-factor'" data-two-factor-setup>{{ \App\Constants\AdminUx::TWO_FACTOR_REMINDER_ACTION }}</x-button>
+                    <form novalidate method="POST" action="{{ route(\App\Constants\AdminUx::TWO_FACTOR_REMINDER_ROUTE) }}" data-two-factor-dismiss>
+                        @csrf
+                        <x-button variant="quiet" size="sm" data-leave-ok>{{ \App\Constants\AdminUx::TWO_FACTOR_REMINDER_DISMISS }}</x-button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    @endif
+
     {{-- Needs your attention --}}
     <section class="mt-12" aria-labelledby="attention-heading" data-section="attention">
         <div class="dashboard-heading">

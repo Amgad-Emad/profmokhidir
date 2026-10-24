@@ -30,8 +30,9 @@ class AuthFormCraftTest extends TestCase
             ->assertSee('x-data="authForm()" x-on:submit="submit($event)" data-auth-form', false)
             ->assertSee('<div class="auth__column form-style-underline" data-rise-group>', false)
             ->assertSee('<label id="email-label" for="email" class="t-label form-label">Email</label>', false)
-            ->assertSee('<p id="email-hint" class="form-hint"><span class="form-hint__requirement">'.FormControls::REQUIRED.'</span></p>', false)
-            ->assertSee('<input class="form-control__input" id="email" name="email" required="required" aria-describedby="email-hint" data-label="email" type="email"', false)
+            ->assertSee('<span id="email-requirement" class="form-requirement"><span aria-hidden="true">·</span> '.FormControls::REQUIRED.'</span>', false)
+            ->assertDontSee('<p id="email-hint"', false)
+            ->assertSee('<input class="form-control__input" id="email" name="email" required="required" aria-describedby="email-requirement" data-label="email" type="email"', false)
             ->assertSee('data-msg-type="'.FormControls::MESSAGE_EMAIL.'" autocomplete="'.AuthScreens::AUTOCOMPLETE_USERNAME.'" autofocus="autofocus">', false)
             ->assertSee('x-bind:type="type" x-on:keydown="key($event)" x-on:keyup="key($event)" x-on:blur="blur()" x-on:input="input($event)" autocomplete="'.AuthScreens::AUTOCOMPLETE_CURRENT_PASSWORD.'" spellcheck="false" autocapitalize="off">', false)
             ->assertSee('class="form-control__action"', false)
@@ -41,7 +42,7 @@ class AuthFormCraftTest extends TestCase
             ->assertSee('<input class="form-check__box" id="remember" name="remember" type="checkbox" value="1">', false)
             ->assertSee(AuthScreens::REMEMBER_LABEL)
             ->assertSee('<a href="'.route('password.request').'" class="link-hairline">'.AuthScreens::FORGOT_LINK.'</a>', false)
-            ->assertSee('class="btn-pill-solid w-full" data-busy-label="'.AuthScreens::screen(AuthScreens::LOGIN)['busy'].'">'.AuthScreens::screen(AuthScreens::LOGIN)['action'].'</button>', false)
+            ->assertSee('class="btn btn--primary w-full" data-busy-label="'.AuthScreens::screen(AuthScreens::LOGIN)['busy'].'">'.AuthScreens::screen(AuthScreens::LOGIN)['action'].'</button>', false)
             ->assertSee('data-error-summary hidden>', false)
             ->assertDontSee('focus:border-bronze', false)
             ->assertDontSee('data-password-strength', false);
@@ -60,7 +61,7 @@ class AuthFormCraftTest extends TestCase
             ->assertSee('class="form-summary mt-8" role="alert" tabindex="-1" data-error-summary', false)
             ->assertSee(FormControls::ERROR_SUMMARY_TITLE)
             ->assertSee('<a href="#email">'.AuthScreens::FAILED_CREDENTIALS.'</a>', false)
-            ->assertSee('aria-invalid="true" aria-describedby="email-hint email-error"', false)
+            ->assertSee('aria-invalid="true" aria-describedby="email-requirement email-error"', false)
             ->assertSee('<p id="email-error" class="form-message form-error" data-form-error role="alert">', false);
 
         $this->assertSame(2, substr_count($response->getContent(), AuthScreens::FAILED_CREDENTIALS), 'In the summary and under the field, nowhere else');
@@ -90,7 +91,7 @@ class AuthFormCraftTest extends TestCase
     #[Test]
     public function the_two_factor_challenge_has_six_digit_boxes_a_hidden_code_and_a_switch_to_a_recovery_code(): void
     {
-        $admin = User::factory()->admin()->create(['password' => 'secret-password']);
+        $admin = User::factory()->admin()->withTwoFactor()->create(['password' => 'secret-password']);
         $this->post(route('login'), ['email' => $admin->email, 'password' => 'secret-password']);
 
         $response = $this->get(route('two-factor.login'))->assertOk();
@@ -98,7 +99,7 @@ class AuthFormCraftTest extends TestCase
         $response
             ->assertSee('x-data="authChallenge({ recovery: false })" data-two-factor', false)
             ->assertSee('x-data="formOtp({ length: '.AuthScreens::CODE_LENGTH.' })" data-otp', false)
-            ->assertSee('<legend id="code-label" class="t-label form-label">Authentication code</legend>', false)
+            ->assertSee('<legend id="code-label" class="t-label form-label">Authentication code<span id="code-requirement" class="form-requirement">', false)
             ->assertSee('aria-label="Digit 1 of 6"', false)
             ->assertSee('aria-label="Digit 6 of 6"', false)
             ->assertSee('<input type="hidden" name="code" x-ref="value" value="" x-bind:disabled="recovery"', false)
@@ -120,7 +121,7 @@ class AuthFormCraftTest extends TestCase
     #[Test]
     public function a_wrong_code_links_the_summary_to_the_first_box_and_a_wrong_recovery_code_opens_the_recovery_field(): void
     {
-        $admin = User::factory()->admin()->create(['password' => 'secret-password']);
+        $admin = User::factory()->admin()->withTwoFactor()->create(['password' => 'secret-password']);
         $this->post(route('login'), ['email' => $admin->email, 'password' => 'secret-password']);
 
         // Asserting on the session here would restart it and age the flashed errors away before the next request.

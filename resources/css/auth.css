@@ -130,10 +130,4 @@
         text-decoration: underline;
         text-decoration-color: var(--ink);
     }
-
-    /* Submitting: the label changes to the busy wording; the pill stays still. */
-    .btn-pill-solid[aria-busy='true'] {
-        cursor: progress;
-        opacity: 0.85;
-    }
 }

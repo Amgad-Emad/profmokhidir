@@ -9,7 +9,7 @@
             <h2 id="confirm-title" class="font-display text-3xl font-light leading-tight">{{ $title }}</h2>
             <div id="confirm-description" class="mt-3 text-base font-light text-ink">{{ $slot }}</div>
             <div class="mt-8 flex flex-wrap justify-end gap-3">
-                <x-button type="button" variant="outline" wire:click="{{ $cancel }}">{{ $cancelLabel }}</x-button>
+                <x-button type="button" variant="quiet" wire:click="{{ $cancel }}">{{ $cancelLabel }}</x-button>
                 <x-button type="button" wire:click="{{ $action }}" wire:loading.attr="disabled" data-confirm>{{ $confirmLabel }}</x-button>
             </div>
         </div>

@@ -70,11 +70,11 @@
                     <x-admin.status-badge :tone="StatusTone::Ash" label="Off" />
                 @endif
             </div>
+            @if ($twoFactor['recommended'])
+                <p class="t-label mt-3 text-accent-text" data-two-factor-recommended>Recommended for administrator accounts</p>
+            @endif
             <p class="mt-2 text-sm font-light text-ink-muted">
                 When enabled, signing in also asks for a six-digit code from an authenticator app such as Google Authenticator, 1Password or Authy.
-                @if ($twoFactor['required'])
-                    Two-factor authentication is required for administrator accounts.
-                @endif
             </p>
 
             @error('code', 'confirmTwoFactorAuthentication')
@@ -118,7 +118,7 @@
                     </ul>
                     <form novalidate method="POST" action="{{ route('two-factor.recovery-codes') }}" class="mt-4">
                         @csrf
-                        <x-button variant="outline">Generate new codes</x-button>
+                        <x-button variant="quiet">Generate new codes</x-button>
                     </form>
                 </details>
             @endif
@@ -127,12 +127,18 @@
                 <form novalidate method="POST" action="{{ route('two-factor.disable') }}" class="mt-6">
                     @csrf
                     @method('DELETE')
-                    <x-button variant="outline">{{ $twoFactor['pending'] ? 'Cancel setup' : 'Turn off two-factor authentication' }}</x-button>
-                    @if ($twoFactor['required'] && $twoFactor['confirmed'])
-                        <p class="mt-2 text-sm font-light text-ink-muted">Turning it off will lock you out of the dashboard until it is set up again.</p>
-                    @endif
+                    <x-button variant="quiet">{{ $twoFactor['pending'] ? 'Cancel setup' : 'Turn off two-factor authentication' }}</x-button>
                 </form>
             @endif
+        </section>
+
+        {{-- Sign out --}}
+        <section class="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-rule pt-8" aria-labelledby="sign-out-heading" data-account-sign-out>
+            <div>
+                <h2 id="sign-out-heading" class="font-display text-3xl font-light">Sign out</h2>
+                <p class="mt-2 text-sm font-light text-ink-muted">Signed in as {{ $user->email }}.</p>
+            </div>
+            <x-account.sign-out />
         </section>
     </div>
 </x-dynamic-component>

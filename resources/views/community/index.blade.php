@@ -48,7 +48,7 @@
                             @if ($standing['chatUrl'])
                                 <x-button :href="$standing['chatUrl']">Open the chat</x-button>
                             @endif
-                            <x-button variant="outline" :href="route(\App\Constants\AdminNavigation::ACCOUNT_ROUTE)">Your account</x-button>
+                            <x-button variant="quiet" :href="route(\App\Constants\AdminNavigation::ACCOUNT_ROUTE)">Your account</x-button>
                         </div>
                     </section>
 

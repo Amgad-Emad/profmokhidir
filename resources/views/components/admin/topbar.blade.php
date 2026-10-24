@@ -6,12 +6,12 @@
 @props(['crumbs', 'user'])
 <header class="admin-topbar" data-admin-topbar>
     <div class="admin-topbar__row">
-        <button type="button" class="admin-icon-button lg:hidden"
+        <x-button variant="icon" type="button" class="lg:hidden"
                 x-on:click="open = !open" x-bind:aria-expanded="open.toString()" aria-expanded="false" aria-controls="admin-sidebar">
             <span class="sr-only" x-text="open ? 'Close menu' : 'Open menu'">Open menu</span>
             <x-icon name="menu" x-show="!open" />
             <x-icon name="close" x-show="open" x-cloak />
-        </button>
+        </x-button>
 
         <nav class="admin-breadcrumbs" aria-label="Breadcrumb" data-admin-breadcrumbs>
             <ol>

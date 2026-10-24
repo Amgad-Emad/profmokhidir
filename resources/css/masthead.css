@@ -184,13 +184,6 @@
         transform: scaleX(1);
     }
 
-    /* The small outline pill on the right of the bar. */
-    .btn-pill-outline.btn-pill--small {
-        min-height: 2.25rem;
-        padding: 0.5rem 1.25rem;
-        font-size: 0.875rem;
-    }
-
     /* ------------------------------------------------------------ mega menu */
     .mega-menu {
         position: absolute;
@@ -375,3 +368,168 @@
 }
 
 /* Print: the masthead is hidden with the rest of the chrome in archive.css. */
+
+/* ------------------------------------------------------------ account menu */
+@layer components {
+    .site-account {
+        position: relative;
+    }
+
+    .site-account__button {
+        display: inline-flex;
+        min-height: 2.75rem;
+        align-items: center;
+        gap: 0.5rem;
+        padding-inline: 0.25rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        color: var(--ink);
+    }
+
+    /* The initials in a 1px brass hairline ring (36px), Cormorant like the mark but never the mark itself. */
+    .site-account__avatar {
+        display: inline-flex;
+        width: 2.25rem;
+        height: 2.25rem;
+        flex: none;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--accent-line);
+        border-radius: 9999px;
+        font-family: var(--font-display);
+        font-size: 1rem;
+        font-weight: 300;
+        letter-spacing: 0.04em;
+        color: var(--ink-strong);
+    }
+
+    .site-account__name {
+        display: none;
+        max-width: 10rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    @media (min-width: 96rem) {
+        .site-account__name {
+            display: inline;
+        }
+    }
+
+    /* Phones: a signed-in reader finds the theme toggle in the account menu, which keeps the bar to one row. */
+    @media (max-width: 39.99rem) {
+        .site-header .site-header__theme--in-menu {
+            display: none;
+        }
+
+        .site-account__button {
+            padding-inline: 0;
+        }
+    }
+
+    .site-account__chevron {
+        transition: transform 400ms var(--ease-rise);
+    }
+
+    .site-account__button[aria-expanded='true'] .site-account__chevron {
+        transform: rotate(180deg);
+    }
+
+    .site-account__panel {
+        position: absolute;
+        right: 0;
+        top: 100%;
+        z-index: 60;
+        margin-top: 0.5rem;
+        width: min(17rem, calc(100vw - 2rem));
+        padding: 0.5rem 0;
+        border: 1px solid var(--rule);
+        border-radius: var(--radius-card);
+        color: var(--ink);
+    }
+
+    /* Below 1024px the Menu button sits to the right of the avatar: pin the panel to the viewport edge under the bar. */
+    @media (max-width: 63.99rem) {
+        .site-account__panel {
+            position: fixed;
+            top: calc(var(--header-height) + 0.25rem);
+            right: 1rem;
+            margin-top: 0;
+        }
+    }
+
+    .site-account__who {
+        padding: 0.5rem 1rem 0.75rem;
+        margin-bottom: 0.25rem;
+        border-bottom: 1px solid var(--rule);
+    }
+
+    .site-account__item {
+        display: flex;
+        width: 100%;
+        min-height: 2.75rem;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem 1rem;
+        font-size: 0.9375rem;
+        font-weight: 400;
+        color: var(--ink);
+        text-align: left;
+        text-decoration: none;
+    }
+
+    .site-account__item:hover {
+        background-color: var(--surface-sunken);
+        color: var(--ink-strong);
+        text-decoration: none;
+    }
+
+    .site-account__theme {
+        display: flex;
+        min-height: 2.75rem;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0 0.5rem 0 1rem;
+        margin-top: 0.25rem;
+        border-top: 1px solid var(--rule);
+        font-size: 0.9375rem;
+        color: var(--ink-muted);
+    }
+
+    .site-account__theme + li {
+        border-top: 1px solid var(--rule);
+    }
+
+    .site-account-signin {
+        min-height: 2.75rem;
+        align-items: center;
+        color: var(--ink);
+    }
+}
+
+/* ------------------------------------------------------------ one-off notice (signed out) */
+@layer components {
+    .site-notice {
+        position: fixed;
+        inset-inline: 1rem;
+        bottom: 1rem;
+        z-index: 45;
+        display: flex;
+        justify-content: center;
+        pointer-events: none;
+    }
+
+    .site-notice__alert {
+        width: min(28rem, 100%);
+        pointer-events: auto;
+        align-items: center;
+    }
+
+    .site-notice__close {
+        width: 2.75rem;
+        height: 2.75rem;
+        margin-block: -0.5rem;
+    }
+}

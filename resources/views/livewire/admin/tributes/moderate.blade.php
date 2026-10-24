@@ -21,10 +21,10 @@
             <x-form.checkbox id="select-all" wire:click="toggleAll" :checked="$pageIds !== [] && array_diff($pageIds, $selected) === []">Select all on this page</x-form.checkbox>
             <span class="font-light text-ink-muted">{{ count($selected) }} selected</span>
             @if ($current !== TributeStatus::Approved)
-                <button type="button" wire:click="approveSelected" @disabled($selected === []) class="save-bar__link disabled:opacity-40" data-bulk-approve>Approve selected</button>
+                <x-button variant="quiet" size="sm" type="button" wire:click="approveSelected" :disabled="$selected === []" data-bulk-approve>Approve selected</x-button>
             @endif
             @if ($current !== TributeStatus::Rejected)
-                <button type="button" wire:click="rejectSelected" @disabled($selected === []) class="save-bar__link save-bar__link--danger disabled:opacity-40" data-bulk-reject>Decline selected</button>
+                <x-button variant="quiet" size="sm" danger type="button" wire:click="rejectSelected" :disabled="$selected === []" data-bulk-reject>Decline selected</x-button>
             @endif
         </div>
 
@@ -49,8 +49,8 @@
                                     </div>
                                     <x-form.textarea model="edit.message" label="Tribute" rows="5" required />
                                     <div class="flex flex-wrap gap-3">
-                                        <x-button type="submit" class="px-5 py-2 text-sm">Save changes</x-button>
-                                        <x-button type="button" variant="outline" class="px-5 py-2 text-sm" wire:click="cancelEditing">Cancel</x-button>
+                                        <x-button type="submit" size="sm">Save changes</x-button>
+                                        <x-button type="button" variant="quiet" size="sm" wire:click="cancelEditing">Cancel</x-button>
                                     </div>
                                 </form>
                             @else
@@ -63,10 +63,10 @@
                                 <x-admin.status-badge tone="cypress" label="Featured" data-featured-badge />
                             @endif
                             @if (! $tribute->isApproved())
-                                <x-button type="button" variant="primary" wire:click="approve({{ $tribute->getKey() }})" class="btn-pill--small" data-approve>Approve<span class="sr-only"> tribute from {{ $tribute->name }}</span></x-button>
+                                <x-button type="button" variant="primary" size="sm" wire:click="approve({{ $tribute->getKey() }})" data-approve>Approve<span class="sr-only"> tribute from {{ $tribute->name }}</span></x-button>
                             @endif
                             @if ($tribute->status !== TributeStatus::Rejected)
-                                <button type="button" wire:click="decline({{ $tribute->getKey() }})" class="save-bar__link" data-reject>Decline<span class="sr-only"> tribute from {{ $tribute->name }}</span></button>
+                                <x-button variant="quiet" size="sm" type="button" wire:click="decline({{ $tribute->getKey() }})" data-reject>Decline<span class="sr-only"> tribute from {{ $tribute->name }}</span></x-button>
                             @endif
                             @if ($tribute->isApproved() || $editingId !== (int) $tribute->getKey())
                                 <x-admin.row-menu :label="'tribute from '.$tribute->name">

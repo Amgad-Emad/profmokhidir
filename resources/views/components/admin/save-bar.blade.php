@@ -18,9 +18,9 @@
     </div>
     <div class="save-bar__actions">
         @if ($editor['revisionCount'] > 0)
-            <button type="button" class="save-bar__link" wire:click="toggleHistory" aria-haspopup="dialog" data-history-open>
+            <x-button variant="quiet" size="sm" type="button" wire:click="toggleHistory" aria-haspopup="dialog" data-history-open>
                 <x-icon name="history" class="size-4" />History
-            </button>
+            </x-button>
         @endif
         @if ($editor['previewUrl'])
             <a href="{{ $editor['previewUrl'] }}" target="_blank" rel="noopener" class="save-bar__link" x-on:click="preview($event)" data-preview>
@@ -33,7 +33,7 @@
             </a>
         @endif
         @if ($published)
-            <button type="button" class="save-bar__link" wire:click="unpublish" wire:loading.attr="disabled" data-unpublish>Unpublish</button>
+            <x-button variant="quiet" size="sm" type="button" wire:click="unpublish" wire:loading.attr="disabled" data-unpublish>Unpublish</x-button>
             <x-button type="button" variant="primary" wire:click="publish" wire:loading.attr="disabled" data-shortcut="save publish" data-save>{{ $saveLabel ?? 'Update' }}</x-button>
         @else
             <x-button type="button" wire:click="save" wire:loading.attr="disabled" data-shortcut="save" data-save>{{ $saveLabel ?? 'Save draft' }}</x-button>

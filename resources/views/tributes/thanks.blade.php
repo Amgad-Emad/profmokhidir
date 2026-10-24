@@ -6,8 +6,8 @@
             <x-seal class="seal--open" tone="ivory" :size="56" />
             <h1 id="section-title" class="t-quote mt-10 text-ink-strong" data-rise role="status">{{ $message }}</h1>
             <div class="mt-12 flex flex-wrap gap-4" data-rise>
-                <a href="{{ $indexUrl }}" class="btn-pill-outline">Back to tributes</a>
-                <a href="{{ route('home') }}" class="btn-pill-filled">Home</a>
+                <x-button :href="$indexUrl">Back to tributes</x-button>
+                <x-button variant="primary" :href="route('home')">Home</x-button>
             </div>
         </div>
     </section>

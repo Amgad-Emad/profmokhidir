@@ -11,8 +11,8 @@
                 <p class="t-body max-w-xl text-ink">{{ $copy['line'] }}</p>
                 <x-epigraph tone="ivory" class="hero__epigraph">@typeset($copy['epigraph'])</x-epigraph>
                 <div class="flex flex-wrap gap-4">
-                    <a href="{{ route('about') }}" class="btn-pill-filled">{{ $copy['readStory'] }}</a>
-                    <a href="{{ route('tributes.create') }}" class="btn-pill-outline">{{ $copy['leaveTribute'] }}</a>
+                    <x-button variant="primary" :href="route('about')">{{ $copy['readStory'] }}</x-button>
+                    <x-button :href="route('tributes.create')">{{ $copy['leaveTribute'] }}</x-button>
                 </div>
             </div>
 

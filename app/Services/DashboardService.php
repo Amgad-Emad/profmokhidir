@@ -55,6 +55,7 @@ class DashboardService
         private readonly MediaService $media,
         private readonly ActivityFeedService $activity,
         private readonly LaunchReadinessService $readiness,
+        private readonly AuthenticationService $auth,
     ) {}
 
     /**
@@ -273,6 +274,7 @@ class DashboardService
             'checklist' => $canManageContent ? $this->readiness->checklist() : null,
             'feed' => $this->activity->recent(),
             'greeting' => $this->greeting(),
+            'twoFactorReminder' => $user !== null && $this->auth->shouldRemindTwoFactor($user),
             'published' => $this->publishedCounts(),
             'queues' => $queues,
             'attention' => array_filter(

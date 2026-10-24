@@ -71,11 +71,11 @@
             @if ($href)
                 <a href="{{ $href }}" target="_blank" rel="noopener" class="form-file__action">Open<span class="sr-only"> {{ $currentName }} (opens in a new tab)</span></a>
             @endif
-            <button type="button" class="form-file__action" x-on:click="$refs.input.click()">{{ FormControls::UPLOAD_REPLACE }}<span class="sr-only"> {{ \Illuminate\Support\Str::lower($label) }}</span></button>
+            <x-button variant="quiet" size="sm" type="button" x-on:click="$refs.input.click()">{{ FormControls::UPLOAD_REPLACE }}<span class="sr-only"> {{ \Illuminate\Support\Str::lower($label) }}</span></x-button>
             @if ($remove)
-                <button type="button" class="form-file__action form-file__action--remove" wire:click="{{ $remove }}" x-on:click="clear()">{{ FormControls::UPLOAD_REMOVE }}<span class="sr-only"> {{ \Illuminate\Support\Str::lower($label) }}</span></button>
+                <x-button variant="quiet" size="sm" danger type="button" wire:click="{{ $remove }}" x-on:click="clear()">{{ FormControls::UPLOAD_REMOVE }}<span class="sr-only"> {{ \Illuminate\Support\Str::lower($label) }}</span></x-button>
             @elseif ($model === null)
-                <button type="button" class="form-file__action form-file__action--remove" x-on:click="clear()">{{ FormControls::UPLOAD_REMOVE }}<span class="sr-only"> {{ \Illuminate\Support\Str::lower($label) }}</span></button>
+                <x-button variant="quiet" size="sm" danger type="button" x-on:click="clear()">{{ FormControls::UPLOAD_REMOVE }}<span class="sr-only"> {{ \Illuminate\Support\Str::lower($label) }}</span></x-button>
             @endif
         </div>
     </div>

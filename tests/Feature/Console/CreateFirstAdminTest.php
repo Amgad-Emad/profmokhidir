@@ -35,7 +35,7 @@ class CreateFirstAdminTest extends TestCase
             ->expectsQuestion('Email address', 'Owner@ProfMokhidir.com')
             ->expectsOutputToContain('Site Owner <owner@profmokhidir.com> has been created as an administrator.')
             ->expectsOutputToContain('set-password link has been emailed')
-            ->expectsOutputToContain('Two-factor authentication is required')
+            ->expectsOutputToContain('Two-factor authentication is recommended')
             ->assertSuccessful();
 
         $user = User::query()->where('email', 'owner@profmokhidir.com')->sole();

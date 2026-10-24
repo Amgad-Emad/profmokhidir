@@ -27,7 +27,7 @@ class AuthViewsTest extends TestCase
             ->assertSee('data-variant="stacked"', false)
             ->assertSee('Mohamed Osman Khidir')
             ->assertSee('class="auth__column form-style-underline" data-rise-group', false)
-            ->assertSee('btn-pill-solid w-full', false)
+            ->assertSee('btn btn--primary w-full', false)
             ->assertSee('class="seal !mt-4"', false)
             ->assertSee('<h1 id="page-title" class="t-heading">Sign in</h1>', false)
             ->assertSee('t-label form-label', false)
@@ -35,7 +35,7 @@ class AuthViewsTest extends TestCase
             ->assertSee(route('password.request'))
             ->assertSee('glow-brass')
             ->assertDontSee('auth-card')
-            ->assertDontSee('btn-pill-outline text-ink', false)
+            ->assertDontSee('btn--secondary', false)
             ->assertDontSee('livewire', false);
     }
 
@@ -94,7 +94,7 @@ class AuthViewsTest extends TestCase
     #[Test]
     public function the_two_factor_challenge_page_renders_both_code_and_recovery_forms(): void
     {
-        $admin = User::factory()->admin()->create(['password' => 'secret-password']);
+        $admin = User::factory()->admin()->withTwoFactor()->create(['password' => 'secret-password']);
 
         $this->post(route('login'), ['email' => $admin->email, 'password' => 'secret-password'])
             ->assertRedirect(route('two-factor.login'));

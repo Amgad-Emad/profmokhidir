@@ -51,6 +51,17 @@
 
     <x-site.header :hero="$hero" />
 
+    @if (session('status') === \App\Constants\AuthStatus::SIGNED_OUT)
+        <div class="site-notice" x-data="{ shown: true }" x-show="shown" data-signed-out-notice>
+            <x-alert :tone="\App\Constants\AuthStatus::tone(\App\Constants\AuthStatus::SIGNED_OUT)" class="site-notice__alert">
+                <span class="flex items-center justify-between gap-4">
+                    {{ \App\Constants\AuthStatus::message(\App\Constants\AuthStatus::SIGNED_OUT) }}
+                    <x-button variant="icon" type="button" class="site-notice__close" x-on:click="shown = false"><x-icon name="close" class="size-4" label="Dismiss" /></x-button>
+                </span>
+            </x-alert>
+        </div>
+    @endif
+
     <main id="main" tabindex="-1" @class(['site-main', 'site-main--hero' => $hero])>
         @if (count($trail) > 1)
             <div @class(['breadcrumbs-band', 'on-dark bg-surface text-ink' => $breadcrumbTone === 'ivory'])>

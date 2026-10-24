@@ -26,7 +26,7 @@ class TributesPageTest extends TestCase
                 'glow-brass on-dark bg-surface', 't-label text-accent-text', Taglines::TRIBUTES_LABEL,
                 'rule-brass', 'id="section-title" class="t-quote', Taglines::TRIBUTES_HEADING,
                 'class="seal seal--open" aria-hidden="true" data-rise', 'brand-mark--ring', 'data-tone="ivory"', 'seal__rule',
-                'href="'.route('tributes.create').'" class="btn-pill-filled">'.Taglines::LEAVE_TRIBUTE,
+                'href="'.route('tributes.create').'" class="btn btn--primary">'.Taglines::LEAVE_TRIBUTE,
             ], false)
             ->assertSee('<meta property="og:image" content="'.asset(SocialCards::TRIBUTES).'">', false)
             ->assertSee('<meta property="og:image:width" content="1200">', false)

@@ -38,8 +38,8 @@ class AdminFormControlsTest extends TestCase
     {
         Livewire::actingAs($this->editor)->test(AwardForm::class)
             ->assertSeeHtml('wire:model.live.blur="form.name" aria-required="true"')
-            ->assertSeeHtml('<span class="form-hint__requirement">'.FormControls::REQUIRED.'</span>')
-            ->assertSeeHtml('<span class="form-hint__requirement">'.FormControls::OPTIONAL.'</span>')
+            ->assertSeeHtml('<span aria-hidden="true">·</span> '.FormControls::REQUIRED.'</span>')
+            ->assertSeeHtml('<span aria-hidden="true">·</span> '.FormControls::OPTIONAL.'</span>')
             ->assertSeeHtml('wire:model.live.blur="form.year"')
             ->assertSeeHtml('inputmode="numeric" pattern="[0-9]{4}"')
             ->assertSeeHtml('wire:click="save"')

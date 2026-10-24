@@ -24,7 +24,7 @@ class AdminMiddlewareTest extends TestCase
         $this->assertContains('auth', $middleware);
         $this->assertContains('verified', $middleware);
         $this->assertContains('role:admin|editor', $middleware);
-        $this->assertContains('two-factor', $middleware);
+        $this->assertNotContains('two-factor', $middleware, 'Two-factor is recommended, not required');
     }
 
     #[Test]

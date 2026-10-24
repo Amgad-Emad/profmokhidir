@@ -33,7 +33,7 @@ class StyleguideRouteTest extends TestCase
             $response->assertSee($hex)->assertSee("var(--color-{$name})", false);
         }
 
-        foreach (['t-display', 't-heading', 't-quote', 't-body', 't-label', 'btn-pill-filled', 'btn-pill-outline', 'card', 'rule-brass', 'glow-brass', 'photo-portrait', 'photo-archive'] as $class) {
+        foreach (['t-display', 't-heading', 't-quote', 't-body', 't-label', 'btn--primary', 'btn--secondary', 'card', 'rule-brass', 'glow-brass', 'photo-portrait', 'photo-archive'] as $class) {
             $response->assertSee($class);
         }
 

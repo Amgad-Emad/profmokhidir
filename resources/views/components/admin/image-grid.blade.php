@@ -46,20 +46,20 @@
                         </div>
                         <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
                             @if ($orderable)
-                                <button type="button" wire:click="setCover({{ $id }})" class="link-meta">Use as cover</button>
+                                <x-button variant="quiet" size="sm" type="button" wire:click="setCover({{ $id }})">Use as cover</x-button>
                                 <span class="inline-flex items-center gap-1">
                                     <button type="button" wire:click="movePhotoUp({{ $id }})" @disabled($loop->first) class="inline-flex size-8 items-center justify-center rounded-full border border-rule hover:border-focus disabled:opacity-40"><span aria-hidden="true">↑</span><span class="sr-only">Move photo up</span></button>
                                     <button type="button" wire:click="movePhotoDown({{ $id }})" @disabled($loop->last) class="inline-flex size-8 items-center justify-center rounded-full border border-rule hover:border-focus disabled:opacity-40"><span aria-hidden="true">↓</span><span class="sr-only">Move photo down</span></button>
                                 </span>
                             @endif
-                            <button type="button" wire:click="confirmRemoveImage({{ $id }})" class="text-danger-tone underline-offset-4 hover:underline" data-remove-image>Remove</button>
+                            <x-button variant="quiet" size="sm" danger type="button" wire:click="confirmRemoveImage({{ $id }})" data-remove-image>Remove</x-button>
                         </div>
                     </div>
                     <div class="space-y-8">
                         <form novalidate wire:submit="saveImage({{ $id }})" class="space-y-4">
                             <x-admin.image-details :prefix="'images.'.$id" :required="$detailsRequired" />
                             <div class="flex items-center gap-4">
-                                <x-button type="submit" variant="outline" class="px-5 py-2 text-sm">Save details</x-button>
+                                <x-button type="submit" variant="quiet" size="sm">Save details</x-button>
                                 <span class="text-sm font-light text-ink-muted" wire:loading wire:target="saveImage({{ $id }})">Saving…</span>
                             </div>
                         </form>
@@ -71,7 +71,7 @@
                                     <x-form.toggle :model="'archive.'.$id.'.'.\App\Constants\Archive::FEATURED" label="Featured on the wall" hint="Hangs one size larger in the album." class="sm:self-end" />
                                 </div>
                                 <div class="flex items-center gap-4">
-                                    <x-button type="submit" variant="outline" class="px-5 py-2 text-sm">Save archive details</x-button>
+                                    <x-button type="submit" variant="quiet" size="sm">Save archive details</x-button>
                                     <span class="text-sm font-light text-ink-muted" wire:loading wire:target="savePhotoArchive({{ $id }})">Saving…</span>
                                 </div>
                             </form>

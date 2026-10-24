@@ -7,6 +7,7 @@
 @import './fonts.css';
 @import './media.css';
 @import './typography.css';
+@import './buttons.css';
 @import './home.css';
 @import './archive.css';
 @import './remembrance.css';
@@ -224,100 +225,7 @@
         text-transform: uppercase;
     }
 
-    /* Buttons: pill shaped, ivory filled or outline in the current colour. Hover fills slowly from the left. */
-    .btn-pill-filled,
-    .btn-pill-outline {
-        @apply inline-flex items-center justify-center gap-2 rounded-full px-7 py-3 font-sans text-base font-medium leading-none no-underline;
-        min-height: 2.75rem; /* 44px touch target */
-        transition:
-            background-color var(--duration-draw, 600ms) var(--ease-rise),
-            color var(--duration-draw, 600ms) var(--ease-rise),
-            border-color var(--duration-draw, 600ms) var(--ease-rise);
-    }
-
-    .btn-pill-filled:hover,
-    .btn-pill-outline:hover {
-        text-decoration: none;
-    }
-
-    .btn-pill-filled {
-        background-color: var(--fill);
-        color: var(--fill-ink);
-    }
-
-    .btn-pill-filled:hover {
-        background-color: var(--fill-hover);
-    }
-
-    /* Outline: hover fills with the solid fill of the surface it sits on (the --fill token follows the region). */
-    .btn-pill-outline {
-        --btn-fill: var(--fill);
-        --btn-fill-ink: var(--fill-ink);
-        position: relative;
-        isolation: isolate;
-        overflow: hidden;
-        border: 1px solid currentColor;
-        color: currentColor;
-        background-color: transparent;
-    }
-
-    .btn-pill-outline::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        z-index: -1;
-        background-color: var(--btn-fill);
-        transform: scaleX(0);
-        transform-origin: left center;
-        transition: transform var(--duration-draw, 600ms) var(--ease-rise);
-    }
-
-    .btn-pill-outline:hover,
-    .btn-pill-outline:focus-visible {
-        color: var(--btn-fill-ink);
-        border-color: var(--btn-fill);
-    }
-
-    .btn-pill-outline:hover::before,
-    .btn-pill-outline:focus-visible::before {
-        transform: scaleX(1);
-    }
-
-    /* Solid: the solid fill with its ink, the primary action of a form on the page surface (sign-in,
-       password reset, the community application). One per screen, always full width of its column. */
-    .btn-pill-solid {
-        @apply inline-flex items-center justify-center gap-2 rounded-full px-7 py-3 font-sans text-base font-medium leading-none no-underline;
-        min-height: 2.75rem;
-        border: 1px solid var(--fill);
-        background-color: var(--fill);
-        color: var(--fill-ink);
-        transition:
-            background-color var(--duration-draw, 600ms) var(--ease-rise),
-            border-color var(--duration-draw, 600ms) var(--ease-rise);
-    }
-
-    .btn-pill-solid:hover,
-    .btn-pill-solid:focus-visible {
-        border-color: var(--fill-hover);
-        background-color: var(--fill-hover);
-        color: var(--fill-ink);
-        text-decoration: none;
-    }
-
-    /* Quiet secondary action (Back, Cancel): a text link in the metadata style with a 44px target. */
-    .btn-quiet {
-        @apply inline-flex min-h-11 items-center gap-1 px-1 font-sans text-base font-medium text-ink;
-        text-decoration: underline;
-        text-decoration-color: var(--accent-line);
-        text-underline-offset: 0.2em;
-        transition: text-decoration-color 300ms var(--ease-rise);
-    }
-
-    .btn-quiet:hover,
-    .btn-quiet:focus-visible {
-        text-decoration: underline;
-        text-decoration-color: var(--ink);
-    }
+    /* Buttons live in buttons.css (one token table per variant and state in tokens.css). */
 
     /* Cards: 4px radius, the raised surface (or the panel surface), a hairline rule. */
     .card {

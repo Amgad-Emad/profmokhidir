@@ -24,10 +24,7 @@
         <ul>
             <li><a href="{{ route(AdminNavigation::ACCOUNT_ROUTE) }}" class="chat-member-menu__item"><x-icon name="user" class="size-4" />{{ ChatCopy::MENU_ACCOUNT }}</a></li>
             <li>
-                <form novalidate method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="chat-member-menu__item"><x-icon name="arrow" class="size-4" />{{ ChatCopy::MENU_SIGN_OUT }}</button>
-                </form>
+                <x-account.sign-out item-class="chat-member-menu__item" />
             </li>
         </ul>
     </div>

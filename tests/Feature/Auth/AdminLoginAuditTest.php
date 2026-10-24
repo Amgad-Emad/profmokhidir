@@ -49,7 +49,7 @@ class AdminLoginAuditTest extends TestCase
     #[Test]
     public function an_admin_is_logged_once_the_two_factor_challenge_succeeds(): void
     {
-        $admin = User::factory()->admin()->create(['password' => 'secret-password']);
+        $admin = User::factory()->admin()->withTwoFactor()->create(['password' => 'secret-password']);
 
         $this->post(route('login'), ['email' => $admin->email, 'password' => 'secret-password'])
             ->assertRedirect(route('two-factor.login'));

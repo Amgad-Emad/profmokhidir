@@ -42,7 +42,7 @@
             <div class="search-form__row form-style-underline">
                 <x-form.input type="search" :name="Search::PARAM" id="error-search" :label="ErrorPages::SEARCH_LABEL" :optional="false" size="display" class="search-form__field"
                               :placeholder="Search::PLACEHOLDER" autocomplete="off" :maxlength="Search::MAX_LENGTH" />
-                <button type="submit" class="btn-pill-outline">{{ Search::BUTTON_LABEL }}</button>
+                <x-button type="submit">{{ Search::BUTTON_LABEL }}</x-button>
             </div>
         </form>
 
@@ -55,7 +55,7 @@
             </ol>
         </nav>
 
-        <a href="{{ route('home') }}" class="btn-pill-filled mt-4">{{ ErrorPages::HOME_LABEL }}</a>
+        <x-button variant="primary" :href="route('home')" class="mt-4">{{ ErrorPages::HOME_LABEL }}</x-button>
     </main>
 </body>
 </html>

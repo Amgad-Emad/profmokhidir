@@ -15,7 +15,7 @@
 
             <nav class="mt-16" aria-label="Back" data-rise>
                 <hr class="rule-brass" data-rule>
-                <a href="{{ $section['url'] }}" class="btn-pill-outline mt-10 text-ink">All other information</a>
+                <x-button :href="$section['url']" class="mt-10">All other information</x-button>
             </nav>
         </div>
     </article>

@@ -8,7 +8,7 @@
         <div role="dialog" aria-modal="true" aria-labelledby="shortcuts-title" class="admin-dialog" x-trap.noscroll="open">
             <div class="flex items-start justify-between gap-4">
                 <h2 id="shortcuts-title" class="font-display text-3xl font-light leading-tight">Keyboard shortcuts</h2>
-                <button type="button" class="admin-icon-button" x-on:click="open = false"><span class="sr-only">Close</span><x-icon name="close" /></button>
+                <x-button variant="icon" type="button" x-on:click="open = false"><span class="sr-only">Close</span><x-icon name="close" /></x-button>
             </div>
             <dl class="admin-shortcuts mt-6">
                 @foreach (AdminUx::shortcuts() as $shortcut)

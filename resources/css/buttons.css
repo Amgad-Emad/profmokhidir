@@ -1,0 +1,350 @@
+/*
+ | The button system (<x-button>, App\Services\ButtonService). Five variants
+ | (App\Constants\ButtonVariant: primary, secondary, quiet, icon, danger), three sizes
+ | (ButtonSize: the 44px pill, the small pill, the round icon button) and six states
+ | (ButtonState: default, hover, active, focus-visible, disabled, loading).
+ |
+ | Colours come only from the .btn token table in tokens.css: this file sets the four
+ | working properties (--btn-bg, --btn-ink, --btn-border, --btn-icon) from the
+ | variant's tokens for each state. Nothing else may colour a button: no text-* or
+ | bg-* utilities on a button (they outrank these rules and once turned a label the
+ | colour of its fill), and page stylesheets only add layout to a button's own class.
+ | Imported before the page stylesheets so their layout rules can adjust size.
+ */
+
+@layer components {
+    .btn {
+        --btn-bg: transparent;
+        --btn-ink: var(--ink);
+        --btn-border: transparent;
+        --btn-icon: var(--ink);
+        display: inline-flex;
+        min-height: 2.75rem; /* 44px target */
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.75rem;
+        border: 1px solid var(--btn-border);
+        border-radius: 9999px;
+        background-color: var(--btn-bg);
+        color: var(--btn-ink);
+        font-family: var(--font-sans);
+        font-size: 1rem;
+        font-weight: 500;
+        line-height: 1;
+        text-align: center;
+        text-decoration: none;
+        cursor: pointer;
+        transition:
+            background-color 400ms var(--ease-rise),
+            border-color 400ms var(--ease-rise),
+            color 400ms var(--ease-rise),
+            text-decoration-color 400ms var(--ease-rise);
+    }
+
+    .btn:hover {
+        text-decoration: none;
+    }
+
+    .btn :where(svg) {
+        color: var(--btn-icon);
+    }
+
+    /* ---------------------------------------------------------------- variants */
+    .btn--primary {
+        --btn-bg: var(--btn-primary-bg);
+        --btn-ink: var(--btn-primary-ink);
+        --btn-border: var(--btn-primary-border);
+        --btn-icon: var(--btn-primary-icon);
+    }
+
+    .btn--primary:hover {
+        --btn-bg: var(--btn-primary-bg-hover);
+        --btn-ink: var(--btn-primary-ink-hover);
+        --btn-border: var(--btn-primary-border-hover);
+        --btn-icon: var(--btn-primary-icon-hover);
+    }
+
+    .btn--primary:focus-visible {
+        --btn-bg: var(--btn-primary-bg-focus);
+        --btn-ink: var(--btn-primary-ink-focus);
+        --btn-border: var(--btn-primary-border-focus);
+        --btn-icon: var(--btn-primary-icon-focus);
+    }
+
+    .btn--primary:active {
+        --btn-bg: var(--btn-primary-bg-active);
+        --btn-ink: var(--btn-primary-ink-active);
+        --btn-border: var(--btn-primary-border-active);
+        --btn-icon: var(--btn-primary-icon-active);
+    }
+
+    .btn--secondary {
+        --btn-bg: var(--btn-secondary-bg);
+        --btn-ink: var(--btn-secondary-ink);
+        --btn-border: var(--btn-secondary-border);
+        --btn-icon: var(--btn-secondary-icon);
+    }
+
+    .btn--secondary:hover {
+        --btn-bg: var(--btn-secondary-bg-hover);
+        --btn-ink: var(--btn-secondary-ink-hover);
+        --btn-border: var(--btn-secondary-border-hover);
+        --btn-icon: var(--btn-secondary-icon-hover);
+    }
+
+    .btn--secondary:focus-visible {
+        --btn-bg: var(--btn-secondary-bg-focus);
+        --btn-ink: var(--btn-secondary-ink-focus);
+        --btn-border: var(--btn-secondary-border-focus);
+        --btn-icon: var(--btn-secondary-icon-focus);
+    }
+
+    .btn--secondary:active {
+        --btn-bg: var(--btn-secondary-bg-active);
+        --btn-ink: var(--btn-secondary-ink-active);
+        --btn-border: var(--btn-secondary-border-active);
+        --btn-icon: var(--btn-secondary-icon-active);
+    }
+
+    .btn--quiet {
+        --btn-bg: var(--btn-quiet-bg);
+        --btn-ink: var(--btn-quiet-ink);
+        --btn-border: var(--btn-quiet-border);
+        --btn-icon: var(--btn-quiet-icon);
+        min-height: 2.75rem;
+        padding: 0 0.25rem;
+        border-radius: var(--radius-card);
+        text-decoration: underline;
+        text-decoration-thickness: 1px;
+        text-decoration-color: var(--accent-line);
+        text-underline-offset: 0.2em;
+    }
+
+    .btn--quiet:hover {
+        --btn-bg: var(--btn-quiet-bg-hover);
+        --btn-ink: var(--btn-quiet-ink-hover);
+        --btn-border: var(--btn-quiet-border-hover);
+        --btn-icon: var(--btn-quiet-icon-hover);
+        text-decoration: underline;
+        text-decoration-color: currentColor;
+    }
+
+    .btn--quiet:focus-visible {
+        --btn-bg: var(--btn-quiet-bg-focus);
+        --btn-ink: var(--btn-quiet-ink-focus);
+        --btn-border: var(--btn-quiet-border-focus);
+        --btn-icon: var(--btn-quiet-icon-focus);
+        text-decoration-color: currentColor;
+    }
+
+    .btn--quiet:active {
+        --btn-bg: var(--btn-quiet-bg-active);
+        --btn-ink: var(--btn-quiet-ink-active);
+        --btn-border: var(--btn-quiet-border-active);
+        --btn-icon: var(--btn-quiet-icon-active);
+    }
+
+    .btn--icon {
+        --btn-bg: var(--btn-icon-bg);
+        --btn-ink: var(--btn-icon-ink);
+        --btn-border: var(--btn-icon-border);
+        --btn-icon: var(--btn-icon-icon);
+        width: 2.75rem;
+        height: 2.75rem;
+        flex-shrink: 0;
+        padding: 0;
+    }
+
+    .btn--icon:hover,
+    .btn--icon[aria-expanded='true'],
+    .btn--icon[aria-pressed='true'] {
+        --btn-bg: var(--btn-icon-bg-hover);
+        --btn-ink: var(--btn-icon-ink-hover);
+        --btn-border: var(--btn-icon-border-hover);
+        --btn-icon: var(--btn-icon-icon-hover);
+    }
+
+    .btn--icon:focus-visible {
+        --btn-bg: var(--btn-icon-bg-focus);
+        --btn-ink: var(--btn-icon-ink-focus);
+        --btn-border: var(--btn-icon-border-focus);
+        --btn-icon: var(--btn-icon-icon-focus);
+    }
+
+    .btn--icon:active {
+        --btn-bg: var(--btn-icon-bg-active);
+        --btn-ink: var(--btn-icon-ink-active);
+        --btn-border: var(--btn-icon-border-active);
+        --btn-icon: var(--btn-icon-icon-active);
+    }
+
+    .btn--danger {
+        --btn-bg: var(--btn-danger-bg);
+        --btn-ink: var(--btn-danger-ink);
+        --btn-border: var(--btn-danger-border);
+        --btn-icon: var(--btn-danger-icon);
+    }
+
+    .btn--danger:hover {
+        --btn-bg: var(--btn-danger-bg-hover);
+        --btn-ink: var(--btn-danger-ink-hover);
+        --btn-border: var(--btn-danger-border-hover);
+        --btn-icon: var(--btn-danger-icon-hover);
+    }
+
+    .btn--danger:focus-visible {
+        --btn-bg: var(--btn-danger-bg-focus);
+        --btn-ink: var(--btn-danger-ink-focus);
+        --btn-border: var(--btn-danger-border-focus);
+        --btn-icon: var(--btn-danger-icon-focus);
+    }
+
+    .btn--danger:active {
+        --btn-bg: var(--btn-danger-bg-active);
+        --btn-ink: var(--btn-danger-ink-active);
+        --btn-border: var(--btn-danger-border-active);
+        --btn-icon: var(--btn-danger-icon-active);
+    }
+
+
+    /* ------------------------------------------------- loading and disabled */
+    /* Loading: the busy label shows (resources/js/auth.js), the colours stay, a second press does nothing. */
+    .btn--primary[aria-busy='true'] {
+        --btn-bg: var(--btn-primary-bg-loading);
+        --btn-ink: var(--btn-primary-ink-loading);
+        --btn-border: var(--btn-primary-border-loading);
+        --btn-icon: var(--btn-primary-icon-loading);
+    }
+
+    .btn--secondary[aria-busy='true'] {
+        --btn-bg: var(--btn-secondary-bg-loading);
+        --btn-ink: var(--btn-secondary-ink-loading);
+        --btn-border: var(--btn-secondary-border-loading);
+        --btn-icon: var(--btn-secondary-icon-loading);
+    }
+
+    .btn--quiet[aria-busy='true'] {
+        --btn-bg: var(--btn-quiet-bg-loading);
+        --btn-ink: var(--btn-quiet-ink-loading);
+        --btn-border: var(--btn-quiet-border-loading);
+        --btn-icon: var(--btn-quiet-icon-loading);
+    }
+
+    .btn--icon[aria-busy='true'] {
+        --btn-bg: var(--btn-icon-bg-loading);
+        --btn-ink: var(--btn-icon-ink-loading);
+        --btn-border: var(--btn-icon-border-loading);
+        --btn-icon: var(--btn-icon-icon-loading);
+    }
+
+    .btn--danger[aria-busy='true'] {
+        --btn-bg: var(--btn-danger-bg-loading);
+        --btn-ink: var(--btn-danger-ink-loading);
+        --btn-border: var(--btn-danger-border-loading);
+        --btn-icon: var(--btn-danger-icon-loading);
+    }
+
+    .btn[aria-busy='true'] {
+        cursor: progress;
+    }
+
+    /* Disabled: the muted ink on a hairline (no opacity, so the label keeps its contrast). */
+    .btn--primary:is(:disabled, [aria-disabled='true']) {
+        --btn-bg: var(--btn-primary-bg-disabled);
+        --btn-ink: var(--btn-primary-ink-disabled);
+        --btn-border: var(--btn-primary-border-disabled);
+        --btn-icon: var(--btn-primary-icon-disabled);
+    }
+
+    .btn--secondary:is(:disabled, [aria-disabled='true']) {
+        --btn-bg: var(--btn-secondary-bg-disabled);
+        --btn-ink: var(--btn-secondary-ink-disabled);
+        --btn-border: var(--btn-secondary-border-disabled);
+        --btn-icon: var(--btn-secondary-icon-disabled);
+    }
+
+    .btn--quiet:is(:disabled, [aria-disabled='true']) {
+        --btn-bg: var(--btn-quiet-bg-disabled);
+        --btn-ink: var(--btn-quiet-ink-disabled);
+        --btn-border: var(--btn-quiet-border-disabled);
+        --btn-icon: var(--btn-quiet-icon-disabled);
+        text-decoration-color: transparent;
+    }
+
+    .btn--icon:is(:disabled, [aria-disabled='true']) {
+        --btn-bg: var(--btn-icon-bg-disabled);
+        --btn-ink: var(--btn-icon-ink-disabled);
+        --btn-border: var(--btn-icon-border-disabled);
+        --btn-icon: var(--btn-icon-icon-disabled);
+    }
+
+    .btn--danger:is(:disabled, [aria-disabled='true']) {
+        --btn-bg: var(--btn-danger-bg-disabled);
+        --btn-ink: var(--btn-danger-ink-disabled);
+        --btn-border: var(--btn-danger-border-disabled);
+        --btn-icon: var(--btn-danger-icon-disabled);
+    }
+
+    .btn:is(:disabled, [aria-disabled='true']) {
+        cursor: not-allowed;
+    }
+
+    /* A quiet button in the danger tone (row actions such as Reject or Delete): quiet's surface, danger's ink in each state. */
+    .btn--quiet.btn--tone-danger {
+        --btn-ink: var(--btn-danger-ink);
+        --btn-icon: var(--btn-danger-icon);
+    }
+
+    .btn--quiet.btn--tone-danger:hover {
+        --btn-ink: var(--btn-danger-ink-hover);
+        --btn-icon: var(--btn-danger-icon-hover);
+    }
+
+    .btn--quiet.btn--tone-danger:focus-visible {
+        --btn-ink: var(--btn-danger-ink-focus);
+        --btn-icon: var(--btn-danger-icon-focus);
+    }
+
+    .btn--quiet.btn--tone-danger:active {
+        --btn-ink: var(--btn-danger-ink-active);
+        --btn-icon: var(--btn-danger-icon-active);
+    }
+
+    .btn--quiet.btn--tone-danger[aria-busy='true'] {
+        --btn-ink: var(--btn-danger-ink-loading);
+        --btn-icon: var(--btn-danger-icon-loading);
+    }
+
+    .btn--quiet.btn--tone-danger:is(:disabled, [aria-disabled='true']) {
+        --btn-ink: var(--btn-danger-ink-disabled);
+        --btn-icon: var(--btn-danger-icon-disabled);
+    }
+
+    /* ---------------------------------------------------------------- sizes */
+    .btn--small {
+        white-space: nowrap;
+        min-height: 2.25rem;
+        padding: 0.5rem 1.25rem;
+        font-size: 0.875rem;
+    }
+
+    .btn--quiet.btn--small {
+        min-height: 2.75rem;
+        padding: 0 0.25rem;
+        font-size: 0.9375rem;
+    }
+
+    .btn--round {
+        width: 2.75rem;
+        height: 2.75rem;
+        flex-shrink: 0;
+        padding: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .btn {
+            transition: none;
+        }
+    }
+}

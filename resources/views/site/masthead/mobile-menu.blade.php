@@ -49,8 +49,11 @@
         </nav>
 
         <div class="site-menu__foot mt-12 flex flex-col items-start gap-6">
-            <a href="{{ $tributeUrl }}" class="btn-pill-outline on-dark">{{ Masthead::LEAVE_TRIBUTE }}</a>
+            <x-button on-dark :href="$tributeUrl">{{ Masthead::LEAVE_TRIBUTE }}</x-button>
             <a href="{{ $utility['link']['url'] }}" class="link-draw smallcaps site-menu__utility">{{ $utility['link']['label'] }}</a>
+            @if ($account !== null)
+                <x-account.sign-out variant="quiet" data-mobile-sign-out />
+            @endif
         </div>
     </div>
 </div>

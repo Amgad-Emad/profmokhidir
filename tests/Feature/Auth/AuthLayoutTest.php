@@ -110,7 +110,7 @@ class AuthLayoutTest extends TestCase
     #[Test]
     public function the_two_factor_screen_is_titled_and_closes_the_same_way(): void
     {
-        $admin = User::factory()->admin()->create(['password' => 'secret-password']);
+        $admin = User::factory()->admin()->withTwoFactor()->create(['password' => 'secret-password']);
         $this->post(route('login'), ['email' => $admin->email, 'password' => 'secret-password'])->assertRedirect(route('two-factor.login'));
 
         $this->get(route('two-factor.login'))

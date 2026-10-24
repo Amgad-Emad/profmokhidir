@@ -33,6 +33,11 @@ interface UserRepositoryInterface extends BaseRepositoryInterface
     public function updateTheme(User $user, Theme $theme): User;
 
     /**
+     * Remember that the user dismissed the dashboard card recommending two-factor authentication.
+     */
+    public function dismissTwoFactorReminder(User $user): User;
+
+    /**
      * Users holding the role whose account is not deactivated, optionally
      * leaving one user out of the count.
      */

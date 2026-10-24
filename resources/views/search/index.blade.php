@@ -9,7 +9,7 @@
                 <div class="search-form__row form-style-underline mt-3">
                     <x-form.input type="search" :name="Search::PARAM" id="search-query" :label="Search::LABEL" hide-label :optional="false" size="display" class="search-form__field"
                                   :value="$results['query']" :placeholder="Search::PLACEHOLDER" autocomplete="off" spellcheck="false" :maxlength="Search::MAX_LENGTH" autofocus />
-                    <button type="submit" class="btn-pill-outline text-ink">{{ Search::BUTTON_LABEL }}</button>
+                    <x-button type="submit">{{ Search::BUTTON_LABEL }}</x-button>
                 </div>
                 @if (! $canSeeMembersOnly)
                     <p class="mt-3 text-sm font-light text-ink-muted">{{ Search::MEMBERS_NOTE }}</p>

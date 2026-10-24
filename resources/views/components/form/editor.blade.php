@@ -80,9 +80,9 @@
                 <p id="{{ $linkId }}-error" class="form-message form-error" x-show="linkError" x-cloak role="alert"><x-icon name="warning" class="mt-1 size-4 shrink-0" /><span x-text="linkError"></span></p>
             </div>
             <div class="form-editor__dialog-actions">
-                <x-button type="button" variant="primary" class="px-5 py-2 text-sm" x-on:click="applyLink()">{{ FormControls::LINK_APPLY }}</x-button>
-                <button type="button" class="form-file__action" x-show="is('link') === 'true'" x-on:click="removeLink()">{{ FormControls::LINK_REMOVE }}</button>
-                <button type="button" class="form-file__action" x-on:click="closeLink()">{{ FormControls::LINK_CANCEL }}</button>
+                <x-button type="button" variant="primary" size="sm" x-on:click="applyLink()">{{ FormControls::LINK_APPLY }}</x-button>
+                <x-button variant="quiet" size="sm" type="button" x-show="is('link') === 'true'" x-on:click="removeLink()">{{ FormControls::LINK_REMOVE }}</x-button>
+                <x-button variant="quiet" size="sm" type="button" x-on:click="closeLink()">{{ FormControls::LINK_CANCEL }}</x-button>
             </div>
         </div>
 

@@ -70,7 +70,7 @@ class ErrorPagesTest extends TestCase
         $this->assertStringContainsString('<p class="t-label text-accent-text">'.ErrorPages::LABEL_PREFIX.' '.$code.'</p>', $html);
         $this->assertStringContainsString('<h1 class="t-heading text-ink-strong">'.e($page['title']).'</h1>', $html);
         $this->assertStringContainsString('<p class="t-quote max-w-xl">'.e($page['line']).'</p>', $html);
-        $this->assertStringContainsString('<a href="'.route('home').'" class="btn-pill-filled mt-4">'.ErrorPages::HOME_LABEL.'</a>', $html);
+        $this->assertStringContainsString('<a href="'.route('home').'" class="btn btn--primary mt-4">'.ErrorPages::HOME_LABEL.'</a>', $html);
 
         // The search box is a plain GET form to /search: it works on a page that loads no script.
         $this->assertMatchesRegularExpression('/<form novalidate method="get" action="'.preg_quote(route(Search::ROUTE), '/').'" role="search"/', $html);

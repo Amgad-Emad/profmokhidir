@@ -46,7 +46,7 @@
 
         <div class="flex flex-wrap items-center gap-4 border-t border-rule pt-8">
             <x-button type="submit" wire:loading.attr="disabled" data-save>Save settings</x-button>
-            <x-button type="button" variant="outline" :href="route(\App\Constants\AdminNavigation::DASHBOARD_ROUTE)">Back to the dashboard</x-button>
+            <x-button type="button" variant="quiet" :href="route(\App\Constants\AdminNavigation::DASHBOARD_ROUTE)">Back to the dashboard</x-button>
             <span class="text-sm font-light text-ink-muted" wire:loading wire:target="save">Saving…</span>
         </div>
     </form>

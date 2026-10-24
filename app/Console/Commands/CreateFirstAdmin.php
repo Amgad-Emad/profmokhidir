@@ -14,8 +14,8 @@ use Illuminate\Support\Facades\Validator;
 /**
  * Production setup: create the first administrator without a seeder or
  * tinker. Roles and permissions are synced first, then the person is invited
- * with a set-password link (no password is generated or shown). They set up
- * two-factor authentication on first sign-in.
+ * with a set-password link (no password is generated or shown). Two-factor
+ * authentication is recommended to them on the dashboard, not required.
  */
 class CreateFirstAdmin extends Command
 {
@@ -81,7 +81,7 @@ class CreateFirstAdmin extends Command
             'A set-password link has been emailed to '.$user->email.' (mailer: '.config('mail.default').').',
             'The link expires after '.$expires.' minutes; an administrator can resend it from Users & roles.',
             'They sign in at '.route('login').' once the password is set.',
-            'Two-factor authentication is required before the dashboard opens; they set it up at '.route(AdminNavigation::ACCOUNT_ROUTE).'.',
+            'Two-factor authentication is recommended for administrators; they can turn it on at '.route(AdminNavigation::ACCOUNT_ROUTE).'.',
             'If mail is queued, a queue worker must be running for the email to go out.',
         ] as $note) {
             $this->line('  - '.$note);

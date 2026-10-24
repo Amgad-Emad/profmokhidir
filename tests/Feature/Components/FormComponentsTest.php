@@ -27,11 +27,11 @@ class FormComponentsTest extends TestCase
     }
 
     #[Test]
-    public function a_field_reads_label_then_hint_then_control_then_error(): void
+    public function a_field_reads_label_and_requirement_then_hint_then_control_then_error(): void
     {
         $html = $this->render('<x-form.input name="affiliation" label="Affiliation" required hint="Your university." />');
 
-        $this->assertMatchesRegularExpression('/<label id="affiliation-label" for="affiliation" class="t-label form-label">Affiliation<\/label>\s*<p id="affiliation-hint" class="form-hint"><span class="form-hint__requirement">Required<\/span> · Your university\.<\/p>\s*<div class="form-field__control"><div class="form-control"\s*>\s*<input class="form-control__input"/', $html);
+        $this->assertMatchesRegularExpression('/<label id="affiliation-label" for="affiliation" class="t-label form-label">Affiliation<\/label><span id="affiliation-requirement" class="form-requirement"><span aria-hidden="true">·<\/span> Required<\/span>\s*<p id="affiliation-hint" class="form-hint">Your university\.<\/p>\s*<div class="form-field__control"><div class="form-control"\s*>\s*<input class="form-control__input"/', $html);
         $this->assertStringContainsString('<p id="affiliation-error" class="form-message form-error" data-form-error></p>', $html, 'An empty error slot is ready for blur validation');
         $this->assertStringNotContainsString('*', strip_tags($html), 'Never a lone asterisk');
         $this->assertStringContainsString('placeholder="'.FormControls::BLANK_PLACEHOLDER.'"', $html);
@@ -40,7 +40,8 @@ class FormComponentsTest extends TestCase
     #[Test]
     public function an_optional_field_says_so_and_a_filter_says_nothing(): void
     {
-        $this->assertStringContainsString('<span class="form-hint__requirement">Optional</span>', $this->render('<x-form.input name="location" label="Place" />'));
+        $this->assertStringContainsString('<span id="location-requirement" class="form-requirement"><span aria-hidden="true">·</span> Optional</span>', $this->render('<x-form.input name="location" label="Place" />'));
+        $this->assertStringNotContainsString('form-requirement', $this->render('<x-form.input name="q" label="Search" :optional="false" />'));
         $this->assertStringNotContainsString('form-hint', $this->render('<x-form.input name="q" label="Search" :optional="false" />'));
     }
 
@@ -49,7 +50,7 @@ class FormComponentsTest extends TestCase
     {
         $html = $this->render('<x-form.input name="email" label="Email" type="email" required />', ['email' => FormControls::MESSAGE_EMAIL]);
 
-        $this->assertStringContainsString('aria-invalid="true" aria-describedby="email-hint email-error"', $html);
+        $this->assertStringContainsString('aria-invalid="true" aria-describedby="email-requirement email-error"', $html);
         $this->assertMatchesRegularExpression('/<p id="email-error" class="form-message form-error" data-form-error role="alert"><svg[^>]*>.*?<\/svg>\s*<span>'.preg_quote(FormControls::MESSAGE_EMAIL, '/').'<\/span><\/p>/s', $html);
     }
 
@@ -93,7 +94,7 @@ class FormComponentsTest extends TestCase
     {
         $html = $this->render('<x-form.textarea name="message" label="Your tribute" required :maxlength="600" rows="6" value="Thank you" />');
 
-        $this->assertStringContainsString('maxlength="600" aria-describedby="message-hint message-count"', $html);
+        $this->assertStringContainsString('maxlength="600" aria-describedby="message-requirement message-count"', $html);
         $this->assertStringContainsString('data-autogrow="true"', $html);
         $this->assertStringContainsString('rows="6"', $html);
         $this->assertStringContainsString('>Thank you</textarea>', $html);
@@ -160,7 +161,7 @@ class FormComponentsTest extends TestCase
     {
         $html = $this->render('<x-form.otp name="code" label="Authentication code" :hidden="[\'x-bind:disabled\' => \'recovery\']" />', ['code' => 'The code is not valid.']);
 
-        $this->assertStringContainsString('<fieldset class="form-field form-fieldset" x-data="formOtp({ length: 6 })" data-otp="data-otp" data-form-field aria-describedby="code-hint code-error"', $html);
+        $this->assertStringContainsString('<fieldset class="form-field form-fieldset" x-data="formOtp({ length: 6 })" data-otp="data-otp" data-form-field aria-describedby="code-requirement code-error"', $html);
         $this->assertSame(AuthScreens::CODE_LENGTH, substr_count($html, '<div class="form-control"><input class="form-control__input" type="text" id="code-'));
         $this->assertStringContainsString('<input type="hidden" name="code" x-ref="value" value="" x-bind:disabled="recovery" data-msg-missing="Enter the 6-digit code from your app.">', $html);
         $this->assertSame(AuthScreens::CODE_LENGTH, substr_count($html, 'aria-invalid="true"'));

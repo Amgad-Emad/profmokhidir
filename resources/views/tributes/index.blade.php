@@ -11,7 +11,7 @@
             </div>
             <x-seal class="seal--open" tone="ivory" :size="48" />
             <div class="mt-10 flex flex-wrap gap-4" data-rise>
-                <a href="{{ $createUrl }}" class="btn-pill-filled">{{ $copy['leaveTribute'] }}</a>
+                <x-button variant="primary" :href="$createUrl">{{ $copy['leaveTribute'] }}</x-button>
             </div>
         </div>
     </section>
@@ -53,7 +53,7 @@
                 <div class="mx-auto mt-6 max-w-3xl" data-rise-group>
                     @if ($activeRelationship === null && ! $featured)
                         <x-empty-state message="No tributes have been published yet. Yours could be the first." />
-                        <a href="{{ $createUrl }}" class="btn-pill-outline text-ink">{{ $copy['leaveTribute'] }}</a>
+                        <x-button :href="$createUrl">{{ $copy['leaveTribute'] }}</x-button>
                     @else
                         <x-empty-state :message="'No tributes from '.mb_strtolower($activeRelationship?->plural() ?? 'anyone else').' have been published yet.'" />
                     @endif
@@ -72,7 +72,7 @@
             @endif
 
             <div class="mt-16 flex flex-wrap items-center justify-center gap-4" data-rise>
-                <a href="{{ $createUrl }}" class="btn-pill-outline text-ink">{{ $copy['leaveTribute'] }}</a>
+                <x-button :href="$createUrl">{{ $copy['leaveTribute'] }}</x-button>
             </div>
 
             <x-folio section="{{ $section['label'] }}" position="bottom" class="mt-16" />

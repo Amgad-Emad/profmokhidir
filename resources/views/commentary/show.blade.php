@@ -122,7 +122,7 @@
                             @endif
                         </div>
                     </div>
-                    <a href="{{ $section['url'] }}" class="btn-pill-outline mt-10 text-ink">All commentary</a>
+                    <x-button :href="$section['url']" class="mt-10">All commentary</x-button>
                 </nav>
 
                 <x-seal />

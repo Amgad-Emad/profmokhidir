@@ -39,7 +39,7 @@ final class FormFieldService
      * }  $options
      * @return array{
      *     id: string, key: string, name: string|null, model: string|null, wire: string,
-     *     hintId: string, errorId: string, countId: string, label: string,
+     *     hintId: string, requirementId: string, errorId: string, countId: string, label: string,
      *     requirement: string|null, hint: string, hintText: string, error: string|null, invalid: bool,
      *     maxlength: int|null, counter: bool, describedBy: string, required: bool
      * }
@@ -54,7 +54,7 @@ final class FormFieldService
         $maxlength = isset($options['maxlength']) && $options['maxlength'] !== '' ? (int) $options['maxlength'] : null;
         $counter = (bool) ($options['counter'] ?? $maxlength !== null);
         $requirement = ($options['marker'] ?? true) ? $this->requirement($required, $options['optional'] ?? true) : null;
-        $hint = $this->hintLine($requirement, $options['hint'] ?? null);
+        $hint = trim((string) ($options['hint'] ?? ''));
         $error = $options['error'] ?? $this->firstError($errors, $key, (string) ($options['bag'] ?? 'default'), (bool) ($options['nested'] ?? false));
 
         $field = [
@@ -64,6 +64,7 @@ final class FormFieldService
             'model' => $model,
             'wire' => (string) ($options['wire'] ?? 'live.blur'),
             'hintId' => $id.'-hint',
+            'requirementId' => $id.'-requirement',
             'errorId' => $id.'-error',
             'countId' => $id.'-count',
             'label' => (string) ($options['label'] ?? ''),
@@ -78,6 +79,7 @@ final class FormFieldService
         ];
 
         $field['describedBy'] = implode(' ', array_filter([
+            $requirement !== null ? $field['requirementId'] : null,
             $hint !== '' ? $field['hintId'] : null,
             $field['counter'] ? $field['countId'] : null,
             $error !== null ? $field['errorId'] : null,
@@ -186,11 +188,6 @@ final class FormFieldService
         }
 
         return $optional === false ? null : FormControls::OPTIONAL;
-    }
-
-    public function hintLine(?string $requirement, ?string $hint): string
-    {
-        return implode(FormControls::HINT_SEPARATOR, array_filter([$requirement, $hint !== null ? trim($hint) : null], fn (?string $part): bool => $part !== null && $part !== ''));
     }
 
     /**

@@ -15,6 +15,7 @@ use App\Http\Controllers\AboutController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\AdminSearchController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\TwoFactorReminderController;
 use App\Http\Controllers\AwardController;
 use App\Http\Controllers\ChatAttachmentController;
 use App\Http\Controllers\ChatController;
@@ -168,14 +169,16 @@ Route::get('/account', [AccountController::class, 'show'])
     ->middleware(['auth', 'verified'])
     ->name(AdminNavigation::ACCOUNT_ROUTE);
 
-// Admin dashboard: staff roles only (Spatie role middleware), email verified, and
-// admins must have confirmed two-factor authentication. Permissions are checked
-// per page (Spatie permission middleware) and per action (Policies).
-Route::middleware(['auth', 'verified', 'role:'.implode('|', Roles::staff()), 'two-factor'])
+// Admin dashboard: staff roles only (Spatie role middleware) with a verified email.
+// Two-factor authentication is recommended, not required (a dashboard card suggests it).
+// Permissions are checked per page (Spatie permission middleware) and per action (Policies).
+Route::middleware(['auth', 'verified', 'role:'.implode('|', Roles::staff())])
     ->prefix('admin')
     ->name(AdminNavigation::ROUTE_PREFIX)
     ->group(function () {
         Route::get('/', DashboardController::class)->name('dashboard');
+        Route::post(AdminUx::TWO_FACTOR_REMINDER_PATH, TwoFactorReminderController::class)
+            ->name(substr(AdminUx::TWO_FACTOR_REMINDER_ROUTE, strlen(AdminNavigation::ROUTE_PREFIX)));
 
         // The command palette's content search (JSON).
         Route::get(AdminUx::SEARCH_PATH, AdminSearchController::class)

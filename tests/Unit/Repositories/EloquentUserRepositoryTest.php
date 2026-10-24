@@ -127,4 +127,16 @@ class EloquentUserRepositoryTest extends TestCase
         $this->repository->updateTheme($user, Theme::Light);
         $this->assertSame(Theme::Light, $user->fresh()->theme);
     }
+
+    #[Test]
+    public function it_remembers_that_the_two_factor_reminder_was_dismissed(): void
+    {
+        $user = User::factory()->admin()->create();
+        $this->assertNull($user->two_factor_reminder_dismissed_at);
+
+        $dismissed = $this->repository->dismissTwoFactorReminder($user);
+
+        $this->assertNotNull($dismissed->two_factor_reminder_dismissed_at);
+        $this->assertNotNull($user->fresh()->two_factor_reminder_dismissed_at);
+    }
 }

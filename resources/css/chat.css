@@ -160,23 +160,7 @@
         color: var(--ink-muted);
     }
 
-    /* Icon buttons in the header: 44px targets, a hairline ring on hover. */
-    .chat-tool {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 2.75rem;
-        height: 2.75rem;
-        border-radius: 9999px;
-        border: 1px solid transparent;
-        color: var(--ink);
-        transition: border-color 400ms var(--ease-rise);
-    }
-
-    .chat-tool:hover,
-    .chat-tool[aria-expanded='true'] {
-        border-color: var(--rule);
-    }
+    /* Icon buttons in the header are <x-button variant="icon"> (44px, colours from the button tokens). */
 
     /* The offline banner sits above the conversation while reconnecting. */
     .chat-banner {
@@ -575,21 +559,11 @@
         background-color: var(--surface-panel);
     }
 
+    /* The message toolbar's icon buttons: 32px squares; colours come from the icon button tokens. */
     .chat-toolbar__button {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
         width: 2rem;
         height: 2rem;
         border-radius: var(--radius-card);
-        color: var(--ink-muted);
-        transition: color 300ms var(--ease-rise), background-color 300ms var(--ease-rise);
-    }
-
-    .chat-toolbar__button:hover,
-    .chat-toolbar__button:focus-visible {
-        color: var(--ink);
-        background-color: var(--surface-sunken);
     }
 
     .chat-toolbar__confirm {
@@ -634,25 +608,10 @@
         opacity: 1;
     }
 
+    /* Inline message actions: quiet buttons set small to sit in the line of text. */
     .chat-action {
         min-height: 1.75rem;
         font-size: 0.8125rem;
-        font-weight: 500;
-        color: var(--accent-text);
-        text-decoration: underline;
-        text-decoration-color: transparent;
-        text-underline-offset: 0.2em;
-        transition: text-decoration-color 400ms var(--ease-rise), color 400ms var(--ease-rise);
-    }
-
-    .chat-action:hover,
-    .chat-action:focus-visible {
-        color: var(--ink);
-        text-decoration-color: var(--accent-line);
-    }
-
-    .chat-action:disabled {
-        opacity: 0.5;
     }
 
     .chat-edit {
@@ -697,11 +656,6 @@
         min-height: 2.5rem;
         margin: calc(-1 * var(--space-6)) 0 0 var(--space-3);
         padding-inline: var(--space-3);
-        border-radius: 9999px;
-        background-color: var(--fill);
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: var(--fill-ink);
         z-index: 5;
     }
 
@@ -780,24 +734,12 @@
 
     /* "Aa": a small outline circle that opens the formatting help. */
     .chat-aa {
-        display: inline-flex;
         flex: none;
-        align-items: center;
-        justify-content: center;
         width: 2.5rem;
         height: 2.5rem;
-        border: 1px solid var(--rule);
-        border-radius: 9999px;
         font-family: var(--font-display);
         font-size: 1.125rem;
         font-weight: 300;
-        color: var(--ink);
-        transition: border-color 400ms var(--ease-rise);
-    }
-
-    .chat-aa:hover,
-    .chat-aa[aria-expanded='true'] {
-        border-color: var(--accent-line);
     }
 
     .chat-formatting {
@@ -825,27 +767,9 @@
     }
 
     /* The send button: a small solid circle with the send icon, quiet while there is nothing to send. */
+    /* <x-button variant="primary" size="round">: disabled while there is nothing to send (the muted hairline state). */
     .chat-send {
-        display: inline-flex;
         flex: none;
-        align-items: center;
-        justify-content: center;
-        width: 2.75rem;
-        height: 2.75rem;
-        border: 1px solid var(--fill);
-        border-radius: 9999px;
-        background-color: var(--fill);
-        color: var(--fill-ink);
-        transition: background-color 600ms var(--ease-rise), color 600ms var(--ease-rise), opacity 400ms var(--ease-rise);
-    }
-
-    .chat-send:hover:not(:disabled) {
-        background-color: var(--fill-hover);
-        border-color: var(--fill-hover);
-    }
-
-    .chat-send:disabled {
-        opacity: 0.4;
     }
 
     .chat-composer__meta {
@@ -1342,20 +1266,9 @@
 
     /* The paperclip sits beside "Aa", in the same quiet outline circle. */
     .chat-clip {
-        display: inline-flex;
         flex: none;
-        align-items: center;
-        justify-content: center;
         width: 2.5rem;
         height: 2.5rem;
-        border: 1px solid var(--rule);
-        border-radius: 9999px;
-        color: var(--ink);
-        transition: border-color 400ms var(--ease-rise);
-    }
-
-    .chat-clip:hover {
-        border-color: var(--accent-line);
     }
 
     .chat-conduct-note {
@@ -1550,21 +1463,15 @@
             animation: none;
         }
 
-        .chat-toolbar__button,
         .chat-tab,
-        .chat-clip,
         .chat-members-button,
         .chat-file__download,
         .chat-progress > span,
-        .chat-aa,
         .chat-page [data-tip]::after {
             transition: none;
         }
 
         .chat-message.is-fading,
-        .chat-send,
-        .chat-action,
-        .chat-tool,
         .chat-reply__excerpt,
         .chat-search__result,
         .chat-composer__input {

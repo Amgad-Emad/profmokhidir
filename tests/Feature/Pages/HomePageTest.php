@@ -39,11 +39,11 @@ class HomePageTest extends TestCase
 
         $response
             ->assertSee('<meta name="description" content="'.e(Taglines::HERO_LINE).'">', false)
-            ->assertSeeInOrder(['glow-brass', 't-label text-accent-text', e(Taglines::HERO_LABEL), 't-display', 'Professor', 'Mohamed Osman Khidir', e(Taglines::HERO_LINE), 'epigraph text-ink hero__epigraph', 'Scholarship is the one inheritance', 'btn-pill-filled', 'btn-pill-outline'], false)
+            ->assertSeeInOrder(['glow-brass', 't-label text-accent-text', e(Taglines::HERO_LABEL), 't-display', 'Professor', 'Mohamed Osman Khidir', e(Taglines::HERO_LINE), 'epigraph text-ink hero__epigraph', 'Scholarship is the one inheritance', 'btn btn--primary', 'btn btn--secondary'], false)
             ->assertSee('<section class="hero glow-brass on-dark bg-surface text-ink" aria-labelledby="hero-title" data-masthead-hero>', false)
             ->assertSee('class="hero__inner relative', false)
-            ->assertSee('<a href="'.route('about').'" class="btn-pill-filled">'.e(Taglines::READ_STORY).'</a>', false)
-            ->assertSee('<a href="'.route('tributes.create').'" class="btn-pill-outline">'.e(Taglines::LEAVE_TRIBUTE).'</a>', false)
+            ->assertSee('<a href="'.route('about').'" class="btn btn--primary">'.e(Taglines::READ_STORY).'</a>', false)
+            ->assertSee('<a href="'.route('tributes.create').'" class="btn btn--secondary">'.e(Taglines::LEAVE_TRIBUTE).'</a>', false)
             ->assertSee('<a href="#'.HomeTimeline::ANCHOR.'" class="scroll-cue t-label text-accent-text">', false)
             ->assertSee('<span class="sr-only"> to '.Taglines::HOME_CHAPTERS.'</span>', false)
             ->assertSee('<span class="scroll-cue__line" aria-hidden="true" data-rule></span>', false)

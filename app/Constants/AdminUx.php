@@ -66,6 +66,19 @@ final class AdminUx
 
     public const string DASHBOARD_LABEL = 'Dashboard';
 
+    /** The dashboard card recommending two-factor authentication to admins who have not turned it on. */
+    public const string TWO_FACTOR_REMINDER_ROUTE = 'admin.two-factor-reminder.dismiss';
+
+    public const string TWO_FACTOR_REMINDER_PATH = 'two-factor-reminder';
+
+    public const string TWO_FACTOR_REMINDER_TITLE = 'Protect your account with two-factor authentication';
+
+    public const string TWO_FACTOR_REMINDER_TEXT = 'Recommended for administrator accounts: signing in also asks for a six-digit code from an authenticator app, so a stolen password alone cannot open the dashboard.';
+
+    public const string TWO_FACTOR_REMINDER_ACTION = 'Set up two-factor';
+
+    public const string TWO_FACTOR_REMINDER_DISMISS = 'Not now';
+
     /**
      * The shortcuts sheet ("?"): keys as shown, and what they do.
      *

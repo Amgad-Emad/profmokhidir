@@ -44,16 +44,19 @@ class PageTransitionsTest extends TestCase
     }
 
     #[Test]
-    public function links_draw_a_hairline_from_the_left_and_outline_buttons_fill_slowly(): void
+    public function links_draw_a_hairline_from_the_left_and_buttons_change_colour_slowly(): void
     {
         $this->assertMatchesRegularExpression('/\.link-draw::after \{[^}]*height: 1px;[^}]*transform: scaleX\(0\);\s*transform-origin: left center;\s*transition: transform var\(--duration-draw\) var\(--ease-rise\);/s', $this->css);
         $this->assertMatchesRegularExpression('/\.link-draw:hover::after,\s*\.link-draw:focus-visible::after \{\s*transform: scaleX\(1\);/', $this->css);
         $this->assertStringContainsString('--duration-draw: '.Motion::LINK_DRAW_MS.'ms;', $this->css);
 
         $app = file_get_contents(resource_path('css/app.css'));
-        $this->assertMatchesRegularExpression('/\.btn-pill-outline::before \{[^}]*background-color: var\(--btn-fill\);\s*transform: scaleX\(0\);\s*transform-origin: left center;\s*transition: transform var\(--duration-draw, 600ms\) var\(--ease-rise\);/s', $app);
-        // The fill follows the --fill token, which .on-dark remaps to ivory with evergreen ink.
-        $this->assertMatchesRegularExpression('/\.btn-pill-outline \{[^}]*--btn-fill: var\(--fill\);\s*--btn-fill-ink: var\(--fill-ink\);/s', $app);
+        $buttons = file_get_contents(resource_path('css/buttons.css'));
+        // Buttons change colour slowly (400ms on the brand easing) and never move or wipe.
+        $this->assertMatchesRegularExpression('/\.btn \{[^}]*transition:\s*background-color 400ms var\(--ease-rise\),\s*border-color 400ms var\(--ease-rise\),\s*color 400ms var\(--ease-rise\)/s', $buttons);
+        $this->assertStringNotContainsString('scaleX', $buttons);
+        // The solid pill follows the --fill token, which .on-dark remaps to ivory with evergreen ink.
+        $this->assertMatchesRegularExpression('/--btn-primary-bg: var\(--fill\);\s*--btn-primary-ink: var\(--fill-ink\);/s', file_get_contents(resource_path('css/tokens.css')));
         $this->assertMatchesRegularExpression('/\.on-dark \{[^}]*--fill: var\(--brand-ivory\);\s*--fill-ink: var\(--brand-evergreen\);/s', file_get_contents(resource_path('css/tokens.css')));
         $this->assertStringNotContainsString('linear-gradient', $app.$this->css, 'Underlines are pseudo-elements, not gradients');
     }

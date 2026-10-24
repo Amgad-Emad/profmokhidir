@@ -3,6 +3,7 @@
 namespace Tests\Feature\Qa;
 
 use App\Constants\AdminNavigation;
+use App\Constants\AdminUx;
 use App\Constants\ContentTypes;
 use App\Constants\Disks;
 use App\Constants\Roles;
@@ -108,16 +109,18 @@ class AdminRoutePermissionsTest extends TestCase
     }
 
     #[Test]
-    public function every_admin_route_is_guarded_by_auth_verification_staff_role_two_factor_and_a_permission(): void
+    public function every_admin_route_is_guarded_by_auth_verification_staff_role_and_a_permission(): void
     {
         foreach ($this->adminRoutes() as $name => ['route' => $route]) {
             $middleware = $route->gatherMiddleware();
 
-            foreach (['auth', 'verified', 'role:'.implode('|', Roles::staff()), 'two-factor'] as $required) {
+            foreach (['auth', 'verified', 'role:'.implode('|', Roles::staff())] as $required) {
                 $this->assertContains($required, $middleware, "{$name} is missing {$required}");
             }
 
-            if ($name !== AdminNavigation::DASHBOARD_ROUTE) {
+            $this->assertNotContains('two-factor', $middleware, "{$name} still requires two-factor");
+
+            if (! in_array($name, [AdminNavigation::DASHBOARD_ROUTE, AdminUx::TWO_FACTOR_REMINDER_ROUTE], true)) {
                 $this->assertNotNull($this->permissionOf($route), "{$name} has no permission middleware");
             }
         }
@@ -189,11 +192,11 @@ class AdminRoutePermissionsTest extends TestCase
     }
 
     #[Test]
-    public function admins_without_confirmed_two_factor_are_sent_to_set_it_up(): void
+    public function admins_without_two_factor_open_every_admin_screen(): void
     {
         $admin = User::factory()->admin()->withoutTwoFactor()->create();
 
-        $this->actingAs($admin)->get(route(AdminNavigation::DASHBOARD_ROUTE))->assertRedirect();
-        $this->assertStringContainsString(route(AdminNavigation::ACCOUNT_ROUTE), $this->actingAs($admin)->get(route(AdminNavigation::DASHBOARD_ROUTE))->headers->get('Location'));
+        $this->actingAs($admin)->get(route(AdminNavigation::DASHBOARD_ROUTE))->assertOk();
+        $this->actingAs($admin)->get(route(AdminNavigation::routeFor(AdminNavigation::USERS)))->assertOk();
     }
 }

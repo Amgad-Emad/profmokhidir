@@ -69,19 +69,19 @@
                         <div class="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 text-sm lg:flex-col lg:items-end">
                             <x-admin.status-badge :tone="StatusTone::forCommunity($user->community_status)" :label="$user->community_status->label()" />
                             @if ($user->community_status === CommunityStatus::Pending || $user->community_status === CommunityStatus::Rejected)
-                                <button type="button" wire:click="decide('{{ Applications::ACTION_APPROVE }}', {{ $user->getKey() }})" class="text-success-tone underline-offset-4 hover:underline" data-approve>Approve<span class="sr-only"> {{ $user->name }}</span></button>
+                                <x-button variant="quiet" size="sm" type="button" wire:click="decide('{{ Applications::ACTION_APPROVE }}', {{ $user->getKey() }})" data-approve>Approve<span class="sr-only"> {{ $user->name }}</span></x-button>
                             @endif
                             @if ($user->community_status === CommunityStatus::Pending)
-                                <button type="button" wire:click="decide('{{ Applications::ACTION_REJECT }}', {{ $user->getKey() }})" class="text-danger-tone underline-offset-4 hover:underline" data-reject>Reject<span class="sr-only"> {{ $user->name }}</span></button>
+                                <x-button variant="quiet" size="sm" danger type="button" wire:click="decide('{{ Applications::ACTION_REJECT }}', {{ $user->getKey() }})" data-reject>Reject<span class="sr-only"> {{ $user->name }}</span></x-button>
                             @endif
                             @if ($user->community_status === CommunityStatus::Approved)
-                                <button type="button" wire:click="decide('{{ Applications::ACTION_SUSPEND }}', {{ $user->getKey() }})" class="text-danger-tone underline-offset-4 hover:underline" data-suspend>Suspend<span class="sr-only"> {{ $user->name }}</span></button>
+                                <x-button variant="quiet" size="sm" danger type="button" wire:click="decide('{{ Applications::ACTION_SUSPEND }}', {{ $user->getKey() }})" data-suspend>Suspend<span class="sr-only"> {{ $user->name }}</span></x-button>
                             @endif
                             @if ($user->community_status === CommunityStatus::Suspended)
-                                <button type="button" wire:click="decide('{{ Applications::ACTION_REINSTATE }}', {{ $user->getKey() }})" class="text-success-tone underline-offset-4 hover:underline" data-reinstate>Reinstate<span class="sr-only"> {{ $user->name }}</span></button>
+                                <x-button variant="quiet" size="sm" type="button" wire:click="decide('{{ Applications::ACTION_REINSTATE }}', {{ $user->getKey() }})" data-reinstate>Reinstate<span class="sr-only"> {{ $user->name }}</span></x-button>
                             @endif
                             @if (in_array($user->community_status, [CommunityStatus::Approved, CommunityStatus::Suspended], true))
-                                <button type="button" wire:click="decide('{{ Applications::ACTION_REMOVE }}', {{ $user->getKey() }})" class="text-ink-muted underline-offset-4 hover:underline" data-remove>Remove<span class="sr-only"> {{ $user->name }}</span></button>
+                                <x-button variant="quiet" size="sm" type="button" wire:click="decide('{{ Applications::ACTION_REMOVE }}', {{ $user->getKey() }})" data-remove>Remove<span class="sr-only"> {{ $user->name }}</span></x-button>
                             @endif
                         </div>
                     </div>
@@ -100,7 +100,7 @@
                     <x-form.textarea model="note" label="Note to the applicant (optional)" rows="4" hint="Included in the email and kept in the audit log." />
                 </div>
                 <div class="mt-8 flex flex-wrap justify-end gap-3">
-                    <x-button type="button" variant="outline" wire:click="cancelDecision">Cancel</x-button>
+                    <x-button type="button" variant="quiet" wire:click="cancelDecision">Cancel</x-button>
                     <x-button type="submit" wire:loading.attr="disabled" data-confirm>{{ $dialog['confirm'] }}</x-button>
                 </div>
             </form>

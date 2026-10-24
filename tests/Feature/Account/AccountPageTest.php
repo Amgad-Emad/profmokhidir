@@ -196,17 +196,17 @@ class AccountPageTest extends TestCase
     }
 
     #[Test]
-    public function an_admin_can_finish_two_factor_setup_and_then_open_the_dashboard(): void
+    public function an_admin_can_turn_on_two_factor_and_the_dashboard_card_goes_away(): void
     {
         $admin = User::factory()->admin()->withoutTwoFactor()->create();
 
-        $this->actingAs($admin)->get(route(AdminNavigation::DASHBOARD_ROUTE))->assertRedirect();
+        $this->actingAs($admin)->get(route(AdminNavigation::DASHBOARD_ROUTE))->assertOk()->assertSee('data-two-factor-card', false);
 
         $this->actingAs($admin)->withSession(['auth.password_confirmed_at' => time()])->post(route('two-factor.enable'));
 
         $code = app(Google2FA::class)->getCurrentOtp(decrypt($admin->fresh()->two_factor_secret));
         $this->actingAs($admin)->withSession(['auth.password_confirmed_at' => time()])->post(route('two-factor.confirm'), ['code' => $code]);
 
-        $this->actingAs($admin->fresh())->get(route(AdminNavigation::DASHBOARD_ROUTE))->assertOk();
+        $this->actingAs($admin->fresh())->get(route(AdminNavigation::DASHBOARD_ROUTE))->assertOk()->assertDontSee('data-two-factor-card', false);
     }
 }

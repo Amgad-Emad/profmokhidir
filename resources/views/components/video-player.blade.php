@@ -62,7 +62,7 @@
             @endif
             <p class="t-body text-ink-muted">This recording is hosted on another site.</p>
             @if ($player['url'])
-                <x-button variant="filled" :href="$player['url']" rel="noopener">{{ $player['label'] }}</x-button>
+                <x-button :href="$player['url']" rel="noopener">{{ $player['label'] }}</x-button>
             @endif
         </div>
     @endif

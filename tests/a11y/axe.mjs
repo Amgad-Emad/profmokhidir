@@ -9,8 +9,8 @@
  |
  | Environment: A11Y_BASE_URL (default https://profmokhidir.test). Signed-in
  | screens need A11Y_EDITOR_EMAIL / A11Y_EDITOR_PASSWORD, A11Y_ADMIN_EMAIL /
- | A11Y_ADMIN_PASSWORD / A11Y_ADMIN_RECOVERY (a recovery code, since admins must
- | pass the two-factor challenge) and A11Y_MEMBER_EMAIL / A11Y_MEMBER_PASSWORD.
+ | A11Y_ADMIN_PASSWORD / A11Y_ADMIN_RECOVERY (a recovery code, only for an admin
+ | who turned two-factor on) and A11Y_MEMBER_EMAIL / A11Y_MEMBER_PASSWORD.
  | Without them those screens are skipped. Public detail pages are read from
  | /sitemap.xml. A11Y_PUBLIC=0 skips the public pages and A11Y_ROLES=admin,editor
  | limits the signed-in sessions. Every page is audited in each theme of

@@ -148,4 +148,30 @@ class MastheadServiceTest extends TestCase
         $this->assertNotNull($portrait['media']);
         $this->assertSame(route('about'), $portrait['url']);
     }
+
+    #[Test]
+    public function visitors_have_no_account_menu(): void
+    {
+        $this->assertNull($this->masthead->account(null));
+    }
+
+    #[Test]
+    public function the_account_menu_offers_the_chat_to_members_and_the_dashboard_to_staff(): void
+    {
+        $member = $this->masthead->account(User::factory()->member()->create(['name' => 'Amina Osman']));
+        $this->assertSame('Amina Osman', $member['name']);
+        $this->assertSame('AO', $member['initials']);
+        $this->assertSame(['account', 'chat'], array_column($member['items'], 'key'));
+        $this->assertSame(route('community.chat'), $member['items'][1]['url']);
+
+        $editor = $this->masthead->account(User::factory()->editor()->create());
+        $this->assertSame(['account', 'dashboard'], array_column($editor['items'], 'key'));
+
+        $admin = $this->masthead->account(User::factory()->admin()->create());
+        $this->assertSame(['account', 'chat', 'dashboard'], array_column($admin['items'], 'key'));
+
+        $applicant = $this->masthead->account(User::factory()->applicant()->create());
+        $this->assertSame(['account'], array_column($applicant['items'], 'key'));
+        $this->assertSame(Masthead::ACCOUNT, $applicant['items'][0]['label']);
+    }
 }

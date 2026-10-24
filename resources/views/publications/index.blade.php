@@ -36,12 +36,12 @@
 
             <div class="catalogue mt-20" x-data="catalogueSheet">
                 <div class="catalogue__toolbar lg:hidden" x-cloak>
-                    <button type="button" class="btn-pill-outline text-ink" x-ref="toggle" aria-controls="catalogue-filters" x-bind:aria-expanded="open.toString()" x-on:click="show()">
+                    <x-button type="button" x-ref="toggle" aria-controls="catalogue-filters" x-bind:aria-expanded="open.toString()" x-on:click="show()">
                         Refine the catalogue
                         @if ($activeCount > 0)
                             <span class="catalogue__badge">{{ $activeCount }}<span class="sr-only"> active</span></span>
                         @endif
-                    </button>
+                    </x-button>
                 </div>
 
                 <div class="catalogue__backdrop lg:hidden" x-cloak x-show="open" x-on:click="close()" aria-hidden="true"></div>

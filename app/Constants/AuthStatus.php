@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Constants;
 
 /**
- * Session "status" keys flashed by Fortify (and by our two-factor middleware),
- * with the sentence shown for each on the account and auth pages.
+ * Session "status" keys flashed by Fortify (and by our sign-out response),
+ * with the sentence shown for each on the account, auth and home pages.
  */
 final class AuthStatus
 {
@@ -24,8 +24,8 @@ final class AuthStatus
 
     public const string VERIFICATION_LINK_SENT = 'verification-link-sent';
 
-    /** Flashed by EnsureTwoFactorIsEnabled when an admin still has to set up TOTP. */
-    public const string TWO_FACTOR_REQUIRED = 'two-factor-required';
+    /** Flashed by App\Http\Responses\LogoutResponse; the home page shows it once. */
+    public const string SIGNED_OUT = 'signed-out';
 
     /** Flashed by EnsureAccountIsActive when a deactivated account is signed out. */
     public const string ACCOUNT_DEACTIVATED = 'account-deactivated';
@@ -51,7 +51,7 @@ final class AuthStatus
             self::TWO_FACTOR_DISABLED => 'Two-factor authentication has been turned off.',
             self::RECOVERY_CODES_GENERATED => 'New recovery codes have been generated. The old ones no longer work.',
             self::VERIFICATION_LINK_SENT => 'A new verification link has been sent to your email address.',
-            self::TWO_FACTOR_REQUIRED => 'Administrator accounts must use two-factor authentication. Set up your authenticator app below before opening the dashboard.',
+            self::SIGNED_OUT => 'You have signed out.',
             self::ACCOUNT_DEACTIVATED => 'This account has been deactivated. Contact an administrator.',
         ];
     }
@@ -67,8 +67,8 @@ final class AuthStatus
     public static function tone(string $status): StatusTone
     {
         return match ($status) {
-            self::TWO_FACTOR_REQUIRED, self::TWO_FACTOR_ENABLED => StatusTone::Bronze,
-            self::TWO_FACTOR_DISABLED, self::ACCOUNT_DEACTIVATED => StatusTone::Ash,
+            self::TWO_FACTOR_ENABLED => StatusTone::Bronze,
+            self::TWO_FACTOR_DISABLED, self::ACCOUNT_DEACTIVATED, self::SIGNED_OUT => StatusTone::Ash,
             default => StatusTone::Cypress,
         };
     }

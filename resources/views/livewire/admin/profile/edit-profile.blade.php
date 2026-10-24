@@ -20,18 +20,18 @@
             <x-form.tags model="form.expertise" label="Expertise" hint="Each field of work as a short phrase, in the order they should appear. Press Enter after each one." data-expertise />
 
             <fieldset class="form-fieldset" data-key-facts>
-                <legend class="t-label form-label">Key facts</legend>
-                <p class="form-hint"><span class="form-hint__requirement">{{ \App\Constants\FormControls::OPTIONAL }}</span>{{ \App\Constants\FormControls::HINT_SEPARATOR }}A short label and its value, such as Born and 1940. They are listed beside the biography.</p>
+                <legend class="t-label form-label">Key facts<span class="form-requirement"><span aria-hidden="true">{{ trim(\App\Constants\FormControls::HINT_SEPARATOR) }}</span> {{ \App\Constants\FormControls::OPTIONAL }}</span></legend>
+                <p class="form-hint">A short label and its value, such as Born and 1940. They are listed beside the biography.</p>
                 <div class="mt-4 space-y-4">
                     @foreach ($form['key_facts'] as $index => $fact)
                         <div class="grid items-end gap-4 sm:grid-cols-[1fr_2fr_auto]" wire:key="fact-{{ $index }}">
                             <x-form.input :model="'form.key_facts.'.$index.'.label'" :label="'Fact '.($index + 1).' label'" :optional="false" />
                             <x-form.input :model="'form.key_facts.'.$index.'.value'" :label="'Fact '.($index + 1).' value'" :optional="false" />
-                            <button type="button" wire:click="removeKeyFact({{ $index }})" class="form-file__action form-file__action--remove mb-1">Remove<span class="sr-only"> key fact {{ $index + 1 }}</span></button>
+                            <x-button variant="quiet" size="sm" danger type="button" class="mb-1" wire:click="removeKeyFact({{ $index }})">Remove<span class="sr-only"> key fact {{ $index + 1 }}</span></x-button>
                         </div>
                     @endforeach
                 </div>
-                <button type="button" wire:click="addKeyFact" class="form-file__action mt-4 inline-flex items-center gap-2"><x-icon name="plus" class="size-4" />Add a key fact</button>
+                <x-button variant="quiet" size="sm" type="button" class="mt-4" wire:click="addKeyFact"><x-icon name="plus" class="size-4" />Add a key fact</x-button>
             </fieldset>
 
             <x-form.input model="form.students_supervised" label="Students supervised" type="number" inputmode="numeric" min="0" class="sm:max-w-xs" hint="Only if the family or university has confirmed the number. It appears in the figures on the home page; leave it blank to leave it out." />

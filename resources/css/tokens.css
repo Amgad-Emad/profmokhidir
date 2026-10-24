@@ -74,6 +74,9 @@
     --fill: light-dark(var(--brand-evergreen), var(--brand-ivory));
     --fill-ink: light-dark(var(--brand-ivory), var(--brand-evergreen));
     --fill-hover: light-dark(var(--brand-cypress), var(--brand-linen));
+    /* The solid button's hover and press: evergreen deepens a little, ivory takes a linen tint; the ink never changes. */
+    --fill-deep: light-dark(color-mix(in srgb, var(--brand-evergreen) 78%, #000000), color-mix(in srgb, var(--brand-ivory) 45%, var(--brand-linen)));
+    --fill-pressed: light-dark(color-mix(in srgb, var(--brand-evergreen) 62%, #000000), var(--brand-linen));
 
     /* ---- Rules and accents. */
     --rule: light-dark(var(--brand-stone), color-mix(in srgb, var(--brand-brass) 35%, transparent));
@@ -124,6 +127,8 @@
     --fill: var(--brand-ivory);
     --fill-ink: var(--brand-evergreen);
     --fill-hover: var(--brand-linen);
+    --fill-deep: color-mix(in srgb, var(--brand-ivory) 45%, var(--brand-linen));
+    --fill-pressed: var(--brand-linen);
     --rule: color-mix(in srgb, var(--brand-brass) 35%, transparent);
     --rule-strong: light-dark(var(--brand-brass), color-mix(in srgb, var(--brand-champagne) 66%, transparent));
     --accent-text: light-dark(var(--brand-brass), var(--brand-champagne));
@@ -173,6 +178,8 @@
 .bulk-bar,
 .list-empty,
 .attention-card,
+.two-factor-card,
+.site-account__panel,
 .quick-action,
 .launch-checklist__list,
 .activity-feed,
@@ -186,6 +193,157 @@
     --focus: var(--focus-on-raised);
     --rule-strong: var(--rule-strong-on-raised);
     --surface-field: var(--surface-field-on-raised);
+}
+
+/*
+ | Buttons: every variant's background, text, border and icon in every state, in one table.
+ | Declared on .btn itself so each value resolves where the button stands: the same
+ | variant follows the page, a raised card or an .on-dark band in either theme without
+ | a second set. buttons.css only maps a state to these names
+ | (App\Constants\ButtonVariant / ButtonState: --btn-{variant}-{part}[-{state}]).
+ | Hover is always subtle and keeps the ink: the solid pill deepens (evergreen) or takes
+ | a linen tint (ivory); outline, icon and danger buttons gain a faint tint of their ink.
+ | Focus looks like hover plus the ring; loading keeps the default colours; disabled
+ | drops to the muted ink on a hairline. tests/Unit/Design/ButtonContrastTest checks
+ | every label and icon at 4.5:1 and every outline at 3:1 against what is behind it.
+ */
+.btn {
+    --btn-tint: color-mix(in srgb, var(--ink) 8%, transparent);
+    --btn-tint-strong: color-mix(in srgb, var(--ink) 14%, transparent);
+    --btn-danger-tint: color-mix(in srgb, var(--danger-tone) 6%, transparent);
+    --btn-danger-tint-strong: color-mix(in srgb, var(--danger-tone) 10%, transparent);
+
+    /* Primary: the solid pill. */
+    --btn-primary-bg: var(--fill);
+    --btn-primary-ink: var(--fill-ink);
+    --btn-primary-border: var(--fill);
+    --btn-primary-icon: var(--fill-ink);
+    --btn-primary-bg-hover: var(--fill-deep);
+    --btn-primary-ink-hover: var(--fill-ink);
+    --btn-primary-border-hover: var(--fill-deep);
+    --btn-primary-icon-hover: var(--fill-ink);
+    --btn-primary-bg-active: var(--fill-pressed);
+    --btn-primary-ink-active: var(--fill-ink);
+    --btn-primary-border-active: var(--fill-pressed);
+    --btn-primary-icon-active: var(--fill-ink);
+    --btn-primary-bg-focus: var(--fill-deep);
+    --btn-primary-ink-focus: var(--fill-ink);
+    --btn-primary-border-focus: var(--fill-deep);
+    --btn-primary-icon-focus: var(--fill-ink);
+    --btn-primary-bg-disabled: transparent;
+    --btn-primary-ink-disabled: var(--ink-muted);
+    --btn-primary-border-disabled: var(--rule-strong);
+    --btn-primary-icon-disabled: var(--ink-muted);
+    --btn-primary-bg-loading: var(--fill);
+    --btn-primary-ink-loading: var(--fill-ink);
+    --btn-primary-border-loading: var(--fill);
+    --btn-primary-icon-loading: var(--fill-ink);
+
+    /* Secondary: the outline pill in the current ink. */
+    --btn-secondary-bg: transparent;
+    --btn-secondary-ink: var(--ink);
+    --btn-secondary-border: var(--ink);
+    --btn-secondary-icon: var(--ink);
+    --btn-secondary-bg-hover: var(--btn-tint);
+    --btn-secondary-ink-hover: var(--ink-strong);
+    --btn-secondary-border-hover: var(--ink-strong);
+    --btn-secondary-icon-hover: var(--ink-strong);
+    --btn-secondary-bg-active: var(--btn-tint-strong);
+    --btn-secondary-ink-active: var(--ink-strong);
+    --btn-secondary-border-active: var(--ink-strong);
+    --btn-secondary-icon-active: var(--ink-strong);
+    --btn-secondary-bg-focus: var(--btn-tint);
+    --btn-secondary-ink-focus: var(--ink-strong);
+    --btn-secondary-border-focus: var(--ink-strong);
+    --btn-secondary-icon-focus: var(--ink-strong);
+    --btn-secondary-bg-disabled: transparent;
+    --btn-secondary-ink-disabled: var(--ink-muted);
+    --btn-secondary-border-disabled: var(--rule-strong);
+    --btn-secondary-icon-disabled: var(--ink-muted);
+    --btn-secondary-bg-loading: transparent;
+    --btn-secondary-ink-loading: var(--ink);
+    --btn-secondary-border-loading: var(--ink);
+    --btn-secondary-icon-loading: var(--ink);
+
+    /* Quiet: underlined text; the underline turns from brass to the ink on hover. With `danger` the ink follows the danger rows below. */
+    --btn-quiet-bg: transparent;
+    --btn-quiet-ink: var(--ink);
+    --btn-quiet-border: transparent;
+    --btn-quiet-icon: var(--ink);
+    --btn-quiet-bg-hover: transparent;
+    --btn-quiet-ink-hover: var(--ink-strong);
+    --btn-quiet-border-hover: transparent;
+    --btn-quiet-icon-hover: var(--ink-strong);
+    --btn-quiet-bg-active: transparent;
+    --btn-quiet-ink-active: var(--ink-strong);
+    --btn-quiet-border-active: transparent;
+    --btn-quiet-icon-active: var(--ink-strong);
+    --btn-quiet-bg-focus: transparent;
+    --btn-quiet-ink-focus: var(--ink-strong);
+    --btn-quiet-border-focus: transparent;
+    --btn-quiet-icon-focus: var(--ink-strong);
+    --btn-quiet-bg-disabled: transparent;
+    --btn-quiet-ink-disabled: var(--ink-muted);
+    --btn-quiet-border-disabled: transparent;
+    --btn-quiet-icon-disabled: var(--ink-muted);
+    --btn-quiet-bg-loading: transparent;
+    --btn-quiet-ink-loading: var(--ink);
+    --btn-quiet-border-loading: transparent;
+    --btn-quiet-icon-loading: var(--ink);
+
+    /* Icon: a borderless tool; hover lays a faint tint of the ink behind it. */
+    --btn-icon-bg: transparent;
+    --btn-icon-ink: var(--ink);
+    --btn-icon-border: transparent;
+    --btn-icon-icon: var(--ink);
+    --btn-icon-bg-hover: var(--btn-tint);
+    --btn-icon-ink-hover: var(--ink-strong);
+    --btn-icon-border-hover: transparent;
+    --btn-icon-icon-hover: var(--ink-strong);
+    --btn-icon-bg-active: var(--btn-tint-strong);
+    --btn-icon-ink-active: var(--ink-strong);
+    --btn-icon-border-active: transparent;
+    --btn-icon-icon-active: var(--ink-strong);
+    --btn-icon-bg-focus: var(--btn-tint);
+    --btn-icon-ink-focus: var(--ink-strong);
+    --btn-icon-border-focus: transparent;
+    --btn-icon-icon-focus: var(--ink-strong);
+    --btn-icon-bg-disabled: transparent;
+    --btn-icon-ink-disabled: var(--ink-muted);
+    --btn-icon-border-disabled: transparent;
+    --btn-icon-icon-disabled: var(--ink-muted);
+    --btn-icon-bg-loading: transparent;
+    --btn-icon-ink-loading: var(--ink);
+    --btn-icon-border-loading: transparent;
+    --btn-icon-icon-loading: var(--ink);
+
+    /* Danger: the outline pill in the danger tone (bronze on ivory, brass on evergreen, champagne on cypress).
+       Any tint behind bronze or brass lowers its contrast, so under the pointer the label takes the strong ink
+       and the danger-tone border carries the meaning. */
+    --btn-danger-bg: transparent;
+    --btn-danger-ink: var(--danger-tone);
+    --btn-danger-border: var(--danger-tone);
+    --btn-danger-icon: var(--danger-tone);
+    --btn-danger-bg-hover: var(--btn-danger-tint);
+    --btn-danger-ink-hover: var(--ink-strong);
+    --btn-danger-border-hover: var(--danger-tone);
+    --btn-danger-icon-hover: var(--ink-strong);
+    --btn-danger-bg-active: var(--btn-danger-tint-strong);
+    --btn-danger-ink-active: var(--ink-strong);
+    --btn-danger-border-active: var(--danger-tone);
+    --btn-danger-icon-active: var(--ink-strong);
+    --btn-danger-bg-focus: var(--btn-danger-tint);
+    --btn-danger-ink-focus: var(--ink-strong);
+    --btn-danger-border-focus: var(--danger-tone);
+    --btn-danger-icon-focus: var(--ink-strong);
+    --btn-danger-bg-disabled: transparent;
+    --btn-danger-ink-disabled: var(--ink-muted);
+    --btn-danger-border-disabled: var(--rule-strong);
+    --btn-danger-icon-disabled: var(--ink-muted);
+    --btn-danger-bg-loading: transparent;
+    --btn-danger-ink-loading: var(--danger-tone);
+    --btn-danger-border-loading: var(--danger-tone);
+    --btn-danger-icon-loading: var(--danger-tone);
 }
 
 /* Tailwind's default palette is removed: the only colour utilities are the semantic tokens below. */
