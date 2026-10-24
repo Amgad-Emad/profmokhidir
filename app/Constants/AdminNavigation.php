@@ -20,6 +20,8 @@ final class AdminNavigation
 
     public const string GROUP_TRIBUTES = 'tributes';
 
+    public const string GROUP_AUDIENCE = 'audience';
+
     public const string GROUP_SETTINGS = 'settings';
 
     /** Route name of the dashboard home. */
@@ -62,6 +64,8 @@ final class AdminNavigation
 
     public const string TRIBUTES = 'tributes';
 
+    public const string ANALYTICS = 'analytics';
+
     public const string USERS = 'users';
 
     public const string SITE_SETTINGS = 'site-settings';
@@ -80,6 +84,7 @@ final class AdminNavigation
             self::GROUP_MEDIA => 'Media',
             self::GROUP_COMMUNITY => 'Community',
             self::GROUP_TRIBUTES => 'Tributes',
+            self::GROUP_AUDIENCE => 'Audience',
             self::GROUP_SETTINGS => 'Settings',
         ];
     }
@@ -108,6 +113,7 @@ final class AdminNavigation
             self::MEMBERS => self::item('Members', self::GROUP_COMMUNITY, 'community.members', 'community/members', Permissions::MANAGE_COMMUNITY),
             self::CHAT_REPORTS => self::item('Chat reports', self::GROUP_COMMUNITY, 'community.reports', 'community/reports', Permissions::MODERATE_CHAT),
             self::TRIBUTES => self::item('Review tributes', self::GROUP_TRIBUTES, 'tributes.index', 'tributes', Permissions::MODERATE_TRIBUTES),
+            self::ANALYTICS => self::item('Analytics', self::GROUP_AUDIENCE, 'analytics', Analytics::ADMIN_PATH, Permissions::VIEW_ANALYTICS),
             self::USERS => self::item('Users & roles', self::GROUP_SETTINGS, 'users.index', 'users', Permissions::MANAGE_USERS),
             self::SITE_SETTINGS => self::item('Site settings', self::GROUP_SETTINGS, 'settings.site', 'settings', Permissions::MANAGE_SETTINGS),
             self::ACCOUNT => self::item('Your account', self::GROUP_SETTINGS, self::ACCOUNT_ROUTE, '/account', Permissions::ACCESS_ADMIN),
@@ -167,7 +173,7 @@ final class AdminNavigation
         return [
             self::PROFILE, self::CV, self::PUBLICATIONS, self::AWARDS, self::COMMENTARY, self::TEACHING, self::OTHER, self::HOME_QUOTES,
             self::VIDEOS, self::ALBUMS, self::MEDIA_LIBRARY, self::TRIBUTES,
-            self::APPLICATIONS, self::MEMBERS, self::CHAT_REPORTS, self::USERS, self::SITE_SETTINGS,
+            self::APPLICATIONS, self::MEMBERS, self::CHAT_REPORTS, self::ANALYTICS, self::USERS, self::SITE_SETTINGS,
         ];
     }
 

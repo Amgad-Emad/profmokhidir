@@ -27,6 +27,8 @@ final class Permissions
 
     public const string ACCESS_CHAT = 'access chat';
 
+    public const string VIEW_ANALYTICS = 'view analytics';
+
     /**
      * @return list<string>
      */
@@ -41,6 +43,7 @@ final class Permissions
             self::MANAGE_USERS,
             self::MANAGE_SETTINGS,
             self::ACCESS_CHAT,
+            self::VIEW_ANALYTICS,
         ];
     }
 
@@ -53,7 +56,7 @@ final class Permissions
     {
         return [
             Roles::ADMIN => self::all(),
-            Roles::EDITOR => [self::ACCESS_ADMIN, self::MANAGE_CONTENT, self::MODERATE_TRIBUTES],
+            Roles::EDITOR => [self::ACCESS_ADMIN, self::MANAGE_CONTENT, self::MODERATE_TRIBUTES, self::VIEW_ANALYTICS],
             Roles::MEMBER => [self::ACCESS_CHAT],
             Roles::APPLICANT => [],
         ];

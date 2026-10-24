@@ -17,7 +17,8 @@ use Livewire\Component;
 /**
  * Site settings (admin only): public contact details, the address that
  * receives tribute and community notifications, the mail sender, and the
- * community chat upload switch and size limits.
+ * community chat upload switch and size limits, and the visitor analytics
+ * switch (off until the client approves it).
  */
 class SiteSettings extends Component
 {
@@ -33,6 +34,7 @@ class SiteSettings extends Component
         $this->authorize('viewAny', Setting::class);
         $this->form = $this->settings()->all();
         $this->form[SettingKeys::CHAT_UPLOADS_ENABLED] = $this->form[SettingKeys::CHAT_UPLOADS_ENABLED] !== '0';
+        $this->form[SettingKeys::ANALYTICS_ENABLED] = $this->form[SettingKeys::ANALYTICS_ENABLED] === '1';
     }
 
     public function save(): void
@@ -53,9 +55,11 @@ class SiteSettings extends Component
         }
 
         $values[SettingKeys::CHAT_UPLOADS_ENABLED] = (bool) ($validated[SettingKeys::CHAT_UPLOADS_ENABLED] ?? false);
+        $values[SettingKeys::ANALYTICS_ENABLED] = (bool) ($validated[SettingKeys::ANALYTICS_ENABLED] ?? false);
 
         $this->form = $this->settings()->update($values, auth()->user());
         $this->form[SettingKeys::CHAT_UPLOADS_ENABLED] = $this->form[SettingKeys::CHAT_UPLOADS_ENABLED] !== '0';
+        $this->form[SettingKeys::ANALYTICS_ENABLED] = $this->form[SettingKeys::ANALYTICS_ENABLED] === '1';
         $this->toast('Site settings saved.');
     }
 

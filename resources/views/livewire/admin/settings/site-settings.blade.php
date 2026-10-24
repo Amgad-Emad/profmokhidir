@@ -44,6 +44,16 @@
             </div>
         </fieldset>
 
+        <fieldset class="form-grid" id="analytics" data-analytics-settings>
+            <legend class="t-label text-accent-text">Visitor analytics</legend>
+            <div class="flex flex-col gap-3 text-sm font-light text-ink-muted">
+                <p>The site's own count of its readers, shown under Audience on the dashboard. Switch it on only once the client has approved visitor analytics and any notice it needs. While it is on, the footer links to a Privacy page that explains it to visitors.</p>
+                <p>What is recorded: the page, how long it was read (tab in view and the visitor active within {{ \App\Constants\Analytics::IDLE_SECONDS }} seconds), how far it was scrolled, the referring site's name, the country, the device type and browser family, and a campaign source when a link carries one.</p>
+                <p>What is not: no cookies, no IP addresses, no user agents, nothing that names a person. Visitors are told apart within one day by a hash whose salt is replaced every day. Signed-in staff, bots, and browsers that send Do Not Track or Global Privacy Control are never counted. Page views are deleted after {{ \App\Constants\Analytics::RAW_RETENTION_DAYS }} days and daily totals after {{ \App\Constants\Analytics::ROLLUP_RETENTION_MONTHS }} months.</p>
+            </div>
+            <x-form.toggle :model="'form.'.SettingKeys::ANALYTICS_ENABLED" :label="$labels[SettingKeys::ANALYTICS_ENABLED]" hint="Off by default. Turning it off stops recording at once; figures already collected stay on the report." />
+        </fieldset>
+
         <div class="flex flex-wrap items-center gap-4 border-t border-rule pt-8">
             <x-button type="submit" wire:loading.attr="disabled" data-save>Save settings</x-button>
             <x-button type="button" variant="quiet" :href="route(\App\Constants\AdminNavigation::DASHBOARD_ROUTE)">Back to the dashboard</x-button>

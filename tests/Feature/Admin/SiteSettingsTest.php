@@ -11,6 +11,7 @@ use App\Models\Profile;
 use App\Models\User;
 use App\Notifications\TributeAwaitingReview;
 use App\Services\AboutPageService;
+use App\Services\AnalyticsService;
 use App\Services\ProfileService;
 use App\Services\SettingService;
 use App\Services\TributeService;
@@ -103,5 +104,33 @@ class SiteSettingsTest extends TestCase
         app(TributeService::class)->submit(['name' => 'A', 'relationship' => TributeRelationship::Friend, 'message' => 'Hello'], '203.0.113.9');
         Notification::assertSentOnDemand(TributeAwaitingReview::class, fn (TributeAwaitingReview $n, array $channels, AnonymousNotifiable $notifiable): bool => $notifiable->routes['mail'] === 'notices@example.com');
         Notification::assertNotSentTo($this->admin, TributeAwaitingReview::class);
+    }
+
+    #[Test]
+    public function the_analytics_switch_is_off_by_default_explains_what_is_collected_and_saves(): void
+    {
+        $this->actingAs($this->admin)->get(route(AdminNavigation::routeFor(AdminNavigation::SITE_SETTINGS)))->assertOk()
+            ->assertSee('data-analytics-settings', false)
+            ->assertSee('Record visitor analytics')
+            ->assertSee('no cookies, no IP addresses')
+            ->assertSee('once the client has approved');
+
+        $this->assertFalse(app(AnalyticsService::class)->enabled());
+
+        Livewire::actingAs($this->admin)->test(SiteSettings::class)
+            ->assertSet('form.'.SettingKeys::ANALYTICS_ENABLED, false)
+            ->set('form.'.SettingKeys::ANALYTICS_ENABLED, true)
+            ->call('save')
+            ->assertHasNoErrors()
+            ->assertSet('form.'.SettingKeys::ANALYTICS_ENABLED, true);
+
+        $this->assertTrue(app(AnalyticsService::class)->enabled());
+        $this->assertSame('1', app(SettingService::class)->get(SettingKeys::ANALYTICS_ENABLED));
+
+        Livewire::actingAs($this->admin)->test(SiteSettings::class)
+            ->set('form.'.SettingKeys::ANALYTICS_ENABLED, false)
+            ->call('save');
+
+        $this->assertFalse(app(AnalyticsService::class)->enabled());
     }
 }

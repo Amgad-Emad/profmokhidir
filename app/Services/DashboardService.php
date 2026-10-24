@@ -56,6 +56,7 @@ class DashboardService
         private readonly ActivityFeedService $activity,
         private readonly LaunchReadinessService $readiness,
         private readonly AuthenticationService $auth,
+        private readonly AnalyticsReportService $analytics,
     ) {}
 
     /**
@@ -275,6 +276,7 @@ class DashboardService
             'feed' => $this->activity->recent(),
             'greeting' => $this->greeting(),
             'twoFactorReminder' => $user !== null && $this->auth->shouldRemindTwoFactor($user),
+            'audience' => $user !== null && $user->can(Permissions::VIEW_ANALYTICS) ? $this->analytics->audience() : null,
             'published' => $this->publishedCounts(),
             'queues' => $queues,
             'attention' => array_filter(

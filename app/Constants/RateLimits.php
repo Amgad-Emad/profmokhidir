@@ -26,12 +26,17 @@ final class RateLimits
 
     public const int CHAT_UPLOAD_PER_MINUTE = 30;
 
+    /** Analytics beacons per address per minute (a page view plus a few engagement beacons per page). */
+    public const string ANALYTICS_COLLECT = 'analytics-collect';
+
+    public const int ANALYTICS_COLLECT_PER_MINUTE = 60;
+
     /**
      * @return list<string>
      */
     public static function all(): array
     {
-        return [self::COMMUNITY_SIGNUP, self::CHAT_SEND, self::CHAT_UPLOAD];
+        return [self::COMMUNITY_SIGNUP, self::CHAT_SEND, self::CHAT_UPLOAD, self::ANALYTICS_COLLECT];
     }
 
     public static function chatSendKey(int $userId): string

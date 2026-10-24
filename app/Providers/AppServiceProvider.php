@@ -52,6 +52,12 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(RateLimits::CHAT_UPLOAD_PER_MINUTE)->by((string) ($request->user()?->getKey() ?? $request->ip()));
         });
 
+        // Analytics beacons per address per minute. The key is an HMAC of the address, so even the
+        // short-lived limiter entry never holds the IP itself.
+        RateLimiter::for(RateLimits::ANALYTICS_COLLECT, function (Request $request) {
+            return Limit::perMinute(RateLimits::ANALYTICS_COLLECT_PER_MINUTE)->by(hash_hmac('sha256', (string) $request->ip(), (string) config('app.key')));
+        });
+
         // Livewire re-applies these route middleware on every component update,
         // so a suspended member is refused on the very next poll or send.
         Livewire::addPersistentMiddleware([EnsureCommunityMember::class, EnsureAccountIsActive::class]);

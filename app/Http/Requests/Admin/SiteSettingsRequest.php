@@ -11,7 +11,8 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * The site settings form: public contact details, the notification address
- * the mail sender and the community chat upload switch and limits.
+ * the mail sender, the community chat upload switch and limits, and the
+ * visitor analytics switch.
  */
 class SiteSettingsRequest extends FormRequest
 {
@@ -35,6 +36,7 @@ class SiteSettingsRequest extends FormRequest
             SettingKeys::CHAT_UPLOADS_ENABLED => ['boolean'],
             SettingKeys::CHAT_IMAGE_MAX_MB => ['nullable', 'integer', 'min:'.ChatAttachments::LIMIT_MIN_MB, 'max:'.ChatAttachments::LIMIT_MAX_MB],
             SettingKeys::CHAT_DOCUMENT_MAX_MB => ['nullable', 'integer', 'min:'.ChatAttachments::LIMIT_MIN_MB, 'max:'.ChatAttachments::LIMIT_MAX_MB],
+            SettingKeys::ANALYTICS_ENABLED => ['boolean'],
         ];
     }
 

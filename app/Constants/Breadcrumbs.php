@@ -31,6 +31,7 @@ final class Breadcrumbs
         return [
             Search::ROUTE => Search::TITLE,
             AdminNavigation::ACCOUNT_ROUTE => 'Account',
+            Analytics::PRIVACY_ROUTE => 'Privacy',
         ];
     }
 

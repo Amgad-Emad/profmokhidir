@@ -1,7 +1,7 @@
 {{--
     The dashboard home, task first: what needs attention now (one card per queue, with the action),
     the quick actions, the "Before launch" checklist, recent activity in plain language, and the
-    published count per section. Data from DashboardService::summary().
+    audience figures (first-party analytics) and the published count per section. Data from DashboardService::summary().
 --}}
 <x-layouts.admin title="Dashboard">
     <header class="flex flex-col gap-2">
@@ -101,6 +101,11 @@
             @endif
         </section>
     </div>
+
+    {{-- Audience: the first-party analytics, for those who may read it --}}
+    @if ($audience !== null)
+        <x-admin.audience :audience="$audience" />
+    @endif
 
     {{-- Published per section --}}
     <section class="mt-14" aria-labelledby="published-heading" data-section="published">

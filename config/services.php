@@ -35,4 +35,17 @@ return [
         ],
     ],
 
+    // Country lookup for the first-party analytics: a free GeoLite2 licence key
+    // (php artisan analytics:update-geoip downloads the database weekly).
+    'maxmind' => [
+        'license_key' => env('MAXMIND_LICENSE_KEY'),
+    ],
+
+    // First-party analytics. Behind Cloudflare the CF-IPCountry header gives the
+    // country; it is ignored otherwise, because any client could send it.
+    'analytics' => [
+        'behind_cloudflare' => (bool) env('ANALYTICS_BEHIND_CLOUDFLARE', false),
+        'site_id' => env('ANALYTICS_SITE_ID'),
+    ],
+
 ];

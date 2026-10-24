@@ -7,7 +7,7 @@ Roles and permissions use spatie/laravel-permission; all media uses spatie/larav
 Check composer.json and package.json for exact versions and use APIs that match them.
 
 ## Product
-Public academic profile website for Prof. Mohamed Osman Khidir (profmokhidir.com) with an admin dashboard for content editors. English only for release 1. No visitor analytics or tracking.
+Public academic profile website for Prof. Mohamed Osman Khidir (profmokhidir.com) with an admin dashboard for content editors. English only for release 1. Analytics: first-party, cookieless, off by default; enabled only after client approval.
 
 Public sections (in navigation order):
 1. About Prof. Mokhidir: biography, portrait, title and affiliation, expertise, key facts.

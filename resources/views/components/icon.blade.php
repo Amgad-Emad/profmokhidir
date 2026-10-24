@@ -6,6 +6,9 @@
     @case('check')
         <path d="M5 12.5l4.5 4.5L19 7.5" />
         @break
+    @case('chart')
+        <path d="M4.5 19.5h15" /><path d="M6 15.5l4-4.5 3.5 3L18.5 8" />
+        @break
     @case('clock')
         <circle cx="12" cy="12" r="8.25" /><path d="M12 7.5V12l3 2" />
         @break

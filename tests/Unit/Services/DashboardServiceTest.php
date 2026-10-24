@@ -132,7 +132,7 @@ class DashboardServiceTest extends TestCase
 
         $summary = $this->service->summary(User::factory()->editor()->create());
 
-        $this->assertSame(['cards', 'actions', 'checklist', 'feed', 'greeting', 'twoFactorReminder', 'published', 'queues', 'attention', 'activity'], array_keys($summary));
+        $this->assertSame(['cards', 'actions', 'checklist', 'feed', 'greeting', 'twoFactorReminder', 'audience', 'published', 'queues', 'attention', 'activity'], array_keys($summary));
         $this->assertContains($summary['greeting']['salutation'], DashboardGreeting::all());
         $this->assertCount(10, $summary['published']);
         $this->assertCount(3, $summary['queues']);

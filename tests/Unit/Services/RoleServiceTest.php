@@ -44,7 +44,7 @@ class RoleServiceTest extends TestCase
         }
 
         $this->assertCount(count(Permissions::all()), Role::findByName(Roles::ADMIN)->permissions);
-        $this->assertCount(3, Role::findByName(Roles::EDITOR)->permissions);
+        $this->assertCount(count(Permissions::forRole(Roles::EDITOR)), Role::findByName(Roles::EDITOR)->permissions);
         $this->assertSame([Permissions::ACCESS_CHAT], Role::findByName(Roles::MEMBER)->permissions->pluck('name')->all());
         $this->assertCount(0, Role::findByName(Roles::APPLICANT)->permissions);
     }
@@ -56,7 +56,7 @@ class RoleServiceTest extends TestCase
         $this->service->ensureRole(Roles::EDITOR);
 
         $this->assertSame(1, Role::query()->where('name', Roles::EDITOR)->count());
-        $this->assertCount(3, Role::findByName(Roles::EDITOR)->permissions);
+        $this->assertCount(count(Permissions::forRole(Roles::EDITOR)), Role::findByName(Roles::EDITOR)->permissions);
     }
 
     #[Test]

@@ -2,6 +2,7 @@
 
 use App\Constants\AdminNavigation;
 use App\Constants\AdminUx;
+use App\Constants\Analytics;
 use App\Constants\ContentTypes;
 use App\Constants\Permissions;
 use App\Constants\RateLimits;
@@ -14,8 +15,10 @@ use App\Constants\TributeCards;
 use App\Http\Controllers\AboutController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\AdminSearchController;
+use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\TwoFactorReminderController;
+use App\Http\Controllers\AnalyticsCollectController;
 use App\Http\Controllers\AwardController;
 use App\Http\Controllers\ChatAttachmentController;
 use App\Http\Controllers\ChatController;
@@ -26,6 +29,7 @@ use App\Http\Controllers\CvController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OtherItemController;
 use App\Http\Controllers\PictureController;
+use App\Http\Controllers\PrivacyController;
 use App\Http\Controllers\PublicationController;
 use App\Http\Controllers\RobotsController;
 use App\Http\Controllers\SearchController;
@@ -156,6 +160,13 @@ foreach (array_diff_key($sections, array_flip($built)) as $key => $section) {
         ->name($section['route']);
 }
 
+// First-party analytics (off until approved): the beacon endpoint, and the privacy page
+// that explains it (served only while analytics is on).
+Route::post(Analytics::COLLECT_PATH, AnalyticsCollectController::class)
+    ->middleware('throttle:'.RateLimits::ANALYTICS_COLLECT)
+    ->name(Analytics::COLLECT_ROUTE);
+Route::get(Analytics::PRIVACY_PATH, PrivacyController::class)->name(Analytics::PRIVACY_ROUTE);
+
 // Design-system review page. Served only in the local environment (404 elsewhere).
 Route::get('/styleguide', StyleguideController::class)
     ->middleware(EnsureLocalEnvironment::class)
@@ -233,6 +244,16 @@ Route::middleware(['auth', 'verified', 'role:'.implode('|', Roles::staff())])
         Route::get(AdminNavigation::get(AdminNavigation::CHAT_REPORTS)['path'], ChatReports::class)
             ->middleware('permission:'.Permissions::MODERATE_CHAT)
             ->name(substr(AdminNavigation::routeFor(AdminNavigation::CHAT_REPORTS), strlen(AdminNavigation::ROUTE_PREFIX)));
+
+        // Audience: the analytics report and its CSV exports (admins and editors).
+        Route::middleware('permission:'.Permissions::VIEW_ANALYTICS)->group(function () {
+            $name = substr(Analytics::ADMIN_ROUTE, strlen(AdminNavigation::ROUTE_PREFIX));
+
+            Route::get(Analytics::ADMIN_PATH, [AnalyticsController::class, 'index'])->name($name);
+            Route::get(Analytics::ADMIN_PATH.'/export/{export}', [AnalyticsController::class, 'export'])
+                ->whereIn('export', Analytics::exports())
+                ->name(substr(Analytics::EXPORT_ROUTE, strlen(AdminNavigation::ROUTE_PREFIX)));
+        });
 
         // Settings: staff and community accounts, and the site settings. Both admin only.
         Route::get(AdminNavigation::get(AdminNavigation::USERS)['path'], UserIndex::class)

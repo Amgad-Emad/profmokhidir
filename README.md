@@ -203,8 +203,9 @@ address and mail sender are set on **Site settings**.
 "daemon"/"worker" feature) and restart it on every deploy with `php artisan queue:restart`.
 
 **Scheduler.** Add one cron entry: `* * * * * php /path/to/artisan schedule:run >> /dev/null 2>&1`.
-Nothing is scheduled yet; the entry is there for backups and housekeeping
-(`queue:prune-failed`, `auth:clear-resets`) when they are added.
+It runs the hourly chat-upload clean-up, the nightly analytics rollup and retention job
+(00:30) and the weekly GeoLite2 update (Wednesdays 03:15), and is there for backups and
+housekeeping (`queue:prune-failed`, `auth:clear-resets`) when they are added.
 
 **Storage.** `storage/app/public` holds public media (served through the symlink);
 `storage/app/private/media` holds members-only teaching files and is never web-served.
@@ -219,6 +220,51 @@ backups or install `spatie/laravel-backup` and schedule `backup:run` and `backup
 `robots.txt`; admin sessions require confirmed two-factor authentication; login is rate
 limited; tributes and community sign-ups are rate limited per address and protected by a
 honeypot. `.env` is never committed.
+
+## Visitor analytics (off until the client approves it)
+
+The site has its own first-party, cookieless analytics: visitors, countries and the pages that
+hold attention, on the dashboard's **Audience** section and at `/admin/analytics` (admins and
+editors, permission `view analytics`). It is **off by default** and records nothing until an
+administrator switches on **Site settings → Visitor analytics**. While it is on, the footer links
+to a `/privacy` page that explains it; while it is off that page does not exist.
+
+How it works:
+
+- `resources/js/analytics.js` is loaded only on public pages, only while analytics is on, and
+  never for signed-in staff or browsers that send Do Not Track / Global Privacy Control. It
+  sends one page view and, when the tab is hidden or the page left, the engaged time (tab in
+  view and the visitor active within 30 seconds) and scroll depth (25/50/75/100%) with
+  `navigator.sendBeacon` to `POST /a/collect`.
+- The endpoint is rate limited, CSRF-exempt, validates every field and ignores bots (user
+  agent and missing JavaScript signals), staff, DNT/GPC and excluded paths (`/admin`,
+  `/community/chat`, `/account`, sign-in screens).
+- No cookies and no personal data: unique visitors are an HMAC of IP + user agent + site id
+  under a salt that is replaced every day (the previous day's salt is deleted), so a visitor
+  cannot be followed from one day to the next. The IP address and user agent are never stored.
+- Country: the `CF-IPCountry` header when `ANALYTICS_BEHIND_CLOUDFLARE=true`, otherwise a local
+  MaxMind GeoLite2 Country database, otherwise "Unknown". For the database, create a free
+  MaxMind account, put the licence key in `.env` as `MAXMIND_LICENSE_KEY` and run
+  `php artisan analytics:update-geoip` once (the scheduler then refreshes it weekly). The file
+  lives in `storage/app/geoip/` and is not committed. Behind a proxy or Cloudflare, configure
+  Laravel's trusted proxies so `request()->ip()` is the visitor's address.
+- Raw page views (`analytics_events`) are rolled up nightly by `App\Jobs\RollUpAnalytics` into
+  `analytics_daily_*` tables and deleted after 30 days; the daily rollups are kept 25 months.
+- The first deploy after this change must run `php artisan db:seed --class=RolesAndPermissionsSeeder`
+  (or `admin:create-first`) to add the `view analytics` permission to admins and editors.
+
+Locally, `php artisan db:seed --class=AnalyticsDemoSeeder` (also part of `DatabaseSeeder`) fills
+90 days of realistic demo figures so the report can be reviewed; it refuses to run outside the
+`local` environment. To see the live script on the Valet site, switch analytics on in Site
+settings and browse while signed out. The world map's outlines come from `@svg-maps/world`
+(CC BY 4.0), simplified by `npm run world-map` into `resources/data/world-map.json`.
+
+**Legal note.** The design is meant to need no consent banner: it sets no cookies, stores
+nothing on the visitor's device and keeps no personal data. Whether that is enough depends on
+the client's jurisdiction and its rules for websites (for example the GDPR and ePrivacy rules in
+Europe, PECR in the UK, or local law in Sudan and the Gulf). **The client should confirm with
+their own legal advice** that no banner or further notice is needed before analytics is
+switched on, and approve the wording of the Privacy page.
 
 ## Tests and QA
 
@@ -260,8 +306,12 @@ These were left open in the client brief and still need an answer before launch:
    channel is enough.
 4. **Hosting.** Choose the host and domain setup, the transactional email provider, whether to
    run Reverb for the chat (see above) or keep polling, and who holds the backups.
-5. **Analytics.** The brief says no visitor analytics or tracking in release 1, and none is
-   installed. Confirm this, or choose a cookie-free option later.
+5. **Analytics.** The brief says no visitor tracking until requirements and notices are agreed.
+   A first-party, cookieless analytics is built but **switched off** (see "Visitor analytics"
+   above). Before switching it on the client must approve collecting it at all, what is
+   recorded and the retention periods, the Privacy page wording and footer link, the country
+   source (Cloudflare or a MaxMind GeoLite2 account, whose licence terms apply), and confirm
+   with their own legal advice that no consent banner is needed.
 6. **Content.** Every seeded record is placeholder text or a generated image. Approved
    biography, CV entries, publication list, awards, photographs (with permission notes),
    videos, teaching files, commentaries and other items are needed, together with the portrait

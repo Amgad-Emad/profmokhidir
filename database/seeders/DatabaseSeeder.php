@@ -34,6 +34,8 @@ class DatabaseSeeder extends Seeder
             ChatUploadSeeder::class,
             RevisionSeeder::class,
             AuditLogSeeder::class,
+            // Local only: 90 days of demo visitor analytics (it calls the salt and event seeders).
+            AnalyticsDemoSeeder::class,
         ]);
     }
 }

@@ -4,6 +4,7 @@ namespace Tests\Feature\Qa;
 
 use App\Constants\AdminNavigation;
 use App\Constants\AdminUx;
+use App\Constants\Analytics;
 use App\Constants\ContentTypes;
 use App\Constants\Disks;
 use App\Constants\Roles;
@@ -50,7 +51,8 @@ class AdminRoutePermissionsTest extends TestCase
             $parameters = [];
 
             foreach ($route->parameterNames() as $parameter) {
-                $parameters[$parameter] = $this->recordFor($parameter)->getKey();
+                // The analytics CSV export takes the table's name, not a record.
+                $parameters[$parameter] = $parameter === 'export' ? Analytics::EXPORT_VISITORS : $this->recordFor($parameter)->getKey();
             }
 
             $routes[$name] = ['route' => $route, 'url' => route($name, $parameters)];

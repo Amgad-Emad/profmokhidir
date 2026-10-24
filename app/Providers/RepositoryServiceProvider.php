@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Repositories\Contracts\AlbumRepositoryInterface;
+use App\Repositories\Contracts\AnalyticsEventRepositoryInterface;
+use App\Repositories\Contracts\AnalyticsRollupRepositoryInterface;
+use App\Repositories\Contracts\AnalyticsSaltRepositoryInterface;
 use App\Repositories\Contracts\AuditLogRepositoryInterface;
 use App\Repositories\Contracts\AwardRepositoryInterface;
 use App\Repositories\Contracts\BrandTokenRepositoryInterface;
@@ -34,6 +37,9 @@ use App\Repositories\Eloquent\ConstantBrandTokenRepository;
 use App\Repositories\Eloquent\ConstantChapterRepository;
 use App\Repositories\Eloquent\ConstantSectionRepository;
 use App\Repositories\Eloquent\EloquentAlbumRepository;
+use App\Repositories\Eloquent\EloquentAnalyticsEventRepository;
+use App\Repositories\Eloquent\EloquentAnalyticsRollupRepository;
+use App\Repositories\Eloquent\EloquentAnalyticsSaltRepository;
 use App\Repositories\Eloquent\EloquentAuditLogRepository;
 use App\Repositories\Eloquent\EloquentAwardRepository;
 use App\Repositories\Eloquent\EloquentChatChannelRepository;
@@ -92,6 +98,9 @@ class RepositoryServiceProvider extends ServiceProvider
         AuditLogRepositoryInterface::class => EloquentAuditLogRepository::class,
         SettingRepositoryInterface::class => EloquentSettingRepository::class,
         RevisionRepositoryInterface::class => EloquentRevisionRepository::class,
+        AnalyticsEventRepositoryInterface::class => EloquentAnalyticsEventRepository::class,
+        AnalyticsSaltRepositoryInterface::class => EloquentAnalyticsSaltRepository::class,
+        AnalyticsRollupRepositoryInterface::class => EloquentAnalyticsRollupRepository::class,
     ];
 
     /**

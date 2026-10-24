@@ -1,5 +1,6 @@
 <?php
 
+use App\Constants\Analytics;
 use App\Constants\ThemeSettings;
 use App\Http\Middleware\EnablePreview;
 use App\Http\Middleware\EnsureAccountIsActive;
@@ -32,6 +33,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // The theme cookie stays plain so the inline head script can read it before the first paint.
         $middleware->encryptCookies(except: [ThemeSettings::COOKIE]);
+
+        // Analytics beacons come from sendBeacon, which cannot carry a CSRF token; they change nothing a visitor owns.
+        $middleware->validateCsrfTokens(except: [ltrim(Analytics::COLLECT_PATH, '/')]);
 
         // Signed preview links show a draft on its public page; global so it runs before any page service is built.
         $middleware->prepend(EnablePreview::class);

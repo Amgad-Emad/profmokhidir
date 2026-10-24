@@ -17,7 +17,7 @@ use InvalidArgumentException;
  * Site settings: the public contact details, the address that receives staff
  * notifications (tributes awaiting review, new community applications) and
  * the mail sender, and whether (and how large) members may attach files in the
- * community chat. Values are cached; saving flushes the cache, writes the
+ * community chat, and whether the first-party visitor analytics is on. Values are cached; saving flushes the cache, writes the
  * audit log and re-applies the mail sender to the running configuration.
  */
 class SettingService
@@ -79,6 +79,8 @@ class SettingService
             SettingKeys::CHAT_UPLOADS_ENABLED => '1',
             SettingKeys::CHAT_IMAGE_MAX_MB => (string) ChatAttachments::IMAGE_MAX_MB,
             SettingKeys::CHAT_DOCUMENT_MAX_MB => (string) ChatAttachments::DOCUMENT_MAX_MB,
+            // Off until the client approves visitor analytics.
+            SettingKeys::ANALYTICS_ENABLED => '0',
         ];
     }
 

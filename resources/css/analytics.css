@@ -1,0 +1,299 @@
+/*
+ | Admin analytics: the report at /admin/analytics and the dashboard's Audience
+ | section. Every figure uses tabular lining numerals; charts read their colours
+ | from the tokens (--chart-*, --map-*), so they follow the theme.
+ */
+@layer components {
+    .analytics-figures {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+    }
+
+    .analytics-figure {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 1.5rem;
+        border: 1px solid var(--rule);
+        border-radius: var(--radius-card);
+        background-color: var(--surface-panel);
+    }
+
+    .analytics-figure__value {
+        font-family: var(--font-display);
+        font-size: 2.75rem;
+        font-weight: 300;
+        line-height: 1;
+        color: var(--ink-strong);
+        font-variant-numeric: lining-nums tabular-nums;
+    }
+
+    .analytics-figure__change {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        font-size: 0.875rem;
+        font-weight: 400;
+        color: var(--ink-muted);
+        font-variant-numeric: lining-nums tabular-nums;
+    }
+
+    .analytics-figure__change[data-direction='up'] svg {
+        transform: rotate(-45deg);
+    }
+
+    .analytics-figure__change[data-direction='down'] svg {
+        transform: rotate(45deg);
+    }
+
+    .analytics-panel {
+        min-width: 0;
+        padding: 1.5rem;
+        border: 1px solid var(--rule);
+        border-radius: var(--radius-card);
+        background-color: var(--surface-panel);
+    }
+
+    .analytics-panel__head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0.5rem 1rem;
+    }
+
+    .analytics-panel__title {
+        font-family: var(--font-display);
+        font-size: 1.75rem;
+        font-weight: 300;
+        line-height: 1.15;
+        color: var(--ink-strong);
+    }
+
+    .analytics-grid {
+        display: grid;
+        gap: 1.5rem;
+    }
+
+    @media (min-width: 64rem) {
+        .analytics-grid--two {
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        }
+
+        .analytics-grid--three {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .analytics-grid--map {
+            grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+            align-items: start;
+        }
+    }
+
+    /* The visitors chart: a fixed-height canvas, the legend as two short rules. */
+    .analytics-chart {
+        position: relative;
+        height: 18rem;
+        margin-top: 1.5rem;
+    }
+
+    .analytics-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem 1.5rem;
+        font-size: 0.875rem;
+        color: var(--ink-muted);
+    }
+
+    .analytics-legend__item {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .analytics-legend__swatch {
+        display: inline-block;
+        width: 1.5rem;
+        border-top: 2px solid var(--chart-line);
+    }
+
+    .analytics-legend__swatch--compare {
+        border-top: 2px dashed var(--chart-compare);
+    }
+
+    /* Hidden samples the chart script reads its resolved colours from. */
+    .analytics-chart__ink {
+        position: absolute;
+        width: 0;
+        height: 0;
+        overflow: hidden;
+    }
+
+    .analytics-chart__ink[data-ink='line'] { color: var(--chart-line); }
+    .analytics-chart__ink[data-ink='compare'] { color: var(--chart-compare); }
+    .analytics-chart__ink[data-ink='grid'] { color: var(--chart-grid); }
+    .analytics-chart__ink[data-ink='label'] { color: var(--chart-label); }
+    .analytics-chart__ink[data-ink='panel'] { color: var(--surface-panel); }
+
+    /* Ranked lists: label, figure, share bar. */
+    .ranked-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.875rem;
+        margin-top: 1.25rem;
+    }
+
+    .ranked-list__row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 0.375rem 1rem;
+        align-items: baseline;
+        font-size: 0.9375rem;
+    }
+
+    .ranked-list__label {
+        display: flex;
+        align-items: baseline;
+        gap: 0.5rem;
+        min-width: 0;
+        overflow-wrap: anywhere;
+        color: var(--ink);
+    }
+
+    .ranked-list__flag {
+        font-size: 1.125rem;
+        line-height: 1;
+    }
+
+    .ranked-list__figure {
+        font-variant-numeric: lining-nums tabular-nums;
+        color: var(--ink-strong);
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    .ranked-list__share {
+        margin-left: 0.5rem;
+        color: var(--ink-muted);
+        font-weight: 300;
+    }
+
+    .share-bar {
+        grid-column: 1 / -1;
+        position: relative;
+        height: 3px;
+        background-color: var(--chart-grid);
+    }
+
+    .share-bar__fill {
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: var(--share);
+        background-color: var(--chart-line);
+    }
+
+    /* The world map: land in a quiet tint, visited countries in five steps of the line colour. */
+    .world-map {
+        display: block;
+        width: 100%;
+        height: auto;
+    }
+
+    .world-map path {
+        fill: var(--map-land);
+        stroke: var(--map-edge);
+        stroke-width: 0.4;
+        vector-effect: non-scaling-stroke;
+    }
+
+    .world-map path[data-tier='1'] { fill: color-mix(in srgb, var(--chart-line) 18%, var(--map-land)); }
+    .world-map path[data-tier='2'] { fill: color-mix(in srgb, var(--chart-line) 34%, var(--map-land)); }
+    .world-map path[data-tier='3'] { fill: color-mix(in srgb, var(--chart-line) 52%, var(--map-land)); }
+    .world-map path[data-tier='4'] { fill: color-mix(in srgb, var(--chart-line) 72%, var(--map-land)); }
+    .world-map path[data-tier='5'] { fill: var(--chart-line); }
+
+    .world-map-scale {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+        font-size: 0.8125rem;
+        color: var(--ink-muted);
+    }
+
+    .world-map-scale__steps {
+        display: flex;
+        border: 1px solid var(--rule);
+    }
+
+    .world-map-scale__steps span {
+        width: 1.25rem;
+        height: 0.5rem;
+    }
+
+    .world-map-scale__steps span:nth-child(1) { background: color-mix(in srgb, var(--chart-line) 18%, var(--map-land)); }
+    .world-map-scale__steps span:nth-child(2) { background: color-mix(in srgb, var(--chart-line) 34%, var(--map-land)); }
+    .world-map-scale__steps span:nth-child(3) { background: color-mix(in srgb, var(--chart-line) 52%, var(--map-land)); }
+    .world-map-scale__steps span:nth-child(4) { background: color-mix(in srgb, var(--chart-line) 72%, var(--map-land)); }
+    .world-map-scale__steps span:nth-child(5) { background: var(--chart-line); }
+
+    /* The range picker: one row of fields and the Apply button. */
+    .analytics-range {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 1rem;
+    }
+
+    .analytics-range > * {
+        flex: 0 1 12rem;
+    }
+
+    .analytics-range > .analytics-range__apply {
+        flex: 0 0 auto;
+        padding-bottom: 0.25rem;
+    }
+
+    .analytics-table td,
+    .analytics-table th {
+        font-variant-numeric: lining-nums tabular-nums;
+    }
+
+    .analytics-off {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+        padding: 1.25rem 1.5rem;
+        border: 1px solid var(--rule);
+        border-radius: var(--radius-card);
+        background-color: var(--surface-panel);
+    }
+}
+
+/*
+ | Row headers of the analytics tables read as body text, not as column labels. Unlayered and
+ | doubled up, because app.css's own .admin-table th rule comes after this file.
+ */
+.admin-table.analytics-table tbody th {
+    padding: 0.875rem 1rem;
+    font-size: inherit;
+    font-weight: 300;
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--ink);
+    white-space: normal;
+    border-bottom: 1px solid var(--rule);
+}
+
+.admin-table.analytics-table tbody tr:last-child th {
+    border-bottom: 0;
+}
+
+.admin-table.analytics-table .analytics-table__path {
+    overflow-wrap: anywhere;
+}
+
+.admin-table.analytics-table td {
+    white-space: nowrap;
+}

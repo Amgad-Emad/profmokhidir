@@ -10,7 +10,8 @@
     sets the trail on the dark band, for pages that open on a dark surface. `hero` marks a page that opens with the
     evergreen hero under the masthead: the bar starts transparent over it and the page reserves no top padding.
     Colours come from the semantic tokens (resources/css/tokens.css); <html> carries the theme attributes
-    (App\Services\ThemeService) and <x-theme.head> settles the choice before the first paint.
+    (App\Services\ThemeService) and <x-theme.head> settles the choice before the first paint. <x-analytics.script>
+    adds the first-party analytics only while it is switched on (never in the admin, chat or guest layouts).
 --}}
 @props(['title' => null, 'description' => null, 'image' => null, 'canonical' => null, 'type' => null, 'schema' => null, 'noindex' => false, 'breadcrumbs' => null, 'breadcrumbTitle' => null, 'breadcrumbTone' => 'evergreen', 'hero' => false])
 @inject('breadcrumbService', 'App\Services\BreadcrumbService')
@@ -43,6 +44,7 @@
     <x-brand.favicons />
     <x-fonts />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <x-analytics.script />
 </head>
 <body class="bg-surface text-ink">
     <x-duotone-filter />

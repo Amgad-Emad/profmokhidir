@@ -112,6 +112,15 @@
     --danger-ink: light-dark(var(--brand-ivory), var(--brand-evergreen));
     --danger-wash: color-mix(in srgb, var(--danger) 6%, transparent);
 
+    /* ---- Analytics (admin): the line is evergreen in light and champagne in dark, the comparison brass;
+       the map is shaded in tints of the line colour over a quiet land colour. */
+    --chart-line: light-dark(var(--brand-evergreen), var(--brand-champagne));
+    --chart-compare: var(--brand-brass);
+    --chart-grid: light-dark(var(--brand-stone), color-mix(in srgb, var(--brand-brass) 25%, transparent));
+    --chart-label: light-dark(var(--brand-ash), color-mix(in srgb, var(--brand-stone) 88%, transparent));
+    --map-land: light-dark(var(--brand-linen), color-mix(in srgb, var(--brand-ivory) 7%, transparent));
+    --map-edge: light-dark(var(--brand-ivory), var(--brand-cypress));
+
     /* ---- Status tones (meaning never rests on colour alone: each tone carries an icon). */
     --pending-tone: light-dark(var(--brand-bronze), var(--brand-brass));
     --success-tone: light-dark(var(--brand-cypress), var(--brand-champagne));
@@ -215,6 +224,9 @@
 .quick-action,
 .launch-checklist__list,
 .activity-feed,
+.analytics-figure,
+.analytics-panel,
+.analytics-off,
 .library-tile,
 .chat-run.is-mine,
 .chat-toolbar,

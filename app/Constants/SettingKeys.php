@@ -31,6 +31,9 @@ final class SettingKeys
 
     public const string CHAT_DOCUMENT_MAX_MB = 'chat_document_max_mb';
 
+    /** First-party, cookieless visitor analytics: off ("0") until the client approves it, then on ("1"). */
+    public const string ANALYTICS_ENABLED = 'analytics_enabled';
+
     /**
      * @return list<string>
      */
@@ -46,6 +49,7 @@ final class SettingKeys
             self::CHAT_UPLOADS_ENABLED,
             self::CHAT_IMAGE_MAX_MB,
             self::CHAT_DOCUMENT_MAX_MB,
+            self::ANALYTICS_ENABLED,
         ];
     }
 
@@ -84,6 +88,7 @@ final class SettingKeys
             self::CHAT_UPLOADS_ENABLED => 'Members may attach files',
             self::CHAT_IMAGE_MAX_MB => 'Largest image (MB)',
             self::CHAT_DOCUMENT_MAX_MB => 'Largest document (MB)',
+            self::ANALYTICS_ENABLED => 'Record visitor analytics',
         ];
     }
 

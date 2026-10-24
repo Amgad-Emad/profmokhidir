@@ -121,6 +121,7 @@ final class AdminUx
             AdminNavigation::MEMBERS => 'users',
             AdminNavigation::CHAT_REPORTS => 'chat',
             AdminNavigation::TRIBUTES => 'heart',
+            AdminNavigation::ANALYTICS => 'chart',
             AdminNavigation::USERS => 'shield',
             AdminNavigation::SITE_SETTINGS => 'settings',
             AdminNavigation::ACCOUNT => 'user',

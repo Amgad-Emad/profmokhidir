@@ -13,8 +13,8 @@ class AdminNavigationTest extends TestCase
     #[Test]
     public function groups_are_in_sidebar_order(): void
     {
-        $this->assertSame(['content', 'media', 'community', 'tributes', 'settings'], array_keys(AdminNavigation::groups()));
-        $this->assertSame(['Content', 'Media', 'Community', 'Tributes', 'Settings'], array_values(AdminNavigation::groups()));
+        $this->assertSame(['content', 'media', 'community', 'tributes', 'audience', 'settings'], array_keys(AdminNavigation::groups()));
+        $this->assertSame(['Content', 'Media', 'Community', 'Tributes', 'Audience', 'Settings'], array_values(AdminNavigation::groups()));
     }
 
     #[Test]

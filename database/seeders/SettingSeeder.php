@@ -28,6 +28,8 @@ class SettingSeeder extends Seeder
             SettingKeys::CHAT_UPLOADS_ENABLED => '1',
             SettingKeys::CHAT_IMAGE_MAX_MB => (string) ChatAttachments::IMAGE_MAX_MB,
             SettingKeys::CHAT_DOCUMENT_MAX_MB => (string) ChatAttachments::DOCUMENT_MAX_MB,
+            // Off: visitor analytics waits for the client's approval.
+            SettingKeys::ANALYTICS_ENABLED => '0',
         ];
 
         $settings->seedDefaults($defaults);
