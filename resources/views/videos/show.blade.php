@@ -1,3 +1,4 @@
+@inject('pageCopy', 'App\Services\PageContentService')
 <x-layouts.public :title="$video->title" :description="$description ?? $section['summary']">
     <article class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28">
         <div class="max-w-4xl">
@@ -20,7 +21,7 @@
 
         @if ($related->isNotEmpty())
             <section class="mt-24" aria-labelledby="same-event">
-                <h2 id="same-event" class="t-label text-accent-text" data-rise>More from this event</h2>
+                <h2 id="same-event" class="t-label text-accent-text" data-rise>{{ $pageCopy->text('videos', 'more_label') }}</h2>
                 <hr class="rule-brass mt-4" data-rule>
                 <ul class="mt-12 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3" data-rise-group>
                     @foreach ($related as $other)
@@ -48,7 +49,7 @@
         @endif
 
         <nav class="mt-20 border-t border-rule pt-8" aria-label="More videos">
-            <a href="{{ route('videos') }}" class="link-meta">All videos</a>
+            <a href="{{ route('videos') }}" class="link-meta">{{ $pageCopy->text('videos', 'back_label') }}</a>
         </nav>
     </article>
 </x-layouts.public>

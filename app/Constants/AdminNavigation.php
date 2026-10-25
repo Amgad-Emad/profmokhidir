@@ -34,6 +34,8 @@ final class AdminNavigation
     public const string ROUTE_PREFIX = 'admin.';
 
     // Item keys, so queues can be referenced by name.
+    public const string PAGES = 'pages';
+
     public const string PROFILE = 'profile';
 
     public const string CV = 'cv';
@@ -98,6 +100,7 @@ final class AdminNavigation
     public static function items(): array
     {
         return [
+            self::PAGES => self::item('Pages', self::GROUP_CONTENT, 'content.pages', 'content/pages', Permissions::MANAGE_CONTENT),
             self::PROFILE => self::item('About & profile', self::GROUP_CONTENT, 'content.profile', 'content/profile', Permissions::MANAGE_CONTENT),
             self::CV => self::item('CV entries', self::GROUP_CONTENT, 'content.cv', 'content/cv', Permissions::MANAGE_CONTENT),
             self::PUBLICATIONS => self::item('Publications', self::GROUP_CONTENT, 'content.publications', 'content/publications', Permissions::MANAGE_CONTENT),
@@ -171,7 +174,7 @@ final class AdminNavigation
     public static function built(): array
     {
         return [
-            self::PROFILE, self::CV, self::PUBLICATIONS, self::AWARDS, self::COMMENTARY, self::TEACHING, self::OTHER, self::HOME_QUOTES,
+            self::PAGES, self::PROFILE, self::CV, self::PUBLICATIONS, self::AWARDS, self::COMMENTARY, self::TEACHING, self::OTHER, self::HOME_QUOTES,
             self::VIDEOS, self::ALBUMS, self::MEDIA_LIBRARY, self::TRIBUTES,
             self::APPLICATIONS, self::MEMBERS, self::CHAT_REPORTS, self::ANALYTICS, self::USERS, self::SITE_SETTINGS,
         ];

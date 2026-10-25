@@ -46,9 +46,9 @@
                         <p class="mt-4 text-base font-light text-ink-muted">{{ $standing['message'] }}</p>
                         <div class="mt-8 flex flex-wrap gap-4">
                             @if ($standing['chatUrl'])
-                                <x-button :href="$standing['chatUrl']">Open the chat</x-button>
+                                <x-button :href="$standing['chatUrl']">{{ $copy['chatButton'] }}</x-button>
                             @endif
-                            <x-button variant="quiet" :href="route(\App\Constants\AdminNavigation::ACCOUNT_ROUTE)">Your account</x-button>
+                            <x-button variant="quiet" :href="route(\App\Constants\AdminNavigation::ACCOUNT_ROUTE)">{{ $copy['accountButton'] }}</x-button>
                         </div>
                     </section>
 

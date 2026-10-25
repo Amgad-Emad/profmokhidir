@@ -73,7 +73,7 @@ class AboutPageServiceTest extends TestCase
 
         $this->assertTrue($data['profile']->is($profile));
         $this->assertTrue($data['portrait']->is($profile->portrait()));
-        $this->assertSame('<p>Hello</p>bad()<h2>Years</h2><blockquote>Light</blockquote>', $data['bio']);
+        $this->assertSame('<p>Hello</p><h2>Years</h2><blockquote>Light</blockquote>', $data['bio']);
         $this->assertSame(['Agronomy', 'Soil fertility'], $data['expertise']);
         $this->assertSame([['label' => 'Field', 'value' => 'Agronomy']], $data['facts']);
         $this->assertSame(['email' => 'office@example.com', 'note' => 'Via the office.', 'phone' => null, 'address' => null], $data['contact']);

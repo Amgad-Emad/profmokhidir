@@ -7,6 +7,8 @@ use App\Constants\AdminUx;
 use App\Constants\Analytics;
 use App\Constants\ContentTypes;
 use App\Constants\Disks;
+use App\Constants\ErrorPages;
+use App\Constants\Pages;
 use App\Constants\Roles;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -51,8 +53,13 @@ class AdminRoutePermissionsTest extends TestCase
             $parameters = [];
 
             foreach ($route->parameterNames() as $parameter) {
-                // The analytics CSV export takes the table's name, not a record.
-                $parameters[$parameter] = $parameter === 'export' ? Analytics::EXPORT_VISITORS : $this->recordFor($parameter)->getKey();
+                // The analytics CSV export takes the table's name, and the page screens a page key, not a record.
+                $parameters[$parameter] = match ($parameter) {
+                    'export' => Analytics::EXPORT_VISITORS,
+                    Pages::ROUTE_PARAMETER => Pages::ERRORS,
+                    'code' => (string) ErrorPages::NOT_FOUND,
+                    default => $this->recordFor($parameter)->getKey(),
+                };
             }
 
             $routes[$name] = ['route' => $route, 'url' => route($name, $parameters)];

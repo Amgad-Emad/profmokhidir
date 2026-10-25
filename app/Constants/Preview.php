@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Constants;
 
+use App\Models\Page;
+use Illuminate\Database\Eloquent\Model;
+
 /**
  * Signed preview links: an editor's draft shown on its real public page. The
  * link is the public address plus `preview=<type>.<id>` and a signature that
@@ -15,6 +18,9 @@ final class Preview
     public const string PARAM = 'preview';
 
     public const string SEPARATOR = '.';
+
+    /** Preview type of an editable page (Admin › Pages): its drafts shown on the real page. */
+    public const string PAGE = 'page';
 
     /** How long a preview link works. */
     public const int TTL_MINUTES = 120;
@@ -42,6 +48,16 @@ final class Preview
             return null;
         }
 
-        return ContentTypes::isValid($matches[1]) ? ['type' => $matches[1], 'id' => (int) $matches[2]] : null;
+        return ContentTypes::isValid($matches[1]) || $matches[1] === self::PAGE ? ['type' => $matches[1], 'id' => (int) $matches[2]] : null;
+    }
+
+    /**
+     * The model a preview type names: a content type's, or the Page.
+     *
+     * @return class-string<Model>
+     */
+    public static function modelFor(string $type): string
+    {
+        return $type === self::PAGE ? Page::class : ContentTypes::get($type)['model'];
     }
 }

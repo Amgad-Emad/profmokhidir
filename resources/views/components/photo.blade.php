@@ -24,7 +24,7 @@
     <div @class(['photo__frame overflow-hidden rounded-card', 'photo__frame--lift' => $lifts(), 'bg-surface-raised/40' => $onDark(), 'bg-surface-sunken' => ! $onDark()]) @if ($aspect) style="aspect-ratio: {{ $aspect }}" @endif>
         @if ($lifts())
             {{-- The untreated print beneath; the duotone above fades a little on hover (desktop, motion allowed). --}}
-            <img src="{{ $src }}" @if ($srcset) srcset="{{ $srcset }}" sizes="{{ $sizes }}" @endif alt="" @if ($width && $height) width="{{ $width }}" height="{{ $height }}" @endif class="photo__under h-full w-full object-cover" loading="{{ $loading }}" decoding="async" aria-hidden="true">
+            <img src="{{ $src }}" @if ($srcset) srcset="{{ $srcset }}" sizes="{{ $sizes }}" @endif alt="" @if ($width && $height) width="{{ $width }}" height="{{ $height }}" @endif class="photo__under h-full w-full object-cover" @if ($position) style="object-position: {{ $position }}" @endif loading="{{ $loading }}" decoding="async" aria-hidden="true">
         @endif
         <img
             src="{{ $src }}"
@@ -32,6 +32,7 @@
             alt="{{ $alt }}"
             @if ($width && $height) width="{{ $width }}" height="{{ $height }}" @endif
             class="{{ $treatmentClass }} h-full w-full object-cover"
+            @if ($position) style="object-position: {{ $position }}" @endif
             loading="{{ $loading }}"
             decoding="async"
             @if ($loading === 'eager') fetchpriority="high" @endif

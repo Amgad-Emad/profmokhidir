@@ -4,6 +4,7 @@
     (sticky beside the text on wide screens, a disclosure above it otherwise), a slim brass progress line
     under the header and "Further reading" by shared topic. Prints as an article (resources/css/archive.css).
 --}}
+@inject('pageCopy', 'App\Services\PageContentService')
 <x-layouts.public :title="$commentary->title" :description="$commentary->summary" :type="\App\Constants\Seo::OG_TYPE_ARTICLE">
     <x-reading-progress target="#essay-body" />
 
@@ -122,7 +123,7 @@
                             @endif
                         </div>
                     </div>
-                    <x-button :href="$section['url']" class="mt-10">All commentary</x-button>
+                    <x-button :href="$section['url']" class="mt-10">{{ $pageCopy->text('commentary', 'back_label') }}</x-button>
                 </nav>
 
                 <x-seal />

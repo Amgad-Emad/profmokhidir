@@ -2,6 +2,7 @@
     Awards as a roll of honour: an engraved-plaque feel made only of type and hairlines. Each award is
     centred, its name in Cormorant small caps, the awarding body and year below, separated by ornaments.
 --}}
+@inject('pageCopy', 'App\Services\PageContentService')
 <x-layouts.public :title="$section['title']" :description="$section['summary']">
     <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28" aria-labelledby="section-title">
         <x-chapter-opening :number="$chapter" :label="$section['label']" :title="$section['title']" level="1" id="section-title">
@@ -9,7 +10,7 @@
         </x-chapter-opening>
 
         @if ($awards->isEmpty())
-            <x-empty-state class="mt-6" message="Awards and recognitions will be listed here once they are published." />
+            <x-empty-state class="mt-6" :message="$pageCopy->text('awards', 'empty')" />
         @else
             <div class="honour-roll">
                 <x-ornament type="double-rule" />

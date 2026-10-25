@@ -27,6 +27,9 @@ final class MediaCollections
     /** OtherItem: free-form images or files. */
     public const string MEDIA = 'media';
 
+    /** PageBlock: the hero and share images of an editable page (the block's value names the one in use). */
+    public const string PAGE_IMAGES = 'page_images';
+
     /** ChatUpload: a member's file waiting, in the temporary area, to be sent with a message. */
     public const string CHAT_PENDING = 'chat_pending';
 
@@ -40,6 +43,6 @@ final class MediaCollections
      */
     public static function images(): array
     {
-        return [self::PORTRAIT, self::THUMBNAIL, self::PHOTOS, self::MEDIA];
+        return [self::PORTRAIT, self::THUMBNAIL, self::PHOTOS, self::MEDIA, self::PAGE_IMAGES];
     }
 }

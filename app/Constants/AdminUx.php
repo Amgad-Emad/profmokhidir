@@ -106,6 +106,7 @@ final class AdminUx
     {
         return [
             'dashboard' => 'home',
+            AdminNavigation::PAGES => 'pencil',
             AdminNavigation::PROFILE => 'user',
             AdminNavigation::CV => 'file',
             AdminNavigation::PUBLICATIONS => 'book',

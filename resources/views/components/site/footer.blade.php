@@ -6,7 +6,7 @@
                 <p class="t-quote max-w-xl">{{ $closingLine }}</p>
             </div>
             <nav aria-label="Sections">
-                <p class="t-label text-accent-text">Sections</p>
+                <p class="t-label text-accent-text">{{ $heading }}</p>
                 <ul class="mt-6 grid grid-cols-2 gap-x-10 gap-y-3 sm:grid-cols-3 lg:grid-cols-2">
                     @foreach ($sections as $item)
                         <li>
@@ -20,9 +20,9 @@
             <p class="t-label text-accent-text">{{ $domain }}</p>
             <p class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm font-light text-ink-muted">
                 @if ($privacyUrl)
-                    <a href="{{ $privacyUrl }}" class="footer-link"@if (request()->routeIs(\App\Constants\Analytics::PRIVACY_ROUTE)) aria-current="page"@endif>Privacy</a>
+                    <a href="{{ $privacyUrl }}" class="footer-link"@if (request()->routeIs(\App\Constants\Analytics::PRIVACY_ROUTE)) aria-current="page"@endif>{{ $privacyLabel }}</a>
                 @endif
-                <span>&copy; {{ date('Y') }} Professor Mohamed Osman Khidir. All rights reserved.</span>
+                <span>{{ $copyright }}</span>
             </p>
         </div>
     </div>

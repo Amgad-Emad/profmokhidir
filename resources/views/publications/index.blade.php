@@ -3,6 +3,7 @@
     filters (type, year range, topic) beside the records, which are grouped by decade. The filters are a
     plain GET form, so they work without JavaScript; on small screens they move into a sheet.
 --}}
+@inject('pageCopy', 'App\Services\PageContentService')
 @inject('typesetter', 'App\Services\TypesetterService')
 <x-layouts.public :title="$section['title']" :description="$section['summary']" :schema="$schema" :canonical="$clearUrl">
     <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28" aria-labelledby="section-title">
@@ -11,11 +12,11 @@
         </x-chapter-opening>
 
         @if ($publications->total() === 0 && ! $isFiltered)
-            <x-empty-state class="mt-6" message="Publications will be listed here as they are catalogued." />
+            <x-empty-state class="mt-6" :message="$pageCopy->text('publications', 'empty')" />
         @else
             @if ($featured->isNotEmpty())
                 <section class="selected-works mt-20" aria-labelledby="selected-works-title">
-                    <h2 id="selected-works-title" class="t-label text-accent-text" data-rise>{{ \App\Constants\Catalogue::SELECTED_WORKS_LABEL }}</h2>
+                    <h2 id="selected-works-title" class="t-label text-accent-text" data-rise>{{ $pageCopy->text('publications', 'selected_label') }}</h2>
                     <hr class="rule-brass mt-4" data-rule>
                     <ol class="selected-works__list" data-rise-group>
                         @foreach ($featured as $work)
@@ -37,7 +38,7 @@
             <div class="catalogue mt-20" x-data="catalogueSheet">
                 <div class="catalogue__toolbar lg:hidden" x-cloak>
                     <x-button type="button" x-ref="toggle" aria-controls="catalogue-filters" x-bind:aria-expanded="open.toString()" x-on:click="show()">
-                        Refine the catalogue
+                        {{ $pageCopy->text('publications', 'refine_label') }}
                         @if ($activeCount > 0)
                             <span class="catalogue__badge">{{ $activeCount }}<span class="sr-only"> active</span></span>
                         @endif
@@ -93,14 +94,14 @@
                 <div class="catalogue__results">
                     <p class="catalogue__count" role="status">
                         @if ($publications->total() === 0)
-                            No publications match these filters
+                            {{ $pageCopy->text('publications', 'none_match') }}
                         @else
                             Showing {{ $publications->firstItem() }}–{{ $publications->lastItem() }} of {{ $publications->total() }} {{ $publications->total() === 1 ? 'record' : 'records' }}@foreach ($activeSummary as $part) · {{ $part }}@endforeach
                         @endif
                     </p>
 
                     @if ($publications->total() === 0)
-                        <x-empty-state class="mt-2" message="Nothing has been catalogued under these filters yet." />
+                        <x-empty-state class="mt-2" :message="$pageCopy->text('publications', 'empty_filtered')" />
                     @endif
 
                     @foreach ($groups as $group)

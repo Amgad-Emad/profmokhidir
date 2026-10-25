@@ -8,6 +8,7 @@ use App\Constants\AdminNavigation;
 use App\Constants\Chapters;
 use App\Constants\DateFormats;
 use App\Constants\Masthead;
+use App\Constants\Pages;
 use App\Models\Album;
 use App\Models\Profile;
 use App\Models\Publication;
@@ -44,6 +45,7 @@ class MastheadService
         private readonly AlbumService $albums,
         private readonly TributeService $tributes,
         private readonly AuthenticationService $auth,
+        private readonly PageContentService $pages,
     ) {}
 
     /**
@@ -55,15 +57,19 @@ class MastheadService
     {
         $chapters = [];
         $position = 0;
+        $definitions = $this->chapters->all();
 
-        foreach ($this->chapters->all() as $key => $definition) {
+        // Header & footer (Admin › Pages) sets the order, names and straps; the chapters' sections stay fixed.
+        foreach ($this->pages->items(Pages::NAVIGATION, 'chapters') as $copy) {
+            $key = $copy['key'];
+            $definition = $definitions[$key];
             $items = $this->links($definition, $currentRoute, $user);
 
             $chapters[] = [
                 'key' => $key,
                 'numeral' => $this->typesetter->roman(++$position),
-                'label' => $definition['label'],
-                'strap' => $definition['strap'],
+                'label' => $copy['label'],
+                'strap' => $copy['strap'],
                 'panelId' => Masthead::chapterPanelId($key),
                 'buttonId' => Masthead::chapterButtonId($key),
                 'items' => $items,
@@ -103,7 +109,7 @@ class MastheadService
             default => ['label' => Masthead::ACCOUNT, 'url' => route(AdminNavigation::ACCOUNT_ROUTE)],
         };
 
-        return ['line' => Masthead::UTILITY_LINE, 'link' => $link];
+        return ['line' => $this->pages->text(Pages::NAVIGATION, 'utility_line'), 'link' => $link];
     }
 
     /**
@@ -144,7 +150,9 @@ class MastheadService
      */
     public function featured(string $kind): ?array
     {
-        $label = Chapters::featuredLabels()[$kind] ?? null;
+        $label = isset(Chapters::featuredLabels()[$kind])
+            ? ($this->pages->keyed(Pages::NAVIGATION, 'featured_labels')[$kind]['label'] ?? Chapters::featuredLabels()[$kind])
+            : null;
 
         if ($label === null) {
             return null;
@@ -167,13 +175,16 @@ class MastheadService
     {
         $links = [];
 
+        $sections = $this->pages->keyed(Pages::NAVIGATION, 'sections');
+        $actions = $this->pages->keyed(Pages::NAVIGATION, 'actions');
+
         foreach ($definition['sections'] as $section) {
             $item = $this->navigation->section($section, $currentRoute);
 
             $links[] = [
                 'key' => $item['key'],
                 'label' => $item['label'],
-                'description' => $this->chapters->description($section) ?? $item['summary'],
+                'description' => $sections[$section]['line'] ?? $this->chapters->description($section) ?? $item['summary'],
                 'url' => $item['url'],
                 'active' => $item['active'],
             ];
@@ -188,8 +199,8 @@ class MastheadService
 
             $links[] = [
                 'key' => $key,
-                'label' => $action['label'],
-                'description' => $action['description'],
+                'label' => $actions[$key]['label'] ?? $action['label'],
+                'description' => $actions[$key]['line'] ?? $action['description'],
                 'url' => route($action['route']),
                 'active' => false, // Actions are calls to action, never the current page: the section stays the one current item.
             ];

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
-use App\Constants\ContentTypes;
 use App\Constants\Preview;
 use App\Support\PreviewContext;
 use Closure;
@@ -41,7 +40,7 @@ class EnablePreview
 
         abort_unless($request->hasValidSignature(), 403, 'This preview link has expired. Open Preview again from the edit screen for a fresh one.');
 
-        $this->context->activate(ContentTypes::get($preview['type'])['model'], $preview['id']);
+        $this->context->activate(Preview::modelFor($preview['type']), $preview['id']);
         $previousStore = $this->useCacheStore(self::PREVIEW_STORE);
         $request->attributes->set(Preview::ATTRIBUTE, $preview);
 

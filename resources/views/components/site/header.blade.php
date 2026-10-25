@@ -32,7 +32,7 @@
                     <kbd class="site-search-toggle__key" aria-hidden="true">/</kbd>
                 </a>
 
-                <x-button size="sm" :href="$tributeUrl" class="site-header__tribute hidden xl:inline-flex">{{ Masthead::LEAVE_TRIBUTE }}</x-button>
+                <x-button size="sm" :href="$tributeUrl" class="site-header__tribute hidden xl:inline-flex">{{ $tributeLabel }}</x-button>
 
                 <x-theme.switch id="theme-switch-masthead" :class="$account !== null ? 'site-header__theme site-header__theme--in-menu' : 'site-header__theme'" />
 

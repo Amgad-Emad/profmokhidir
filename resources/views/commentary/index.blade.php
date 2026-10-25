@@ -1,3 +1,4 @@
+@inject('pageCopy', 'App\Services\PageContentService')
 <x-layouts.public :title="$section['title']" :description="$section['summary']">
     <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28" aria-labelledby="section-title">
         <x-chapter-opening :number="$chapter" :label="$section['label']" :title="$section['title']" level="1" id="section-title">
@@ -5,14 +6,14 @@
         </x-chapter-opening>
 
         @if ($commentaries->total() === 0 && $activeTag === null)
-            <x-empty-state class="mt-6" message="Essays and reflections will be published here in due course." />
+            <x-empty-state class="mt-6" :message="$pageCopy->text('commentary', 'empty')" />
         @else
             @if ($tags !== [])
-                <x-filter-pills class="mt-12 border-y border-rule py-8" label="Topics" :options="$tags" :all-url="$clearUrl" :all-active="$activeTag === null" all-label="All topics" data-rise />
+                <x-filter-pills class="mt-12 border-y border-rule py-8" label="Topics" :options="$tags" :all-url="$clearUrl" :all-active="$activeTag === null" :all-label="$pageCopy->text('commentary', 'all_topics')" data-rise />
             @endif
 
             @if ($commentaries->total() === 0)
-                <x-empty-state class="mt-6" message="Nothing has been written under this topic yet." />
+                <x-empty-state class="mt-6" :message="$pageCopy->text('commentary', 'empty_topic')" />
             @else
                 <ol class="mt-12 divide-y divide-rule border-b border-rule" data-rise-group>
                     @foreach ($commentaries as $commentary)

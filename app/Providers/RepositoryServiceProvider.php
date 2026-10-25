@@ -22,6 +22,7 @@ use App\Repositories\Contracts\CvEntryRepositoryInterface;
 use App\Repositories\Contracts\HomeQuoteRepositoryInterface;
 use App\Repositories\Contracts\MediaRepositoryInterface;
 use App\Repositories\Contracts\OtherItemRepositoryInterface;
+use App\Repositories\Contracts\PageRepositoryInterface;
 use App\Repositories\Contracts\ProfileRepositoryInterface;
 use App\Repositories\Contracts\PublicationRepositoryInterface;
 use App\Repositories\Contracts\RevisionRepositoryInterface;
@@ -51,6 +52,7 @@ use App\Repositories\Eloquent\EloquentCommentaryRepository;
 use App\Repositories\Eloquent\EloquentCvEntryRepository;
 use App\Repositories\Eloquent\EloquentHomeQuoteRepository;
 use App\Repositories\Eloquent\EloquentOtherItemRepository;
+use App\Repositories\Eloquent\EloquentPageRepository;
 use App\Repositories\Eloquent\EloquentProfileRepository;
 use App\Repositories\Eloquent\EloquentPublicationRepository;
 use App\Repositories\Eloquent\EloquentRevisionRepository;
@@ -98,6 +100,7 @@ class RepositoryServiceProvider extends ServiceProvider
         AuditLogRepositoryInterface::class => EloquentAuditLogRepository::class,
         SettingRepositoryInterface::class => EloquentSettingRepository::class,
         RevisionRepositoryInterface::class => EloquentRevisionRepository::class,
+        PageRepositoryInterface::class => EloquentPageRepository::class,
         AnalyticsEventRepositoryInterface::class => EloquentAnalyticsEventRepository::class,
         AnalyticsSaltRepositoryInterface::class => EloquentAnalyticsSaltRepository::class,
         AnalyticsRollupRepositoryInterface::class => EloquentAnalyticsRollupRepository::class,

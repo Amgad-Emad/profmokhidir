@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Services;
 
+use App\Constants\PageDefinitions\TributeBlocks;
 use App\Constants\PageSizes;
 use App\Constants\Sections;
 use App\Constants\SocialCards;
@@ -53,9 +54,12 @@ class TributesPageServiceTest extends TestCase
         $this->assertSame([
             'label' => Taglines::TRIBUTES_LABEL,
             'heading' => Taglines::TRIBUTES_HEADING,
-            'leaveTribute' => Taglines::LEAVE_TRIBUTE,
+            'leaveTribute' => ['label' => Taglines::LEAVE_TRIBUTE, 'url' => route('tributes.create')],
             'featuredLabel' => Taglines::TRIBUTES_FEATURED_LABEL,
             'bookLabel' => Taglines::TRIBUTES_BOOK_LABEL,
+            'shareLabel' => TributeBlocks::SHARE_LABEL,
+            'empty' => TributeBlocks::EMPTY,
+            'emptyFiltered' => 'No tributes from anyone else have been published yet.',
         ], $data['copy']);
         $this->assertSame(asset(SocialCards::TRIBUTES), $data['shareImage']);
         $this->assertSame(route('tributes.create'), $data['createUrl']);

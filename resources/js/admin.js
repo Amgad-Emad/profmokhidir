@@ -6,6 +6,7 @@ import { adminShell } from './admin/shell';
 import { commandPalette } from './admin/palette';
 import { adminToasts } from './admin/toasts';
 import { editScreen, leaveGuard, sectionNav } from './admin/editing';
+import { pagePreview } from './admin/page-preview';
 import { watchPlaceholders } from './admin/placeholders';
 import { initShortcuts } from './admin/shortcuts';
 
@@ -23,6 +24,7 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('editScreen', editScreen);
     Alpine.data('leaveGuard', leaveGuard);
     Alpine.data('sectionNav', sectionNav);
+    Alpine.data('pagePreview', pagePreview);
 
     /*
      | Drag-and-drop reordering of table rows (native HTML5 drag events). Rows are

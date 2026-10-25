@@ -4,19 +4,25 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Constants\Pages;
 use App\Constants\Sections;
 use App\Repositories\Contracts\SectionRepositoryInterface;
 use InvalidArgumentException;
 
 /**
  * Builds the navigation shown in the public header, full-screen menu and footer,
- * marking the item that matches the current route.
+ * marking the item that matches the current route. Each section's name comes
+ * from Header & footer and its title and summary from its own page in
+ * Admin › Pages (PageContentService), the section constants being the default.
  *
  * @phpstan-type NavItem array{key: string, label: string, title: string, url: string, route: string, placement: string, summary: string, active: bool}
  */
 class NavigationService
 {
-    public function __construct(private readonly SectionRepositoryInterface $sections) {}
+    public function __construct(
+        private readonly SectionRepositoryInterface $sections,
+        private readonly PageContentService $pages,
+    ) {}
 
     /**
      * Items for the header navigation.
@@ -110,14 +116,16 @@ class NavigationService
      */
     private function item(string $key, array $definition, ?string $currentRoute): array
     {
+        $page = Pages::forSection($key);
+
         return [
             'key' => $key,
-            'label' => $definition['label'],
-            'title' => $definition['title'],
+            'label' => $this->pages->keyed(Pages::NAVIGATION, 'sections')[$key]['label'] ?? $definition['label'],
+            'title' => $page === null ? $definition['title'] : $this->pages->text($page, 'title'),
             'url' => route($definition['route']),
             'route' => $definition['route'],
             'placement' => $definition['placement'],
-            'summary' => $definition['summary'],
+            'summary' => $page === null ? $definition['summary'] : $this->pages->text($page, 'intro'),
             'active' => $this->isActive($definition['route'], $currentRoute),
         ];
     }

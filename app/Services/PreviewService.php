@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Constants\ContentTypes;
+use App\Constants\ErrorPages;
+use App\Constants\Pages;
 use App\Constants\Preview;
+use App\Models\Page;
 use App\Support\PreviewContext;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\URL;
@@ -42,6 +45,24 @@ class PreviewService
         $parameters[Preview::PARAM] = Preview::value($type, (int) $record->getKey());
 
         return URL::temporarySignedRoute($definition['public_route'], now()->addMinutes(Preview::TTL_MINUTES), $parameters);
+    }
+
+    /**
+     * The preview link of an editable page: its real public page with the
+     * page's drafts shown (signed like a record's). The error pages have no
+     * address of their own, so they are drawn in the dashboard instead.
+     */
+    public function pageUrl(Page $page, int $errorCode = ErrorPages::NOT_FOUND): string
+    {
+        $route = Pages::get($page->key)['route'];
+
+        if ($route === null) {
+            return route(Pages::ERROR_PREVIEW_ROUTE, [Pages::ROUTE_PARAMETER => $page->key, 'code' => $errorCode]);
+        }
+
+        return URL::temporarySignedRoute($route, now()->addMinutes(Preview::TTL_MINUTES), [
+            Preview::PARAM => Preview::value(Preview::PAGE, (int) $page->getKey()),
+        ]);
     }
 
     /**

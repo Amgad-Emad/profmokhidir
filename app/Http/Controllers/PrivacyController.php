@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Constants\Analytics;
 use App\Services\AnalyticsService;
+use App\Services\PreviewService;
 use Illuminate\Contracts\View\View;
 
 /**
@@ -14,11 +15,15 @@ use Illuminate\Contracts\View\View;
  */
 class PrivacyController extends Controller
 {
-    public function __construct(private readonly AnalyticsService $analytics) {}
+    public function __construct(
+        private readonly AnalyticsService $analytics,
+        private readonly PreviewService $preview,
+    ) {}
 
     public function __invoke(): View
     {
-        abort_unless($this->analytics->enabled(), 404);
+        // A signed preview from Admin › Pages may show it before analytics is switched on.
+        abort_unless($this->analytics->enabled() || $this->preview->active(), 404);
 
         return view('privacy', [
             'idleSeconds' => Analytics::IDLE_SECONDS,

@@ -3,7 +3,10 @@
  | (App\Constants\Masthead holds the values the constants below mirror):
  |
  |   - the bar compacts once the page has scrolled past the threshold and the
- |     reader is scrolling down; scrolling up restores it (classes drive the CSS)
+ |     reader is scrolling down; scrolling up restores it (classes drive the CSS).
+ |     A scroll the browser makes to bring newly focused content into view (Tab)
+ |     leaves the bar as it is, so the bar never grows over what was just
+ |     focused; focus moving into the bar itself restores it
  |   - over the home hero ([data-masthead-hero]) the bar is transparent; the glass
  |     returns once the hero has scrolled past
  |   - the chapter disclosures: click, Enter or Space toggle a panel; ArrowDown
@@ -23,6 +26,7 @@ const DESKTOP = '(min-width: 1024px)'; // Tailwind `lg`: the chapter bar takes o
 const FINE_POINTER = '(hover: hover) and (pointer: fine)';
 const COMPACT_AFTER = 40;
 const SCROLL_JITTER = 4;
+const FOCUS_SCROLL_MS = 250; // a scroll this soon after focus moved is the browser revealing the focused element
 const SCROLL_CLOSES_AFTER = 24;
 const HOVER_OPEN_DELAY = 150;
 const HOVER_CLOSE_DELAY = 300;
@@ -43,10 +47,15 @@ export default function masthead() {
         hero: null,
         hoverTimer: null,
         leaveTimer: null,
+        focusedAt: 0,
 
         init() {
             this.hero = document.querySelector(HERO_SELECTOR);
             this.lastY = window.scrollY;
+            document.addEventListener('focusin', (event) => {
+                this.focusedAt = performance.now();
+                if (this.$el.contains(event.target)) this.setCompact(false);
+            });
             this.update();
         },
 
@@ -64,8 +73,12 @@ export default function masthead() {
             const y = window.scrollY;
             const delta = y - this.lastY;
 
+            const revealingFocus = performance.now() - this.focusedAt < FOCUS_SCROLL_MS;
+
             if (y <= COMPACT_AFTER) {
                 this.setCompact(false);
+            } else if (revealingFocus) {
+                // Keep the bar's size: the browser placed the focused element just below it.
             } else if (delta > SCROLL_JITTER) {
                 this.setCompact(true);
             } else if (delta < -SCROLL_JITTER) {

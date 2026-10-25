@@ -33,7 +33,7 @@ class CommunityPageServiceTest extends TestCase
         $this->assertTrue($page['section']['active']);
         $this->assertSame(CommunityCopy::HEADING, $page['copy']['heading']);
         $this->assertSame(CommunityCopy::conductRules(), $page['copy']['conduct']);
-        $this->assertSame(CommunityCopy::PRIVACY, $page['copy']['privacy']);
+        $this->assertSame(e(CommunityCopy::PRIVACY), (string) $page['copy']['privacy']);
         $this->assertSame(route('community.apply'), $page['applyUrl']);
         $this->assertSame(route('login'), $page['loginUrl']);
         $this->assertNull($page['standing']);

@@ -6,6 +6,7 @@ use App\Constants\Sections;
 use App\Repositories\Contracts\SectionRepositoryInterface;
 use App\Repositories\Eloquent\ConstantSectionRepository;
 use App\Services\NavigationService;
+use App\Services\PageContentService;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -95,7 +96,7 @@ class NavigationServiceTest extends TestCase
             'awards' => (new ConstantSectionRepository)->find(Sections::AWARDS),
         ]);
 
-        $items = (new NavigationService($repository))->primary();
+        $items = (new NavigationService($repository, $this->app->make(PageContentService::class)))->primary();
 
         $this->assertCount(1, $items);
         $this->assertSame('Awards', $items[0]['label']);

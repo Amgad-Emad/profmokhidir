@@ -1,4 +1,5 @@
 {{-- Other Information as a catalogue index: items grouped by category, each set as a catalogue record. --}}
+@inject('pageCopy', 'App\Services\PageContentService')
 <x-layouts.public :title="$section['title']" :description="$section['summary']">
     <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28" aria-labelledby="section-title">
         <x-chapter-opening :number="$chapter" :label="$section['label']" :title="$section['title']" level="1" id="section-title">
@@ -6,7 +7,7 @@
         </x-chapter-opening>
 
         @if ($categories === [])
-            <x-empty-state class="mt-6" message="Further information will be added here as it becomes available." />
+            <x-empty-state class="mt-6" :message="$pageCopy->text('other', 'empty')" />
         @else
             <div class="catalogue-index">
                 @if (count($categories) > 1)
@@ -44,9 +45,9 @@
                                             <p class="record__summary">@typeset($item->summary)</p>
                                         @endif
                                         @if (filled($item->destination_url))
-                                            <ul class="record__links"><li><x-external-link :href="$item->destination_url" label="Visit" /></li></ul>
+                                            <ul class="record__links"><li><x-external-link :href="$item->destination_url" :label="$pageCopy->text('other', 'visit_label')" /></li></ul>
                                         @elseif ($item->hasDetail())
-                                            <ul class="record__links"><li><a href="{{ route('other.show', $item->slug) }}" class="link-meta">Read more<span class="sr-only"> about {{ $item->title }}</span></a></li></ul>
+                                            <ul class="record__links"><li><a href="{{ route('other.show', $item->slug) }}" class="link-meta">{{ $pageCopy->text('other', 'read_more') }}<span class="sr-only"> about {{ $item->title }}</span></a></li></ul>
                                         @endif
                                     </article>
                                 </li>

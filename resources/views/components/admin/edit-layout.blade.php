@@ -4,13 +4,15 @@
     notice, and the sticky save bar (<x-admin.save-bar>) along the bottom. `after` holds sections
     that save on their own (photographs, the portrait), outside the form but in the same nav.
     Alpine `editScreen` (resources/js/admin/editing.js) tracks changes and autosaves drafts.
-    `editor` comes from ContentForm::editorState().
+    `editor` comes from ContentForm::editorState(). `autosave` overrides the default (drafts only):
+    the page editor keeps drafts beside the published page, so it autosaves either way. `draftable`
+    and `publish-label` pass through to the save bar.
 --}}
-@props(['editor', 'sections' => [], 'saveLabel' => null])
+@props(['editor', 'sections' => [], 'saveLabel' => null, 'autosave' => null, 'draftable' => false, 'publishLabel' => null])
 @use('App\Constants\AdminUx')
 @use('App\Constants\Placeholders')
 @php
-    $autosave = $editor['status'] !== \App\Constants\ContentStatus::Published;
+    $autosave ??= $editor['status'] !== \App\Constants\ContentStatus::Published;
     // Only fixed values go in x-data: a changed expression would restart the component on every save.
     $config = ['seconds' => AdminUx::AUTOSAVE_SECONDS];
 @endphp
@@ -40,5 +42,5 @@
         {{ $after ?? '' }}
     </div>
 
-    <x-admin.save-bar :editor="$editor" :save-label="$saveLabel" />
+    <x-admin.save-bar :editor="$editor" :save-label="$saveLabel" :draftable="$draftable" :publish-label="$publishLabel" />
 </div>

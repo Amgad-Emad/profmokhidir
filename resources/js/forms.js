@@ -281,10 +281,14 @@ function trackTyping() {
         document.addEventListener('livewire:navigated', growAll);
     }
 
-    document.querySelectorAll(`${FIELD} [data-form-counter]`).forEach((counter) => {
-        const el = counter.closest(FIELD).querySelector('input, textarea');
-        if (el) updateCounter(el);
-    });
+    const countAll = () =>
+        document.querySelectorAll(`${FIELD} [data-form-counter]`).forEach((counter) => {
+            const el = counter.closest(FIELD).querySelector('input, textarea');
+            if (el) updateCounter(el);
+        });
+    countAll();
+    // Livewire fills wire:model fields after this runs: count again once it has.
+    document.addEventListener('livewire:initialized', countAll);
 }
 
 function trackLivewire() {

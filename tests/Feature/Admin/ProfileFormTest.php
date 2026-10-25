@@ -51,7 +51,7 @@ class ProfileFormTest extends TestCase
             ->assertSet('form.key_facts', [['label' => 'Born', 'value' => '1940']]);
 
         $profile = Profile::query()->sole();
-        $this->assertSame('<p>Bio</p>bad()', $profile->full_bio);
+        $this->assertSame('<p>Bio</p>', $profile->full_bio);
         $this->assertSame(['Agronomy', 'Soil science'], $profile->expertise);
         $this->assertSame('office@example.com', $profile->contact_email_public);
         $this->assertSame(1, Profile::query()->count());

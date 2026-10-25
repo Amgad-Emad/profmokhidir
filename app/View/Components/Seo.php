@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\View\Components;
 
 use App\Constants\Seo as SeoConstants;
+use App\Constants\SocialCards;
 use App\Services\SeoService;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
@@ -28,6 +29,8 @@ class Seo extends Component
 
     public ?string $jsonLd;
 
+    public string $imageAltText;
+
     /**
      * @param  array<string, mixed>|list<array<string, mixed>>|null  $schema
      */
@@ -40,11 +43,13 @@ class Seo extends Component
         ?string $type = null,
         ?array $schema = null,
         public bool $noindex = false,
+        ?string $imageAlt = null,
     ) {
         $this->pageTitle = $seo->title($title);
         $this->metaDescription = $seo->description($description);
         $this->canonicalUrl = $seo->canonical($canonical);
         $this->imageUrl = $seo->image($image);
+        $this->imageAltText = filled($imageAlt) ? $imageAlt : SocialCards::QUOTE;
         $this->type = $seo->ogType($type);
         $this->jsonLd = $schema === null || $schema === [] ? null : $seo->jsonLd($schema);
     }

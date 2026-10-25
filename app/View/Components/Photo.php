@@ -40,6 +40,9 @@ class Photo extends Component
 
     public ?int $width = null;
 
+    /** CSS object-position from the crop focus point (page images), or null for the centre. */
+    public ?string $position = null;
+
     public ?int $height = null;
 
     public function __construct(
@@ -62,6 +65,13 @@ class Photo extends Component
         $this->placeYear = ResponsiveImage::placeYear($media);
         $this->note = ResponsiveImage::text($media, MediaProperties::NOTE);
         $this->credit = ResponsiveImage::text($media, MediaProperties::CREDIT);
+
+        $focusX = $media->getCustomProperty(MediaProperties::FOCUS_X);
+        $focusY = $media->getCustomProperty(MediaProperties::FOCUS_Y);
+
+        if (is_numeric($focusX) && is_numeric($focusY) && ((int) $focusX !== 50 || (int) $focusY !== 50)) {
+            $this->position = sprintf('%d%% %d%%', max(0, min(100, (int) $focusX)), max(0, min(100, (int) $focusY)));
+        }
 
         if (($dimensions = ResponsiveImage::dimensions($media)) !== null) {
             [$this->width, $this->height] = $dimensions;

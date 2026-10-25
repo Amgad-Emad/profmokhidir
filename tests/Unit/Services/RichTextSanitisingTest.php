@@ -20,7 +20,7 @@ class RichTextSanitisingTest extends TestCase
 
         $commentary = $service->create(['title' => 'Piece', 'body' => $dirty]);
 
-        $this->assertSame('<h2>Title</h2>alert(1)<p>Text <a>bad</a> <a href="https://example.org" rel="noopener">good</a></p><blockquote><p>Quote</p></blockquote>', $commentary->body);
+        $this->assertSame('<h2>Title</h2><p>Text <a>bad</a> <a href="https://example.org" rel="noopener">good</a></p><blockquote><p>Quote</p></blockquote>', $commentary->body);
 
         $updated = $service->update($commentary, ['body' => '   ']);
         $this->assertNull($updated->body);

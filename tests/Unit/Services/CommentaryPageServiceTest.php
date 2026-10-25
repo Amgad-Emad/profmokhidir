@@ -59,7 +59,7 @@ class CommentaryPageServiceTest extends TestCase
         $data = $this->service->show($current);
 
         $this->assertTrue($data['commentary']->is($current));
-        $this->assertSame('<p>Safe</p>bad()<a>link</a>', $data['body']);
+        $this->assertSame('<p>Safe</p><a>link</a>', $data['body']);
         $this->assertSame([['value' => 'Policy', 'label' => 'Policy', 'url' => route('commentary', ['tag' => 'Policy']), 'active' => false]], $data['tags']);
         $this->assertTrue($data['previous']->is($newer));
         $this->assertTrue($data['next']->is($older));

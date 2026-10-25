@@ -7,6 +7,7 @@ use App\Constants\CvSection;
 use App\Constants\Disks;
 use App\Constants\HomeTimeline;
 use App\Constants\MediaProperties;
+use App\Constants\PageDefinitions\HomeBlocks;
 use App\Constants\Sections;
 use App\Constants\Taglines;
 use App\Models\Album;
@@ -53,18 +54,26 @@ class HomePageServiceTest extends TestCase
         $this->assertSame([], $data['chapters']);
         $this->assertSame([], $data['stats']);
         $this->assertSame(HomeTimeline::ANCHOR, $data['anchor']);
+        // No page copy stored: the built-in wording (App\Constants\PageDefinitions\HomeBlocks).
+        $copy = $data['copy'];
+        $this->assertSame((string) $copy['chaptersIntro'], HomeBlocks::CHAPTERS_INTRO);
+        unset($copy['chaptersIntro']);
         $this->assertSame([
             'label' => Taglines::HERO_LABEL,
+            'headingFirst' => HomeBlocks::HERO_HEADING_FIRST,
+            'headingSecond' => HomeBlocks::HERO_HEADING_SECOND,
             'line' => Taglines::HERO_LINE,
             'epigraph' => Taglines::HOME_EPIGRAPH,
             'scroll' => Taglines::SCROLL_CUE,
             'chapters' => Taglines::HOME_CHAPTERS,
+            'chaptersEmpty' => HomeBlocks::CHAPTERS_EMPTY,
             'numbers' => Taglines::HOME_NUMBERS,
+            'numbersEmpty' => HomeBlocks::NUMBERS_EMPTY,
             'continue' => Taglines::HOME_CONTINUE,
             'closing' => Taglines::HOME_CLOSING,
-            'readStory' => Taglines::READ_STORY,
-            'leaveTribute' => Taglines::LEAVE_TRIBUTE,
-        ], $data['copy']);
+            'readStory' => ['label' => Taglines::READ_STORY, 'url' => route('about')],
+            'leaveTribute' => ['label' => Taglines::LEAVE_TRIBUTE, 'url' => route('tributes.create')],
+        ], $copy);
     }
 
     #[Test]

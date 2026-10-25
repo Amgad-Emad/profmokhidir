@@ -101,7 +101,7 @@ class CommentaryPageTest extends TestCase
                 'First published at www.example.org', '1 min read',
                 'Why the lecture still matters.',
                 '<div id="essay-body">',
-                '<div class="drop-cap prose-bio essay__body mt-10" data-rise="data-rise"><p>First paragraph.</p>alert(1)<blockquote>A quote.</blockquote><p>Second.</p></div>',
+                '<div class="drop-cap prose-bio essay__body mt-10" data-rise="data-rise"><p>First paragraph.</p><blockquote>A quote.</blockquote><p>Second.</p></div>',
                 'href="https://www.example.org/essay" rel="noopener"', 'Read the original · example.org',
                 'ornament--fleuron', 'aria-label="Topics"', 'href="'.e(route('commentary', ['tag' => 'Education'])).'"', 'Education',
                 'aria-label="More commentary"', 'Previous', 'href="'.route('commentary.show', 'newer').'"', 'Newer piece',

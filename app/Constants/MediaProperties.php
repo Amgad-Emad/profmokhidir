@@ -35,6 +35,11 @@ final class MediaProperties
 
     public const string HEIGHT = 'height';
 
+    /** Page images: the crop focus point, as percentages from the left and the top (CSS object-position). */
+    public const string FOCUS_X = 'focus_x';
+
+    public const string FOCUS_Y = 'focus_y';
+
     /**
      * @return list<string>
      */
@@ -43,7 +48,7 @@ final class MediaProperties
         return [
             self::ALT_TEXT, self::CAPTION, self::PLACE, self::YEAR, self::NOTE,
             self::CREDIT, self::PERMISSIONS_NOTE, self::TREATMENT, self::IS_COVER,
-            self::WIDTH, self::HEIGHT,
+            self::WIDTH, self::HEIGHT, self::FOCUS_X, self::FOCUS_Y,
         ];
     }
 

@@ -28,7 +28,7 @@ class RichTextTest extends TestCase
     {
         $html = '<p class="x" onclick="alert(1)">Hi</p><script>alert(1)</script><img src="x"><div style="color:red">Boxed</div><h2 id="a">T</h2>';
 
-        $this->assertSame('<p>Hi</p>alert(1)Boxed<h2>T</h2>', RichText::sanitise($html));
+        $this->assertSame('<p>Hi</p>Boxed<h2>T</h2>', RichText::sanitise($html));
     }
 
     #[Test]

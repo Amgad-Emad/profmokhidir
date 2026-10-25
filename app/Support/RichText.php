@@ -18,13 +18,21 @@ final class RichText
         'p', 'h2', 'h3', 'h4', 'blockquote', 'em', 'strong', 'i', 'b', 'a', 'ul', 'ol', 'li', 'br', 'cite',
     ];
 
+    /**
+     * Tags kept by inline(): emphasis, links and line breaks.
+     *
+     * @var list<string>
+     */
+    public const array INLINE_TAGS = ['em', 'strong', 'i', 'b', 'a', 'br'];
+
     public static function sanitise(?string $html): string
     {
         if ($html === null || trim($html) === '') {
             return '';
         }
 
-        $clean = strip_tags($html, self::ALLOWED_TAGS);
+        // Scripts and styles go with their contents, not just their tags.
+        $clean = strip_tags((string) preg_replace('#<(script|style|iframe|object|embed)\b[^>]*>.*?</\1\s*>#is', '', $html), self::ALLOWED_TAGS);
 
         // Drop every attribute, keeping only http(s) and mailto hrefs on links.
         $clean = (string) preg_replace_callback(
@@ -47,6 +55,25 @@ final class RichText
         );
 
         return trim($clean);
+    }
+
+    /**
+     * Text that sits inside one paragraph of the design (page blocks such as
+     * an introduction): only emphasis, links and line breaks survive, and
+     * paragraphs from the editor are joined with a line break.
+     */
+    public static function inline(?string $html): string
+    {
+        $clean = self::sanitise($html);
+
+        if ($clean === '') {
+            return '';
+        }
+
+        $clean = (string) preg_replace('#</p>\s*<p>#i', '<br>', $clean);
+        $clean = strip_tags($clean, self::INLINE_TAGS);
+
+        return trim((string) preg_replace('#^(<br>\s*)+|(\s*<br>)+$#i', '', $clean));
     }
 
     /**

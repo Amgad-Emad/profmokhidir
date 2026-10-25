@@ -11,7 +11,7 @@
             </div>
             <x-seal class="seal--open" tone="ivory" :size="48" />
             <div class="mt-10 flex flex-wrap gap-4" data-rise>
-                <x-button variant="primary" :href="$createUrl">{{ $copy['leaveTribute'] }}</x-button>
+                <x-button variant="primary" :href="$copy['leaveTribute']['url']">{{ $copy['leaveTribute']['label'] }}</x-button>
             </div>
         </div>
     </section>
@@ -27,7 +27,7 @@
                     </blockquote>
                     <p class="frontispiece__author smallcaps">@typeset($featured->name)</p>
                     <x-meta class="frontispiece__meta" :items="[$featured->relationship?->label(), $featured->location]" />
-                    <a href="{{ $page->cardUrl($featured) }}" class="tribute-entry__card t-label" download="{{ \App\Constants\TributeCards::filename((int) $featured->getKey()) }}">Share card<span class="sr-only"> for the tribute from {{ $featured->name }} (PNG image)</span></a>
+                    <a href="{{ $page->cardUrl($featured) }}" class="tribute-entry__card t-label" download="{{ \App\Constants\TributeCards::filename((int) $featured->getKey()) }}">{{ $copy['shareLabel'] }}<span class="sr-only"> for the tribute from {{ $featured->name }} (PNG image)</span></a>
                 </div>
                 <x-ornament type="fleuron" />
             </div>
@@ -52,17 +52,17 @@
             @if ($tributes->total() === 0)
                 <div class="mx-auto mt-6 max-w-3xl" data-rise-group>
                     @if ($activeRelationship === null && ! $featured)
-                        <x-empty-state message="No tributes have been published yet. Yours could be the first." />
-                        <x-button :href="$createUrl">{{ $copy['leaveTribute'] }}</x-button>
+                        <x-empty-state :message="$copy['empty']" />
+                        <x-button :href="$copy['leaveTribute']['url']">{{ $copy['leaveTribute']['label'] }}</x-button>
                     @else
-                        <x-empty-state :message="'No tributes from '.mb_strtolower($activeRelationship?->plural() ?? 'anyone else').' have been published yet.'" />
+                        <x-empty-state :message="$copy['emptyFiltered']" />
                     @endif
                 </div>
             @else
                 <ol class="book mt-14" data-rise-group data-book>
                     @foreach ($tributes as $tribute)
                         <li class="book__leaf">
-                            <x-tribute-entry :tribute="$tribute" :card-url="$page->cardUrl($tribute)" />
+                            <x-tribute-entry :tribute="$tribute" :card-url="$page->cardUrl($tribute)" :card-label="$copy['shareLabel']" />
                             <x-ornament />
                         </li>
                     @endforeach
@@ -72,7 +72,7 @@
             @endif
 
             <div class="mt-16 flex flex-wrap items-center justify-center gap-4" data-rise>
-                <x-button :href="$createUrl">{{ $copy['leaveTribute'] }}</x-button>
+                <x-button :href="$copy['leaveTribute']['url']">{{ $copy['leaveTribute']['label'] }}</x-button>
             </div>
 
             <x-folio section="{{ $section['label'] }}" position="bottom" class="mt-16" />

@@ -5,14 +5,16 @@
             <div class="flex flex-col items-start gap-8" data-scroll-scale>
                 <p class="t-label text-accent-text">{{ $copy['label'] }}</p>
                 <h1 id="hero-title" class="t-display">
-                    <span class="block text-ink">Professor</span>
-                    <span class="block text-ink-strong">Mohamed Osman Khidir</span>
+                    <span class="block text-ink">{{ $copy['headingFirst'] }}</span>
+                    <span class="block text-ink-strong">{{ $copy['headingSecond'] }}</span>
                 </h1>
                 <p class="t-body max-w-xl text-ink">{{ $copy['line'] }}</p>
-                <x-epigraph tone="ivory" class="hero__epigraph">@typeset($copy['epigraph'])</x-epigraph>
+                @if ($copy['epigraph'] !== '')
+                    <x-epigraph tone="ivory" class="hero__epigraph">@typeset($copy['epigraph'])</x-epigraph>
+                @endif
                 <div class="flex flex-wrap gap-4">
-                    <x-button variant="primary" :href="route('about')">{{ $copy['readStory'] }}</x-button>
-                    <x-button :href="route('tributes.create')">{{ $copy['leaveTribute'] }}</x-button>
+                    <x-button variant="primary" :href="$copy['readStory']['url']">{{ $copy['readStory']['label'] }}</x-button>
+                    <x-button :href="$copy['leaveTribute']['url']">{{ $copy['leaveTribute']['label'] }}</x-button>
                 </div>
             </div>
 
@@ -32,9 +34,7 @@
     {{-- 2. A life in chapters: one chapter per decade, a brass hairline down the left, quote interludes between. --}}
     <section class="life bg-surface text-ink" aria-labelledby="{{ $anchor }}">
         <div class="mx-auto max-w-7xl px-4 pt-20 sm:px-6 lg:pt-28">
-            <x-chapter-opening :title="$copy['chapters']" :id="$anchor">
-                Each decade of his life, drawn from the record of his education, appointments and honours.
-            </x-chapter-opening>
+            <x-chapter-opening :title="$copy['chapters']" :id="$anchor">{{ $copy['chaptersIntro'] }}</x-chapter-opening>
         </div>
 
         @forelse ($chapters as $chapter)
@@ -89,7 +89,7 @@
             @endif
         @empty
             <div class="mx-auto max-w-7xl px-4 pt-10 sm:px-6">
-                <x-empty-state message="The chapters of his life will appear here as his record is catalogued." />
+                <x-empty-state :message="$copy['chaptersEmpty']" />
             </div>
         @endforelse
 
@@ -111,7 +111,7 @@
                 </dl>
             @else
                 <div class="mt-10">
-                    <x-empty-state message="The figures will appear once his publications, appointments and honours are catalogued." />
+                    <x-empty-state :message="$copy['numbersEmpty']" />
                 </div>
             @endif
         </div>

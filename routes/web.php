@@ -4,6 +4,8 @@ use App\Constants\AdminNavigation;
 use App\Constants\AdminUx;
 use App\Constants\Analytics;
 use App\Constants\ContentTypes;
+use App\Constants\ErrorPages;
+use App\Constants\Pages;
 use App\Constants\Permissions;
 use App\Constants\RateLimits;
 use App\Constants\Roles;
@@ -17,6 +19,7 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\AdminSearchController;
 use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\PageErrorPreviewController;
 use App\Http\Controllers\Admin\TwoFactorReminderController;
 use App\Http\Controllers\AnalyticsCollectController;
 use App\Http\Controllers\AwardController;
@@ -57,6 +60,8 @@ use App\Livewire\Admin\HomeQuotes\Index as HomeQuoteIndex;
 use App\Livewire\Admin\Media\Library as MediaLibrary;
 use App\Livewire\Admin\OtherItems\Form as OtherItemForm;
 use App\Livewire\Admin\OtherItems\Index as OtherItemIndex;
+use App\Livewire\Admin\Pages\Edit as PageEdit;
+use App\Livewire\Admin\Pages\Index as PageIndex;
 use App\Livewire\Admin\Profile\EditProfile;
 use App\Livewire\Admin\Publications\Form as PublicationForm;
 use App\Livewire\Admin\Publications\Index as PublicationIndex;
@@ -224,6 +229,17 @@ Route::middleware(['auth', 'verified', 'role:'.implode('|', Roles::staff())])
                 Route::get($path.'/create', $form)->name($name.'.create');
                 Route::get($path.'/{'.$parameter.':id}/edit', $form)->whereNumber($parameter)->name($name.'.edit');
             }
+
+            // Page copy: the list of pages, one edit screen each, and the error pages drawn with their drafts.
+            $pages = AdminNavigation::get(AdminNavigation::PAGES)['path'];
+            $pagesName = substr(AdminNavigation::routeFor(AdminNavigation::PAGES), strlen(AdminNavigation::ROUTE_PREFIX));
+
+            Route::get($pages, PageIndex::class)->name($pagesName);
+            Route::get($pages.'/{'.Pages::ROUTE_PARAMETER.'}/edit', PageEdit::class)->whereIn(Pages::ROUTE_PARAMETER, Pages::all())->name($pagesName.'.edit');
+            Route::get($pages.'/{'.Pages::ROUTE_PARAMETER.'}/preview/{code}', PageErrorPreviewController::class)
+                ->whereIn(Pages::ROUTE_PARAMETER, [Pages::ERRORS])
+                ->whereIn('code', array_map('strval', ErrorPages::codes()))
+                ->name($pagesName.'.error-preview');
 
             Route::get(AdminNavigation::get(AdminNavigation::MEDIA_LIBRARY)['path'], MediaLibrary::class)
                 ->name(substr(AdminNavigation::routeFor(AdminNavigation::MEDIA_LIBRARY), strlen(AdminNavigation::ROUTE_PREFIX)));

@@ -47,8 +47,16 @@ final class CacheKeys
     /** The portrait on the sign-in screens (the published profile's, or a featured archive photo). */
     public const string AUTH_PORTRAIT = 'public.auth.portrait';
 
+    /** Prefix of each editable page's published blocks (Admin › Pages): "public.pages.<page key>". */
+    public const string PAGE_PREFIX = 'public.pages.';
+
     /** Site settings (contact details, notification address, mail sender). */
     public const string SETTINGS = 'settings.all';
+
+    public static function page(string $page): string
+    {
+        return self::PAGE_PREFIX.$page;
+    }
 
     /**
      * @return list<string>
@@ -59,6 +67,7 @@ final class CacheKeys
             self::PROFILE, self::CV_ENTRIES, self::PUBLICATIONS, self::AWARDS, self::VIDEOS,
             self::ALBUMS, self::ALBUMS_NEWEST, self::TEACHING_MATERIALS, self::COMMENTARIES, self::OTHER_ITEMS, self::TRIBUTES, self::TRIBUTES_FEATURED,
             self::HOME_QUOTES, self::AUTH_PORTRAIT, self::SETTINGS,
+            ...array_map(self::page(...), Pages::all()),
         ];
     }
 }

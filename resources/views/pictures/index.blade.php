@@ -1,3 +1,4 @@
+@inject('pageCopy', 'App\Services\PageContentService')
 <x-layouts.public :title="$section['title']" :description="$section['summary']">
     <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28" aria-labelledby="section-title">
         <x-chapter-opening :number="$chapter" :label="$section['label']" :title="$section['title']" level="1" id="section-title">
@@ -5,7 +6,7 @@
         </x-chapter-opening>
 
         @if ($albums === [])
-            <x-empty-state class="mt-6" message="Photographs will be gathered into albums here once they are published." />
+            <x-empty-state class="mt-6" :message="$pageCopy->text('pictures', 'empty')" />
         @else
             <nav class="exhibition-views mt-12 flex flex-wrap items-center gap-x-8 gap-y-4" aria-label="View" data-rise>
                 <p class="t-label text-accent-text">{{ $total }} {{ \Illuminate\Support\Str::plural('photograph', $total) }} in {{ count($albums) }} {{ \Illuminate\Support\Str::plural('album', count($albums)) }}</p>

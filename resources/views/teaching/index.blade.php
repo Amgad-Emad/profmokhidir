@@ -1,4 +1,5 @@
 {{-- Teaching materials as a syllabus: each course with its description and a numbered reading list. --}}
+@inject('pageCopy', 'App\Services\PageContentService')
 <x-layouts.public :title="$section['title']" :description="$section['summary']">
     <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28" aria-labelledby="section-title">
         <x-chapter-opening :number="$chapter" :label="$section['label']" :title="$section['title']" level="1" id="section-title">
@@ -6,7 +7,7 @@
         </x-chapter-opening>
 
         @if (! $hasAny)
-            <x-empty-state class="mt-6" message="Teaching materials will appear here as they are prepared for sharing." />
+            <x-empty-state class="mt-6" :message="$pageCopy->text('teaching', 'empty')" />
         @else
             @if ($topics !== [] || count($types) > 1)
                 <form novalidate method="get" action="{{ $clearUrl }}" class="mt-12 flex flex-col gap-6 border-y border-rule py-8 sm:flex-row sm:flex-wrap sm:items-end" data-rise>
@@ -28,11 +29,11 @@
             @endif
 
             @if (! $canSeeMembers)
-                <p class="mt-8 max-w-2xl text-base font-light text-ink-muted" data-rise>Some materials are shared with members of the Scientific Community only. <a href="{{ $communityUrl }}" class="text-ink underline decoration-accent-line underline-offset-4">Apply to join the community</a> to download them.</p>
+                <p class="mt-8 max-w-2xl text-base font-light text-ink-muted" data-rise>{{ $pageCopy->text('teaching', 'members_note') }} <a href="{{ $communityUrl }}" class="text-ink underline decoration-accent-line underline-offset-4">{{ $pageCopy->text('teaching', 'members_link') }}</a> {{ $pageCopy->text('teaching', 'members_after') }}</p>
             @endif
 
             @if ($courses === [])
-                <x-empty-state class="mt-6" message="No materials match these filters." />
+                <x-empty-state class="mt-6" :message="$pageCopy->text('teaching', 'empty_filtered')" />
             @endif
 
             <div class="syllabus">

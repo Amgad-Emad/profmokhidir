@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Constants\CommunityCopy;
 use App\Constants\CommunityStatus;
+use App\Constants\Pages;
 use App\Constants\Sections;
 use App\Constants\StatusTone;
 use App\Models\User;
+use Illuminate\Support\HtmlString;
 
 /**
  * Assembles the public Scientific Community page: the explanation, the
@@ -26,13 +27,16 @@ class CommunityPageService
 
     public const string ROUTE_CHAT = 'community.chat';
 
-    public function __construct(private readonly NavigationService $navigation) {}
+    public function __construct(
+        private readonly NavigationService $navigation,
+        private readonly PageContentService $pages,
+    ) {}
 
     /**
      * @return array{
      *     section: NavItem,
      *     chapter: int,
-     *     copy: array{heading: string, intro: string, whoHeading: string, who: string, conductHeading: string, conduct: list<string>, privacyHeading: string, privacy: string, conductAgreement: string, privacyAgreement: string, applyHeading: string, applyIntro: string},
+     *     copy: array{heading: string, intro: HtmlString, whoHeading: string, who: HtmlString, conductHeading: string, conduct: list<string>, privacyHeading: string, privacy: HtmlString, conductAgreement: string, privacyAgreement: string, applyHeading: string, applyIntro: string, chatButton: string, accountButton: string},
      *     standing: ?Standing,
      *     applyUrl: string,
      *     loginUrl: string
@@ -44,18 +48,20 @@ class CommunityPageService
             'section' => $this->navigation->section(Sections::COMMUNITY, self::ROUTE_INDEX),
             'chapter' => $this->navigation->chapter(Sections::COMMUNITY),
             'copy' => [
-                'heading' => CommunityCopy::HEADING,
-                'intro' => CommunityCopy::INTRO,
-                'whoHeading' => CommunityCopy::WHO_HEADING,
-                'who' => CommunityCopy::WHO,
-                'conductHeading' => CommunityCopy::CONDUCT_HEADING,
-                'conduct' => CommunityCopy::conductRules(),
-                'privacyHeading' => CommunityCopy::PRIVACY_HEADING,
-                'privacy' => CommunityCopy::PRIVACY,
-                'conductAgreement' => CommunityCopy::CONDUCT_AGREEMENT,
-                'privacyAgreement' => CommunityCopy::PRIVACY_AGREEMENT,
-                'applyHeading' => CommunityCopy::APPLY_HEADING,
-                'applyIntro' => CommunityCopy::APPLY_INTRO,
+                'heading' => $this->text('heading'),
+                'intro' => $this->pages->html(Pages::COMMUNITY, 'lead'),
+                'whoHeading' => $this->text('who_heading'),
+                'who' => $this->pages->html(Pages::COMMUNITY, 'who'),
+                'conductHeading' => $this->text('conduct_heading'),
+                'conduct' => $this->conductRules(),
+                'privacyHeading' => $this->text('privacy_heading'),
+                'privacy' => $this->pages->html(Pages::COMMUNITY, 'privacy'),
+                'conductAgreement' => $this->text('conduct_agreement'),
+                'privacyAgreement' => $this->text('privacy_agreement'),
+                'applyHeading' => $this->text('apply_heading'),
+                'applyIntro' => $this->text('apply_intro'),
+                'chatButton' => $this->text('chat_button'),
+                'accountButton' => $this->text('account_button'),
             ],
             'standing' => $user === null ? null : $this->standing($user),
             'applyUrl' => route(self::ROUTE_APPLY),
@@ -73,20 +79,38 @@ class CommunityPageService
         $user->unsetRelation('roles');
 
         if ($user->isAdmin()) {
-            return $this->state(CommunityStatus::Approved, CommunityCopy::APPROVED_HEADING, CommunityCopy::CHAT_INTRO, StatusTone::Cypress, route(self::ROUTE_CHAT), false);
+            return $this->state(CommunityStatus::Approved, 'approved_heading', 'chat_intro', StatusTone::Cypress, route(self::ROUTE_CHAT), false);
         }
 
         return match ($user->community_status) {
-            CommunityStatus::Pending => $this->state(CommunityStatus::Pending, CommunityCopy::PENDING_HEADING, CommunityCopy::PENDING, StatusTone::Bronze, null, false),
-            CommunityStatus::Rejected => $this->state(CommunityStatus::Rejected, CommunityCopy::REJECTED_HEADING, CommunityCopy::REJECTED, StatusTone::Ash, null, false),
-            CommunityStatus::Suspended => $this->state(CommunityStatus::Suspended, CommunityCopy::SUSPENDED_HEADING, CommunityCopy::SUSPENDED, StatusTone::Ash, null, false),
+            CommunityStatus::Pending => $this->state(CommunityStatus::Pending, 'pending_heading', 'pending', StatusTone::Bronze, null, false),
+            CommunityStatus::Rejected => $this->state(CommunityStatus::Rejected, 'rejected_heading', 'rejected', StatusTone::Ash, null, false),
+            CommunityStatus::Suspended => $this->state(CommunityStatus::Suspended, 'suspended_heading', 'suspended', StatusTone::Ash, null, false),
             CommunityStatus::Approved => $user->canAccessChat()
-                ? $this->state(CommunityStatus::Approved, CommunityCopy::APPROVED_HEADING, CommunityCopy::APPROVED, StatusTone::Cypress, route(self::ROUTE_CHAT), false)
-                : $this->state(CommunityStatus::Suspended, CommunityCopy::SUSPENDED_HEADING, CommunityCopy::SUSPENDED, StatusTone::Ash, null, false),
+                ? $this->state(CommunityStatus::Approved, 'approved_heading', 'approved', StatusTone::Cypress, route(self::ROUTE_CHAT), false)
+                : $this->state(CommunityStatus::Suspended, 'suspended_heading', 'suspended', StatusTone::Ash, null, false),
             CommunityStatus::None => $user->reviewed_at === null
-                ? $this->state(CommunityStatus::None, CommunityCopy::NOT_APPLIED_HEADING, CommunityCopy::SIGNED_IN_NOT_APPLIED, StatusTone::Ash, null, ! $user->canAccessAdmin())
-                : $this->state(CommunityStatus::None, CommunityCopy::REMOVED_HEADING, CommunityCopy::REMOVED, StatusTone::Ash, null, true),
+                ? $this->state(CommunityStatus::None, 'not_applied_heading', 'not_applied', StatusTone::Ash, null, ! $user->canAccessAdmin())
+                : $this->state(CommunityStatus::None, 'removed_heading', 'removed', StatusTone::Ash, null, true),
         };
+    }
+
+    /**
+     * One line of the community page's copy (Admin › Pages › Scientific Community).
+     */
+    public function text(string $key): string
+    {
+        return $this->pages->text(Pages::COMMUNITY, $key);
+    }
+
+    /**
+     * The conduct rules, in order.
+     *
+     * @return list<string>
+     */
+    public function conductRules(): array
+    {
+        return array_column($this->pages->items(Pages::COMMUNITY, 'conduct'), 'text');
     }
 
     /**
@@ -96,8 +120,8 @@ class CommunityPageService
     {
         return [
             'status' => $status,
-            'heading' => $heading,
-            'message' => $message,
+            'heading' => $this->text($heading),
+            'message' => $this->text($message),
             'tone' => $tone,
             'chatUrl' => $chatUrl,
             'canApply' => $canApply,

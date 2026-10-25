@@ -3,6 +3,7 @@
     section opened by <x-chapter-opening>, with a slim sticky index of sections on wide screens.
     No download, print or file link anywhere on this page, and the print stylesheet hides it entirely.
 --}}
+@inject('pageCopy', 'App\Services\PageContentService')
 <x-layouts.public :title="$section['title']" :description="$section['summary']">
     <x-reading-progress target="#cv-body" />
 
@@ -13,15 +14,15 @@
             </x-chapter-opening>
 
             @if ($groups === [])
-                <x-empty-state class="mt-6" message="The curriculum vitae is being compiled and will appear here once it is published." />
+                <x-empty-state class="mt-6" :message="$pageCopy->text('cv', 'empty')" />
             @else
                 @if ($lastUpdated)
-                    <p class="cv-ledger__updated" data-rise><span class="smallcaps">Last updated</span> <x-date :date="$lastUpdated" /></p>
+                    <p class="cv-ledger__updated" data-rise><span class="smallcaps">{{ $pageCopy->text('cv', 'updated_label') }}</span> <x-date :date="$lastUpdated" /></p>
                 @endif
 
                 <div class="cv-ledger__layout">
                     <nav class="cv-ledger__index" aria-labelledby="cv-index-title">
-                        <p id="cv-index-title" class="t-label text-accent-text">Sections</p>
+                        <p id="cv-index-title" class="t-label text-accent-text">{{ $pageCopy->text('cv', 'index_label') }}</p>
                         <ol class="cv-ledger__index-list">
                             @foreach ($summary as $item)
                                 <li>
@@ -67,6 +68,6 @@
         </div>
 
         {{-- Shown on paper only: the CV itself is never printed. --}}
-        <p class="cv-print-notice">The curriculum vitae of {{ \App\Constants\BrandMark::TITLE }} is published to be read online only, at {{ $section['url'] }}.</p>
+        <p class="cv-print-notice">{{ $pageCopy->text('cv', 'print_notice', [':name' => \App\Constants\BrandMark::TITLE, ':url' => $section['url']]) }}</p>
     </section>
 </x-layouts.public>

@@ -7,17 +7,30 @@
     Inner pages get a breadcrumb trail (App\Services\BreadcrumbService) with BreadcrumbList JSON-LD:
     `breadcrumb-title` names the current page when it differs from `title`; `breadcrumbs` passes a
     trail of ['label' => , 'url' => , 'current' => ] outright, or false to show none. `breadcrumb-tone="ivory"`
-    sets the trail on the dark band, for pages that open on a dark surface. `hero` marks a page that opens with the
+    sets the trail on the dark band, for pages that open on a dark surface. `page` names the Admin › Pages entry whose
+    search & sharing block applies (by default the page whose own route this is): its search title and description
+    replace `title` and `description` in the head only, and its share image (else `image`, else the site-wide one
+    under Header & footer) the share card. `hero` marks a page that opens with the
     evergreen hero under the masthead: the bar starts transparent over it and the page reserves no top padding.
     Colours come from the semantic tokens (resources/css/tokens.css); <html> carries the theme attributes
     (App\Services\ThemeService) and <x-theme.head> settles the choice before the first paint. <x-analytics.script>
     adds the first-party analytics only while it is switched on (never in the admin, chat or guest layouts).
 --}}
-@props(['title' => null, 'description' => null, 'image' => null, 'canonical' => null, 'type' => null, 'schema' => null, 'noindex' => false, 'breadcrumbs' => null, 'breadcrumbTitle' => null, 'breadcrumbTone' => 'evergreen', 'hero' => false])
+@props(['title' => null, 'description' => null, 'image' => null, 'canonical' => null, 'type' => null, 'schema' => null, 'noindex' => false, 'breadcrumbs' => null, 'breadcrumbTitle' => null, 'breadcrumbTone' => 'evergreen', 'hero' => false, 'page' => null])
 @inject('breadcrumbService', 'App\Services\BreadcrumbService')
 @inject('themes', 'App\Services\ThemeService')
+@inject('pageCopy', 'App\Services\PageContentService')
 @php
     $theme = $themes->current(request());
+
+    $page ??= \App\Constants\Pages::forRoute(request()->route()?->getName());
+    $pageSeo = $page === null ? null : $pageCopy->seo($page);
+    $siteShare = $pageCopy->seo(\App\Constants\Pages::NAVIGATION);
+    $share = match (true) {
+        $pageSeo !== null && $pageSeo['image'] !== null => ['image' => $pageSeo['image'], 'alt' => $pageSeo['imageAlt']],
+        $image !== null => ['image' => $image, 'alt' => null],
+        default => ['image' => $siteShare['image'], 'alt' => $siteShare['imageAlt']],
+    };
 
     $trail = match (true) {
         $breadcrumbs === false => [],
@@ -39,7 +52,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <x-seo :title="$title" :description="$description" :image="$image" :canonical="$canonical" :type="$type" :schema="$schema" :noindex="$noindex" />
+    <x-seo :title="$pageSeo['title'] ?? $title" :description="$pageSeo['description'] ?? $description" :image="$share['image']" :image-alt="$share['alt']" :canonical="$canonical" :type="$type" :schema="$schema" :noindex="$noindex" />
     <x-theme.head light="evergreen" dark="cypress" />
     <x-brand.favicons />
     <x-fonts />

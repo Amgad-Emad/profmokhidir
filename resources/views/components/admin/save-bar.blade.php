@@ -3,9 +3,11 @@
     save state ("Saved 2 minutes ago", "Unsaved changes", "Saving…", or why an autosave waited),
     then History, Preview (a signed link to the real public page, saved first), and the actions:
     Save draft and Publish for a draft; Unpublish and Update once published. The buttons carry
-    data-shortcut so Ctrl/Cmd+S and Ctrl/Cmd+Enter press them.
+    data-shortcut so Ctrl/Cmd+S and Ctrl/Cmd+Enter press them. With `draftable` (page copy, whose drafts
+    sit beside the published page) a published record keeps Save draft beside Unpublish and
+    `publish-label` (Publish changes), so Ctrl/Cmd+S never puts anything live.
 --}}
-@props(['editor', 'saveLabel' => null])
+@props(['editor', 'saveLabel' => null, 'draftable' => false, 'publishLabel' => null])
 @use('App\Constants\ContentStatus')
 @use('App\Constants\StatusTone')
 @php
@@ -32,7 +34,11 @@
                 <x-icon name="external" class="size-4" />View on site<span class="sr-only"> (opens in a new tab)</span>
             </a>
         @endif
-        @if ($published)
+        @if ($published && $draftable)
+            <x-button variant="quiet" size="sm" type="button" wire:click="unpublish" wire:loading.attr="disabled" data-unpublish>Unpublish</x-button>
+            <x-button type="button" wire:click="save" wire:loading.attr="disabled" data-shortcut="save" data-save>{{ $saveLabel ?? 'Save draft' }}</x-button>
+            <x-button type="button" variant="primary" wire:click="publish" wire:loading.attr="disabled" data-shortcut="publish" data-publish>{{ $publishLabel ?? 'Update' }}</x-button>
+        @elseif ($published)
             <x-button variant="quiet" size="sm" type="button" wire:click="unpublish" wire:loading.attr="disabled" data-unpublish>Unpublish</x-button>
             <x-button type="button" variant="primary" wire:click="publish" wire:loading.attr="disabled" data-shortcut="save publish" data-save>{{ $saveLabel ?? 'Update' }}</x-button>
         @else

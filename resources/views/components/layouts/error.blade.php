@@ -2,11 +2,13 @@
     Error pages (resources/views/errors/{code}.blade.php): evergreen with the soft brass glow,
     the MK mark in its ring, a short Cormorant line, a search box that needs no script, the
     chapters of the site and a pill button home. Never indexed. `code` selects the copy in
-    App\Constants\ErrorPages. The chapter list comes from the section constants, so the page
-    renders even when the database is unreachable.
+    Admin › Pages › Error pages (App\Constants\ErrorPages is the default). The chapter list comes
+    from the section constants with the names from Header & footer; PageContentService falls back
+    to the built-in copy, so the page renders even when the database is unreachable.
 --}}
 @props(['code'])
 @inject('themes', 'App\Services\ThemeService')
+@inject('pageCopy', 'App\Services\PageContentService')
 @php
     $theme = $themes->current(request());
 
@@ -16,8 +18,10 @@
     use App\Constants\Seo;
 
     $code = (int) $code;
-    $page = ErrorPages::get($code);
+    $copyCode = ErrorPages::isValid($code) ? $code : ErrorPages::SERVER_ERROR;
+    $page = ['title' => $pageCopy->text('errors', 'title_'.$copyCode), 'line' => $pageCopy->text('errors', 'line_'.$copyCode)];
     $chapters = Sections::definitions();
+    $names = $pageCopy->keyed('navigation', 'sections');
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" {{ $themes->htmlAttributes($theme) }}>
@@ -34,28 +38,28 @@
 <body class="error-page glow-brass on-dark min-h-screen bg-surface text-ink">
     <main id="main" class="mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center gap-8 px-4 py-20 text-center sm:px-6" data-error-code="{{ $code }}">
         <x-brand.mark :size="96" />
-        <p class="t-label text-accent-text">{{ ErrorPages::LABEL_PREFIX }} {{ $code }}</p>
+        <p class="t-label text-accent-text">{{ $pageCopy->text('errors', 'label') }} {{ $code }}</p>
         <h1 class="t-heading text-ink-strong">{{ $page['title'] }}</h1>
         <p class="t-quote max-w-xl">{{ $page['line'] }}</p>
 
         <form novalidate method="get" action="{{ route(Search::ROUTE) }}" role="search" class="search-form search-form--ivory w-full max-w-xl text-left">
             <div class="search-form__row form-style-underline">
-                <x-form.input type="search" :name="Search::PARAM" id="error-search" :label="ErrorPages::SEARCH_LABEL" :optional="false" size="display" class="search-form__field"
+                <x-form.input type="search" :name="Search::PARAM" id="error-search" :label="$pageCopy->text('errors', 'search_label')" :optional="false" size="display" class="search-form__field"
                               :placeholder="Search::PLACEHOLDER" autocomplete="off" :maxlength="Search::MAX_LENGTH" />
                 <x-button type="submit">{{ Search::BUTTON_LABEL }}</x-button>
             </div>
         </form>
 
         <nav class="error-page__chapters w-full max-w-xl" aria-label="Chapters">
-            <p class="t-label text-accent-text">{{ ErrorPages::CHAPTERS_LABEL }}</p>
+            <p class="t-label text-accent-text">{{ $pageCopy->text('errors', 'chapters_label') }}</p>
             <ol class="error-page__chapter-list mt-4">
-                @foreach ($chapters as $section)
-                    <li><a href="{{ route($section['route']) }}" class="error-page__chapter link-draw smallcaps">{{ $section['label'] }}</a></li>
+                @foreach ($chapters as $key => $section)
+                    <li><a href="{{ route($section['route']) }}" class="error-page__chapter link-draw smallcaps">{{ $names[$key]['label'] ?? $section['label'] }}</a></li>
                 @endforeach
             </ol>
         </nav>
 
-        <x-button variant="primary" :href="route('home')" class="mt-4">{{ ErrorPages::HOME_LABEL }}</x-button>
+        <x-button variant="primary" :href="route('home')" class="mt-4">{{ $pageCopy->text('errors', 'home_button') }}</x-button>
     </main>
 </body>
 </html>

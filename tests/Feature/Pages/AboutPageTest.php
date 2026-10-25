@@ -3,6 +3,7 @@
 namespace Tests\Feature\Pages;
 
 use App\Constants\Disks;
+use App\Constants\Taglines;
 use App\Models\Profile;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
@@ -56,7 +57,7 @@ class AboutPageTest extends TestCase
             ->assertSeeInOrder(['Key facts', '<dl', '<dt class="t-label text-accent-text">Field</dt>', '<dd class="figures-lining font-display text-[1.75rem] font-light leading-10 text-ink">Agronomy</dd>', 'Years teaching', '40'], false)
             ->assertSeeInOrder(['Contact', 'href="mailto:office@example.com"', 'office@example.com</a><span class="sidenote"', 'class="sidenote__ref"', 'role="note"', 'Correspondence is handled by the family office.'], false)
             ->assertDontSee('folio--top', false)
-            ->assertSeeInOrder(['breadcrumbs', 'chapter-opening', 'class="epigraph', e(\App\Constants\Taglines::ABOUT_EPIGRAPH), 'class="sidenote-host', 'ornament--fleuron', 'class="seal"', 'folio--bottom'], false)
+            ->assertSeeInOrder(['breadcrumbs', 'chapter-opening', 'class="epigraph', e(Taglines::ABOUT_EPIGRAPH), 'class="sidenote-host', 'ornament--fleuron', 'class="seal"', 'folio--bottom'], false)
             ->assertSeeInOrder(['aria-label="Continue reading"', 'href="'.route('cv').'"', 'CV &amp; Achievements', 'href="'.route('publications').'"', 'Publications', 'href="'.route('awards').'"', 'Awards'], false)
             ->assertDontSee('The biography is being prepared');
 
@@ -79,7 +80,7 @@ class AboutPageTest extends TestCase
         $response = $this->get(route('about'))->assertOk();
 
         $response
-            ->assertSee('<p>Safe.</p>alert(1)<p>Also safe.</p>', false)
+            ->assertSee('<p>Safe.</p><p>Also safe.</p>', false)
             ->assertDontSee('<script>', false)
             ->assertDontSee('alert(1)</script>', false)
             ->assertDontSee('onclick', false)

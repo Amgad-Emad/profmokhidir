@@ -18,14 +18,14 @@
 <meta property="og:image" content="{{ $imageUrl }}">
 <meta property="og:image:width" content="{{ \App\Constants\SocialCards::WIDTH }}">
 <meta property="og:image:height" content="{{ \App\Constants\SocialCards::HEIGHT }}">
-<meta property="og:image:alt" content="{{ \App\Constants\SocialCards::QUOTE }}">
+<meta property="og:image:alt" content="{{ $imageAltText }}">
 <meta name="twitter:card" content="{{ \App\Constants\Seo::TWITTER_CARD }}">
 <meta name="twitter:title" content="{{ $pageTitle }}">
 @if ($metaDescription)
     <meta name="twitter:description" content="{{ $metaDescription }}">
 @endif
 <meta name="twitter:image" content="{{ $imageUrl }}">
-<meta name="twitter:image:alt" content="{{ \App\Constants\SocialCards::QUOTE }}">
+<meta name="twitter:image:alt" content="{{ $imageAltText }}">
 @if ($jsonLd)
     <script type="application/ld+json">{!! $jsonLd !!}</script>
 @endif

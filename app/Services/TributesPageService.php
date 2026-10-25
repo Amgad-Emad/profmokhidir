@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Constants\Pages;
 use App\Constants\PageSizes;
 use App\Constants\Sections;
 use App\Constants\SocialCards;
-use App\Constants\Taglines;
 use App\Constants\TributeCards;
 use App\Constants\TributeForm;
 use App\Constants\TributeRelationship;
@@ -40,6 +40,7 @@ class TributesPageService
     public function __construct(
         private readonly TributeService $tributes,
         private readonly NavigationService $navigation,
+        private readonly PageContentService $pages,
     ) {}
 
     /**
@@ -73,11 +74,14 @@ class TributesPageService
             'activeRelationship' => $relationship,
             'clearUrl' => $this->url(),
             'copy' => [
-                'label' => Taglines::TRIBUTES_LABEL,
-                'heading' => Taglines::TRIBUTES_HEADING,
-                'leaveTribute' => Taglines::LEAVE_TRIBUTE,
-                'featuredLabel' => Taglines::TRIBUTES_FEATURED_LABEL,
-                'bookLabel' => Taglines::TRIBUTES_BOOK_LABEL,
+                'label' => $this->text('label'),
+                'heading' => $this->text('heading'),
+                'leaveTribute' => $this->pages->link(Pages::TRIBUTES, 'button_tribute'),
+                'featuredLabel' => $this->text('featured_label'),
+                'bookLabel' => $this->text('book_label'),
+                'shareLabel' => $this->text('share_label'),
+                'empty' => $this->text('empty'),
+                'emptyFiltered' => $this->text('empty_filtered', [':relationship' => mb_strtolower($relationship?->plural() ?? 'anyone else')]),
             ],
             'shareImage' => $this->shareImage(),
             'createUrl' => route(self::ROUTE_CREATE),
@@ -102,11 +106,12 @@ class TributesPageService
     {
         return [
             'section' => $this->navigation->section(Sections::TRIBUTES, self::ROUTE_CREATE),
-            'title' => Taglines::LEAVE_TRIBUTE,
+            'title' => $this->text('form_title'),
             'step' => TributeForm::STEP_WRITE,
             'steps' => TributeForm::steps(),
-            'intro' => TributeForm::INTRO,
-            'fields' => TributeForm::fields(),
+            'intro' => $this->text('form_intro'),
+            'fields' => $this->fields(),
+            'copy' => ['preview' => $this->text('preview_button'), 'back' => $this->text('back_label')],
             'relationships' => $this->relationshipOptions(),
             'messageMaxLength' => Tribute::MESSAGE_MAX_LENGTH,
             'previewUrl' => route(self::ROUTE_PREVIEW),
@@ -143,11 +148,12 @@ class TributesPageService
 
         return [
             'section' => $this->navigation->section(Sections::TRIBUTES, self::ROUTE_PREVIEW),
-            'title' => Taglines::LEAVE_TRIBUTE,
+            'title' => $this->text('form_title'),
             'step' => TributeForm::STEP_PREVIEW,
             'steps' => TributeForm::steps(),
-            'intro' => TributeForm::PREVIEW_INTRO,
-            'consent' => TributeForm::CONSENT,
+            'intro' => $this->text('preview_intro'),
+            'consent' => $this->text('consent'),
+            'copy' => ['send' => $this->text('send_button'), 'change' => $this->text('change_button')],
             'tribute' => $tribute,
             'data' => $data,
             'storeUrl' => route(self::ROUTE_STORE),
@@ -162,9 +168,38 @@ class TributesPageService
     {
         return [
             'section' => $this->navigation->section(Sections::TRIBUTES, self::ROUTE_THANKS),
-            'message' => Taglines::TRIBUTE_THANKS,
+            'message' => $this->text('thanks'),
             'indexUrl' => route(self::ROUTE_INDEX),
+            'copy' => ['back' => $this->text('back_label'), 'home' => $this->text('home_button')],
         ];
+    }
+
+    /**
+     * One line of the tributes copy (Admin › Pages › Tributes).
+     *
+     * @param  array<string, string>  $replace
+     */
+    public function text(string $key, array $replace = []): string
+    {
+        return $this->pages->text(Pages::TRIBUTES, $key, $replace);
+    }
+
+    /**
+     * The form's field labels and hints.
+     *
+     * @return array<string, array{label: string, hint: string}>
+     */
+    public function fields(): array
+    {
+        $fields = TributeForm::fields();
+
+        foreach ($this->pages->items(Pages::TRIBUTES, 'fields') as $item) {
+            if (isset($fields[$item['key']])) {
+                $fields[$item['key']] = ['label' => $item['label'], 'hint' => $item['hint']];
+            }
+        }
+
+        return $fields;
     }
 
     /**

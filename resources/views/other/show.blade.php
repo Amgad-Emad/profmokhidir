@@ -1,3 +1,4 @@
+@inject('pageCopy', 'App\Services\PageContentService')
 <x-layouts.public :title="$item->title" :description="$item->summary">
     <article class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28" aria-labelledby="section-title">
         <div class="mx-auto max-w-measure">
@@ -15,7 +16,7 @@
 
             <nav class="mt-16" aria-label="Back" data-rise>
                 <hr class="rule-brass" data-rule>
-                <x-button :href="$section['url']" class="mt-10">All other information</x-button>
+                <x-button :href="$section['url']" class="mt-10">{{ $pageCopy->text('other', 'back_label') }}</x-button>
             </nav>
         </div>
     </article>

@@ -43,8 +43,8 @@
             <x-form.checkbox name="consent" required>{{ $consent }}</x-form.checkbox>
 
             <div class="flex flex-wrap items-center gap-4">
-                <x-button>Send tribute</x-button>
-                <x-button type="submit" variant="quiet" formaction="{{ $editUrl }}" formnovalidate>Change something</x-button>
+                <x-button>{{ $copy['send'] }}</x-button>
+                <x-button type="submit" variant="quiet" formaction="{{ $editUrl }}" formnovalidate>{{ $copy['change'] }}</x-button>
             </div>
         </form>
     </section>

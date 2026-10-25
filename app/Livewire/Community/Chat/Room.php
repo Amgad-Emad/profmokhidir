@@ -7,11 +7,10 @@ namespace App\Livewire\Community\Chat;
 use App\Constants\ChatCopy;
 use App\Constants\ChatFormat;
 use App\Constants\ChatSettings;
-use App\Constants\CommunityCopy;
 use App\Exceptions\ChatMessageConflictException;
-use App\Exceptions\CommunityApplicationException;
 use App\Exceptions\ChatMessageRemovedException;
 use App\Exceptions\ChatRateLimitException;
+use App\Exceptions\CommunityApplicationException;
 use App\Http\Requests\ChatMessageRequest;
 use App\Http\Requests\ChatReportRequest;
 use App\Models\ChatChannel;
@@ -318,10 +317,11 @@ class Room extends Component
         return view('livewire.community.chat.room', [
             'config' => ChatSettings::clientConfig() + ['attachments' => app(ChatAttachmentService::class)->clientConfig()],
             'communityUrl' => route(CommunityPageService::ROUTE_INDEX),
-            'suspendedHeading' => CommunityCopy::SUSPENDED_HEADING,
-            'suspendedMessage' => CommunityCopy::SUSPENDED,
-            'chatIntro' => CommunityCopy::CHAT_INTRO,
-            'conduct' => CommunityCopy::conductRules(),
+            'suspendedHeading' => $this->communityCopy()->text('suspended_heading'),
+            'suspendedMessage' => $this->communityCopy()->text('suspended'),
+            'communityLabel' => $this->communityCopy()->text('title'),
+            'chatIntro' => $this->communityCopy()->text('chat_intro'),
+            'conduct' => $this->communityCopy()->conductRules(),
             'hints' => ChatFormat::hints(),
             'canModerate' => ! $this->accessRevoked && $this->chat()->canModerate($this->viewer()),
         ])->title(ChatSettings::ROOM_NAME.' · '.ChatCopy::TITLE);
@@ -338,7 +338,7 @@ class Room extends Component
     private function guarded(callable $action): array
     {
         if ($this->accessRevoked) {
-            return $this->failure(self::ERROR_ACCESS, CommunityCopy::SUSPENDED);
+            return $this->failure(self::ERROR_ACCESS, $this->communityCopy()->text('suspended'));
         }
 
         $result = $this->attempt($action);
@@ -364,7 +364,7 @@ class Room extends Component
             if (! $this->viewer()->canAccessChat()) {
                 $this->accessRevoked = true;
 
-                return $this->failure(self::ERROR_ACCESS, CommunityCopy::SUSPENDED);
+                return $this->failure(self::ERROR_ACCESS, $this->communityCopy()->text('suspended'));
             }
 
             return $this->failure(self::ERROR_ACCESS, $exception->getMessage() ?: 'You may not do that.');
@@ -379,6 +379,14 @@ class Room extends Component
         } catch (InvalidArgumentException $exception) {
             return $this->failure(self::ERROR_INVALID, $exception->getMessage());
         }
+    }
+
+    /**
+     * The community page's copy (Admin › Pages), shared with the chat.
+     */
+    private function communityCopy(): CommunityPageService
+    {
+        return app(CommunityPageService::class);
     }
 
     /**

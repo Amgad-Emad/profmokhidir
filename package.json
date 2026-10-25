@@ -16,7 +16,8 @@
         "qa:focus": "node tests/qa/focus.mjs",
         "qa:buttons": "node tests/qa/buttons-auth.mjs",
         "qa:danger-forms": "node tests/qa/danger-forms.mjs",
-        "qa:analytics": "node tests/qa/analytics.mjs"
+        "qa:analytics": "node tests/qa/analytics.mjs",
+        "qa:pages": "node tests/qa/pages-cms.mjs"
     },
     "devDependencies": {
         "@axe-core/playwright": "^4.11.1",

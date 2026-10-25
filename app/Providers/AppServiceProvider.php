@@ -7,6 +7,7 @@ use App\Constants\RateLimits;
 use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\EnsureCommunityMember;
 use App\Models\User;
+use App\Services\PageContentService;
 use App\Services\SettingService;
 use App\Services\TypesetterService;
 use App\Support\PreviewContext;
@@ -26,6 +27,9 @@ class AppServiceProvider extends ServiceProvider
     {
         // The draft shown by a signed preview link lives for one request only.
         $this->app->scoped(PreviewContext::class);
+
+        // Page copy is read many times per request (header, footer, page): loaded once per request.
+        $this->app->scoped(PageContentService::class);
     }
 
     public function boot(): void

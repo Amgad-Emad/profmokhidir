@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\View\Components\Site;
 
 use App\Constants\Masthead;
+use App\Constants\Pages;
 use App\Constants\Search;
 use App\Services\MastheadService;
 use App\Services\NavigationService;
+use App\Services\PageContentService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\View\Component;
@@ -43,10 +45,13 @@ class Header extends Component
 
     public string $tributeUrl;
 
+    /** The tribute pill's label (Admin › Pages › Header & footer). */
+    public string $tributeLabel;
+
     /** @var list<array{key: string, label: string, title: string, url: string, route: string, placement: string, summary: string, active: bool}> */
     public array $sections;
 
-    public function __construct(MastheadService $masthead, NavigationService $navigation, Request $request, public bool $hero = false)
+    public function __construct(MastheadService $masthead, NavigationService $navigation, PageContentService $pages, Request $request, public bool $hero = false)
     {
         $current = $request->route()?->getName();
         $user = $request->user();
@@ -60,6 +65,7 @@ class Header extends Component
         $this->searchUrl = route(Search::ROUTE);
         $this->searchShortcuts = Search::keyShortcuts();
         $this->tributeUrl = route('tributes.create');
+        $this->tributeLabel = $pages->text(Pages::NAVIGATION, 'header_tribute');
     }
 
     public function menuId(): string

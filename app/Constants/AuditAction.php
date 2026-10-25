@@ -84,6 +84,11 @@ final class AuditAction
 
     public const string ADMIN_LOGIN = 'auth.admin_login';
 
+    /** Page copy (Admin › Pages): the editor's draft put live, or the page returned to its built-in copy. */
+    public const string PAGE_PUBLISHED = 'page.published';
+
+    public const string PAGE_UNPUBLISHED = 'page.unpublished';
+
     /**
      * @return list<string>
      */
@@ -98,7 +103,7 @@ final class AuditAction
             self::CONTENT_CREATED, self::CONTENT_RESTORED, self::CONTENT_PUBLISHED, self::CONTENT_UNPUBLISHED, self::CONTENT_DELETED, self::CONTENT_PURGED,
             self::TRIBUTE_EDITED, self::TRIBUTE_FEATURED, self::TRIBUTE_UNFEATURED, self::TRIBUTE_REOPENED, self::MEDIA_UPLOADED, self::MEDIA_UPDATED, self::MEDIA_DELETED,
             self::CHAT_MESSAGE_DELETED, self::CHAT_MESSAGE_REPORTED, self::CHAT_REPORT_RESOLVED,
-            self::CHAT_MESSAGE_PINNED, self::CHAT_MESSAGE_UNPINNED, self::ADMIN_LOGIN,
+            self::CHAT_MESSAGE_PINNED, self::CHAT_MESSAGE_UNPINNED, self::ADMIN_LOGIN, self::PAGE_PUBLISHED, self::PAGE_UNPUBLISHED,
         ];
     }
 
@@ -147,6 +152,8 @@ final class AuditAction
             self::CHAT_MESSAGE_PINNED => 'pinned a chat message',
             self::CHAT_MESSAGE_UNPINNED => 'unpinned a chat message',
             self::ADMIN_LOGIN => 'signed in',
+            self::PAGE_PUBLISHED => 'updated the wording of a page',
+            self::PAGE_UNPUBLISHED => 'returned a page to its original wording',
         ];
     }
 

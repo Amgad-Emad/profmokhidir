@@ -60,6 +60,20 @@ final class ErrorPages
     }
 
     /**
+     * What a status code means, in plain words (the admin names each error page by it).
+     */
+    public static function describe(int $code): string
+    {
+        return match ($code) {
+            self::FORBIDDEN => 'no permission',
+            self::NOT_FOUND => 'page not found',
+            self::PAGE_EXPIRED => 'form expired',
+            self::UNAVAILABLE => 'site down for maintenance',
+            default => 'something broke',
+        };
+    }
+
+    /**
      * @return list<int>
      */
     public static function codes(): array

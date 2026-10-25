@@ -5,7 +5,8 @@
     the hint line, otherwise "Optional" (`:optional="false"` for filters and search boxes).
     `class` goes on the field; every other attribute lands on the <input>. A trailing button
     (clear, show) goes in the `action` slot; `loading` names a Livewire target that puts the
-    control in its loading state while it runs; `frame` adds attributes to the frame itself.
+    control in its loading state while it runs; `frame` adds attributes to the frame itself. With a
+    Livewire `model`, `value` only seeds the character counter (Livewire fills the field).
 --}}
 @props([
     'name' => null,
@@ -50,7 +51,7 @@
     $frameClasses = ['form-control', 'form-control--compact' => $size === 'compact', 'form-control--display' => $size === 'display'];
     $frameAttributes = new \Illuminate\View\ComponentAttributeBag($frame);
 @endphp
-<x-form.field :field="$field" :hide-label="$hideLabel" :class="$attributes->get('class')" :counter-text="$field['counter'] ? strtr(\App\Constants\FormControls::COUNTER_FORMAT, [':count' => (string) mb_strlen((string) $current), ':max' => (string) $maxlength]) : null">
+<x-form.field :field="$field" :hide-label="$hideLabel" :class="$attributes->get('class')" :counter-text="$field['counter'] ? strtr(\App\Constants\FormControls::COUNTER_FORMAT, [':count' => (string) mb_strlen((string) ($model === null ? $current : $value)), ':max' => (string) $maxlength]) : null">
     <div @class($frameClasses) {{ $frameAttributes }} @if ($loading) wire:loading.attr="data-loading" wire:target="{{ $loading }}" @endif>
         @if ($prefix)
             <span class="form-control__affix" aria-hidden="true">{{ $prefix }}</span>

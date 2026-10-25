@@ -43,7 +43,8 @@ const PUBLIC_PAGES = [
     '/login', '/forgot-password', '/this-page-does-not-exist',
 ];
 const EDITOR_PAGES = [
-    '/admin', '/admin/content/profile', '/admin/content/cv', '/admin/content/cv/create',
+    '/admin', '/admin/content/pages', '/admin/content/pages/home/edit', '/admin/content/pages/community/edit', '/admin/content/pages/navigation/edit',
+    '/admin/content/profile', '/admin/content/cv', '/admin/content/cv/create',
     '/admin/content/publications', '/admin/content/publications/create', '/admin/content/awards',
     '/admin/content/commentary', '/admin/content/commentary/create', '/admin/content/teaching',
     '/admin/content/other', '/admin/media/library', '/admin/media/albums', '/admin/media/albums/create',

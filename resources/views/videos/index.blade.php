@@ -1,3 +1,4 @@
+@inject('pageCopy', 'App\Services\PageContentService')
 <x-layouts.public :title="$section['title']" :description="$section['summary']">
     <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28" aria-labelledby="section-title">
         <x-chapter-opening :number="$chapter" :label="$section['label']" :title="$section['title']" level="1" id="section-title">
@@ -5,13 +6,13 @@
         </x-chapter-opening>
 
         @if ($featured === null)
-            <x-empty-state class="mt-6" message="Recordings of lectures, interviews and events will appear here once they are published." />
+            <x-empty-state class="mt-6" :message="$pageCopy->text('videos', 'empty')" />
         @else
             <article class="lecture-hall mt-16" aria-labelledby="featured-title" data-rise>
                 <x-video-player :player="$player" :title="$featured->title" :featured="true" />
                 <div class="lecture-hall__label">
                     <div class="lecture-hall__text">
-                        <p class="t-label text-accent-text">Featured recording</p>
+                        <p class="t-label text-accent-text">{{ $pageCopy->text('videos', 'featured_label') }}</p>
                         <h2 id="featured-title" class="lecture-hall__title">
                             <a href="{{ route('videos.show', $featured->slug) }}" class="text-ink">{{ $featured->title }}</a>
                         </h2>
@@ -24,7 +25,7 @@
             </article>
 
             @if ($videos->isNotEmpty())
-                <h2 class="t-label mt-24 text-accent-text" id="all-recordings" data-rise>All recordings</h2>
+                <h2 class="t-label mt-24 text-accent-text" id="all-recordings" data-rise>{{ $pageCopy->text('videos', 'all_label') }}</h2>
                 <hr class="rule-brass mt-4" data-rule>
                 <ul class="mt-12 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3" data-rise-group aria-labelledby="all-recordings">
                     @foreach ($videos as $video)

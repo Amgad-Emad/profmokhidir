@@ -40,7 +40,7 @@
         $control,
     ), $attributes->except(['class'])->getAttributes());
 @endphp
-<x-form.field :field="$field" :hide-label="$hideLabel" :class="$attributes->get('class')" :counter-text="$field['counter'] ? strtr(\App\Constants\FormControls::COUNTER_FORMAT, [':count' => (string) mb_strlen($current), ':max' => (string) $maxlength]) : null">
+<x-form.field :field="$field" :hide-label="$hideLabel" :class="$attributes->get('class')" :counter-text="$field['counter'] ? strtr(\App\Constants\FormControls::COUNTER_FORMAT, [':count' => (string) mb_strlen($model === null ? $current : (string) $value), ':max' => (string) $maxlength]) : null">
     <div class="form-control">
         <textarea @class(['form-control__input', 'form-control__input--mono' => $mono, $controlClass => $controlClass !== null]) {{ $textareaAttributes }}>{{ $current }}</textarea>
         {{ $action ?? '' }}

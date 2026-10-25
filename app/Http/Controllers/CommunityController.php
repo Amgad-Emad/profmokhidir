@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Constants\CommunityCopy;
 use App\Http\Requests\CommunitySignupRequest;
 use App\Models\User;
 use App\Services\CommunityPageService;
@@ -27,7 +26,7 @@ class CommunityController extends Controller
         return view('community.index', $page->index($request->user()));
     }
 
-    public function store(CommunitySignupRequest $request, CommunityService $community): RedirectResponse
+    public function store(CommunitySignupRequest $request, CommunityService $community, CommunityPageService $page): RedirectResponse
     {
         if ($request->isSpam()) {
             return redirect()->route(CommunityPageService::ROUTE_INDEX);
@@ -46,6 +45,6 @@ class CommunityController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route(CommunityPageService::ROUTE_INDEX)->with(self::STATUS_KEY, CommunityCopy::SUBMITTED);
+        return redirect()->route(CommunityPageService::ROUTE_INDEX)->with(self::STATUS_KEY, $page->text('submitted'));
     }
 }

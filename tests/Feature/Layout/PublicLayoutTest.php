@@ -66,7 +66,7 @@ class PublicLayoutTest extends TestCase
         $this->assertStringContainsString('data-variant="stacked"', $footer);
         $this->assertStringContainsString('<p class="t-quote max-w-xl">'.Footer::CLOSING_LINE.'</p>', $footer);
         $this->assertStringContainsString('<p class="t-label text-accent-text">'.Footer::DOMAIN.'</p>', $footer);
-        $this->assertStringContainsString('&copy; '.date('Y'), $footer);
+        $this->assertStringContainsString('© '.date('Y'), $footer);
 
         preg_match_all('/class="footer-link"[^>]*>([^<]+)<\/a>/', $footer, $links);
         $this->assertCount(11, $links[1]);
