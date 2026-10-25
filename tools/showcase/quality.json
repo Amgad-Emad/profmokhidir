@@ -1,0 +1,38 @@
+{
+    "measuredLabel": "25 October 2026",
+    "tests": { "total": 1714, "passed": 1713, "failed": 0, "skipped": 1, "skippedReason": "a check for unfinished sections, which no longer applies because every section is built", "assertions": 30567 },
+    "axe": {
+        "summary": "An automated accessibility audit (axe, against WCAG 2.x levels A and AA) opened 57 pages: every public page in the sitemap, the sign-in and account screens, the dashboard screens and the community chat, signed in as an editor, an administrator and a member. Each page was checked on a phone (360 px) and a desktop (1366 px), in the light and the dark appearance. 1,022 checks ran and none failed.",
+        "rows": [
+            ["Automatic WCAG A and AA rules (axe)", "282 page checks, 0 problems"],
+            ["Headings in a logical order", "228 checks, 0 problems"],
+            ["Every control reachable and visible with the keyboard", "228 checks, 0 problems"],
+            ["Content shown in full when the device asks for reduced motion", "56 checks, 0 problems"],
+            ["Pages load correctly (including the designed \"not found\" page)", "228 checks, 0 problems"]
+        ]
+    },
+    "lighthouse": {
+        "summary": "Google Lighthouse, in its mobile setting (a mid-range phone on a slowed connection), scored the four main pages. The target was 90 or more in every column.",
+        "rows": [
+            ["Home", "99", "100", "100", "100"],
+            ["About", "99", "100", "100", "100"],
+            ["Publications", "98", "100", "100", "100"],
+            ["Pictures", "99", "100", "100", "100"]
+        ]
+    },
+    "smoke": {
+        "summary": "The whole-site check opened 32 pages (every public page plus the dashboard, the account page and the chat) at phone, tablet and desktop widths (360, 768 and 1440 px) in both appearances. 1,350 checks ran and none failed.",
+        "rows": [
+            ["Page loads without errors", "192 checks, 0 problems"],
+            ["No error messages in the browser", "192 checks, 0 problems"],
+            ["Every image, style and script loads", "192 checks, 0 problems"],
+            ["No sideways scrolling", "192 checks, 0 problems"],
+            ["Links within the site work", "174 checks, 0 problems"],
+            ["Light and dark appearance applied", "192 checks, 0 problems"]
+        ]
+    },
+    "notes": [
+        "The only warnings were the 15 sample DOI links on the Publications page, which point to placeholder addresses and will be replaced by the real ones.",
+        "Lighthouse suggests longer browser caching for images and styles; this is set on the live server, not in the site itself."
+    ]
+}

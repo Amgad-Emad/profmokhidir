@@ -18,7 +18,9 @@
         "qa:danger-forms": "node tests/qa/danger-forms.mjs",
         "qa:analytics": "node tests/qa/analytics.mjs",
         "qa:pages": "node tests/qa/pages-cms.mjs",
-        "qa:readability": "node tests/qa/readability.mjs"
+        "qa:readability": "node tests/qa/readability.mjs",
+        "showcase": "npm --prefix tools/showcase install --silent --no-audit --no-fund && node tools/showcase/build.mjs",
+        "showcase:capture": "npm --prefix tools/showcase install --silent --no-audit --no-fund && node tools/showcase/capture.mjs"
     },
     "devDependencies": {
         "@axe-core/playwright": "^4.11.1",

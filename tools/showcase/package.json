@@ -1,0 +1,15 @@
+{
+    "name": "profmokhidir-showcase",
+    "private": true,
+    "type": "module",
+    "description": "Builds the client progress report (docs/client-showcase) from fresh screenshots.",
+    "scripts": {
+        "capture": "node capture.mjs",
+        "build": "node build.mjs"
+    },
+    "devDependencies": {
+        "docx": "^9.14.0",
+        "jszip": "^3.10.2"
+    },
+    "version": "1.0.0"
+}
