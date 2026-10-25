@@ -16,7 +16,7 @@
     @unless ($audience['enabled'])
         <div class="analytics-off mt-6" data-analytics-off>
             <x-icon name="info" class="mt-0.5 size-5 text-accent-text" />
-            <p class="text-base font-light text-ink-muted">
+            <p class="text-base font-normal text-ink-muted">
                 Visitor analytics is switched off, so nothing is being recorded. It is first-party and cookieless, and is switched on in
                 @can(\App\Constants\Permissions::MANAGE_SETTINGS)
                     <a href="{{ route(AdminNavigation::routeFor(AdminNavigation::SITE_SETTINGS)) }}#analytics">Site settings</a>
@@ -29,7 +29,7 @@
     @endunless
 
     @if ($audience['hasData'])
-        <p class="mt-6 text-sm font-light text-ink-muted">Last 30 days, {{ $audience['period']['label'] }}, against {{ $audience['period']['comparison'] }}.</p>
+        <p class="mt-6 text-sm font-normal text-ink-muted">Last 30 days, {{ $audience['period']['label'] }}, against {{ $audience['period']['comparison'] }}.</p>
         <div class="analytics-figures mt-4">
             @foreach ($audience['headline'] as $key => $figure)
                 <x-admin.analytics-figure :figure="$figure" :comparison="$audience['period']['comparison']" :key="$key" />

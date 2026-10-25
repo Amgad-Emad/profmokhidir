@@ -237,7 +237,7 @@
         margin-top: 0.75rem;
         max-width: 18rem;
         font-family: var(--font-sans);
-        font-weight: 300;
+        font-weight: 400;
         font-size: 1rem;
         line-height: 1.6;
         color: var(--ink);
@@ -311,7 +311,7 @@
         display: block;
         margin-top: 0.125rem;
         font-family: var(--font-sans);
-        font-weight: 300;
+        font-weight: 400;
         font-size: 0.9375rem;
         line-height: 1.5;
         color: var(--ink);
@@ -382,7 +382,7 @@
         gap: 0.5rem;
         padding-inline: 0.25rem;
         border-radius: 9999px;
-        font-size: 0.875rem;
+        font-size: 0.9375rem; /* 15px */
         color: var(--ink);
     }
 
@@ -473,7 +473,7 @@
         gap: 0.75rem;
         padding: 0.5rem 1rem;
         font-size: 0.9375rem;
-        font-weight: 400;
+        font-weight: 500;
         color: var(--ink);
         text-align: left;
         text-decoration: none;

@@ -103,7 +103,7 @@ class StyleguideServiceTest extends TestCase
     {
         $sections = $this->service->sections();
 
-        $this->assertSame(['colours', 'functionalColours', 'fonts', 'typeScale', 'motion', 'typesetting', 'ornaments', 'typesetExamples', 'components'], array_keys($sections));
+        $this->assertSame(['colours', 'functionalColours', 'fonts', 'typeScale', 'motion', 'typesetting', 'ornaments', 'typesetExamples', 'components', 'sectionCards'], array_keys($sections));
         $this->assertSame(array_keys(Components::groups()), array_keys($sections['components']));
         $this->assertCount(count(Components::all()), array_merge(...array_column($sections['components'], 'components')));
         $this->assertCount(9, $sections['colours']);

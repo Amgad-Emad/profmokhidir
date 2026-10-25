@@ -103,7 +103,7 @@ class ContentIndexComponentTest extends TestCase
                 && $params['undo']['args'] === [[$award->getKey()]]
                 && $params['seconds'] === AdminUx::UNDO_SECONDS)
             ->assertDontSee('Gold medal')
-            ->assertSee('Trash<span class="ml-2 text-xs text-ink-muted">1</span>', false);
+            ->assertSee('Trash<span class="ml-2 text-sm text-ink-muted">1</span>', false);
 
         $this->assertNotNull($award->fresh()->deleted_at);
 

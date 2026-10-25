@@ -33,7 +33,7 @@
             <div class="chat-panel__section">
                 <h3 class="t-label text-accent-text">{{ ChatSettings::ROOM_NAME }}</h3>
                 <p class="chat-panel__text mt-2" x-text="currentChannel?.description || @js($chatIntro)"></p>
-                <p class="mt-2 text-sm font-light text-ink-muted">{{ $chatIntro }}</p>
+                <p class="mt-2 text-sm font-normal text-ink-muted">{{ $chatIntro }}</p>
             </div>
 
             <div class="chat-panel__section">
@@ -48,7 +48,7 @@
         </section>
 
         <section role="tabpanel" id="chat-tabpanel-{{ ChatSettings::TAB_PINNED }}" aria-labelledby="chat-tab-{{ ChatSettings::TAB_PINNED }}" class="chat-panel__section" x-show="panelTab === 'pinned'" x-cloak data-pins>
-            <p class="text-sm font-light text-ink-muted" x-show="pins.length === 0">{{ ChatCopy::NO_PINS }}</p>
+            <p class="text-sm font-normal text-ink-muted" x-show="pins.length === 0">{{ ChatCopy::NO_PINS }}</p>
             <ol class="chat-panel__list" x-show="pins.length > 0">
                 <template x-for="p in pins" :key="p.id">
                     <li>
@@ -75,7 +75,7 @@
                               :placeholder="ChatCopy::MEMBER_SEARCH_PLACEHOLDER" autocomplete="off" maxlength="100"
                               :control="['x-model.debounce.150ms' => 'memberSearch']" />
             </div>
-            <p class="mt-3 text-sm font-light text-ink-muted" role="status" x-show="memberSearch.trim() !== '' && filteredMembers.length === 0" x-text="config.copy.memberSearchNone"></p>
+            <p class="mt-3 text-sm font-normal text-ink-muted" role="status" x-show="memberSearch.trim() !== '' && filteredMembers.length === 0" x-text="config.copy.memberSearchNone"></p>
 
             <ul class="chat-members" data-members-list>
                 <template x-for="member in filteredMembers" :key="member.id">

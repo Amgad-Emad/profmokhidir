@@ -117,19 +117,13 @@
         </div>
     </section>
 
-    {{-- 5. Continue the story: three quiet entry cards. 6. The seal and the closing line. --}}
+    {{-- 5. Continue the story: three section cards across the content width. 6. The seal and the closing line. --}}
     <section class="bg-surface text-ink" aria-labelledby="continue-the-story">
         <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28">
             <x-chapter-opening :title="$copy['continue']" id="continue-the-story" />
-            <ul class="mt-12 grid gap-6 md:grid-cols-3" data-rise-group>
+            <ul class="section-cards mt-12" data-rise-group>
                 @foreach ($stories as $story)
-                    <li class="story-card card card-ivory">
-                        @if ($story['photo'])
-                            <x-photo :media="$story['photo']" sizes="(min-width: 768px) 30vw, 100vw" aspect="3 / 2" class="story-card__photo" />
-                        @endif
-                        <a href="{{ $story['url'] }}" class="story-card__link t-label text-accent-text">{{ $story['title'] }}</a>
-                        <p class="story-card__line">{{ $story['line'] }}</p>
-                    </li>
+                    <li><x-section-card :card="$story" /></li>
                 @endforeach
             </ul>
 

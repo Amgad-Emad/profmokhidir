@@ -71,11 +71,9 @@
     /* ---- Ink. */
     --ink: light-dark(var(--brand-evergreen), var(--brand-champagne));
     --ink-strong: light-dark(var(--brand-evergreen), var(--brand-ivory));
-    --ink-muted: light-dark(var(--brand-ash), color-mix(in srgb, var(--brand-stone) 88%, transparent));
-    --ink-quiet: light-dark(
-        color-mix(in srgb, var(--brand-ash) 94%, var(--brand-ivory)),
-        color-mix(in srgb, var(--brand-stone) 80%, transparent)
-    );
+    /* Muted carries descriptions and hints, so it holds 7:1 on the page in both themes (ThemeContrastTest); quiet is for marginal text only (4.5:1). */
+    --ink-muted: light-dark(color-mix(in srgb, var(--brand-ash) 70%, var(--brand-evergreen)), var(--brand-stone));
+    --ink-quiet: light-dark(var(--brand-ash), color-mix(in srgb, var(--brand-stone) 88%, transparent));
     --ink-on-band: var(--brand-champagne);
     --ink-on-band-strong: var(--brand-ivory);
     --ink-on-hero: var(--brand-champagne);
@@ -154,8 +152,8 @@
     --surface-field: light-dark(color-mix(in srgb, var(--brand-ivory) 6%, transparent), var(--brand-evergreen));
     --ink: var(--brand-champagne);
     --ink-strong: var(--brand-ivory);
-    --ink-muted: color-mix(in srgb, var(--brand-champagne) 86%, transparent);
-    --ink-quiet: color-mix(in srgb, var(--brand-champagne) 80%, transparent);
+    --ink-muted: color-mix(in srgb, var(--brand-champagne) 92%, transparent);
+    --ink-quiet: color-mix(in srgb, var(--brand-champagne) 84%, transparent);
     --fill: var(--brand-ivory);
     --fill-ink: var(--brand-evergreen);
     --fill-hover: var(--brand-linen);

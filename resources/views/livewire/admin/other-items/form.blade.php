@@ -23,7 +23,7 @@
         <x-admin.form-section id="images" title="Images" :form="false">
             <x-admin.image-grid :media="$media" :missing="$missing" :images="$images" :details-required="$detailsRequired" :accept="$imageAccept" :hint="$imageHint" multiple :confirming-id="$confirmingImageId" :can-upload="! $isNew" />
             @if ($isNew)
-                <p class="text-sm font-light text-ink-muted">Images can be added once the item has a title and has been saved once.</p>
+                <p class="text-sm font-normal text-ink-muted">Images can be added once the item has a title and has been saved once.</p>
             @endif
         </x-admin.form-section>
     </x-admin.edit-layout>

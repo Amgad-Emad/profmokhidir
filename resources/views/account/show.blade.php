@@ -11,7 +11,7 @@
         <header class="flex flex-col gap-2">
             <p class="t-label text-accent-text">Settings</p>
             <h1 class="t-heading">Your account</h1>
-            <p class="max-w-2xl text-base font-light text-ink-muted">Update your name and email, change your password, choose the appearance and manage two-factor authentication.</p>
+            <p class="max-w-2xl text-base font-normal text-ink-muted">Update your name and email, change your password, choose the appearance and manage two-factor authentication.</p>
         </header>
 
         @if ($status && AuthStatus::isValid($status))
@@ -21,7 +21,7 @@
         {{-- Profile --}}
         <section class="mt-12 rounded-card border border-rule bg-surface-panel p-6 sm:p-8" aria-labelledby="profile-heading">
             <h2 id="profile-heading" class="font-display text-3xl font-light">Name and email</h2>
-            <p class="mt-2 text-sm font-light text-ink-muted">Changing your email address will ask you to verify it again.</p>
+            <p class="mt-2 text-sm font-normal text-ink-muted">Changing your email address will ask you to verify it again.</p>
 
             <form novalidate method="POST" action="{{ route('user-profile-information.update') }}" class="form-grid mt-6">
                 @csrf
@@ -35,7 +35,7 @@
         {{-- Password --}}
         <section class="mt-8 rounded-card border border-rule bg-surface-panel p-6 sm:p-8" aria-labelledby="password-heading">
             <h2 id="password-heading" class="font-display text-3xl font-light">Password</h2>
-            <p class="mt-2 text-sm font-light text-ink-muted">Use a long passphrase you do not use anywhere else.</p>
+            <p class="mt-2 text-sm font-normal text-ink-muted">Use a long passphrase you do not use anywhere else.</p>
 
             <form novalidate method="POST" action="{{ route('user-password.update') }}" class="form-grid mt-6">
                 @csrf
@@ -52,7 +52,7 @@
             <div class="flex items-start justify-between gap-6">
                 <div>
                     <h2 id="appearance-heading" class="font-display text-3xl font-light">{{ ThemeSettings::LABEL }}</h2>
-                    <p class="mt-2 max-w-xl text-sm font-light text-ink-muted">{{ ThemeSettings::ACCOUNT_INTRO }}</p>
+                    <p class="mt-2 max-w-xl text-sm font-normal text-ink-muted">{{ ThemeSettings::ACCOUNT_INTRO }}</p>
                 </div>
                 <x-theme.switch id="theme-switch-account" class="shrink-0" />
             </div>
@@ -73,7 +73,7 @@
             @if ($twoFactor['recommended'])
                 <p class="t-label mt-3 text-accent-text" data-two-factor-recommended>Recommended for administrator accounts</p>
             @endif
-            <p class="mt-2 text-sm font-light text-ink-muted">
+            <p class="mt-2 text-sm font-normal text-ink-muted">
                 When enabled, signing in also asks for a six-digit code from an authenticator app such as Google Authenticator, 1Password or Authy.
             </p>
 
@@ -94,7 +94,7 @@
                         {!! $twoFactor['qr_code'] !!}
                     </div>
                     <div class="space-y-4">
-                        <p class="text-base font-light">Scan the code with your authenticator app, or enter this key by hand:</p>
+                        <p class="text-base font-normal">Scan the code with your authenticator app, or enter this key by hand:</p>
                         <p class="font-mono text-sm tracking-wide break-all" data-setup-key>{{ $twoFactor['setup_key'] }}</p>
                         <form novalidate method="POST" action="{{ route('two-factor.confirm') }}" class="space-y-4">
                             @csrf
@@ -110,7 +110,7 @@
             @if ($twoFactor['confirmed'])
                 <details class="mt-6 rounded-card border border-rule bg-surface-raised p-4" data-recovery-codes>
                     <summary class="cursor-pointer font-medium">Recovery codes</summary>
-                    <p class="mt-2 text-sm font-light text-ink-muted">Each code signs you in once if you lose your authenticator. Keep them somewhere safe.</p>
+                    <p class="mt-2 text-sm font-normal text-ink-muted">Each code signs you in once if you lose your authenticator. Keep them somewhere safe.</p>
                     <ul class="mt-4 grid gap-2 font-mono text-sm sm:grid-cols-2">
                         @foreach ($twoFactor['recovery_codes'] as $code)
                             <li>{{ $code }}</li>
@@ -136,7 +136,7 @@
         <section class="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-rule pt-8" aria-labelledby="sign-out-heading" data-account-sign-out>
             <div>
                 <h2 id="sign-out-heading" class="font-display text-3xl font-light">Sign out</h2>
-                <p class="mt-2 text-sm font-light text-ink-muted">Signed in as {{ $user->email }}.</p>
+                <p class="mt-2 text-sm font-normal text-ink-muted">Signed in as {{ $user->email }}.</p>
             </div>
             <x-account.sign-out />
         </section>

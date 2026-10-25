@@ -47,7 +47,7 @@
     @elseif ($hasCaption())
         <figcaption class="flex flex-col gap-1">
             @if ($showCaption && $caption)
-                <span class="text-base font-light {{ $onDark() ? 'text-ink' : 'text-ink-muted' }}">{{ $caption }}</span>
+                <span class="text-base font-normal {{ $onDark() ? 'text-ink' : 'text-ink-muted' }}">{{ $caption }}</span>
             @endif
             @if ($placeYear)
                 <span class="t-label text-accent-text">{{ $placeYear }}</span>

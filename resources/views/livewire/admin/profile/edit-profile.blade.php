@@ -42,7 +42,7 @@
         <x-admin.form-section id="portrait" title="Portrait" intro="The photograph that opens the About page and the sign-in screens. It needs alt text, a caption, a place and a year before the profile can be published." :form="false">
             <x-admin.image-grid label="Portrait" :media="$media" :missing="$missing" :images="$images" :details-required="$detailsRequired" :accept="$imageAccept" :hint="$imageHint" :confirming-id="$confirmingImageId" :can-upload="! $isNew" />
             @if ($isNew)
-                <p class="text-sm font-light text-ink-muted">The portrait can be added once the profile has a name and has been saved once.</p>
+                <p class="text-sm font-normal text-ink-muted">The portrait can be added once the profile has a name and has been saved once.</p>
             @endif
         </x-admin.form-section>
 

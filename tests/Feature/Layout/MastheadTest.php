@@ -103,7 +103,7 @@ class MastheadTest extends TestCase
         $this->assertStringContainsString('--duration-mega: '.Masthead::MENU_DURATION_MS.'ms;', $css);
         $this->assertMatchesRegularExpression('/\.mega-menu--hidden \{\s*opacity: 0;\s*transform: translateY\(var\(--mega-rise\)\);/', $css);
         $this->assertMatchesRegularExpression('/\.mega-menu__name \{[^}]*font-family: var\(--font-display\);/', $css);
-        $this->assertMatchesRegularExpression('/\.mega-menu__link-description,\s*\.site-menu__link-description \{[^}]*font-family: var\(--font-sans\);\s*font-weight: 300;/', $css);
+        $this->assertMatchesRegularExpression('/\.mega-menu__link-description,\s*\.site-menu__link-description \{[^}]*font-family: var\(--font-sans\);\s*font-weight: 400;/', $css);
         $this->assertStringContainsString('prefers-reduced-motion: reduce', file_get_contents(resource_path('css/app.css')));
     }
 

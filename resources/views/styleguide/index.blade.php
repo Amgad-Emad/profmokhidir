@@ -45,7 +45,7 @@ SVG);
                             </div>
                             <p class="t-label mt-2 text-bronze">{{ $colour['role'] }}</p>
                             <p class="mt-3 text-sm leading-relaxed text-ash">{{ $colour['usage'] }}</p>
-                            <dl class="mt-4 grid grid-cols-2 gap-2 font-mono text-xs text-ash">
+                            <dl class="mt-4 grid grid-cols-2 gap-2 font-mono text-sm text-ash">
                                 <div><dt class="t-label !tracking-[0.2em]">On ivory</dt><dd class="mt-1">{{ $ratio($colour['onIvory']) }}</dd></div>
                                 <div><dt class="t-label !tracking-[0.2em]">On evergreen</dt><dd class="mt-1">{{ $ratio($colour['onEvergreen']) }}</dd></div>
                             </dl>
@@ -72,7 +72,7 @@ SVG);
                             </div>
                             <p class="t-label mt-2 text-bronze">{{ $colour['role'] }}</p>
                             <p class="mt-3 text-sm leading-relaxed text-ash">{{ $colour['usage'] }}</p>
-                            <dl class="mt-4 grid grid-cols-2 gap-2 font-mono text-xs text-ash">
+                            <dl class="mt-4 grid grid-cols-2 gap-2 font-mono text-sm text-ash">
                                 @foreach ($colour['contrast'] as $surface => $contrast)
                                     <div><dt class="t-label !tracking-[0.2em]">On {{ $surface }}</dt><dd class="mt-1">{{ $ratio($contrast) }}</dd></div>
                                 @endforeach
@@ -93,7 +93,7 @@ SVG);
                     <div class="card">
                         <dt class="t-label text-bronze">font-{{ $token }}</dt>
                         <dd class="mt-2 text-2xl {{ ['display' => 'font-display', 'sans' => 'font-sans', 'mono' => 'font-mono'][$token] }}">{{ $font['family'] }}</dd>
-                        <dd class="mt-1 font-mono text-xs text-ash">{{ implode(' · ', $font['weights']) }}{{ $font['italic'] ? ' · italic' : '' }}</dd>
+                        <dd class="mt-1 font-mono text-sm text-ash">{{ implode(' · ', $font['weights']) }}{{ $font['italic'] ? ' · italic' : '' }}</dd>
                         <dd class="mt-3 text-sm text-ash">{{ $font['use'] }}</dd>
                     </div>
                 @endforeach
@@ -103,7 +103,7 @@ SVG);
                     <div class="grid gap-4 border-b border-stone pb-10 md:grid-cols-[12rem_1fr]" data-rise>
                         <div>
                             <p class="t-label text-bronze">.{{ $style['class'] }}</p>
-                            <p class="mt-2 font-mono text-xs leading-relaxed text-ash">
+                            <p class="mt-2 font-mono text-sm leading-relaxed text-ash">
                                 {{ $style['size'] }}px{{ $style['mobile'] !== $style['size'] ? ' → '.$style['mobile'].'px mobile' : '' }}<br>
                                 {{ $style['font'] }} {{ $style['weight'] }}{{ $style['italic'] ? ' italic' : '' }}<br>
                                 leading {{ $style['lineHeight'] }}{{ $style['tracking'] ? ' · tracking '.$style['tracking'] : '' }}{{ $style['uppercase'] ? ' · uppercase' : '' }}
@@ -192,6 +192,12 @@ SVG);
                     <p class="mt-4 font-display text-2xl italic">Nothing has been published here yet.</p>
                 </article>
             </div>
+            <p class="t-label mt-12 text-accent-text">&lt;x-section-card&gt; in ul.section-cards · the grid fills the content width (auto-fit, 280px minimum, 24px gap)</p>
+            <ul class="section-cards mt-4" data-rise-group>
+                @foreach ($sectionCards as $card)
+                    <li><x-section-card :card="$card" /></li>
+                @endforeach
+            </ul>
         </section>
 
         {{-- Rules and glow --}}
@@ -220,12 +226,12 @@ SVG);
             <div class="mt-8 grid gap-5 md:grid-cols-2" data-rise-group>
                 <div class="card on-dark flex flex-wrap items-end gap-8 border-cypress bg-evergreen text-champagne">
                     @foreach ([96, 64, 48, 32, 24] as $size)
-                        <div class="flex flex-col items-center gap-2"><x-brand.mark :size="$size" /><span class="font-mono text-xs text-champagne/70">{{ $size }}px</span></div>
+                        <div class="flex flex-col items-center gap-2"><x-brand.mark :size="$size" /><span class="font-mono text-sm text-champagne/70">{{ $size }}px</span></div>
                     @endforeach
                 </div>
                 <div class="card flex flex-wrap items-end gap-8">
                     @foreach ([96, 64, 48, 32, 24] as $size)
-                        <div class="flex flex-col items-center gap-2"><x-brand.mark :size="$size" tone="evergreen" /><span class="font-mono text-xs text-ash">{{ $size }}px</span></div>
+                        <div class="flex flex-col items-center gap-2"><x-brand.mark :size="$size" tone="evergreen" /><span class="font-mono text-sm text-ash">{{ $size }}px</span></div>
                     @endforeach
                 </div>
             </div>
@@ -304,7 +310,7 @@ SVG);
             <p class="t-label mt-16 text-bronze">Self-hosted font files</p>
             <ul class="mt-2 flex flex-col gap-1">
                 @foreach (Typography::files() as $file)
-                    <li><code class="block break-all font-mono text-xs text-ash">{{ Typography::path($file['file']) }} · {{ $file['family'] }} {{ $file['style'] }} {{ $file['weight'] }}</code></li>
+                    <li><code class="block break-all font-mono text-sm text-ash">{{ Typography::path($file['file']) }} · {{ $file['family'] }} {{ $file['style'] }} {{ $file['weight'] }}</code></li>
                 @endforeach
             </ul>
         </section>
@@ -321,9 +327,9 @@ SVG);
                 @foreach ($typesetting['features'] as $key => $feature)
                     <div class="card card-ivory">
                         <dt class="t-label text-bronze">{{ $feature['context'] }}</dt>
-                        <dd class="mt-2 font-mono text-xs text-ash">{{ $feature['css'] }}</dd>
+                        <dd class="mt-2 font-mono text-sm text-ash">{{ $feature['css'] }}</dd>
                         @if ($feature['features'] !== [])
-                            <dd class="mt-1 font-mono text-xs text-ash">{{ implode(' · ', $feature['features']) }}</dd>
+                            <dd class="mt-1 font-mono text-sm text-ash">{{ implode(' · ', $feature['features']) }}</dd>
                         @endif
                     </div>
                 @endforeach
@@ -502,8 +508,8 @@ SVG);
                             <div class="grid gap-2 py-6 md:grid-cols-[14rem_minmax(0,1fr)] md:gap-8" data-component="{{ $component['tag'] }}">
                                 <dt><code class="font-mono text-sm text-evergreen">&lt;{{ $component['tag'] }}&gt;</code></dt>
                                 <dd class="flex flex-col gap-1">
-                                    <span class="text-base font-normal text-evergreen">{{ $component['purpose'] }}</span>
-                                    <span class="text-base font-light text-ash">{{ $component['usage'] }}</span>
+                                    <span class="text-base font-medium text-evergreen">{{ $component['purpose'] }}</span>
+                                    <span class="text-base font-normal text-ash">{{ $component['usage'] }}</span>
                                 </dd>
                             </div>
                         @endforeach

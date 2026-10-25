@@ -20,6 +20,6 @@
         <span>Fewer</span>
         <span class="world-map-scale__steps" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></span>
         <span>More visitors</span>
-        <span class="ml-auto text-xs">{{ $map['attribution'] }}</span>
+        <span class="ml-auto text-sm">{{ $map['attribution'] }}</span>
     </figcaption>
 </figure>

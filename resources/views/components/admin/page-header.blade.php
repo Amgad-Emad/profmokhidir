@@ -5,7 +5,7 @@
         <p class="t-label text-accent-text">{{ $eyebrow }}</p>
         <h1 class="t-heading">{{ $title }}</h1>
         @if ($intro)
-            <p class="max-w-2xl text-base font-light text-ink-muted">{{ $intro }}</p>
+            <p class="max-w-2xl text-base font-normal text-ink-muted">{{ $intro }}</p>
         @endif
     </div>
     @if (trim($slot) !== '')

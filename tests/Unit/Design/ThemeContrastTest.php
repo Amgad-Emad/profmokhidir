@@ -23,6 +23,9 @@ class ThemeContrastTest extends TestCase
 
     private const float UI_MINIMUM = 3.0;
 
+    /** Secondary text that carries content (AAA's 7:1). */
+    private const float CONTENT_MINIMUM = 7.0;
+
     /** Inks that carry text of any size. */
     private const array TEXT_INKS = ['ink', 'ink-strong', 'ink-muted', 'ink-quiet', 'accent-text', 'danger', 'pending-tone', 'success-tone', 'neutral-tone'];
 
@@ -142,6 +145,38 @@ class ThemeContrastTest extends TestCase
         }
 
         $this->assertSame([], $failures, "Text below 4.5:1:\n".implode("\n", $failures));
+    }
+
+    /**
+     * Secondary text that carries content (descriptions, hints, metadata) is set in the
+     * muted ink: it reaches 7:1 wherever reading happens, the page and its sunken and raised
+     * surfaces in the light theme, the page in the dark theme and the evergreen band and hero.
+     * Cypress (the dark theme's raised surface and band) holds the main ink at 6.1:1, so the
+     * muted ink there only needs the 4.5:1 checked above.
+     */
+    #[Test]
+    public function the_muted_ink_reaches_7_to_1_where_content_is_read(): void
+    {
+        $failures = [];
+        $reading = ['light page', 'light page raised', 'dark page', 'light band', 'light hero', 'dark hero'];
+
+        foreach ($reading as $label) {
+            $context = self::contexts()[$label];
+
+            foreach ($this->surfacesFor($context) as $surfaceName => $surface) {
+                if (str_contains($surfaceName, 'field') || ($context['layers'] !== [] && $surfaceName !== 'surface')) {
+                    continue;
+                }
+
+                $ratio = $this->ratio($this->resolve('ink-muted', $context), $surface);
+
+                if ($ratio < self::CONTENT_MINIMUM) {
+                    $failures[] = sprintf('%s: --ink-muted on --%s is %.2f:1', $label, $surfaceName, $ratio);
+                }
+            }
+        }
+
+        $this->assertSame([], $failures, "Muted ink below 7:1:\n".implode("\n", $failures));
     }
 
     #[Test]

@@ -6,6 +6,7 @@ namespace App\Constants\PageDefinitions;
 
 use App\Constants\Catalogue;
 use App\Constants\Pages;
+use App\Constants\SectionCards;
 use App\Constants\Sections;
 use App\Constants\Taglines;
 use App\Support\PageBlockDefinition as Block;
@@ -38,6 +39,7 @@ final class SectionBlocks
         return [
             Block::shortText('title', 'Page heading', self::SECTION_OPENING, $section['title'], 60, hint: 'Also its name in breadcrumbs, search results and the cards that lead here.'),
             Block::shortText('intro', 'Introduction', self::SECTION_OPENING, $section['summary'], 240, hint: 'One or two sentences under the heading. Also used in menus, cards and as the search description.'),
+            Block::image(SectionCards::IMAGE_BLOCK, 'Card image', self::SECTION_OPENING, 'Optional. Shown as a narrow duotone strip on the cards that lead here from the home page and About.'),
             ...self::extra($page),
             Block::seo(self::SECTION_SEO, hint: $page === Pages::ABOUT ? 'Leave the title empty to use the page heading, and the description empty to use the short biography.' : self::SEO_HINT),
         ];

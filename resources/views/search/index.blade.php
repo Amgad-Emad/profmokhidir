@@ -12,7 +12,7 @@
                     <x-button type="submit">{{ Search::BUTTON_LABEL }}</x-button>
                 </div>
                 @if (! $canSeeMembersOnly)
-                    <p class="mt-3 text-sm font-light text-ink-muted">{{ Search::MEMBERS_NOTE }}</p>
+                    <p class="mt-3 text-sm font-normal text-ink-muted">{{ Search::MEMBERS_NOTE }}</p>
                 @endif
             </form>
 

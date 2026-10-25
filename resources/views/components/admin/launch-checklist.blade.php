@@ -27,7 +27,7 @@
                 </span>
                 <div class="launch-checklist__text">
                     <p class="font-medium text-ink">{{ $check['label'] }}</p>
-                    <p class="text-sm font-light text-ink-muted">{{ $check['detail'] }}</p>
+                    <p class="text-sm font-normal text-ink-muted">{{ $check['detail'] }}</p>
                 </div>
                 @if (! $check['done'] && $check['url'])
                     <a href="{{ $check['url'] }}" class="launch-checklist__fix">{{ $check['action'] }}<span class="sr-only">: {{ $check['label'] }}</span></a>
@@ -51,7 +51,7 @@
                 </span>
                 <div class="launch-checklist__text">
                     <p class="font-medium text-ink">{{ $check['label'] }}</p>
-                    <p class="text-sm font-light text-ink-muted">{{ $check['detail'] }}</p>
+                    <p class="text-sm font-normal text-ink-muted">{{ $check['detail'] }}</p>
                 </div>
                 @if (! $check['done'] && $check['url'])
                     <a href="{{ $check['url'] }}" class="launch-checklist__fix">{{ $check['action'] }}<span class="sr-only">: {{ $check['label'] }}</span></a>

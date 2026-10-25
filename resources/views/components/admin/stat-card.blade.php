@@ -18,6 +18,6 @@
         @endif
     </span>
     @if ($caption)
-        <span class="text-sm font-light text-ink-muted">{{ $caption }}</span>
+        <span class="text-sm font-normal text-ink-muted">{{ $caption }}</span>
     @endif
 </{{ $tag }}>

@@ -43,8 +43,8 @@
     .form-requirement {
         margin-left: 0.5rem;
         font-family: var(--font-sans);
-        font-size: 0.875rem;
-        font-weight: 300;
+        font-size: 0.9375rem; /* 15px */
+        font-weight: 400;
         line-height: 1.5rem;
         letter-spacing: normal;
         text-transform: none;
@@ -67,7 +67,7 @@
     .form-hint {
         margin-top: 0.25rem;
         font-size: 0.9375rem; /* 15px */
-        font-weight: 300;
+        font-weight: 400;
         line-height: 1.5rem;
         color: var(--ink-muted);
     }
@@ -88,7 +88,7 @@
         gap: 0.5rem;
         margin-top: 0.5rem;
         font-size: 0.9375rem;
-        font-weight: 400;
+        font-weight: 500;
         line-height: 1.5rem;
     }
 
@@ -104,7 +104,7 @@
     .form-note,
     .form-counter {
         color: var(--ink-muted);
-        font-weight: 300;
+        font-weight: 400;
     }
 
     .form-counter {
@@ -114,7 +114,7 @@
 
     .form-counter[data-near='true'] {
         color: var(--ink);
-        font-weight: 400;
+        font-weight: 500;
     }
 
     .form-counter[data-over='true'] {
@@ -289,7 +289,7 @@
         background: transparent;
         font-family: var(--font-sans);
         font-size: 1.125rem; /* FormControls::TEXT_SIZE_PX: 16px or more, so iOS never zooms */
-        font-weight: 300;
+        font-weight: 400;
         line-height: 1.5rem;
         color: inherit;
         appearance: none;

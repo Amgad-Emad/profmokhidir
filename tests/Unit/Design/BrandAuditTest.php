@@ -4,6 +4,7 @@ namespace Tests\Unit\Design;
 
 use App\Constants\Brand;
 use App\Constants\BrandAudit;
+use Illuminate\Support\Facades\File;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -12,7 +13,8 @@ use Tests\TestCase;
  * built CSS: only the nine brand colours (plus white, black and transparent),
  * and only in the token file (every other file goes through the semantic
  * tokens), only the three brand fonts, no bounce or spin animations and no
- * gradient other than the brass glow.
+ * gradient other than the brass glow; Hanken Grotesk never at weight 300,
+ * grayscale smoothing only on large display type on dark, labels at 0.24em.
  */
 class BrandAuditTest extends TestCase
 {
@@ -255,6 +257,102 @@ class BrandAuditTest extends TestCase
 
         $this->assertGreaterThanOrEqual(1, $seen, 'The brass glow gradient exists');
         $this->assertSame([], $offenders, "Gradients other than the brass glow:\n".implode("\n", $offenders));
+    }
+
+    /**
+     * Every stylesheet and every Blade view, nested folders included.
+     *
+     * @return array<string, string> path => contents
+     */
+    private function typographySources(): array
+    {
+        $files = $this->files(['resources/css/*.css']);
+
+        foreach (File::allFiles(resource_path('views')) as $file) {
+            $relative = ltrim(str_replace(base_path(), '', $file->getPathname()), '/');
+
+            if (str_ends_with($relative, '.blade.php') && ! array_key_exists($relative, BrandAudit::exemptFiles())) {
+                $files[$relative] = $file->getContents();
+            }
+        }
+
+        return $files;
+    }
+
+    #[Test]
+    public function hanken_grotesk_is_never_set_at_weight_300(): void
+    {
+        $offenders = [];
+        $markers = '/'.implode('|', array_map(fn (string $marker): string => '(?<!\w)'.preg_quote($marker, '/').'(?![\w-])', BrandAudit::displayMarkers())).'/';
+
+        foreach ($this->typographySources() as $file => $contents) {
+            if (str_ends_with($file, '.css')) {
+                // Innermost rule blocks: a weight of 300 needs the display family (or a display marker) in the same rule.
+                preg_match_all('/([^{}]*)\{([^{}]*)\}/', $contents, $blocks, PREG_SET_ORDER);
+
+                foreach ($blocks as [, $selector, $body]) {
+                    if (preg_match('/font-weight:\s*300\b|@apply[^;]*\bfont-light\b/', $body) && ! preg_match($markers, $selector.$body)) {
+                        $offenders[] = "{$file}: ".trim(preg_replace('/\s+/', ' ', preg_replace('#/\*.*?\*/#s', '', $selector)));
+                    }
+                }
+
+                continue;
+            }
+
+            preg_match_all('/<([a-z][\w.:-]*)\b[^>]*?\bclass="([^"]*\bfont-light\b[^"]*)"/', $contents, $tags, PREG_SET_ORDER);
+
+            foreach ($tags as [, $tag, $classes]) {
+                if (! in_array($tag, ['h1', 'h2', 'h3', 'h4', 'blockquote'], true) && ! preg_match($markers, $classes)) {
+                    $offenders[] = "{$file}: <{$tag} class=\"{$classes}\">";
+                }
+            }
+        }
+
+        $this->assertSame([], $offenders, "Hanken Grotesk at weight 300 (use 400 for reading, 500 for emphasis):\n".implode("\n", $offenders));
+    }
+
+    #[Test]
+    public function grayscale_smoothing_is_kept_for_large_display_type_on_dark_only(): void
+    {
+        $offenders = [];
+
+        foreach ($this->typographySources() as $file => $contents) {
+            preg_match_all('/([^{}]*)\{([^{}]*)\}/', $contents, $blocks, PREG_SET_ORDER);
+
+            foreach ($blocks as [, $selector, $body]) {
+                if (preg_match('/font-smoothing|@apply[^;]*\bantialiased\b/', $body)) {
+                    $selector = trim(preg_replace('/\s+/', ' ', preg_replace('#/\*.*?\*/#s', '', $selector)));
+
+                    if ($file !== BrandAudit::SMOOTHING_FILE || $selector !== BrandAudit::SMOOTHING_SELECTOR) {
+                        $offenders[] = "{$file}: {$selector}";
+                    }
+                }
+            }
+
+            if (str_ends_with($file, '.blade.php') && preg_match_all('/class="[^"]*\b(?:subpixel-)?antialiased\b[^"]*"/', $contents, $classes)) {
+                $offenders = [...$offenders, ...array_map(fn (string $class): string => "{$file}: {$class}", $classes[0])];
+            }
+        }
+
+        $this->assertSame([], $offenders, "Font smoothing outside the large display type on dark:\n".implode("\n", $offenders));
+    }
+
+    #[Test]
+    public function labels_are_tracked_at_0_24em(): void
+    {
+        $offenders = [];
+
+        foreach ($this->typographySources() as $file => $contents) {
+            if (preg_match_all('/letter-spacing:\s*'.preg_quote(BrandAudit::RETIRED_LABEL_TRACKING, '/').'|tracking-\['.preg_quote(BrandAudit::RETIRED_LABEL_TRACKING, '/').'\]/', $contents, $matches)) {
+                $offenders[] = "{$file}: ".count($matches[0]);
+            }
+        }
+
+        $app = file_get_contents(resource_path('css/app.css'));
+
+        $this->assertSame([], $offenders, 'Labels at the retired 0.3em tracking:'."\n".implode("\n", $offenders));
+        $this->assertStringContainsString('--tracking-label: '.BrandAudit::LABEL_TRACKING.';', $app);
+        $this->assertMatchesRegularExpression('/\.t-label \{[^}]*font-weight: 500;[^}]*letter-spacing: '.preg_quote(BrandAudit::LABEL_TRACKING, '/').';/s', $app);
     }
 
     #[Test]

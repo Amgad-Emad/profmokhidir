@@ -13,7 +13,7 @@
         @endif
     </div>
     @if ($rows === [])
-        <p class="mt-4 text-sm font-light text-ink-muted">{{ $empty }}</p>
+        <p class="mt-4 text-sm font-normal text-ink-muted">{{ $empty }}</p>
     @else
         <ol class="ranked-list">
             @foreach ($rows as $row)

@@ -29,6 +29,7 @@ class HomePageService
         private readonly HomeTimelineService $timeline,
         private readonly NavigationService $navigation,
         private readonly PageContentService $pages,
+        private readonly SectionCardService $cards,
     ) {}
 
     /**
@@ -37,7 +38,7 @@ class HomePageService
      *     portrait: Media|null,
      *     chapters: list<array{number: int, numeral: string, decade: int, years: string, id: string, milestones: list<array{year: int, years: string, title: string, detail: ?string, kind: string, label: string}>, photo: Media|null, interlude: HomeQuote|null}>,
      *     stats: list<array{key: string, value: int, label: string}>,
-     *     stories: list<array{key: string, label: string, title: string, url: string, line: string, photo: Media|null}>,
+     *     stories: list<array{key: string, numeral: string, title: string, summary: string, url: string, image: Media|null}>,
      *     copy: array{label: string, headingFirst: string, headingSecond: string, line: string, epigraph: string, scroll: string, chapters: string, chaptersIntro: HtmlString, chaptersEmpty: string, numbers: string, numbersEmpty: string, continue: string, closing: string, readStory: array{label: string, url: string}, leaveTribute: array{label: string, url: string}},
      *     anchor: string
      * }
@@ -126,11 +127,12 @@ class HomePageService
     }
 
     /**
-     * The three "Continue the story" cards. Each takes an archive photo the
-     * timeline has not shown, falling back to one it has, or none.
+     * The three "Continue the story" section cards (SectionCardService), each with
+     * the home page's own line and an archive photo the timeline has not shown,
+     * falling back to one it has, or none.
      *
      * @param  array<int, Media>  $shown  photos already used by the chapters
-     * @return list<array{key: string, label: string, title: string, url: string, line: string, photo: Media|null}>
+     * @return list<array{key: string, numeral: string, title: string, summary: string, url: string, image: Media|null}>
      */
     public function stories(array $shown = []): array
     {
@@ -143,21 +145,12 @@ class HomePageService
             Sections::PUBLICATIONS => $this->pages->text(Pages::HOME, 'story_publications'),
             Sections::TRIBUTES => $this->pages->text(Pages::HOME, 'story_tributes'),
         ];
-        $stories = [];
+        $images = [];
 
         foreach (Sections::homeStory() as $index => $key) {
-            $section = $this->navigation->section($key);
-
-            $stories[] = [
-                'key' => $key,
-                'label' => $section['label'],
-                'title' => $section['title'],
-                'url' => $section['url'],
-                'line' => $lines[$key],
-                'photo' => $photos[$index] ?? null,
-            ];
+            $images[$key] = $photos[$index] ?? null;
         }
 
-        return $stories;
+        return $this->cards->cards(Sections::homeStory(), $lines, $images);
     }
 }

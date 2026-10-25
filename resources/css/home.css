@@ -1,7 +1,7 @@
 /*
  | The home page journey (resources/views/home.blade.php): the hero's epigraph and
  | scroll cue, "A life in chapters" with its scroll-drawn hairline and sticky decade
- | markers, the quote interludes, the figures and the story cards. Imported by
+ | markers, the quote interludes, the figures (the story cards are section cards, section-cards.css). Imported by
  | app.css. Brand colours only; the only motion is the shared rise and rule plus the
  | hairline's scroll progress (--line-progress, written by resources/js/motion.js).
  | Without JavaScript, or with reduced motion, every line is fully drawn.
@@ -130,7 +130,7 @@
         align-items: baseline;
         gap: 0 0.5em;
         font-family: var(--font-sans);
-        font-weight: 300;
+        font-weight: 400;
         font-size: 1rem;
         line-height: var(--space-3);
         color: var(--ink-muted);
@@ -220,43 +220,6 @@
         font-size: 1.25rem;
         line-height: var(--space-3);
         color: var(--accent-text);
-    }
-
-    /* Continue the story: quiet cards; the label is the link and covers the whole card. */
-    .story-card {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-2);
-        transition: border-color 300ms var(--ease-rise);
-    }
-
-    .story-card:hover,
-    .story-card:focus-within {
-        border-color: var(--ink);
-    }
-
-    .story-card__photo {
-        margin-bottom: var(--space-2);
-    }
-
-    .story-card__link {
-        text-decoration: none;
-    }
-
-    .story-card__link::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        border-radius: var(--radius-card);
-    }
-
-    .story-card__line {
-        font-family: var(--font-display);
-        font-weight: 300;
-        font-size: 1.5rem;
-        line-height: 1.3;
-        color: var(--ink-strong);
     }
 }
 

@@ -7,7 +7,7 @@
     {{-- Upload --}}
     <section id="upload" class="mt-10 rounded-card border border-rule bg-surface-panel p-5 sm:p-6" aria-labelledby="upload-heading" data-upload>
         <h2 id="upload-heading" class="font-display text-2xl font-light">Upload photos</h2>
-        <p class="mt-1 text-sm font-light text-ink-muted">Choose the album first, then drop up to 20 photos at once. They upload one batch at a time; the line shows how far it has got.</p>
+        <p class="mt-1 text-sm font-normal text-ink-muted">Choose the album first, then drop up to 20 photos at once. They upload one batch at a time; the line shows how far it has got.</p>
         <div class="form-row mt-5">
             <x-form.combobox class="form-col--third" model="uploadAlbumId" label="Into album" :options="$albums" placeholder="Type to find an album" required />
             <x-form.upload class="form-col--two-thirds" model="uploads" label="Photos" :hint="$uploadHint" :accept="$uploadAccept" multiple image />
@@ -72,7 +72,7 @@
             @php $editingUsage = $usages[(int) $editing->getKey()] ?? app(\App\Services\MediaService::class)->usage($editing); @endphp
             <div data-details-dialog>
                 <img src="{{ $editing->getUrl() }}" alt="" class="w-full rounded-card border border-rule object-contain" style="max-height: 16rem">
-                <p class="mt-3 text-sm font-light text-ink-muted">
+                <p class="mt-3 text-sm font-normal text-ink-muted">
                     Used by {{ $editingUsage['type_label'] }}: {{ $editingUsage['label'] }}{{ $editingUsage['trashed'] ? ' (in the trash)' : '' }}.
                     @if ($editingUsage['url'])<a href="{{ $editingUsage['url'] }}" class="link-meta">Open it</a>@endif
                 </p>

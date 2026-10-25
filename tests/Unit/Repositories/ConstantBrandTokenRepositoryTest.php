@@ -65,7 +65,7 @@ class ConstantBrandTokenRepositoryTest extends TestCase
         $this->assertSame('Cormorant Garamond', $fonts['display']['family']);
         $this->assertSame([300], $fonts['display']['weights']);
         $this->assertTrue($fonts['display']['italic']);
-        $this->assertSame([300, 400, 500], $fonts['sans']['weights']);
+        $this->assertSame([400, 500], $fonts['sans']['weights']);
         $this->assertSame([400], $fonts['mono']['weights']);
     }
 
@@ -81,7 +81,7 @@ class ConstantBrandTokenRepositoryTest extends TestCase
         $this->assertTrue($scale['quote']['italic']);
         $this->assertSame(18, $scale['body']['size']);
         $this->assertSame(12, $scale['label']['size']);
-        $this->assertSame('0.3em', $scale['label']['tracking']);
+        $this->assertSame('0.24em', $scale['label']['tracking']);
         $this->assertTrue($scale['label']['uppercase']);
     }
 

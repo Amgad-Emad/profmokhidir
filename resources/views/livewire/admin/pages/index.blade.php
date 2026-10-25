@@ -20,7 +20,7 @@
                     <tr wire:key="page-{{ $row['page']->key }}" data-page-row="{{ $row['page']->key }}">
                         <td>
                             <a href="{{ $row['editUrl'] }}" class="font-medium text-ink">{{ $row['definition']['title'] }}</a>
-                            <p class="mt-1 max-w-xl font-light text-ink-muted">{{ $row['definition']['summary'] }}</p>
+                            <p class="mt-1 max-w-xl font-normal text-ink-muted">{{ $row['definition']['summary'] }}</p>
                         </td>
                         <td>
                             <div class="flex flex-wrap gap-2">
@@ -30,7 +30,7 @@
                                 @endif
                             </div>
                         </td>
-                        <td class="whitespace-nowrap font-light text-ink-muted">
+                        <td class="whitespace-nowrap font-normal text-ink-muted">
                             @if ($row['page']->updated_at)
                                 <time datetime="{{ $row['page']->updated_at->toIso8601String() }}">{{ $row['page']->updated_at->diffForHumans() }}</time>
                             @endif

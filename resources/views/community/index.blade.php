@@ -19,9 +19,9 @@
                 <section aria-labelledby="conduct-heading" data-rise>
                     <p class="t-label text-accent-text">{{ $copy['conductHeading'] }}</p>
                     <h2 id="conduct-heading" class="sr-only">{{ $copy['conductHeading'] }}</h2>
-                    <ol class="mt-4 space-y-3 text-base font-light text-ink-muted" data-conduct>
+                    <ol class="mt-4 space-y-3 text-base font-normal text-ink-muted" data-conduct>
                         @foreach ($copy['conduct'] as $rule)
-                            <li class="flex gap-4"><span class="font-mono text-xs text-accent-text">{{ sprintf('%02d', $loop->iteration) }}</span><span>{{ $rule }}</span></li>
+                            <li class="flex gap-4"><span class="font-mono text-sm text-accent-text">{{ sprintf('%02d', $loop->iteration) }}</span><span>{{ $rule }}</span></li>
                         @endforeach
                     </ol>
                 </section>
@@ -29,7 +29,7 @@
                 <section id="privacy" aria-labelledby="privacy-heading" data-rise>
                     <p class="t-label text-accent-text">{{ $copy['privacyHeading'] }}</p>
                     <h2 id="privacy-heading" class="sr-only">{{ $copy['privacyHeading'] }}</h2>
-                    <p class="mt-4 text-base font-light text-ink-muted" data-privacy>{{ $copy['privacy'] }}</p>
+                    <p class="mt-4 text-base font-normal text-ink-muted" data-privacy>{{ $copy['privacy'] }}</p>
                 </section>
             </div>
 
@@ -43,7 +43,7 @@
                     <section class="rounded-card border border-rule bg-surface-raised p-8 sm:p-10" aria-labelledby="standing-heading" data-standing="{{ $standing['status']->value }}">
                         <x-admin.status-badge :tone="$standing['tone']" :label="$standing['status']->label()" />
                         <h2 id="standing-heading" class="mt-6 font-display text-4xl font-light leading-tight">{{ $standing['heading'] }}</h2>
-                        <p class="mt-4 text-base font-light text-ink-muted">{{ $standing['message'] }}</p>
+                        <p class="mt-4 text-base font-normal text-ink-muted">{{ $standing['message'] }}</p>
                         <div class="mt-8 flex flex-wrap gap-4">
                             @if ($standing['chatUrl'])
                                 <x-button :href="$standing['chatUrl']">{{ $copy['chatButton'] }}</x-button>

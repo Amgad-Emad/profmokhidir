@@ -17,7 +17,7 @@
                            :hint="$hint.'. Every image needs alt text, a caption, a place and a year before it can be published.'" :accept="$accept" :multiple="$multiple" image />
         </div>
     @else
-        <p class="mt-6 text-sm font-light text-ink-muted">Save first, then add images.</p>
+        <p class="mt-6 text-sm font-normal text-ink-muted">Save first, then add images.</p>
     @endif
 
     @if ($media->isEmpty())
@@ -30,7 +30,7 @@
                     @if ($orderable) draggable="true" x-on:dragstart="start($event, {{ $id }})" x-on:dragover.prevent="over($event)" x-on:dragend="end($event)" @endif>
                     <div>
                         <img src="{{ $image->getUrl() }}" alt="{{ $image->getCustomProperty(\App\Constants\MediaProperties::ALT_TEXT) ?: '' }}" class="photo-grid__thumb" loading="lazy" width="{{ $image->getCustomProperty(\App\Constants\MediaProperties::WIDTH) }}" height="{{ $image->getCustomProperty(\App\Constants\MediaProperties::HEIGHT) }}">
-                        <p class="mt-2 truncate font-mono text-xs text-ink-muted" title="{{ $image->file_name }}">{{ $image->file_name }} · {{ \App\Support\FileSize::format((int) $image->size) }}</p>
+                        <p class="mt-2 truncate font-mono text-sm text-ink-muted" title="{{ $image->file_name }}">{{ $image->file_name }} · {{ \App\Support\FileSize::format((int) $image->size) }}</p>
                         <div class="mt-3 flex flex-wrap items-center gap-2">
                             @if ($needs === [])
                                 <x-admin.status-badge tone="cypress" label="Ready" />
@@ -60,7 +60,7 @@
                             <x-admin.image-details :prefix="'images.'.$id" :required="$detailsRequired" />
                             <div class="flex items-center gap-4">
                                 <x-button type="submit" variant="quiet" size="sm">Save details</x-button>
-                                <span class="text-sm font-light text-ink-muted" wire:loading wire:target="saveImage({{ $id }})">Saving…</span>
+                                <span class="text-sm font-normal text-ink-muted" wire:loading wire:target="saveImage({{ $id }})">Saving…</span>
                             </div>
                         </form>
                         @if ($archive !== null && array_key_exists($id, $archive))
@@ -72,7 +72,7 @@
                                 </div>
                                 <div class="flex items-center gap-4">
                                     <x-button type="submit" variant="quiet" size="sm">Save archive details</x-button>
-                                    <span class="text-sm font-light text-ink-muted" wire:loading wire:target="savePhotoArchive({{ $id }})">Saving…</span>
+                                    <span class="text-sm font-normal text-ink-muted" wire:loading wire:target="savePhotoArchive({{ $id }})">Saving…</span>
                                 </div>
                             </form>
                         @endif

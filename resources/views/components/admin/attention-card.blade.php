@@ -10,7 +10,7 @@
     @if ($card['items'] !== [])
         <ul class="attention-card__items">
             @foreach ($card['items'] as $item)
-                <li><a href="{{ $item['url'] }}">{{ $item['label'] }}</a><span class="block text-xs font-light text-ink-muted">{{ $item['meta'] }}</span></li>
+                <li><a href="{{ $item['url'] }}">{{ $item['label'] }}</a><span class="block text-sm font-normal text-ink-muted">{{ $item['meta'] }}</span></li>
             @endforeach
         </ul>
     @endif

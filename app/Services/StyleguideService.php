@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Constants\Brand;
+use App\Constants\Sections;
 use App\Repositories\Contracts\BrandTokenRepositoryInterface;
 use InvalidArgumentException;
 
@@ -30,6 +31,7 @@ class StyleguideService
     public function __construct(
         private readonly BrandTokenRepositoryInterface $tokens,
         private readonly TypesetterService $typesetter,
+        private readonly SectionCardService $sectionCards,
     ) {}
 
     /**
@@ -158,7 +160,7 @@ class StyleguideService
     /**
      * Everything the style guide view needs.
      *
-     * @return array{colours: list<array<string, mixed>>, fonts: array<string, mixed>, typeScale: array<string, mixed>, motion: array<string, mixed>, typesetting: array<string, mixed>, ornaments: array<string, mixed>, typesetExamples: list<array{before: string, after: string}>, components: array<string, array{label: string, components: list<array<string, string>>}>}
+     * @return array{colours: list<array<string, mixed>>, fonts: array<string, mixed>, typeScale: array<string, mixed>, motion: array<string, mixed>, typesetting: array<string, mixed>, ornaments: array<string, mixed>, typesetExamples: list<array{before: string, after: string}>, components: array<string, array{label: string, components: list<array<string, string>>}>, sectionCards: list<array<string, mixed>>}
      */
     public function sections(): array
     {
@@ -172,6 +174,7 @@ class StyleguideService
             'ornaments' => $this->ornaments(),
             'typesetExamples' => $this->typesetExamples(),
             'components' => $this->components(),
+            'sectionCards' => $this->sectionCards->cards(Sections::aboutLinks()),
         ];
     }
 

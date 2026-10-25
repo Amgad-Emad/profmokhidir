@@ -1,0 +1,137 @@
+/*
+ | Section cards (<x-section-card>, App\Constants\SectionCards): the cards that lead from the home page
+ | and About into a section. The grid fills the content width (auto-fit columns of at least 280px,
+ | 24px apart: four or three a row on desktop, two on tablet, one on phones), every card the same
+ | height. A card is one link: numeral, Cormorant heading, a one or two line intro and "Explore →"
+ | on its bottom edge. Hover is calm: the stone hairline turns brass, the card rises 2px and the
+ | arrow moves 4px right; under reduced motion only the hairline changes.
+ */
+@layer components {
+    .section-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(17.5rem, 100%), 1fr));
+        gap: 1.5rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .section-cards > li {
+        display: flex;
+        min-width: 0;
+    }
+
+    .section-card {
+        position: relative;
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        min-width: 0;
+        padding: 1.5rem;
+        border: 1px solid var(--rule);
+        border-radius: var(--radius-card);
+        background-color: var(--surface);
+        color: var(--ink);
+        text-decoration: none;
+    }
+
+    .section-card:hover {
+        text-decoration: none;
+    }
+
+    .section-card:hover,
+    .section-card:focus-visible {
+        border-color: var(--accent-line);
+    }
+
+    /* The optional duotone strip runs to the card's edges, above the numeral. */
+    .section-card__strip {
+        display: block;
+        margin: -1.5rem -1.5rem 1.5rem;
+        aspect-ratio: 3 / 1;
+        overflow: hidden;
+        border-radius: calc(var(--radius-card) - 1px) calc(var(--radius-card) - 1px) 0 0;
+        background-color: var(--surface-sunken);
+    }
+
+    .section-card__strip img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .section-card__numeral {
+        color: var(--accent-text);
+    }
+
+    .section-card__title {
+        display: block;
+        margin-top: 0.75rem;
+        font-family: var(--font-display);
+        font-weight: 300;
+        font-size: 1.75rem; /* 28px */
+        line-height: 1.15;
+        color: var(--ink-strong);
+        text-wrap: balance;
+        font-variant-numeric: oldstyle-nums proportional-nums;
+    }
+
+    .section-card__summary {
+        display: block;
+        margin-top: 0.75rem;
+        font-size: 1.0625rem; /* 17px */
+        font-weight: 400;
+        line-height: 1.6;
+        color: var(--ink-muted);
+        text-wrap: pretty;
+    }
+
+    .section-card__action {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 0.375rem;
+        margin-top: auto;
+        padding-top: 1.5rem;
+        font-size: 0.9375rem; /* 15px */
+        font-weight: 500;
+        line-height: 1.4;
+        color: var(--ink-strong);
+    }
+
+    .section-card__arrow {
+        display: inline-block;
+    }
+
+    @media (width >= 40rem) {
+        .section-card {
+            padding: 1.75rem;
+        }
+
+        .section-card__strip {
+            margin: -1.75rem -1.75rem 1.5rem;
+        }
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        .section-card {
+            transition:
+                border-color 300ms var(--ease-rise),
+                transform 300ms var(--ease-rise);
+        }
+
+        .section-card__arrow {
+            transition: transform 300ms var(--ease-rise);
+        }
+
+        .section-card:hover,
+        .section-card:focus-visible {
+            transform: translateY(-2px);
+        }
+
+        .section-card:hover .section-card__arrow,
+        .section-card:focus-visible .section-card__arrow {
+            transform: translateX(4px);
+        }
+    }
+}

@@ -9,6 +9,7 @@
 @import './typography.css';
 @import './buttons.css';
 @import './home.css';
+@import './section-cards.css';
 @import './archive.css';
 @import './remembrance.css';
 @import './wayfinding.css';
@@ -43,17 +44,20 @@
     --text-heading--line-height: 1.1;
     --text-quote: 2rem; /* 32px */
     --text-quote--line-height: 1.3;
-    --text-body: 1.125rem; /* 18px */
-    --text-body--line-height: 1.7778; /* 32px: body lines sit on the 8px baseline grid */
+    --text-body: 1.125rem; /* 18px (17px below 640px, see body) */
+    --text-body--line-height: 1.6;
+    /* Small text never drops below 15px (labels are the one exception: 12px uppercase at weight 500). */
+    --text-sm: 0.9375rem; /* 15px */
+    --text-sm--line-height: 1.5;
     --text-label: 0.75rem; /* 12px */
     --text-label--line-height: 1.4;
-    --text-label--letter-spacing: 0.3em;
+    --text-label--letter-spacing: 0.24em;
 
-    --tracking-label: 0.3em;
+    --tracking-label: 0.24em;
 
     --radius-card: 4px;
 
-    /* Reading measure: 528px of Hanken Grotesk Light at 18px holds 60-72 characters a line (max-w-measure). Fixed in rem so larger type keeps the same column. */
+    /* Reading measure: 528px of Hanken Grotesk at 18px holds 60-72 characters a line (max-w-measure). Fixed in rem so larger type keeps the same column. */
     --container-measure: 33rem;
 
     /* Motion: unhurried, scroll-linked, nothing bounces. */
@@ -67,16 +71,25 @@
 /* ------------------------------------------------------------------ base */
 @layer base {
     html {
-        @apply bg-surface font-sans font-light text-ink antialiased;
+        /* Hanken Grotesk 400 for reading (300 is not used for running text). No grayscale smoothing: it thins the strokes on macOS. */
+        @apply bg-surface font-sans font-normal text-ink;
         -webkit-text-size-adjust: 100%;
+        font-optical-sizing: auto;
+        text-rendering: optimizeLegibility;
         /* Anchored and focused targets land below the fixed masthead as currently shown (WCAG 2.4.11 focus not obscured); --header-height follows its compaction (masthead.css). */
         scroll-padding-top: calc(var(--header-height) + 1.5rem);
     }
 
     body {
         @apply min-h-screen bg-surface text-ink;
-        font-size: var(--text-body);
+        font-size: 1.0625rem; /* 17px on phones */
         line-height: var(--text-body--line-height);
+    }
+
+    @media (width >= 40rem) {
+        body {
+            font-size: var(--text-body);
+        }
     }
 
     h1,
@@ -212,9 +225,15 @@
 
     .t-body {
         font-family: var(--font-sans);
-        font-weight: 300;
-        font-size: 1.125rem; /* 18px */
-        line-height: 1.7778; /* 32px */
+        font-weight: 400;
+        font-size: 1.0625rem; /* 17px on phones */
+        line-height: 1.6;
+    }
+
+    @media (width >= 40rem) {
+        .t-body {
+            font-size: 1.125rem; /* 18px */
+        }
     }
 
     .t-label {
@@ -222,8 +241,15 @@
         font-weight: 500;
         font-size: 0.75rem; /* 12px */
         line-height: 1.4;
-        letter-spacing: 0.3em;
+        letter-spacing: 0.24em;
         text-transform: uppercase;
+        overflow-wrap: break-word;
+    }
+
+    /* Large Cormorant display type on the dark hero and bands: light-on-dark strokes bloom without grayscale smoothing. */
+    :is(.on-dark, .glow-brass) :is(.t-display, .t-heading) {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
     }
 
     /* Buttons live in buttons.css (one token table per variant and state in tokens.css). */
@@ -365,7 +391,7 @@
 
     /* Footer section links (the drawn accent hairline lives in wayfinding.css). */
     .footer-link {
-        @apply font-sans text-base font-light text-ink;
+        @apply font-sans text-base font-normal text-ink;
     }
 
     .footer-link[aria-current='page'] {
@@ -412,19 +438,6 @@
     /* Lock page scroll while the menu is open. */
     .menu-open {
         overflow: hidden;
-    }
-
-    /* Quiet link cards (home section row, About "continue reading"). */
-    .section-card {
-        transition:
-            border-color 300ms var(--ease-rise),
-            background-color 300ms var(--ease-rise);
-    }
-
-    .section-card:hover,
-    .section-card:focus-visible {
-        border-color: var(--ink);
-        background-color: var(--surface);
     }
 
     /* Links in metadata: file and external links ("Download · PDF · 2.1 MB", "Source · example.org"). */
@@ -497,7 +510,7 @@
     }
 
     .cite__text {
-        @apply mt-4 rounded-card border border-rule bg-surface-field p-5 font-sans text-base font-light leading-relaxed text-ink;
+        @apply mt-4 rounded-card border border-rule bg-surface-field p-5 font-sans text-base font-normal leading-relaxed text-ink;
         white-space: pre-wrap;
         word-break: break-word;
     }
@@ -544,15 +557,21 @@
 
     /*
      | Reading prose for the biography and commentary (editor HTML reduced by App\Support\RichText, then typeset by
-     | App\Services\TypesetterService): body copy on the measure and the 8px grid (18px on 32px lines, spacing in
+     | App\Services\TypesetterService): body copy on the measure (17px/18px at 1.6, spacing in
      | baseline units), Cormorant headings, and the blockquote as a pull quote in the quote style.
      */
     .prose-bio {
         font-family: var(--font-sans);
-        font-weight: 300;
-        font-size: 1.125rem; /* 18px */
-        line-height: 1.7778; /* 32px */
+        font-weight: 400;
+        font-size: 1.0625rem; /* 17px on phones */
+        line-height: 1.6;
         color: var(--ink);
+    }
+
+    @media (width >= 40rem) {
+        .prose-bio {
+            font-size: 1.125rem; /* 18px */
+        }
     }
 
     .prose-bio > * + * {
@@ -693,7 +712,7 @@
 .admin-tab {
     padding: 0.75rem 1rem;
     border-bottom: 1px solid transparent;
-    font-size: 0.875rem;
+    font-size: 0.9375rem; /* 15px */
     font-weight: 500;
     color: var(--ink-muted);
     margin-bottom: -1px;
@@ -723,7 +742,7 @@
     padding: 0.875rem 1rem;
     vertical-align: middle;
     border-bottom: 1px solid var(--rule);
-    font-weight: 300;
+    font-weight: 400;
     font-variant-numeric: lining-nums tabular-nums;
 }
 

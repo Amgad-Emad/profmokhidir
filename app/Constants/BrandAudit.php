@@ -152,6 +152,33 @@ final class BrandAudit
     public const string GLOW_TOKEN = '--accent-glow';
 
     /**
+     * Hanken Grotesk is set at 400 for body and 500 for emphasis, labels and UI;
+     * weight 300 belongs to Cormorant Garamond only. A rule or class list at 300
+     * must carry one of these display markers (or sit on a heading or blockquote).
+     *
+     * @return list<string>
+     */
+    public static function displayMarkers(): array
+    {
+        return ['font-display', 't-display', 't-heading', 't-quote', 't-numeral', 'smallcaps'];
+    }
+
+    /**
+     * Grayscale font smoothing thins the strokes on macOS: it is kept only for the
+     * large Cormorant display type on the dark hero and bands, in this one rule.
+     */
+    public const string SMOOTHING_FILE = 'resources/css/app.css';
+
+    public const string SMOOTHING_SELECTOR = ':is(.on-dark, .glow-brass) :is(.t-display, .t-heading)';
+
+    /**
+     * The label's tracking (12px uppercase at weight 500); the old 0.3em is gone.
+     */
+    public const string LABEL_TRACKING = '0.24em';
+
+    public const string RETIRED_LABEL_TRACKING = '0.3em';
+
+    /**
      * File => reason, for files the audit skips entirely.
      *
      * @return array<string, string>

@@ -55,7 +55,7 @@
     <div class="admin-nav__foot border-t border-rule">
         <p class="admin-nav__who text-sm">
             <span class="block font-medium text-ink-strong">{{ $user->name }}</span>
-            <span class="block font-light text-ink">{{ $user->primaryRoleLabel() }}</span>
+            <span class="block font-normal text-ink">{{ $user->primaryRoleLabel() }}</span>
         </p>
         <x-account.sign-out item-class="admin-nav-link admin-nav__sign-out" data-sidebar-sign-out />
         <button type="button" class="admin-nav__collapse" x-on:click="toggleCollapsed()" x-bind:aria-pressed="collapsed.toString()" aria-pressed="false">

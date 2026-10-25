@@ -33,7 +33,7 @@
                                 @if (filled($commentary->tags))
                                     <ul class="mt-2 flex flex-wrap gap-2" aria-label="Topics">
                                         @foreach ($commentary->tags as $tag)
-                                            <li><a href="{{ route('commentary', ['tag' => $tag]) }}" class="filter-pill min-h-9 px-3 text-xs">{{ $tag }}</a></li>
+                                            <li><a href="{{ route('commentary', ['tag' => $tag]) }}" class="filter-pill min-h-9 px-3 text-sm">{{ $tag }}</a></li>
                                         @endforeach
                                     </ul>
                                 @endif

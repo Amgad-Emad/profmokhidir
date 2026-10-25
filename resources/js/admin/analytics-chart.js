@@ -17,7 +17,7 @@ function inks(root) {
 }
 
 function font() {
-    return { family: getComputedStyle(document.body).fontFamily, size: 12, weight: 400 };
+    return { family: getComputedStyle(document.body).fontFamily, size: 15, weight: 400 };
 }
 
 function options(colours, labels) {

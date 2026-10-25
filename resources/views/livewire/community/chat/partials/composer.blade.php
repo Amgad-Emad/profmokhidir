@@ -90,7 +90,7 @@
             <p id="chat-composer-hint" class="chat-hint" x-show="hintShown" data-composer-hint>{{ ChatCopy::COMPOSER_HINT }}</p>
             <p id="chat-attach-note" class="chat-conduct-note" x-show="config.attachments.enabled" data-attach-note>{{ ChatCopy::ATTACH_NOTE }} <span class="sr-only" x-text="config.attachments.types"></span></p>
             <p class="text-sm text-accent-text" role="alert" x-show="sendError" x-text="sendError" x-cloak data-send-error></p>
-            <p class="text-sm font-light text-ink-muted" role="status" aria-live="polite" x-show="notice && !sendError" x-text="notice" x-cloak data-notice></p>
+            <p class="text-sm font-normal text-ink-muted" role="status" aria-live="polite" x-show="notice && !sendError" x-text="notice" x-cloak data-notice></p>
             <p class="chat-count" :class="{ 'is-near': remaining <= 0 }" x-show="remaining <= config.countWarningRemaining" x-cloak aria-live="polite" x-text="countText" data-count></p>
         </div>
     </div>

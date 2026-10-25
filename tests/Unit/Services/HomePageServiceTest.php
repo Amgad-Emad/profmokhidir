@@ -142,14 +142,15 @@ class HomePageServiceTest extends TestCase
         $this->assertSame(Sections::homeStory(), array_column($stories, 'key'));
         $this->assertSame(['About Prof. Mokhidir', 'Publications', 'Tributes'], array_column($stories, 'title'));
         $this->assertSame([route('about'), route('publications'), route('tributes')], array_column($stories, 'url'));
-        $this->assertSame([Taglines::STORY_ABOUT, Taglines::STORY_PUBLICATIONS, Taglines::STORY_TRIBUTES], array_column($stories, 'line'));
-        $this->assertSame([$photos[1]->id, $photos[2]->id, $photos[0]->id], array_map(fn (array $story): ?int => $story['photo']?->id, $stories));
+        $this->assertSame([Taglines::STORY_ABOUT, Taglines::STORY_PUBLICATIONS, Taglines::STORY_TRIBUTES], array_column($stories, 'summary'));
+        $this->assertSame([$photos[1]->id, $photos[2]->id, $photos[0]->id], array_map(fn (array $story): ?int => $story['image']?->id, $stories));
+        $this->assertSame(['I', 'III', 'XI'], array_column($stories, 'numeral'));
     }
 
     #[Test]
     public function story_cards_without_archive_photos_have_none(): void
     {
-        $this->assertSame([null, null, null], array_column($this->service->stories(), 'photo'));
+        $this->assertSame([null, null, null], array_column($this->service->stories(), 'image'));
     }
 
     #[Test]

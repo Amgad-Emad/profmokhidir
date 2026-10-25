@@ -25,7 +25,7 @@
                             <p class="t-body text-ink">@typeset($profile->title)</p>
                         @endif
                         @if (filled($profile->affiliation))
-                            <p class="text-base font-light text-ink-muted">@typeset($profile->affiliation)</p>
+                            <p class="text-base font-normal text-ink-muted">@typeset($profile->affiliation)</p>
                         @endif
                     </div>
                 </div>
@@ -75,30 +75,25 @@
                                     <a href="tel:{{ preg_replace('/[^0-9+]/', '', $contact['phone']) }}" class="t-body text-ink underline decoration-accent-line underline-offset-4" data-contact-phone>{{ $contact['phone'] }}</a>
                                 @endif
                                 @if ($contact['address'])
-                                    <p class="whitespace-pre-line text-base font-light text-ink-muted" data-contact-address>{{ $contact['address'] }}</p>
+                                    <p class="whitespace-pre-line text-base font-normal text-ink-muted" data-contact-address>{{ $contact['address'] }}</p>
                                 @endif
                                 @if ($contact['note'] && ! $contact['email'])
-                                    <p class="text-base font-light text-ink-muted">@typeset($contact['note'])</p>
+                                    <p class="text-base font-normal text-ink-muted">@typeset($contact['note'])</p>
                                 @endif
                             </div>
                         </section>
                     @endif
-
-                    <nav aria-label="Continue reading">
-                        <hr class="rule-brass" data-rule>
-                        <ul class="mt-8 grid gap-4 sm:grid-cols-3">
-                            @foreach ($links as $item)
-                                <li class="h-full">
-                                    <a href="{{ $item['url'] }}" class="section-card card flex h-full flex-col gap-3 text-ink no-underline hover:no-underline">
-                                        <span class="t-label text-accent-text">{{ $item['label'] }}</span>
-                                        <span class="text-base font-light text-ink-muted">{{ $item['summary'] }}</span>
-                                    </a>
-                                </li>
-                            @endforeach
-                        </ul>
-                    </nav>
                 </div>
             </div>
+
+            <nav class="mt-20" aria-label="Continue reading">
+                <hr class="rule-brass" data-rule>
+                <ul class="section-cards mt-10" data-rise-group>
+                    @foreach ($links as $item)
+                        <li><x-section-card :card="$item" level="2" /></li>
+                    @endforeach
+                </ul>
+            </nav>
 
             <x-seal />
         @endif

@@ -31,7 +31,7 @@
         <x-admin.form-section id="poster" title="Poster image" :form="false">
             <x-admin.image-grid label="Poster image" :media="$media" :missing="$missing" :images="$images" :details-required="$detailsRequired" :accept="$imageAccept" :hint="$imageHint" :confirming-id="$confirmingImageId" :can-upload="! $isNew" />
             @if ($isNew)
-                <p class="text-sm font-light text-ink-muted">The poster can be added once the video has a title and has been saved once.</p>
+                <p class="text-sm font-normal text-ink-muted">The poster can be added once the video has a title and has been saved once.</p>
             @endif
         </x-admin.form-section>
     </x-admin.edit-layout>

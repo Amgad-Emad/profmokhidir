@@ -18,7 +18,7 @@
         </div>
         <div class="mt-16 flex flex-col gap-4 border-t border-rule pt-8 sm:flex-row sm:items-center sm:justify-between">
             <p class="t-label text-accent-text">{{ $domain }}</p>
-            <p class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm font-light text-ink-muted">
+            <p class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm font-normal text-ink-muted">
                 @if ($privacyUrl)
                     <a href="{{ $privacyUrl }}" class="footer-link"@if (request()->routeIs(\App\Constants\Analytics::PRIVACY_ROUTE)) aria-current="page"@endif>{{ $privacyLabel }}</a>
                 @endif

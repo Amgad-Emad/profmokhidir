@@ -9,7 +9,7 @@
         <div class="mx-auto max-w-3xl">
             <x-section-header :label="$pageCopy->text('privacy', 'label')" :title="$pageCopy->text('privacy', 'heading')" level="1" id="section-title" />
 
-            <div class="page-prose mt-12 flex flex-col gap-6 text-lg font-light" data-rise data-privacy-analytics>
+            <div class="page-prose mt-12 flex flex-col gap-6 text-lg font-normal" data-rise data-privacy-analytics>
                 {{ $pageCopy->html('privacy', 'body', [':idle_seconds' => $idleSeconds, ':raw_days' => $rawDays, ':rollup_months' => $rollupMonths]) }}
             </div>
         </div>

@@ -25,5 +25,5 @@
             <x-icon name="arrow" class="size-4" />{{ $direction === 'up' ? 'Up' : 'Down' }} {{ number_format(abs($change), 0) }}% on {{ $comparison }}
         @endif
     </span>
-    <span class="text-sm font-light text-ink-muted">{{ $figure['hint'] }}</span>
+    <span class="text-sm font-normal text-ink-muted">{{ $figure['hint'] }}</span>
 </div>

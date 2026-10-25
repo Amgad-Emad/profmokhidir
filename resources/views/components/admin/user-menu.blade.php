@@ -15,7 +15,7 @@
     <div id="admin-user-menu" class="admin-user-menu__panel" x-show="open" x-cloak>
         <p class="admin-user-menu__who">
             <span class="block font-medium text-ink">{{ $user->name }}</span>
-            <span class="block text-sm font-light text-ink-muted">{{ $user->primaryRoleLabel() }}</span>
+            <span class="block text-sm font-normal text-ink-muted">{{ $user->primaryRoleLabel() }}</span>
         </p>
         <ul>
             <li><a href="{{ route(\App\Constants\AdminNavigation::ACCOUNT_ROUTE) }}" class="admin-user-menu__item"><x-icon name="user" class="size-4" />Your account</a></li>

@@ -163,15 +163,15 @@ class HomePageTest extends TestCase
         $html = $this->get(route('home'))->assertOk()
             ->assertSeeInOrder([
                 e(Taglines::HOME_CONTINUE),
-                'href="'.route('about').'" class="story-card__link t-label text-accent-text">About Prof. Mokhidir</a>', e(Taglines::STORY_ABOUT),
-                'href="'.route('publications').'" class="story-card__link t-label text-accent-text">Publications</a>', e(Taglines::STORY_PUBLICATIONS),
-                'href="'.route('tributes').'" class="story-card__link t-label text-accent-text">Tributes</a>', e(Taglines::STORY_TRIBUTES),
+                'href="'.route('about').'" class="section-card"', '>About Prof. Mokhidir</span>', e(Taglines::STORY_ABOUT),
+                'href="'.route('publications').'" class="section-card"', '>Publications</span>', e(Taglines::STORY_PUBLICATIONS),
+                'href="'.route('tributes').'" class="section-card"', '>Tributes</span>', e(Taglines::STORY_TRIBUTES),
                 'class="seal"', e(Taglines::HOME_CLOSING),
             ], false)
             ->getContent();
 
-        $this->assertSame(1, substr_count($html, 'story-card__photo'), 'Only one archive photo exists');
-        $this->assertSame(3, substr_count($html, '<li class="story-card card card-ivory">'));
+        $this->assertSame(1, substr_count($html, 'section-card__strip'), 'Only one archive photo exists');
+        $this->assertSame(3, substr_count($html, 'data-section-card='));
     }
 
     #[Test]

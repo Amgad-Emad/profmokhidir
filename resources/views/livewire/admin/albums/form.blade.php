@@ -14,7 +14,7 @@
         <x-admin.form-section id="photos" title="Photos" :form="false">
             <x-admin.image-grid label="Photos" :media="$media" :missing="$missing" :images="$images" :details-required="$detailsRequired" :accept="$imageAccept" :hint="$imageHint" multiple orderable :cover-id="$coverId" :confirming-id="$confirmingImageId" :can-upload="! $isNew" :archive="$archive" :decades="$decades" />
             @if ($isNew)
-                <p class="text-sm font-light text-ink-muted">Photos can be added once the album has a title and has been saved once.</p>
+                <p class="text-sm font-normal text-ink-muted">Photos can be added once the album has a title and has been saved once.</p>
             @endif
         </x-admin.form-section>
     </x-admin.edit-layout>

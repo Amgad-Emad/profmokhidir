@@ -13,6 +13,6 @@
         @if ($title)
             <p class="font-medium">{{ $title }}</p>
         @endif
-        <div class="font-light">{{ $slot }}</div>
+        <div class="font-normal">{{ $slot }}</div>
     </div>
 </div>

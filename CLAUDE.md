@@ -44,9 +44,9 @@ Functional exception: danger red, only for destructive actions and errors (never
 
 Type:
 - Cormorant Garamond 300 and 300 italic: display, headings, quotes.
-- Hanken Grotesk 300/400/500: body and UI (300 for reading, 500 for emphasis).
+- Hanken Grotesk 400 for body, 500 for emphasis, labels and UI; 300 is not used for running text. Body 18px desktop / 17px mobile at line-height 1.6; small text never below 15px.
 - JetBrains Mono: technical specs only.
-- Scale: display 96px, heading 48px, quote 32px italic, body 18px, label 12px uppercase with 0.3em tracking.
+- Scale: display 96px, heading 48px, quote 32px italic, body 18px (17px mobile), label 12px uppercase at weight 500 with 0.24em tracking.
 
 Mark: "MK" in Cormorant Garamond Light inside a 1px brass hairline ring. Below 32px use a solid evergreen disc with ivory MK. Clear space is one sixth of the ring diameter on every side. Never fill, recolour, tilt or add effects to the mark. Lockups: stacked (mark over "Professor / Mohamed Osman Khidir") and horizontal (for nav, footer).
 

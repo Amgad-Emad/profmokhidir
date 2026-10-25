@@ -8,7 +8,7 @@
     <div class="mt-10 flex flex-wrap items-center gap-2 border-b border-rule" role="tablist" aria-label="Tribute status">
         @foreach ($tabs as $value => $tabInfo)
             <button type="button" role="tab" wire:click="showTab('{{ $value }}')" aria-selected="{{ $tab === $value ? 'true' : 'false' }}" class="admin-tab inline-flex items-center gap-2" data-tab="{{ $value }}">
-                <x-icon :name="$tabInfo['tone']->icon()" class="size-4" />{{ $tabInfo['label'] }}<span class="text-xs text-ink-muted">{{ $tabInfo['count'] }}</span>
+                <x-icon :name="$tabInfo['tone']->icon()" class="size-4" />{{ $tabInfo['label'] }}<span class="text-sm text-ink-muted">{{ $tabInfo['count'] }}</span>
             </button>
         @endforeach
     </div>
@@ -19,7 +19,7 @@
         {{-- Bulk actions --}}
         <div class="mt-6 flex flex-wrap items-center gap-4 text-sm" data-bulk>
             <x-form.checkbox id="select-all" wire:click="toggleAll" :checked="$pageIds !== [] && array_diff($pageIds, $selected) === []">Select all on this page</x-form.checkbox>
-            <span class="font-light text-ink-muted">{{ count($selected) }} selected</span>
+            <span class="font-normal text-ink-muted">{{ count($selected) }} selected</span>
             @if ($current !== TributeStatus::Approved)
                 <x-button variant="quiet" size="sm" type="button" wire:click="approveSelected" :disabled="$selected === []" data-bulk-approve>Approve selected</x-button>
             @endif
@@ -36,10 +36,10 @@
                         <div class="min-w-0 flex-1">
                             <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                                 <p class="font-medium text-ink">{{ $tribute->name }}</p>
-                                <p class="text-sm font-light text-ink-muted">{{ $tribute->relationship->label() }}@if ($tribute->location) · {{ $tribute->location }}@endif</p>
-                                <time datetime="{{ $tribute->created_at->toIso8601String() }}" class="text-sm font-light text-ink-muted">{{ $tribute->created_at->format(DateFormats::LONG) }}</time>
+                                <p class="text-sm font-normal text-ink-muted">{{ $tribute->relationship->label() }}@if ($tribute->location) · {{ $tribute->location }}@endif</p>
+                                <time datetime="{{ $tribute->created_at->toIso8601String() }}" class="text-sm font-normal text-ink-muted">{{ $tribute->created_at->format(DateFormats::LONG) }}</time>
                             </div>
-                            <p class="mt-1 font-mono text-xs text-ink-muted" data-email>{{ $tribute->email ?: 'No email given' }}</p>
+                            <p class="mt-1 font-mono text-sm text-ink-muted" data-email>{{ $tribute->email ?: 'No email given' }}</p>
 
                             @if ($editingId === (int) $tribute->getKey())
                                 <form wire:submit="saveEdit" class="form-grid mt-4" novalidate data-edit-form>

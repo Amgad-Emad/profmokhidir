@@ -10,7 +10,7 @@
     <div class="flex flex-wrap items-center gap-2 border-b border-rule" role="tablist" aria-label="Community status">
         @foreach ($tabs as $value => $tabInfo)
             <button type="button" role="tab" wire:click="showTab('{{ $value }}')" aria-selected="{{ $tab === $value ? 'true' : 'false' }}" class="admin-tab inline-flex items-center gap-2" data-tab="{{ $value }}">
-                <x-icon :name="$tabInfo['tone']->icon()" class="size-4" />{{ $tabInfo['label'] }}<span class="font-mono text-xs text-ink-muted">{{ $tabInfo['count'] }}</span>
+                <x-icon :name="$tabInfo['tone']->icon()" class="size-4" />{{ $tabInfo['label'] }}<span class="font-mono text-sm text-ink-muted">{{ $tabInfo['count'] }}</span>
             </button>
         @endforeach
     </div>
@@ -30,7 +30,7 @@
                         <div class="min-w-0 flex-1">
                             <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                                 <p class="font-medium text-ink">{{ $user->name }}</p>
-                                <p class="font-mono text-xs text-ink-muted">{{ $user->email }}</p>
+                                <p class="font-mono text-sm text-ink-muted">{{ $user->email }}</p>
                                 @if ($user->email_verified_at === null)
                                     <x-admin.status-badge :tone="StatusTone::Bronze" label="Email unverified" />
                                 @endif
@@ -38,30 +38,30 @@
                             <dl class="mt-4 grid gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
                                 <div>
                                     <dt class="t-label text-accent-text">Affiliation</dt>
-                                    <dd class="mt-1 font-light text-ink">{{ $user->affiliation ?: 'Not given' }}</dd>
+                                    <dd class="mt-1 font-normal text-ink">{{ $user->affiliation ?: 'Not given' }}</dd>
                                 </div>
                                 <div>
                                     <dt class="t-label text-accent-text">Academic field</dt>
-                                    <dd class="mt-1 font-light text-ink">{{ $user->academic_field ?: 'Not given' }}</dd>
+                                    <dd class="mt-1 font-normal text-ink">{{ $user->academic_field ?: 'Not given' }}</dd>
                                 </div>
                                 <div class="sm:col-span-2">
                                     <dt class="t-label text-accent-text">Reason for joining</dt>
-                                    <dd class="mt-1 whitespace-pre-line font-light text-ink">{{ $user->reason_for_joining ?: 'Not given' }}</dd>
+                                    <dd class="mt-1 whitespace-pre-line font-normal text-ink">{{ $user->reason_for_joining ?: 'Not given' }}</dd>
                                 </div>
                                 <div>
                                     <dt class="t-label text-accent-text">Applied</dt>
-                                    <dd class="mt-1 font-light text-ink"><x-date :date="$user->created_at" /></dd>
+                                    <dd class="mt-1 font-normal text-ink"><x-date :date="$user->created_at" /></dd>
                                 </div>
                                 @if ($user->reviewed_at)
                                     <div>
                                         <dt class="t-label text-accent-text">Reviewed</dt>
-                                        <dd class="mt-1 font-light text-ink"><x-date :date="$user->reviewed_at" />@if ($user->reviewer) by {{ $user->reviewer->name }}@endif</dd>
+                                        <dd class="mt-1 font-normal text-ink"><x-date :date="$user->reviewed_at" />@if ($user->reviewer) by {{ $user->reviewer->name }}@endif</dd>
                                     </div>
                                 @endif
                                 @if ($user->review_note)
                                     <div class="sm:col-span-2">
                                         <dt class="t-label text-accent-text">Note</dt>
-                                        <dd class="mt-1 whitespace-pre-line font-light text-ink">{{ $user->review_note }}</dd>
+                                        <dd class="mt-1 whitespace-pre-line font-normal text-ink">{{ $user->review_note }}</dd>
                                     </div>
                                 @endif
                             </dl>

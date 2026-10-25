@@ -63,7 +63,7 @@
     .museum-label__note {
         font-size: 0.9375rem; /* 15px */
         line-height: var(--space-3);
-        font-weight: 300;
+        font-weight: 400;
         color: var(--ink-muted);
     }
 

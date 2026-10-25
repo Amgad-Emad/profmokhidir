@@ -16,7 +16,7 @@
             <x-icon name="shield" class="two-factor-card__icon size-6" />
             <div class="min-w-0 flex-1">
                 <h2 id="two-factor-card-heading" class="font-display text-2xl font-light text-ink-strong">{{ \App\Constants\AdminUx::TWO_FACTOR_REMINDER_TITLE }}</h2>
-                <p class="mt-2 max-w-2xl text-base font-light text-ink-muted">{{ \App\Constants\AdminUx::TWO_FACTOR_REMINDER_TEXT }}</p>
+                <p class="mt-2 max-w-2xl text-base font-normal text-ink-muted">{{ \App\Constants\AdminUx::TWO_FACTOR_REMINDER_TEXT }}</p>
                 <div class="mt-5 flex flex-wrap items-center gap-4">
                     <x-button variant="primary" size="sm" :href="route(\App\Constants\AdminNavigation::ACCOUNT_ROUTE).'#two-factor'" data-two-factor-setup>{{ \App\Constants\AdminUx::TWO_FACTOR_REMINDER_ACTION }}</x-button>
                     <form novalidate method="POST" action="{{ route(\App\Constants\AdminUx::TWO_FACTOR_REMINDER_ROUTE) }}" data-two-factor-dismiss>
@@ -75,7 +75,7 @@
                     <h2 id="launch-heading" class="dashboard-heading__title">Before launch</h2>
                     <hr class="rule-brass flex-1" data-rule>
                 </div>
-                <p class="mt-3 text-base font-light text-ink-muted">What still needs doing before the site is announced. Each line updates as the work is done.</p>
+                <p class="mt-3 text-base font-normal text-ink-muted">What still needs doing before the site is announced. Each line updates as the work is done.</p>
                 <x-admin.launch-checklist :checklist="$checklist" class="mt-6" />
             </section>
         @endif

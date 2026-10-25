@@ -22,6 +22,7 @@ class AboutPageService
         private readonly SeoService $seo,
         private readonly SettingService $settings,
         private readonly TypesetterService $typesetter,
+        private readonly SectionCardService $cards,
     ) {}
 
     /**
@@ -34,7 +35,7 @@ class AboutPageService
      *     expertise: list<string>,
      *     facts: list<array{label: string, value: string}>,
      *     contact: array{email: string|null, note: string|null, phone: string|null, address: string|null},
-     *     links: list<array{key: string, label: string, title: string, url: string, route: string, placement: string, summary: string, active: bool}>,
+     *     links: list<array{key: string, numeral: string, title: string, summary: string, url: string, image: Media|null}>,
      *     description: string|null,
      *     schema: array<string, mixed>|null
      * }
@@ -61,11 +62,13 @@ class AboutPageService
     }
 
     /**
-     * @return list<array{key: string, label: string, title: string, url: string, route: string, placement: string, summary: string, active: bool}>
+     * The section cards on to the CV, Publications and Awards.
+     *
+     * @return list<array{key: string, numeral: string, title: string, summary: string, url: string, image: Media|null}>
      */
     public function links(): array
     {
-        return array_map(fn (string $key): array => $this->navigation->section($key), Sections::aboutLinks());
+        return $this->cards->cards(Sections::aboutLinks());
     }
 
     /**

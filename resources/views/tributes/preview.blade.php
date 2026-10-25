@@ -25,7 +25,7 @@
             @csrf
 
             @error(\App\Http\Controllers\TributeController::LIMIT_ERROR)
-                <p class="rounded-card border border-danger bg-danger-wash px-4 py-3 text-base font-light text-danger" role="alert">{{ $message }}</p>
+                <p class="rounded-card border border-danger bg-danger-wash px-4 py-3 text-base font-normal text-danger" role="alert">{{ $message }}</p>
             @enderror
 
             <input type="hidden" name="name" value="{{ $data['name'] }}">

@@ -13,7 +13,7 @@
                 <li class="revision-list__item" wire:key="revision-{{ $revision->getKey() }}">
                     <div>
                         <p class="font-medium text-ink">{{ $revision->kind->label() }}{{ $loop->first ? ' · latest' : '' }}</p>
-                        <p class="text-sm font-light text-ink-muted">
+                        <p class="text-sm font-normal text-ink-muted">
                             <time datetime="{{ $revision->created_at->toIso8601String() }}">{{ $revision->created_at->format(\App\Constants\DateFormats::LONG.', H:i') }}</time>
                             · {{ $revision->created_at->diffForHumans() }}{{ $revision->user ? ' · '.$revision->user->name : '' }}
                         </p>

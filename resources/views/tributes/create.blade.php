@@ -23,7 +23,7 @@
             <x-form.error-summary :intro="\App\Constants\FormControls::ERROR_SUMMARY_INTRO" :except="[\App\Http\Controllers\TributeController::LIMIT_ERROR, 'consent']" />
 
             @error(\App\Http\Controllers\TributeController::LIMIT_ERROR)
-                <p class="rounded-card border border-danger bg-danger-wash px-4 py-3 text-base font-light text-danger" role="alert">{{ $message }}</p>
+                <p class="rounded-card border border-danger bg-danger-wash px-4 py-3 text-base font-normal text-danger" role="alert">{{ $message }}</p>
             @enderror
 
             <x-form.input name="name" :label="$fields['name']['label']" :hint="$fields['name']['hint']" required autocomplete="name" />

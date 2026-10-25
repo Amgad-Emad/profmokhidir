@@ -29,7 +29,7 @@
             @endif
 
             @if (! $canSeeMembers)
-                <p class="mt-8 max-w-2xl text-base font-light text-ink-muted" data-rise>{{ $pageCopy->text('teaching', 'members_note') }} <a href="{{ $communityUrl }}" class="text-ink underline decoration-accent-line underline-offset-4">{{ $pageCopy->text('teaching', 'members_link') }}</a> {{ $pageCopy->text('teaching', 'members_after') }}</p>
+                <p class="mt-8 max-w-2xl text-base font-normal text-ink-muted" data-rise>{{ $pageCopy->text('teaching', 'members_note') }} <a href="{{ $communityUrl }}" class="text-ink underline decoration-accent-line underline-offset-4">{{ $pageCopy->text('teaching', 'members_link') }}</a> {{ $pageCopy->text('teaching', 'members_after') }}</p>
             @endif
 
             @if ($courses === [])

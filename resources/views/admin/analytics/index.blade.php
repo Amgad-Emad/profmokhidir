@@ -19,7 +19,7 @@
     @unless ($enabled)
         <div class="analytics-off mt-8" data-analytics-off>
             <x-icon name="info" class="mt-0.5 size-5 text-accent-text" />
-            <p class="text-base font-light text-ink-muted">
+            <p class="text-base font-normal text-ink-muted">
                 Analytics is switched off, so nothing new is being recorded. Figures already collected stay readable here.
                 @can(\App\Constants\Permissions::MANAGE_SETTINGS)
                     Switch it on in <a href="{{ route(AdminNavigation::routeFor(AdminNavigation::SITE_SETTINGS)) }}#analytics">Site settings</a> once the client has approved it.
@@ -41,7 +41,7 @@
         @endif
         <div class="analytics-range__apply"><x-button type="submit" variant="primary" size="sm" data-leave-ok>Show</x-button></div>
     </form>
-    <p class="mt-4 text-sm font-light text-ink-muted" data-period>{{ $period['label'] }}, compared with {{ $period['comparison'] }}.</p>
+    <p class="mt-4 text-sm font-normal text-ink-muted" data-period>{{ $period['label'] }}, compared with {{ $period['comparison'] }}.</p>
 
     {{-- Headline figures --}}
     <section class="mt-8" aria-labelledby="headline-heading">
@@ -108,7 +108,7 @@
         <section class="analytics-panel" aria-labelledby="map-heading">
             <div class="analytics-panel__head">
                 <h2 id="map-heading" class="analytics-panel__title">Where visitors are</h2>
-                <span class="text-sm font-light text-ink-muted">{{ number_format($countryCount) }} {{ \Illuminate\Support\Str::plural('country', $countryCount) }}</span>
+                <span class="text-sm font-normal text-ink-muted">{{ number_format($countryCount) }} {{ \Illuminate\Support\Str::plural('country', $countryCount) }}</span>
             </div>
             <x-admin.world-map :countries="$map" class="mt-4" />
         </section>
@@ -122,7 +122,7 @@
                 <x-button variant="quiet" size="sm" :href="$exportUrl(Analytics::EXPORT_PAGES)" data-export="pages"><x-icon name="download" class="size-4" />CSV<span class="sr-only"> of pages</span></x-button>
             @endif
         </div>
-        <p class="mt-2 max-w-2xl text-sm font-light text-ink-muted">Ranked by the time visitors spent reading: the tab in view and the visitor scrolling or interacting within the last {{ Analytics::IDLE_SECONDS }} seconds.</p>
+        <p class="mt-2 max-w-2xl text-sm font-normal text-ink-muted">Ranked by the time visitors spent reading: the tab in view and the visitor scrolling or interacting within the last {{ Analytics::IDLE_SECONDS }} seconds.</p>
         <form method="GET" action="{{ route(Analytics::ADMIN_ROUTE) }}" class="analytics-range mt-5" novalidate data-section-form>
             @foreach (array_intersect_key($query, array_flip(['range', 'from', 'to'])) as $name => $value)
                 <input type="hidden" name="{{ $name }}" value="{{ $value }}">
@@ -132,7 +132,7 @@
         </form>
 
         @if ($pages === [])
-            <p class="mt-6 text-sm font-light text-ink-muted" data-pages-empty>{{ $section ? 'No pages in this section were read in this period.' : 'No pages were read in this period.' }}</p>
+            <p class="mt-6 text-sm font-normal text-ink-muted" data-pages-empty>{{ $section ? 'No pages in this section were read in this period.' : 'No pages were read in this period.' }}</p>
         @else
             <div class="relative mt-6 overflow-x-auto rounded-card border border-rule">
                 <table class="admin-table analytics-table w-full text-left text-sm" data-pages-table>
@@ -151,7 +151,7 @@
                             <tr data-page="{{ $page['path'] }}">
                                 <th scope="row">
                                     <a href="{{ $page['url'] }}" class="font-medium text-ink">{{ $page['label'] }}</a>
-                                    <span class="mt-1 block text-xs font-light text-ink-muted">{{ $page['section_label'] }} · <span class="analytics-table__path font-mono">{{ $page['path'] }}</span></span>
+                                    <span class="mt-1 block text-sm font-normal text-ink-muted">{{ $page['section_label'] }} · <span class="analytics-table__path font-mono">{{ $page['path'] }}</span></span>
                                 </th>
                                 <td class="text-right"><time datetime="{{ Duration::iso($page['engaged_seconds']) }}">{{ Duration::short($page['engaged_seconds']) }}</time></td>
                                 <td class="text-right"><time datetime="{{ Duration::iso($page['average_engaged']) }}">{{ Duration::short($page['average_engaged']) }}</time></td>
@@ -176,7 +176,7 @@
         <x-admin.ranked-list title="Campaign sources" :rows="$campaigns" key="campaigns" class="mt-6" />
     @endif
 
-    <p class="mt-10 max-w-3xl text-sm font-light text-ink-muted" data-retention>
+    <p class="mt-10 max-w-3xl text-sm font-normal text-ink-muted" data-retention>
         Page views are kept for {{ Analytics::RAW_RETENTION_DAYS }} days, then only the daily totals remain, for {{ Analytics::ROLLUP_RETENTION_MONTHS }} months.
         Countries are told from the address, which is then discarded; no cookie is set and nothing identifies a person.
     </p>

@@ -44,7 +44,7 @@ final class Typography
         return [
             ['file' => self::FILE_DISPLAY, 'family' => self::DISPLAY_FAMILY, 'style' => 'normal', 'weight' => '300'],
             ['file' => self::FILE_DISPLAY_ITALIC, 'family' => self::DISPLAY_FAMILY, 'style' => 'italic', 'weight' => '300'],
-            ['file' => self::FILE_SANS, 'family' => self::SANS_FAMILY, 'style' => 'normal', 'weight' => '300 500'],
+            ['file' => self::FILE_SANS, 'family' => self::SANS_FAMILY, 'style' => 'normal', 'weight' => '400 500'],
             ['file' => self::FILE_MONO, 'family' => self::MONO_FAMILY, 'style' => 'normal', 'weight' => '400'],
         ];
     }
@@ -66,7 +66,7 @@ final class Typography
     {
         return [
             'display' => ['family' => self::DISPLAY_FAMILY, 'weights' => [300], 'italic' => true, 'use' => 'Display, headings and quotes.'],
-            'sans' => ['family' => self::SANS_FAMILY, 'weights' => [300, 400, 500], 'italic' => false, 'use' => 'Body and UI. 300 for reading, 500 for emphasis.'],
+            'sans' => ['family' => self::SANS_FAMILY, 'weights' => [400, 500], 'italic' => false, 'use' => 'Body 400; emphasis, labels and UI 500. 300 is not used for running text.'],
             'mono' => ['family' => self::MONO_FAMILY, 'weights' => [400], 'italic' => false, 'use' => 'Technical specs only.'],
         ];
     }
@@ -82,8 +82,8 @@ final class Typography
             'display' => ['class' => 't-display', 'size' => 96, 'mobile' => 52, 'font' => self::DISPLAY_FAMILY, 'weight' => 300, 'italic' => false, 'lineHeight' => 1.0, 'tracking' => null, 'uppercase' => false, 'sample' => 'Knowledge is the light we pass on.'],
             'heading' => ['class' => 't-heading', 'size' => 48, 'mobile' => 34, 'font' => self::DISPLAY_FAMILY, 'weight' => 300, 'italic' => false, 'lineHeight' => 1.1, 'tracking' => null, 'uppercase' => false, 'sample' => 'A life devoted to knowledge and to those who sought it.'],
             'quote' => ['class' => 't-quote', 'size' => 32, 'mobile' => 32, 'font' => self::DISPLAY_FAMILY, 'weight' => 300, 'italic' => true, 'lineHeight' => 1.3, 'tracking' => null, 'uppercase' => false, 'sample' => 'His lessons continue in every student he taught.'],
-            'body' => ['class' => 't-body', 'size' => 18, 'mobile' => 18, 'font' => self::SANS_FAMILY, 'weight' => 300, 'italic' => false, 'lineHeight' => 1.78, 'tracking' => null, 'uppercase' => false, 'sample' => 'Teacher, scholar and mentor. Over five decades Professor Khidir taught, supervised and encouraged generations of students, and his writing continues to shape the field.'],
-            'label' => ['class' => 't-label', 'size' => 12, 'mobile' => 12, 'font' => self::SANS_FAMILY, 'weight' => 500, 'italic' => false, 'lineHeight' => 1.4, 'tracking' => '0.3em', 'uppercase' => true, 'sample' => 'Khartoum, 1974'],
+            'body' => ['class' => 't-body', 'size' => 18, 'mobile' => 17, 'font' => self::SANS_FAMILY, 'weight' => 400, 'italic' => false, 'lineHeight' => 1.6, 'tracking' => null, 'uppercase' => false, 'sample' => 'Teacher, scholar and mentor. Over five decades Professor Khidir taught, supervised and encouraged generations of students, and his writing continues to shape the field.'],
+            'label' => ['class' => 't-label', 'size' => 12, 'mobile' => 12, 'font' => self::SANS_FAMILY, 'weight' => 500, 'italic' => false, 'lineHeight' => 1.4, 'tracking' => '0.24em', 'uppercase' => true, 'sample' => 'Khartoum, 1974'],
         ];
     }
 }

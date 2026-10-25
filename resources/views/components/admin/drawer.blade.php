@@ -11,7 +11,7 @@
                 <div>
                     <h2 id="{{ $id }}-title" class="font-display text-3xl font-light leading-tight">{{ $title }}</h2>
                     @if ($description)
-                        <p id="{{ $id }}-description" class="mt-1 text-sm font-light text-ink-muted">{{ $description }}</p>
+                        <p id="{{ $id }}-description" class="mt-1 text-sm font-normal text-ink-muted">{{ $description }}</p>
                     @endif
                 </div>
                 <x-button variant="icon" type="button" wire:click="{{ $close }}"><span class="sr-only">Close</span><x-icon name="close" /></x-button>

@@ -12,7 +12,7 @@
     {{-- Active / Trash tabs --}}
     <div class="mt-10 flex flex-wrap items-center gap-2 border-b border-rule" role="tablist" aria-label="Records">
         <button type="button" role="tab" wire:click="showActive" aria-selected="{{ $view === ContentIndex::VIEW_ACTIVE ? 'true' : 'false' }}" class="admin-tab" data-tab="active">{{ $type['plural'] }}</button>
-        <button type="button" role="tab" wire:click="showTrash" aria-selected="{{ $view === ContentIndex::VIEW_TRASH ? 'true' : 'false' }}" class="admin-tab" data-tab="trash">Trash<span class="ml-2 text-xs text-ink-muted">{{ $trashedCount }}</span></button>
+        <button type="button" role="tab" wire:click="showTrash" aria-selected="{{ $view === ContentIndex::VIEW_TRASH ? 'true' : 'false' }}" class="admin-tab" data-tab="trash">Trash<span class="ml-2 text-sm text-ink-muted">{{ $trashedCount }}</span></button>
     </div>
 
     {{-- Search and filters: chips for short option lists, a select for long ones; all kept in the address. --}}
@@ -36,7 +36,7 @@
     </div>
 
     @if ($view === ContentIndex::VIEW_ACTIVE && ! $canReorder && ! $items->isEmpty())
-        <p class="mt-4 text-sm font-light text-ink-muted">Clear the search, filters and sorting to change the display order.
+        <p class="mt-4 text-sm font-normal text-ink-muted">Clear the search, filters and sorting to change the display order.
             @if ($sort !== '')<x-button variant="quiet" size="sm" type="button" class="ml-1" wire:click="clearSort">Reset sorting</x-button>@endif
         </p>
     @endif
