@@ -36,8 +36,8 @@ class TeachingMaterialRequest extends ContentRequest
     public function messages(): array
     {
         return parent::messages() + [
-            'type.Illuminate\Validation\Rules\Enum' => 'Choose one of the material types.',
-            'access.Illuminate\Validation\Rules\Enum' => 'Choose who may download this material.',
+            'type.Illuminate\Validation\Rules\Enum' => __('Choose one of the material types.'),
+            'access.Illuminate\Validation\Rules\Enum' => __('Choose who may download this material.'),
         ];
     }
 
@@ -46,6 +46,6 @@ class TeachingMaterialRequest extends ContentRequest
      */
     public function attributes(): array
     {
-        return ['material_date' => 'date', 'external_url' => 'external link'];
+        return ['material_date' => __('date'), 'external_url' => __('external link')];
     }
 }

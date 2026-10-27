@@ -27,11 +27,11 @@ enum AnalyticsRange: string
     public function label(): string
     {
         return match ($this) {
-            self::Today => 'Today',
-            self::Week => 'Last 7 days',
-            self::Month => 'Last 30 days',
-            self::Year => 'Last 12 months',
-            self::Custom => 'Custom range',
+            self::Today => __('Today'),
+            self::Week => __('Last 7 days'),
+            self::Month => __('Last 30 days'),
+            self::Year => __('Last 12 months'),
+            self::Custom => __('Custom range'),
         };
     }
 

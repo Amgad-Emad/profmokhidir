@@ -18,11 +18,11 @@
     <span class="analytics-figure__value" data-value>{{ $figure['display'] }}</span>
     <span class="analytics-figure__change" data-direction="{{ $direction }}">
         @if ($direction === 'none')
-            <x-icon name="minus" class="size-4" />No figures for {{ $comparison }}
+            <x-icon name="minus" class="size-4" />{{ __('No figures for :period', ['period' => $comparison]) }}
         @elseif ($direction === 'flat')
-            <x-icon name="minus" class="size-4" />Unchanged on {{ $comparison }}
+            <x-icon name="minus" class="size-4" />{{ __('Unchanged on :period', ['period' => $comparison]) }}
         @else
-            <x-icon name="arrow" class="size-4" />{{ $direction === 'up' ? 'Up' : 'Down' }} {{ number_format(abs($change), 0) }}% on {{ $comparison }}
+            <x-icon name="arrow" class="size-4" />{{ $direction === 'up' ? __('Up :percent% on :period', ['percent' => app(\App\Services\LocaleService::class)->digits(number_format(abs($change), 0)), 'period' => $comparison]) : __('Down :percent% on :period', ['percent' => app(\App\Services\LocaleService::class)->digits(number_format(abs($change), 0)), 'period' => $comparison]) }}
         @endif
     </span>
     <span class="text-sm font-normal text-ink-muted">{{ $figure['hint'] }}</span>

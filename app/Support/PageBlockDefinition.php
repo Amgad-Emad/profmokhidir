@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Constants\Locales;
 use App\Constants\PageBlockType;
 
 /**
@@ -139,6 +140,50 @@ final readonly class PageBlockDefinition
     public static function emptyImage(): array
     {
         return ['media_id' => null, 'alt_text' => null, 'caption' => null, 'place' => null, 'year' => null, 'focus_x' => self::FOCUS_CENTRE, 'focus_y' => self::FOCUS_CENTRE];
+    }
+
+    /** Value keys that are never words: destinations, ids, positions and years. */
+    private const array UNTRANSLATED_KEYS = ['key', 'route', 'url', 'media_id', 'focus_x', 'focus_y', 'year'];
+
+    /**
+     * The same block with its built-in copy in the current language (each
+     * default string through the JSON translations; English as it is).
+     */
+    public function localized(): self
+    {
+        if (app()->getLocale() === Locales::DEFAULT) {
+            return $this;
+        }
+
+        return new self(
+            $this->key, $this->type, $this->label, $this->section, $this->translate($this->default), $this->max, $this->required,
+            $this->hint, $this->inline, $this->tokens, $this->fields, $this->fixedItems, $this->sortable, $this->maxItems, $this->itemLabel,
+        );
+    }
+
+    /**
+     * Every word of a value in the current language where a translation of
+     * it exists (the built-in copy has one; text an editor changed in English
+     * has none and stays as written). Destinations, ids and years are left alone.
+     */
+    public function translate(mixed $value): mixed
+    {
+        if (is_string($value)) {
+            return $value === '' ? $value : __($value);
+        }
+
+        if (! is_array($value)) {
+            return $value;
+        }
+
+        $skip = [...self::UNTRANSLATED_KEYS, ...array_keys(array_filter($this->fields, fn (array $field): bool => $field['kind'] === self::FIELD_ROUTE))];
+        $translated = [];
+
+        foreach ($value as $key => $item) {
+            $translated[$key] = is_string($key) && in_array($key, $skip, true) ? $item : $this->translate($item);
+        }
+
+        return $translated;
     }
 
     /**

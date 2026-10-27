@@ -5,12 +5,12 @@
     <div role="alertdialog" aria-modal="true" aria-labelledby="delete-title" aria-describedby="delete-description" class="confirm-dialog confirm-dialog--danger">
         <div class="confirm-dialog__head">
             <span class="confirm-dialog__icon" data-danger-icon><x-icon name="warning" class="size-6" /></span>
-            <h2 id="delete-title" class="confirm-dialog__title">{{ ChatCopy::DELETE_CONFIRM }}</h2>
+            <h2 id="delete-title" class="confirm-dialog__title">{{ __(ChatCopy::DELETE_CONFIRM) }}</h2>
         </div>
-        <p id="delete-description" class="confirm-dialog__body">{{ ChatCopy::DELETE_CONSEQUENCE }} {{ ConfirmDialog::IRREVERSIBLE }}</p>
+        <p id="delete-description" class="confirm-dialog__body">{{ __(ChatCopy::DELETE_CONSEQUENCE) }} {{ __(ConfirmDialog::IRREVERSIBLE) }}</p>
         <div class="confirm-dialog__actions">
-            <x-button type="button" variant="quiet" x-on:click="cancelDelete(deleteTarget)" x-effect="if (deleting !== null) $nextTick(() => $el.focus())" data-cancel>{{ ConfirmDialog::CANCEL }}</x-button>
-            <x-button type="button" variant="danger-filled" x-on:click="remove(deleteTarget)" data-delete-confirm><x-icon name="trash" class="size-4" />{{ ChatCopy::DELETE_LABEL }}</x-button>
+            <x-button type="button" variant="quiet" x-on:click="cancelDelete(deleteTarget)" x-effect="if (deleting !== null) $nextTick(() => $el.focus())" data-cancel>{{ __(ConfirmDialog::CANCEL) }}</x-button>
+            <x-button type="button" variant="danger-filled" x-on:click="remove(deleteTarget)" data-delete-confirm><x-icon name="trash" class="size-4" />{{ __(ChatCopy::DELETE_LABEL) }}</x-button>
         </div>
     </div>
 </div>

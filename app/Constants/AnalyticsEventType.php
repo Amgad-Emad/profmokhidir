@@ -21,8 +21,8 @@ enum AnalyticsEventType: string
     public function label(): string
     {
         return match ($this) {
-            self::Pageview => 'Page view',
-            self::Engagement => 'Engagement',
+            self::Pageview => __('Page view'),
+            self::Engagement => __('Engagement'),
         };
     }
 }

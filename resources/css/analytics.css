@@ -169,12 +169,12 @@
     .ranked-list__figure {
         font-variant-numeric: lining-nums tabular-nums;
         color: var(--ink-strong);
-        text-align: right;
+        text-align: end;
         white-space: nowrap;
     }
 
     .ranked-list__share {
-        margin-left: 0.5rem;
+        margin-inline-start: 0.5rem;
         color: var(--ink-muted);
         font-weight: 400;
     }
@@ -188,7 +188,8 @@
 
     .share-bar__fill {
         position: absolute;
-        inset: 0 auto 0 0;
+        inset-block: 0;
+        inset-inline: 0 auto;
         width: var(--share);
         background-color: var(--chart-line);
     }

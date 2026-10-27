@@ -19,10 +19,10 @@ class RobotsTest extends TestCase
             ->assertHeader('Content-Type', Seo::TEXT_CONTENT_TYPE);
 
         $this->assertSame(
-            "User-agent: *\nDisallow: /admin\nDisallow: /community/chat\n\nSitemap: ".url(Seo::SITEMAP_PATH)."\n",
+            "User-agent: *\nDisallow: /admin\nDisallow: /community/chat\nDisallow: /language\n\nSitemap: ".url(Seo::SITEMAP_PATH)."\n",
             $response->getContent(),
         );
-        $this->assertSame(['/admin', '/community/chat'], Seo::disallowedPaths());
+        $this->assertSame(['/admin', '/community/chat', '/language'], Seo::disallowedPaths());
     }
 
     #[Test]

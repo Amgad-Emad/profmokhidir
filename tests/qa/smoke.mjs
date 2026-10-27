@@ -65,7 +65,7 @@ function warn(page, width, check, details) {
 
 async function sitemapUrls() {
     try {
-        const response = await fetch(`${BASE}/sitemap.xml`);
+        const response = await fetch(`${BASE}/sitemaps/en.xml`);
         if (!response.ok) return [];
         const xml = await response.text();
         return [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)]

@@ -13,6 +13,9 @@ final class Placeholders
     /** Text the seeders prefix to placeholder copy. */
     public const string MARKER = '[Placeholder]';
 
+    /** The same marker on the seeders' Arabic placeholder copy ("temporary text"). */
+    public const string MARKER_AR = '[نص مؤقت]';
+
     /** Flag shown beside a field that still holds placeholder copy. */
     public const string FLAG = 'Replace before launch';
 
@@ -31,6 +34,6 @@ final class Placeholders
             return false;
         }
 
-        return is_string($value) && str_contains($value, self::MARKER);
+        return is_string($value) && (str_contains($value, self::MARKER) || str_contains($value, self::MARKER_AR));
     }
 }

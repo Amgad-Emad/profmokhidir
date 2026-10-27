@@ -10,11 +10,13 @@ use App\Models\User;
 use App\Services\PageContentService;
 use App\Services\SettingService;
 use App\Services\TypesetterService;
+use App\Support\LocalizedUrlGenerator;
 use App\Support\PreviewContext;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\DevCommands;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
@@ -30,16 +32,41 @@ class AppServiceProvider extends ServiceProvider
 
         // Page copy is read many times per request (header, footer, page): loaded once per request.
         $this->app->scoped(PageContentService::class);
+
+        // route() stays in the language of the page (/ar/... while Arabic is current). Rebinding the
+        // singleton keeps the framework's extenders, which give the generator its session and key resolvers.
+        $this->app->singleton('url', function ($app) {
+            $routes = $app['router']->getRoutes();
+            $app->instance('routes', $routes);
+
+            return new LocalizedUrlGenerator(
+                $routes,
+                $app->rebinding('request', fn ($app, $request) => $app['url']->setRequest($request)),
+                $app['config']['app.asset_url'],
+            );
+        });
     }
 
     public function boot(): void
     {
+        // Carbon keeps its locale in a static: start every application in the configured language
+        // (SetLocale switches it per request).
+        Carbon::setLocale($this->app->getLocale());
+
         Gate::define('access-admin', fn (User $user): bool => $user->canAccessAdmin());
 
         $this->registerDevCommands();
 
         // @typeset($text): database text with curly quotes, en dashes, non-breaking spaces and small caps, escaped.
         Blade::directive('typeset', fn (string $expression): string => '<?php echo app(\\'.TypesetterService::class.'::class)->inline('.$expression.'); ?>');
+
+        // @contentLang($model) or @contentLang($model, 'summary'): `lang="en" dir="ltr"` on an element whose
+        // text falls back to English on an Arabic page; nothing when it is in the page's own language.
+        Blade::directive('contentLang', fn (string $expression): string => '<?php echo \\App\\Constants\\Locales::attributesFor('.$expression.'); ?>');
+
+        // @num($count): a number inside running text, in Arabic-Indic digits on Arabic pages when the site
+        // setting asks for them (Western digits otherwise, and always for years, citations, DOIs and data).
+        Blade::directive('num', fn (string $expression): string => '<?php echo e(app(\\App\\Services\\LocaleService::class)->digits('.$expression.')); ?>');
 
         // Public community signups: a handful per address per hour.
         RateLimiter::for(RateLimits::COMMUNITY_SIGNUP, function (Request $request) {

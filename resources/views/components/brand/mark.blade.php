@@ -26,7 +26,7 @@
     $titleId = 'brand-mark-title-'.uniqid();
 @endphp
 <svg {{ $attributes->class(['brand-mark', $disc ? 'brand-mark--disc' : 'brand-mark--ring']) }} xmlns="http://www.w3.org/2000/svg" width="{{ $size }}" height="{{ $size }}" viewBox="0 0 {{ $box }} {{ $box }}" style="padding: {{ BrandMark::clearSpace($size) }}px" data-size="{{ $size }}" data-tone="{{ $tone }}" data-variant="{{ $disc ? 'disc' : 'ring' }}"{!! $decorative ? ' aria-hidden="true" focusable="false"' : ' role="img" aria-labelledby="'.$titleId.'"' !!}>
-    <title id="{{ $titleId }}">{{ BrandMark::TITLE }}</title>
+    <title id="{{ $titleId }}">{{ __(BrandMark::TITLE) }}</title>
     @if ($disc)
         <circle cx="{{ $centre }}" cy="{{ $centre }}" r="{{ $centre }}" style="fill: var(--mark-disc)" />
     @else

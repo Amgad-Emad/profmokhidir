@@ -98,10 +98,10 @@ class ChatAttachmentService
             'altMaxLength' => ChatAttachments::ALT_MAX_LENGTH,
             'uploadUrl' => route(ChatAttachments::ROUTE_UPLOAD),
             'discardUrl' => route(ChatAttachments::ROUTE_DISCARD, ['upload' => '__uuid__']),
-            'types' => strtr(ChatCopy::ATTACH_TYPES, [
-                ':image' => (string) $this->imageMaxMegabytes(),
-                ':document' => (string) $this->documentMaxMegabytes(),
-                ':max' => (string) ChatAttachments::MAX_FILES,
+            'types' => __(ChatCopy::ATTACH_TYPES, [
+                'image' => (string) $this->imageMaxMegabytes(),
+                'document' => (string) $this->documentMaxMegabytes(),
+                'max' => (string) ChatAttachments::MAX_FILES,
             ]),
         ];
     }
@@ -121,17 +121,17 @@ class ChatAttachmentService
         ChatAccess::guard($member);
 
         if (! $this->enabled()) {
-            throw new InvalidArgumentException(ChatCopy::UPLOADS_OFF);
+            throw new InvalidArgumentException(__(ChatCopy::UPLOADS_OFF));
         }
 
         if ($this->uploads->countPendingFor((int) $member->getKey()) >= ChatAttachments::MAX_FILES) {
-            throw new InvalidArgumentException(strtr(ChatCopy::ATTACH_TOO_MANY, [':max' => (string) ChatAttachments::MAX_FILES]));
+            throw new InvalidArgumentException(__(ChatCopy::ATTACH_TOO_MANY, ['max' => (string) ChatAttachments::MAX_FILES]));
         }
 
         $this->hitRateLimit($member);
 
         $extension = strtolower($file->getClientOriginalExtension());
-        $kind = ChatAttachments::kindFor($extension) ?? throw new InvalidArgumentException(strtr(ChatCopy::ATTACH_UNSUPPORTED, [':name' => $file->getClientOriginalName()]));
+        $kind = ChatAttachments::kindFor($extension) ?? throw new InvalidArgumentException(__(ChatCopy::ATTACH_UNSUPPORTED, ['name' => $file->getClientOriginalName()]));
         $displayName = $this->displayName($file->getClientOriginalName(), $extension);
 
         $directory = storage_path('app/private/chat-staging/'.Str::uuid());
@@ -230,11 +230,11 @@ class ChatAttachmentService
         }
 
         if (! $this->enabled()) {
-            throw new InvalidArgumentException(ChatCopy::UPLOADS_OFF);
+            throw new InvalidArgumentException(__(ChatCopy::UPLOADS_OFF));
         }
 
         if (count($attachments) > ChatAttachments::MAX_FILES) {
-            throw new InvalidArgumentException(strtr(ChatCopy::ATTACH_TOO_MANY, [':max' => (string) ChatAttachments::MAX_FILES]));
+            throw new InvalidArgumentException(__(ChatCopy::ATTACH_TOO_MANY, ['max' => (string) ChatAttachments::MAX_FILES]));
         }
 
         $prepared = [];
@@ -244,11 +244,11 @@ class ChatAttachmentService
             $alt = is_array($attachment) ? trim((string) ($attachment['alt'] ?? '')) : '';
 
             if (! Str::isUuid($uuid) || array_key_exists($uuid, $prepared)) {
-                throw new InvalidArgumentException('One of the files could not be found. Remove it and attach it again.');
+                throw new InvalidArgumentException(__('One of the files could not be found. Remove it and attach it again.'));
             }
 
             $this->uploads->findPendingFor((int) $member->getKey(), $uuid)
-                ?? throw new InvalidArgumentException('One of the files is no longer available. Remove it and attach it again.');
+                ?? throw new InvalidArgumentException(__('One of the files is no longer available. Remove it and attach it again.'));
 
             $prepared[$uuid] = mb_substr($alt, 0, ChatAttachments::ALT_MAX_LENGTH);
         }
@@ -276,7 +276,7 @@ class ChatAttachmentService
         $uploads = $this->uploads->lockPendingFor((int) $member->getKey(), array_keys($prepared));
 
         if ($uploads->count() !== count($prepared)) {
-            throw new InvalidArgumentException('One of the files is no longer available. Remove it and attach it again.');
+            throw new InvalidArgumentException(__('One of the files is no longer available. Remove it and attach it again.'));
         }
 
         $now = CarbonImmutable::now();
@@ -284,7 +284,7 @@ class ChatAttachmentService
         foreach ($uploads->values() as $index => $upload) {
             /** @var ChatUpload $upload */
             $media = $upload->getFirstMedia(MediaCollections::CHAT_PENDING)
-                ?? throw new InvalidArgumentException('One of the files is no longer available. Remove it and attach it again.');
+                ?? throw new InvalidArgumentException(__('One of the files is no longer available. Remove it and attach it again.'));
 
             $properties = $upload->isImage() ? [MediaProperties::ALT_TEXT => $this->altText($prepared[$upload->uuid], $member)] : [];
             $media->order_column = $index + 1;

@@ -33,6 +33,11 @@ interface UserRepositoryInterface extends BaseRepositoryInterface
     public function updateTheme(User $user, Theme $theme): User;
 
     /**
+     * Keep the user's language choice (App\Constants\Locales).
+     */
+    public function updateLocale(User $user, string $locale): User;
+
+    /**
      * Remember that the user dismissed the dashboard card recommending two-factor authentication.
      */
     public function dismissTwoFactorReminder(User $user): User;

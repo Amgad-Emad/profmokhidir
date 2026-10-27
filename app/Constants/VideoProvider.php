@@ -20,8 +20,8 @@ enum VideoProvider: string
         return match ($this) {
             self::YouTube => 'YouTube',
             self::Vimeo => 'Vimeo',
-            self::File => 'Uploaded file',
-            self::Link => 'External link',
+            self::File => __('Uploaded file'),
+            self::Link => __('External link'),
         };
     }
 

@@ -34,7 +34,7 @@
             @if ($hint)<span id="{{ $hintId }}" class="form-check__hint">{{ $hint }}</span>@endif
         </span>
         <span class="form-toggle__control">
-            <span class="form-toggle__state" aria-hidden="true"><span class="form-toggle__on">{{ \App\Constants\FormControls::TOGGLE_ON }}</span><span class="form-toggle__off">{{ \App\Constants\FormControls::TOGGLE_OFF }}</span></span>
+            <span class="form-toggle__state" aria-hidden="true"><span class="form-toggle__on">{{ __(\App\Constants\FormControls::TOGGLE_ON) }}</span><span class="form-toggle__off">{{ __(\App\Constants\FormControls::TOGGLE_OFF) }}</span></span>
             @if ($model === null && $name !== null)<input type="hidden" name="{{ $name }}" value="0">@endif
             <input class="form-toggle__input" {{ $switchAttributes }}>
         </span>

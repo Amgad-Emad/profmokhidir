@@ -5,7 +5,7 @@
 @inject('preview', 'App\Services\PreviewService')
 @if ($preview->active())
     <div class="preview-banner on-dark" role="status" data-preview-banner>
-        <span class="t-label preview-banner__label">{{ \App\Constants\Preview::BANNER_LABEL }}</span>
-        <span class="preview-banner__text">{{ \App\Constants\Preview::BANNER_TEXT }}</span>
+        <span class="t-label preview-banner__label">{{ __(\App\Constants\Preview::BANNER_LABEL) }}</span>
+        <span class="preview-banner__text">{{ __(\App\Constants\Preview::BANNER_TEXT) }}</span>
     </div>
 @endif

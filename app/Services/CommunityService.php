@@ -38,7 +38,7 @@ class CommunityService
      * Public signup: create the account as an applicant, record the
      * application and send the email-verification link.
      *
-     * @param  array{name: string, email: string, password: string, affiliation?: ?string, academic_field?: ?string, reason_for_joining?: ?string}  $data
+     * @param  array{name: string, email: string, password: string, locale?: ?string, affiliation?: ?string, academic_field?: ?string, reason_for_joining?: ?string}  $data
      */
     public function register(array $data): User
     {
@@ -47,6 +47,8 @@ class CommunityService
             'email' => $data['email'],
             'password' => $data['password'],
             'role' => Roles::APPLICANT,
+            // Emails (verification, the decision) follow the language the person signed up in.
+            'locale' => $data['locale'] ?? app()->getLocale(),
         ]);
 
         $user = $this->apply($user, $data);

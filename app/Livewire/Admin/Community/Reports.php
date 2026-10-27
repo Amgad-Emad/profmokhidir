@@ -64,7 +64,7 @@ class Reports extends Component
         $this->authorize('resolve', $report);
 
         $this->service()->resolveReport($report, auth()->user());
-        $this->toast('Report resolved.');
+        $this->toast(__('Report resolved.'));
     }
 
     public function deleteMessage(): void
@@ -78,7 +78,7 @@ class Reports extends Component
 
         $this->service()->deleteReportedMessage($report, auth()->user());
         $this->cancelConfirmation();
-        $this->toast('Message removed and report resolved.');
+        $this->toast(__('Message removed and report resolved.'));
     }
 
     public function suspendAuthor(): void
@@ -96,7 +96,7 @@ class Reports extends Component
         $this->service()->suspendReportedAuthor($report, auth()->user(), filled($validated['note'] ?? null) ? trim((string) $validated['note']) : null);
         $this->cancelConfirmation();
         $this->note = '';
-        $this->toast('Author suspended and report resolved.');
+        $this->toast(__('Author suspended and report resolved.'));
     }
 
     public function render(): View

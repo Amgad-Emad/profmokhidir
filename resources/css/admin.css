@@ -46,7 +46,7 @@
     .admin-shell[data-collapsed='true'] .admin-nav-link .admin-count {
         position: absolute;
         top: 0.125rem;
-        right: 0.375rem;
+        inset-inline-end: 0.375rem;
         min-width: 1.125rem;
         height: 1.125rem;
         padding-inline: 0.25rem;
@@ -103,7 +103,7 @@
         min-height: 2.25rem;
         padding: 0.25rem 0.75rem;
         color: var(--accent-text);
-        text-align: left;
+        text-align: start;
     }
 
     .admin-nav__toggle .t-label {
@@ -131,7 +131,7 @@
         gap: 0.75rem;
         min-height: 2.75rem;
         padding: 0.5rem 0.75rem;
-        border-left: 1px solid transparent;
+        border-inline-start: 1px solid transparent;
         font-size: 1rem;
         font-weight: 400;
         line-height: 1.5;
@@ -155,7 +155,7 @@
     }
 
     .admin-nav-link--active {
-        border-left-color: var(--accent-line);
+        border-inline-start-color: var(--accent-line);
         color: var(--ink-strong);
         font-weight: 500;
     }
@@ -217,7 +217,7 @@
         width: 100%;
         margin-top: 0.25rem;
         font-size: 0.9375rem; /* 15px */
-        text-align: left;
+        text-align: start;
     }
 
     .admin-shell[data-collapsed='true'] .admin-nav__sign-out .sign-out__label {
@@ -256,7 +256,7 @@
         display: flex;
         align-items: center;
         gap: 0.25rem;
-        margin-left: auto;
+        margin-inline-start: auto;
     }
 
     @media (min-width: 40rem) {
@@ -367,7 +367,7 @@
 
         .admin-search-button__label {
             display: inline;
-            margin-right: auto;
+            margin-inline-end: auto;
         }
 
         .admin-search-button .admin-kbd {
@@ -393,7 +393,7 @@
     }
 
     .admin-kbd + .admin-kbd {
-        margin-left: 0.25rem;
+        margin-inline-start: 0.25rem;
     }
 
     .admin-topbar__link {
@@ -465,7 +465,7 @@
     .admin-user-menu__panel,
     .row-menu__panel {
         position: absolute;
-        right: 0;
+        inset-inline-end: 0;
         z-index: 40;
         margin-top: 0.5rem;
         min-width: 15rem;
@@ -492,7 +492,7 @@
         font-size: 0.9375rem;
         font-weight: 500;
         color: var(--ink);
-        text-align: left;
+        text-align: start;
         text-decoration: none;
     }
 
@@ -585,7 +585,7 @@
     }
 
     .confirm-dialog--danger .confirm-dialog__body {
-        padding-left: 3.75rem; /* under the title, clear of the icon */
+        padding-inline-start: 3.75rem; /* under the title, clear of the icon */
     }
 
     .confirm-dialog__actions {
@@ -604,7 +604,7 @@
 
     @media (max-width: 29.99rem) {
         .confirm-dialog--danger .confirm-dialog__body {
-            padding-left: 0;
+            padding-inline-start: 0;
         }
     }
 
@@ -636,7 +636,7 @@
         max-width: 34rem;
         height: 100%;
         flex-direction: column;
-        border-left: 1px solid var(--rule);
+        border-inline-start: 1px solid var(--rule);
         background-color: var(--surface-panel);
         animation: admin-drawer-in 600ms var(--ease-rise);
     }
@@ -658,7 +658,7 @@
 
     @keyframes admin-drawer-in {
         from {
-            transform: translateX(2.5rem);
+            transform: translateX(calc(2.5rem * var(--inline-sign, 1))); /* from the inline end: the right, or the left in Arabic */
             opacity: 0;
         }
     }
@@ -739,12 +739,12 @@
         justify-content: space-between;
         gap: 1rem;
         padding: 0.625rem 1rem;
-        border-left: 1px solid transparent;
+        border-inline-start: 1px solid transparent;
         cursor: pointer;
     }
 
     .palette__option[aria-selected='true'] {
-        border-left-color: var(--accent-line);
+        border-inline-start-color: var(--accent-line);
         background-color: var(--surface-sunken);
     }
 
@@ -787,8 +787,8 @@
     .admin-toasts {
         position: fixed;
         top: 5rem;
-        right: 1rem;
-        left: 1rem;
+        inset-inline-end: 1rem;
+        inset-inline-start: 1rem;
         z-index: 70;
         display: flex;
         flex-direction: column;
@@ -799,7 +799,7 @@
 
     @media (min-width: 40rem) {
         .admin-toasts {
-            left: auto;
+            inset-inline-start: auto;
             width: 26rem;
         }
     }
@@ -816,9 +816,10 @@
         width: 100%;
         align-items: center;
         gap: 0.75rem;
-        padding: 0.75rem 0.75rem 0.75rem 1rem;
+        padding-block: 0.75rem;
+        padding-inline: 1rem 0.75rem;
         border: 1px solid var(--rule);
-        border-left: 1px solid var(--accent-line);
+        border-inline-start: 1px solid var(--accent-line);
         border-radius: var(--radius-card);
         background-color: var(--surface-panel);
         pointer-events: auto;
@@ -921,14 +922,15 @@
 
     .edit-layout__links {
         margin-top: 0.75rem;
-        border-left: 1px solid var(--rule);
+        border-inline-start: 1px solid var(--rule);
     }
 
     .edit-layout__link {
         display: block;
-        margin-left: -1px;
-        padding: 0.375rem 0 0.375rem 1rem;
-        border-left: 1px solid transparent;
+        margin-inline-start: -1px;
+        padding-block: 0.375rem;
+        padding-inline: 1rem 0;
+        border-inline-start: 1px solid transparent;
         font-size: 0.9375rem;
         font-weight: 400;
         color: var(--ink-muted);
@@ -942,7 +944,7 @@
     }
 
     .edit-layout__link[aria-current='true'] {
-        border-left-color: var(--accent-line);
+        border-inline-start-color: var(--accent-line);
         color: var(--ink);
         font-weight: 500;
     }
@@ -1080,7 +1082,7 @@
     .placeholder-flag {
         display: inline-flex;
         align-items: center;
-        margin-left: 0.5rem;
+        margin-inline-start: 0.5rem;
         padding: 0.125rem 0.5rem;
         border: 1px solid var(--pending-tone);
         border-radius: 9999px;
@@ -1093,8 +1095,8 @@
     }
 
     [data-form-field][data-placeholder] {
-        padding-left: 1rem;
-        border-left: 1px solid var(--pending-tone);
+        padding-inline-start: 1rem;
+        border-inline-start: 1px solid var(--pending-tone);
     }
 
     /* ------------------------------------------------------------ lists */
@@ -1157,7 +1159,7 @@
         content: '';
         width: 0.375rem;
         height: 0.625rem;
-        margin-right: 0.125rem;
+        margin-inline-end: 0.125rem;
         border: solid currentColor;
         border-width: 0 1.5px 1.5px 0;
         transform: translateY(-0.0625rem) rotate(45deg);
@@ -1229,7 +1231,7 @@
 
     .row-menu__panel {
         min-width: 13rem;
-        text-align: left;
+        text-align: start;
     }
 
     .bulk-bar {
@@ -1336,7 +1338,7 @@
         gap: 1rem;
         padding: 1.5rem;
         border: 1px solid var(--rule);
-        border-left: 1px solid var(--accent-line);
+        border-inline-start: 1px solid var(--accent-line);
         border-radius: var(--radius-card);
         background-color: var(--surface-panel);
     }
@@ -1488,7 +1490,8 @@
 
     .launch-checklist__bar {
         position: absolute;
-        inset: 0 auto 0 0;
+        inset-block: 0;
+        inset-inline: 0 auto;
         width: var(--progress);
         background-color: var(--accent-line);
     }
@@ -1614,7 +1617,7 @@
 
     .library-tile__open {
         display: block;
-        text-align: left;
+        text-align: start;
     }
 
     .library-tile__open img {
@@ -1746,6 +1749,10 @@
         background: var(--surface);
     }
 
+    .page-preview__frame:dir(rtl) {
+        transform-origin: top right;
+    }
+
     .page-preview__note {
         font-size: 0.9375rem; /* 15px */
         font-weight: 400;
@@ -1797,7 +1804,7 @@
         position: absolute;
         width: 1.5rem;
         height: 1.5rem;
-        margin: -0.75rem 0 0 -0.75rem;
+        margin: -0.75rem 0 0 -0.75rem; /* physical on purpose: centres the mark on a point of the image, which never mirrors */
         border: 1px solid var(--ink);
         border-radius: 999px;
         outline: 1px solid var(--surface);
@@ -1809,9 +1816,9 @@
 
 .preview-banner {
     position: fixed;
-    right: 1rem;
+    inset-inline-end: 1rem;
     bottom: 1rem;
-    left: 1rem;
+    inset-inline-start: 1rem;
     z-index: 80;
     display: flex;
     flex-wrap: wrap;
@@ -1826,7 +1833,7 @@
 
 @media (min-width: 48rem) {
     .preview-banner {
-        left: auto;
+        inset-inline-start: auto;
         max-width: 34rem;
     }
 }

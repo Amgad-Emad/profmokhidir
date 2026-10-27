@@ -64,21 +64,22 @@ class PageRequest extends FormRequest
         $attributes = [];
 
         foreach (PageBlocks::for($this->page) as $key => $definition) {
-            $label = mb_strtolower($definition->label);
+            // Built from translated parts, in the editor's language.
+            $label = mb_strtolower(__($definition->label));
 
             $attributes[$key] = $label;
-            $attributes[$key.'.label'] = $label.' label';
-            $attributes[$key.'.url'] = $label.' web address';
-            $attributes[$key.'.route'] = $label.' destination';
-            $attributes[$key.'.alt_text'] = 'alt text';
-            $attributes[$key.'.caption'] = 'caption';
-            $attributes[$key.'.place'] = 'place';
-            $attributes[$key.'.year'] = 'year';
-            $attributes[$key.'.title'] = 'search title';
-            $attributes[$key.'.description'] = 'search description';
+            $attributes[$key.'.label'] = __(':field label', ['field' => $label]);
+            $attributes[$key.'.url'] = __(':field web address', ['field' => $label]);
+            $attributes[$key.'.route'] = __(':field destination', ['field' => $label]);
+            $attributes[$key.'.alt_text'] = __('alt text');
+            $attributes[$key.'.caption'] = __('caption');
+            $attributes[$key.'.place'] = __('place');
+            $attributes[$key.'.year'] = __('year');
+            $attributes[$key.'.title'] = __('search title');
+            $attributes[$key.'.description'] = __('search description');
 
             foreach ($definition->editableFields() as $field => $spec) {
-                $attributes[$key.'.*.'.$field] = mb_strtolower($definition->itemLabel.' '.$spec['label']);
+                $attributes[$key.'.*.'.$field] = mb_strtolower(__(':item: :field', ['item' => __((string) $definition->itemLabel), 'field' => __($spec['label'])]));
             }
         }
 
@@ -91,12 +92,74 @@ class PageRequest extends FormRequest
     public function messages(): array
     {
         return [
-            '*.alt_text.required_with' => 'Describe the image for people who cannot see it.',
-            '*.caption.required_with' => 'Every photograph needs a caption.',
-            '*.place.required_with' => 'Every photograph needs the place it was taken.',
-            '*.year.required_with' => 'Every photograph needs the year it was taken.',
-            '*.url.url' => 'Enter a full web address beginning with https://.',
+            '*.alt_text.required_with' => __('Describe the image for people who cannot see it.'),
+            '*.caption.required_with' => __('Every photograph needs a caption.'),
+            '*.place.required_with' => __('Every photograph needs the place it was taken.'),
+            '*.year.required_with' => __('Every photograph needs the year it was taken.'),
+            '*.url.url' => __('Enter a full web address beginning with https://.'),
         ];
+    }
+
+    /**
+     * Rules for the Arabic tab (App\Support\PageBlockValue::arabicForm()):
+     * words only, every one optional, with the English limits.
+     *
+     * @return array<string, list<mixed>>
+     */
+    public function arabicRules(): array
+    {
+        $rules = [];
+        $text = fn (int $max): array => ['nullable', 'string', 'max:'.$max];
+
+        foreach (PageBlocks::for($this->page) as $key => $definition) {
+            $rules += match ($definition->type) {
+                PageBlockType::ShortText => [$key => $text((int) $definition->max)],
+                PageBlockType::LongText => [$key => ['nullable', 'string', 'max:'.($definition->max * 4), new PlainTextMax((int) $definition->max)]],
+                PageBlockType::Link => [$key => ['array'], $key.'.label' => $text((int) $definition->max)],
+                PageBlockType::Image => [
+                    $key => ['array'],
+                    $key.'.alt_text' => $text(PageBlockDefinition::IMAGE_TEXT_MAX),
+                    $key.'.caption' => $text(PageBlockDefinition::IMAGE_TEXT_MAX),
+                    $key.'.place' => $text(PageBlockDefinition::IMAGE_TEXT_MAX),
+                ],
+                PageBlockType::Seo => [
+                    $key => ['array'],
+                    $key.'.title' => $text(PageBlockDefinition::SEO_TITLE_MAX),
+                    $key.'.description' => $text(PageBlockDefinition::SEO_DESCRIPTION_MAX),
+                    $key.'.alt_text' => $text(PageBlockDefinition::IMAGE_TEXT_MAX),
+                ],
+                PageBlockType::List => [$key => ['array'], ...array_combine(
+                    array_map(fn (string $field): string => $key.'.*.'.$field, array_keys($this->textFields($definition))),
+                    array_map(fn (array $spec): array => $text((int) $spec['max']), array_values($this->textFields($definition))),
+                )],
+            };
+        }
+
+        return $rules;
+    }
+
+    /**
+     * Attribute names for the Arabic tab ("Arabic hero heading").
+     *
+     * @return array<string, string>
+     */
+    public function arabicAttributes(): array
+    {
+        $attributes = [];
+
+        foreach ($this->attributes() as $field => $label) {
+            $attributes[$field] = __('Arabic :field', ['field' => $label]);
+        }
+
+        return $attributes;
+    }
+
+    /**
+     * @return array<string, array{label: string, kind: string, max: int|null}>
+     */
+    private function textFields(PageBlockDefinition $definition): array
+    {
+        return array_filter($definition->editableFields(), fn (array $spec): bool => $spec['kind'] === PageBlockDefinition::FIELD_TEXT);
     }
 
     /**

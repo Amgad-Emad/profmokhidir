@@ -47,9 +47,9 @@ class AuthPageService
             'screen' => AuthScreens::screen($screen),
             'portrait' => $portrait,
             'caption' => $portrait === null ? null : ResponsiveImage::placeYear($portrait),
-            'epigraph' => AuthScreens::EPIGRAPH,
-            'label' => AuthScreens::PANEL_LABEL,
-            'back' => ['label' => AuthScreens::BACK_LABEL, 'url' => route('home')],
+            'epigraph' => __(AuthScreens::EPIGRAPH),
+            'label' => __(AuthScreens::PANEL_LABEL),
+            'back' => ['label' => __(AuthScreens::BACK_LABEL), 'url' => route('home')],
         ];
     }
 

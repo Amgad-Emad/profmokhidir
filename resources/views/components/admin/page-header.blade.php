@@ -1,4 +1,4 @@
-{{-- Admin page heading: group eyebrow, display title, optional intro and actions on the right. --}}
+{{-- Admin page heading: group eyebrow, display title, optional intro and actions at the end. --}}
 @props(['eyebrow', 'title', 'intro' => null])
 <header {{ $attributes->class(['flex flex-col gap-6 md:flex-row md:items-end md:justify-between']) }}>
     <div class="flex flex-col gap-2">

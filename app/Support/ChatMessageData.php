@@ -38,7 +38,7 @@ final class ChatMessageData
             'id' => (int) $message->getKey(),
             'client_uuid' => (string) $message->client_uuid,
             'user_id' => (int) $message->user_id,
-            'author' => $author?->name ?? 'Former member',
+            'author' => $author?->name ?? __('Former member'),
             'affiliation' => $author?->affiliation,
             'initials' => Initials::of($author?->name),
             'body' => $deleted ? '' : (string) $message->body,
@@ -81,8 +81,8 @@ final class ChatMessageData
     {
         return [
             'id' => (int) $message->getKey(),
-            'author' => $message->user?->name ?? 'Former member',
-            'excerpt' => ChatText::excerpt((string) $message->body, ChatSettings::PIN_EXCERPT_LENGTH) ?: ChatCopy::ATTACHMENTS_LABEL,
+            'author' => $message->user?->name ?? __('Former member'),
+            'excerpt' => ChatText::excerpt((string) $message->body, ChatSettings::PIN_EXCERPT_LENGTH) ?: __(ChatCopy::ATTACHMENTS_LABEL),
             'created_at' => $message->created_at?->toIso8601ZuluString() ?? now()->toIso8601ZuluString(),
             'pinned_at' => $message->pinned_at?->toIso8601ZuluString(),
             'pinned_by' => $message->relationLoaded('pinnedBy') ? $message->pinnedBy?->name : null,
@@ -91,7 +91,7 @@ final class ChatMessageData
 
     public static function removedPlaceholder(): string
     {
-        return ChatSettings::REMOVED_PLACEHOLDER;
+        return __(ChatSettings::REMOVED_PLACEHOLDER);
     }
 
     /**
@@ -106,15 +106,15 @@ final class ChatMessageData
         $original = $message->replyTo;
 
         if ($original === null) {
-            return ['id' => (int) $message->reply_to_id, 'author' => '', 'excerpt' => ChatCopy::REPLY_REMOVED, 'deleted' => true];
+            return ['id' => (int) $message->reply_to_id, 'author' => '', 'excerpt' => __(ChatCopy::REPLY_REMOVED), 'deleted' => true];
         }
 
         $removed = $original->trashed();
 
         return [
             'id' => (int) $original->getKey(),
-            'author' => $removed ? '' : ($original->user?->name ?? 'Former member'),
-            'excerpt' => $removed ? ChatCopy::REPLY_REMOVED : (ChatText::excerpt((string) $original->body) ?: ChatCopy::ATTACHMENTS_LABEL),
+            'author' => $removed ? '' : ($original->user?->name ?? __('Former member')),
+            'excerpt' => $removed ? __(ChatCopy::REPLY_REMOVED) : (ChatText::excerpt((string) $original->body) ?: __(ChatCopy::ATTACHMENTS_LABEL)),
             'deleted' => $removed,
         ];
     }

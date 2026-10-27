@@ -45,13 +45,13 @@ class ProfileRequest extends ContentRequest
     public function attributes(): array
     {
         return [
-            'short_bio' => 'short biography',
-            'full_bio' => 'full biography',
-            'contact_email_public' => 'public contact email',
-            'key_facts.*.label' => 'key fact label',
-            'key_facts.*.value' => 'key fact value',
-            'expertise.*' => 'expertise entry',
-            'students_supervised' => 'number of students supervised',
+            'short_bio' => __('short biography'),
+            'full_bio' => __('full biography'),
+            'contact_email_public' => __('public contact email'),
+            'key_facts.*.label' => __('key fact label'),
+            'key_facts.*.value' => __('key fact value'),
+            'expertise.*' => __('expertise entry'),
+            'students_supervised' => __('number of students supervised'),
         ];
     }
 }

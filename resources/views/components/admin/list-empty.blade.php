@@ -5,11 +5,11 @@
 @props(['title', 'text', 'createUrl' => null, 'createLabel' => null, 'filtered' => false])
 <div {{ $attributes->class(['list-empty']) }} data-list-empty>
     <x-ornament class="list-empty__ornament" />
-    <h2 class="list-empty__title">{{ $filtered ? 'Nothing matches' : $title }}</h2>
-    <p class="list-empty__text">{{ $filtered ? 'No records match this search and these filters.' : $text }}</p>
+    <h2 class="list-empty__title">{{ $filtered ? __('Nothing matches') : $title }}</h2>
+    <p class="list-empty__text">{{ $filtered ? __('No records match this search and these filters.') : $text }}</p>
     <div class="list-empty__actions">
         @if ($filtered)
-            <x-button type="button" wire:click="clearFilters">Clear search and filters</x-button>
+            <x-button type="button" wire:click="clearFilters">{{ __('Clear search and filters') }}</x-button>
         @elseif ($createUrl)
             <x-button variant="primary" :href="$createUrl" data-create>{{ $createLabel }}</x-button>
         @endif

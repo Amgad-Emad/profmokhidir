@@ -7,9 +7,18 @@
     <meta name="robots" content="{{ \App\Constants\Seo::ROBOTS_NOINDEX }}">
 @endif
 <link rel="canonical" href="{{ $canonicalUrl }}">
+@foreach ($alternates as $hreflang => $href)
+    <link rel="alternate" hreflang="{{ $hreflang }}" href="{{ $href }}">
+@endforeach
+@if ($defaultAlternate)
+    <link rel="alternate" hreflang="x-default" href="{{ $defaultAlternate }}">
+@endif
 <meta property="og:type" content="{{ $type }}">
 <meta property="og:site_name" content="{{ $siteName() }}">
-<meta property="og:locale" content="{{ \App\Constants\Seo::LOCALE }}">
+<meta property="og:locale" content="{{ $ogLocale }}">
+@foreach ($ogAlternateLocales as $alternateLocale)
+    <meta property="og:locale:alternate" content="{{ $alternateLocale }}">
+@endforeach
 <meta property="og:title" content="{{ $pageTitle }}">
 @if ($metaDescription)
     <meta property="og:description" content="{{ $metaDescription }}">

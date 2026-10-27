@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Constants\Essay;
 use App\Constants\PageSizes;
 use App\Constants\Sections;
 use App\Models\Commentary;
@@ -86,7 +85,7 @@ class CommentaryPageService
             'commentary' => $commentary,
             'body' => $essay['html'],
             'contents' => $essay['contents'],
-            'readingTime' => $essay['minutes'].' '.Essay::READING_TIME_SUFFIX,
+            'readingTime' => $this->essay->readingLabel($essay['minutes']),
             'related' => $this->commentaries->related($commentary),
             'tags' => $this->tagOptions($this->commentaries->normaliseTags($commentary->tags), null),
             'previous' => $neighbours['previous'],

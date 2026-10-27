@@ -18,6 +18,43 @@ final class Typography
 
     public const string MONO_FAMILY = 'JetBrains Mono';
 
+    /*
+     | Arabic (a documented exception to the brand type rules): Cormorant Garamond and Hanken
+     | Grotesk have no Arabic glyphs, so Arabic pages (<html lang="ar">) add Amiri 400/700 for
+     | display, headings and quotes and IBM Plex Sans Arabic 400/500 for body and UI. They are
+     | loaded from Google Fonts with display=swap on Arabic pages only (<x-fonts>), and the
+     | :lang(ar) stacks in resources/css/locale.css name the Latin brand face first: its
+     | self-hosted file covers Latin only (unicode-range), so English words, Western digits and
+     | Latin punctuation inside Arabic text keep the brand faces and Arabic letters fall through to
+     | the Arabic face. (The Google CSS also ships Latin subsets of both Arabic families, so putting
+     | them first would set English words in Amiri and Plex.) Arabic has no letter-spacing, no
+     | capitals, no italics, no old-style figures, small caps or discretionary ligatures and no drop
+     | caps; sizes and leading are a step larger (see ARABIC_* below). JetBrains Mono is unchanged.
+     */
+    public const string ARABIC_DISPLAY_FAMILY = 'Amiri';
+
+    public const string ARABIC_SANS_FAMILY = 'IBM Plex Sans Arabic';
+
+    /** Google Fonts origins, preconnected on Arabic pages only. */
+    public const string GOOGLE_FONTS_ORIGIN = 'https://fonts.googleapis.com';
+
+    public const string GOOGLE_FONTS_STATIC_ORIGIN = 'https://fonts.gstatic.com';
+
+    /** The one third-party stylesheet, printed by <x-fonts> on Arabic pages only. */
+    public const string ARABIC_STYLESHEET = 'https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;500&display=swap';
+
+    /** The locale whose pages load the Arabic faces. */
+    public const string ARABIC_LOCALE = 'ar';
+
+    /** Arabic body: 19px desktop, 18px phones, at line-height 1.8; labels 14px, no tracking, no capitals. */
+    public const int ARABIC_BODY_PX = 19;
+
+    public const int ARABIC_BODY_MOBILE_PX = 18;
+
+    public const float ARABIC_BODY_LINE_HEIGHT = 1.8;
+
+    public const int ARABIC_LABEL_PX = 14;
+
     /** Self-hosted WOFF2 files under public/fonts (latin subset, from Google Fonts). */
     public const string FONTS_DIRECTORY = 'fonts';
 
@@ -68,6 +105,27 @@ final class Typography
             'display' => ['family' => self::DISPLAY_FAMILY, 'weights' => [300], 'italic' => true, 'use' => 'Display, headings and quotes.'],
             'sans' => ['family' => self::SANS_FAMILY, 'weights' => [400, 500], 'italic' => false, 'use' => 'Body 400; emphasis, labels and UI 500. 300 is not used for running text.'],
             'mono' => ['family' => self::MONO_FAMILY, 'weights' => [400], 'italic' => false, 'use' => 'Technical specs only.'],
+        ];
+    }
+
+    /**
+     * Whether a locale's pages load the Arabic faces.
+     */
+    public static function loadsArabicFaces(string $locale): bool
+    {
+        return $locale === self::ARABIC_LOCALE;
+    }
+
+    /**
+     * The Arabic faces (the exception described above): token => family, weights and use.
+     *
+     * @return array<string, array{family: string, weights: list<int>, italic: bool, use: string}>
+     */
+    public static function arabicFonts(): array
+    {
+        return [
+            'display' => ['family' => self::ARABIC_DISPLAY_FAMILY, 'weights' => [400, 700], 'italic' => false, 'use' => 'Arabic display, headings and quotes (where Cormorant Garamond is used); 700 only to emphasise.'],
+            'sans' => ['family' => self::ARABIC_SANS_FAMILY, 'weights' => [400, 500], 'italic' => false, 'use' => 'Arabic body 400; emphasis, labels and UI 500 (where Hanken Grotesk is used).'],
         ];
     }
 

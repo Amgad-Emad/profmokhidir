@@ -6,6 +6,8 @@
  */
 const normalise = (text) => String(text ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
+import { t } from '../i18n';
+
 export function commandPalette({ entries = [], endpoint = '', min = 2 } = {}) {
     let timer = null;
     let controller = null;
@@ -97,7 +99,7 @@ export function commandPalette({ entries = [], endpoint = '', min = 2 } = {}) {
 
         announce() {
             const count = this.flat.length;
-            this.announcement = count === 0 ? 'No results' : `${count} ${count === 1 ? 'result' : 'results'}`;
+            this.announcement = count === 0 ? t('No results') : (count === 1 ? t('1 result') : t(':count results', { count }));
         },
 
         move(step) {

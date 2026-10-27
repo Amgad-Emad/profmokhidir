@@ -23,6 +23,7 @@
 @import './theme.css';
 @import './admin.css';
 @import './analytics.css';
+@import './locale.css';
 
 /*
  | Brand design system — see CLAUDE.md "Brand (follow exactly)".
@@ -333,7 +334,7 @@
     /* Skip link: hidden until focused, then a pill at the top left. */
     .skip-link {
         position: absolute;
-        left: 1rem;
+        inset-inline-start: 1rem;
         top: 1rem;
         z-index: 60;
         transform: translateY(-200%);
@@ -358,7 +359,7 @@
     .nav-link::after {
         content: '';
         position: absolute;
-        left: 0;
+        inset-inline-start: 0;
         bottom: 0;
         width: 1.5rem;
         height: 1px;
@@ -385,7 +386,7 @@
     }
 
     .nav-link--menu::after {
-        left: 1rem;
+        inset-inline-start: 1rem;
         bottom: 0.5rem;
     }
 
@@ -412,7 +413,7 @@
 
     .site-menu-toggle__icon > span {
         position: absolute;
-        left: 0;
+        inset-inline-start: 0;
         width: 100%;
         height: 1px;
         background-color: currentColor;
@@ -483,7 +484,7 @@
     /* Honeypot field: out of sight and out of the tab order, never display:none so bots still fill it. */
     .form-honeypot {
         position: absolute;
-        left: -9999px;
+        inset-inline-start: -9999px;
         width: 1px;
         height: 1px;
         overflow: hidden;
@@ -501,7 +502,7 @@
 
     .cite summary::after {
         content: '+';
-        margin-left: 0.5rem;
+        margin-inline-start: 0.5rem;
         color: var(--accent-text);
     }
 
@@ -538,7 +539,7 @@
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
-        padding-left: 1.5rem;
+        padding-inline-start: 1.5rem;
     }
 
     .page-prose ul {
@@ -623,7 +624,7 @@
 
     .prose-bio ul,
     .prose-bio ol {
-        padding-left: 1.5em;
+        padding-inline-start: 1.5em;
     }
 
     .prose-bio ul {

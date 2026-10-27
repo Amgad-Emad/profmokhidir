@@ -113,14 +113,15 @@
 
     @supports not (hanging-punctuation: first) {
         .hang-quote {
-            margin-left: -0.42em;
+            margin-inline-start: -0.42em;
         }
     }
 
     /* <x-drop-cap>: the first paragraph opens with a three-line Cormorant initial. */
     .drop-cap > p:first-of-type::first-letter {
-        float: left;
-        margin: 0.06em 0.1em 0 0;
+        float: inline-start;
+        margin-block: 0.06em 0;
+        margin-inline: 0 0.1em;
         font-family: var(--font-display);
         font-weight: 300;
         font-style: normal;
@@ -137,7 +138,8 @@
     @supports (initial-letter: 3) or (-webkit-initial-letter: 3) {
         .drop-cap > p:first-of-type::first-letter {
             float: none;
-            margin: 0 0.12em 0 0;
+            margin-block: 0;
+            margin-inline: 0 0.12em;
             font-size: inherit;
             line-height: inherit;
             -webkit-initial-letter: 3;
@@ -208,7 +210,7 @@
 
     .epigraph__attribution {
         margin-top: var(--space-2);
-        text-align: right;
+        text-align: end;
         font-size: 1.125rem;
         line-height: var(--space-3);
     }
@@ -296,14 +298,14 @@
         font-family: var(--font-display);
         font-variant-numeric: lining-nums;
         color: var(--accent-text);
-        margin-right: 0.25em;
+        margin-inline-end: 0.25em;
     }
 
     .sidenote__note {
         display: block;
         margin-block: var(--space-2);
-        padding-left: var(--space-2);
-        border-left: 1px solid var(--rule);
+        padding-inline-start: var(--space-2);
+        border-inline-start: 1px solid var(--rule);
         font-family: var(--font-sans);
         font-weight: 400;
         font-size: 0.9375rem; /* 15px */
@@ -311,7 +313,7 @@
         font-style: normal;
         letter-spacing: normal;
         text-transform: none;
-        text-align: left;
+        text-align: start;
         color: var(--ink-muted);
     }
 
@@ -326,13 +328,14 @@
         .sidenote__note,
         .sidenote__note:not(.is-open) {
             display: block;
-            float: right;
-            clear: right;
+            float: inline-end;
+            clear: inline-end;
             position: relative;
             width: var(--sidenote-width);
-            margin: 0.25em calc(-1 * (var(--sidenote-width) + var(--sidenote-gap))) var(--space-2) 0;
-            padding-left: 0;
-            border-left: 0;
+            margin-block: 0.25em var(--space-2);
+            margin-inline: 0 calc(-1 * (var(--sidenote-width) + var(--sidenote-gap)));
+            padding-inline-start: 0;
+            border-inline-start: 0;
             font-size: 0.9375rem; /* 14px */
         }
 

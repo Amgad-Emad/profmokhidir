@@ -111,7 +111,7 @@ class OtherItemService extends AbstractContentService
 
     protected function prepare(array $data, $existing): array
     {
-        return $this->withUniqueSlug($data, $existing);
+        return $this->withEnglishSlug($data, $existing);
     }
 
     private function items(): OtherItemRepositoryInterface

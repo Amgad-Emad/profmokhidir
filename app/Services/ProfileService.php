@@ -114,12 +114,12 @@ class ProfileService extends AbstractContentService
     protected function prepare(array $data, $existing): array
     {
         if (array_key_exists('full_bio', $data)) {
-            $data['full_bio'] = RichText::sanitise(is_string($data['full_bio']) ? $data['full_bio'] : null) ?: null;
+            $data['full_bio'] = $this->eachLocale($data['full_bio'], fn (mixed $bio): ?string => RichText::sanitise(is_string($bio) ? $bio : null) ?: null);
         }
 
         foreach (['expertise', 'key_facts'] as $list) {
-            if (array_key_exists($list, $data) && is_array($data[$list])) {
-                $data[$list] = array_values($data[$list]);
+            if (array_key_exists($list, $data)) {
+                $data[$list] = $this->eachLocale($data[$list], fn (mixed $items): mixed => is_array($items) ? array_values($items) : $items);
             }
         }
 

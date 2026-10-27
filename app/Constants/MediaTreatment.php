@@ -19,8 +19,8 @@ enum MediaTreatment: string
     public function label(): string
     {
         return match ($this) {
-            self::Portrait => 'Portrait (warm monochrome)',
-            self::Archive => 'Archive (evergreen duotone)',
+            self::Portrait => __('Portrait (warm monochrome)'),
+            self::Archive => __('Archive (evergreen duotone)'),
         };
     }
 }

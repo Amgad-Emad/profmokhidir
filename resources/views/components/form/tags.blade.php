@@ -27,7 +27,7 @@
 @php
     $field = $forms->describe(['error' => $error, 
         'name' => $name, 'model' => $model, 'wire' => '', 'id' => $id, 'label' => $label,
-        'hint' => trim(($hint ?? '').' '.FormControls::TAGS_ADD_HINT), 'required' => $required,
+        'hint' => trim(($hint ?? '').' '.__(FormControls::TAGS_ADD_HINT)), 'required' => $required,
         'optional' => $optional, 'bag' => $bag, 'nested' => true,
     ], $errors ?? null);
     $initial = $model === null ? old($field['key'], $value) : [];
@@ -39,11 +39,12 @@
         'placeholder' => \App\Constants\FormControls::BLANK_PLACEHOLDER,
         'list' => $suggestions !== [] ? $field['id'].'-suggestions' : null,
         'aria-required' => $required ? 'true' : null,
+        'dir' => $forms->direction('text'),
     ]);
 @endphp
 <x-form.field :field="$field" :class="$attributes->get('class')">
     <div class="form-control form-control--tags" data-tags {{ $attributes->except(['class']) }}
-         x-data="formTags({{ \Illuminate\Support\Js::from(['tags' => $initial, 'separator' => $separator, 'max' => $max, 'copy' => ['remove' => FormControls::TAGS_REMOVE, 'added' => FormControls::TAGS_ADDED, 'removed' => FormControls::TAGS_REMOVED, 'editing' => FormControls::TAGS_EDITING]]) }})"
+         x-data="formTags({{ \Illuminate\Support\Js::from(['tags' => $initial, 'separator' => $separator, 'max' => $max, 'copy' => ['remove' => __(FormControls::TAGS_REMOVE), 'added' => __(FormControls::TAGS_ADDED), 'removed' => __(FormControls::TAGS_REMOVED), 'editing' => __(FormControls::TAGS_EDITING)]]) }})"
          @if ($model) x-modelable="value" wire:model="{{ $model }}" @endif
          x-bind:data-filled="tags.length > 0 ? 'true' : 'false'" x-on:click="$refs.entry.focus()">
         <ul class="contents" role="list" aria-label="{{ $label }}">

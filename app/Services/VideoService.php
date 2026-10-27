@@ -142,6 +142,6 @@ class VideoService extends AbstractContentService
             $data[Archive::FEATURED] = (bool) $data[Archive::FEATURED];
         }
 
-        return $this->withUniqueSlug($data, $existing);
+        return $this->withEnglishSlug($data, $existing);
     }
 }

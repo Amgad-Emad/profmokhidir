@@ -26,7 +26,7 @@ class SeoService
     {
         $title = $this->clean($title);
 
-        return $title === null ? Seo::SITE_NAME : $title.Seo::TITLE_SEPARATOR.Seo::SITE_NAME;
+        return $title === null ? __(Seo::SITE_NAME) : $title.Seo::TITLE_SEPARATOR.__(Seo::SITE_NAME);
     }
 
     /**
@@ -54,11 +54,12 @@ class SeoService
     }
 
     /**
-     * Absolute URL of a share card (the shared site card by default).
+     * Absolute URL of a share card (the shared site card by default), in the
+     * current language's edition when it has one (SocialCards::forLocale).
      */
     public function image(?string $card = null): string
     {
-        return asset($card ?? SocialCards::SITE);
+        return asset(SocialCards::forLocale($card ?? SocialCards::SITE));
     }
 
     public function ogType(?string $type = null): string

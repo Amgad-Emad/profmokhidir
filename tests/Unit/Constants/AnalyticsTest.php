@@ -7,7 +7,7 @@ use App\Constants\AnalyticsRange;
 use App\Constants\Sections;
 use Carbon\CarbonImmutable;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 class AnalyticsTest extends TestCase
 {

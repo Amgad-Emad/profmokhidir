@@ -16,20 +16,24 @@ use App\Models\Publication;
 use App\Models\TeachingMaterial;
 use App\Models\Video;
 use App\Repositories\Contracts\SearchRepositoryInterface;
+use App\Support\SearchText;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Fulltext search in boolean mode over the columns each table indexes (the
- * column lists mirror the fullText() indexes in the migrations). Every word
- * must match as a prefix; words the index does not hold (shorter than InnoDB's
- * minimum token size, or on its stopword list) are matched with LIKE instead.
+ * Fulltext search in boolean mode over each table's folded search column
+ * (App\Support\SearchText: the listed columns in English and Arabic, with
+ * Arabic letter forms, diacritics and the tatweel normalised; the query is
+ * folded the same way). Every word must match as a prefix; words the index
+ * does not hold (shorter than InnoDB's minimum token size, or on its stopword
+ * list) are matched with LIKE instead.
  */
 class EloquentSearchRepository implements SearchRepositoryInterface
 {
     /**
-     * Section key => searched model and its fulltext-indexed columns.
+     * Section key => searched model and the columns its search column folds
+     * (the model's $searchColumns).
      *
      * @return array<string, array{model: class-string<Model>, columns: list<string>}>
      */
@@ -62,7 +66,7 @@ class EloquentSearchRepository implements SearchRepositoryInterface
             $model = new $definition['model'];
 
             $query = $model->newQuery()->published();
-            $this->matching($query, $definition['columns'], $tokens);
+            $this->matching($query, [SearchText::COLUMN], $tokens);
 
             if ($section === Sections::TEACHING && ! $includeMembersOnly) {
                 $query->where('access', TeachingAccess::Public->value);
@@ -87,10 +91,10 @@ class EloquentSearchRepository implements SearchRepositoryInterface
     {
         preg_match_all('/[\p{L}\p{N}]+(?:[\'’][\p{L}]+)?/u', $term, $matches);
 
-        return array_values(array_unique(array_map(
-            fn (string $word): string => mb_strtolower($word),
+        return array_values(array_unique(array_filter(array_map(
+            fn (string $word): string => SearchText::normalise($word),
             $matches[0],
-        )));
+        ), fn (string $word): bool => $word !== '')));
     }
 
     /**

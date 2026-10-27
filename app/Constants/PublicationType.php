@@ -19,13 +19,13 @@ enum PublicationType: string
 
     public function label(): string
     {
-        return match ($this) {
+        return __(match ($this) {
             self::Book => 'Book',
             self::JournalArticle => 'Journal article',
             self::Chapter => 'Book chapter',
             self::ConferencePaper => 'Conference paper',
             self::Report => 'Report',
             self::Other => 'Other',
-        };
+        });
     }
 }

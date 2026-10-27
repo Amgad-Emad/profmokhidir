@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Constants\CommunityStatus;
+use App\Constants\Locales;
 use App\Constants\Roles;
 use App\Constants\Theme;
 use App\Models\User;
@@ -40,7 +41,21 @@ class UserFactory extends Factory
             'community_status' => CommunityStatus::None,
             'remember_token' => Str::random(10),
             'theme' => null,
+            'locale' => null,
         ];
+    }
+
+    /**
+     * A saved language choice (App\Constants\Locales). Without one, locale is NULL and English applies.
+     */
+    public function locale(string $locale): static
+    {
+        return $this->state(fn (array $attributes) => ['locale' => $locale]);
+    }
+
+    public function arabic(): static
+    {
+        return $this->locale(Locales::AR);
     }
 
     /**

@@ -25,8 +25,8 @@ enum TeachingAccess: string
     public function label(): string
     {
         return match ($this) {
-            self::Public => 'Public',
-            self::Members => 'Community members',
+            self::Public => __('Public'),
+            self::Members => __('Community members'),
         };
     }
 

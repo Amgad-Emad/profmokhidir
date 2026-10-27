@@ -6,10 +6,12 @@ namespace App\Services;
 
 use App\Constants\AuditAction;
 use App\Constants\ContentStatus;
+use App\Constants\Locales;
 use App\Constants\MediaCollections;
 use App\Constants\MediaProperties;
 use App\Constants\MediaTreatment;
 use App\Constants\PageBlocks;
+use App\Constants\PageBlockType;
 use App\Constants\Pages;
 use App\Models\Page;
 use App\Models\PageBlock;
@@ -30,6 +32,12 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * puts the drafts live and clears the page's cache; unpublishing returns the
  * page to its built-in copy. Images are uploaded to their block at once but
  * only shown once the value that names them is published.
+ *
+ * Each block is kept per language. The English form is the block as before;
+ * the Arabic form holds the Arabic words only (empty: Arabic pages show the
+ * built-in Arabic copy, or the English words an editor changed). An Arabic
+ * image, link or search value keeps its words only; lists keep the English
+ * items' destinations and order with Arabic text.
  */
 class PageService
 {
@@ -114,8 +122,28 @@ class PageService
         $values = [];
 
         foreach (PageBlocks::for($page->key) as $key => $definition) {
-            $block = $blocks->get($key);
-            $values[$key] = PageBlockValue::normalise($definition, $block?->hasDraft() ? $block->draft_value : $block?->value);
+            $values[$key] = PageBlockValue::normalise($definition, $this->stored($blocks->get($key), Locales::DEFAULT));
+        }
+
+        return $values;
+    }
+
+    /**
+     * The Arabic tab of the edit screen: each block's Arabic words (draft,
+     * else live), shaped by PageBlockValue::arabicForm(), aligned with the
+     * English form (list items in the same order).
+     *
+     * @param  array<string, mixed>|null  $english  the English form (defaults to formValues())
+     * @return array<string, mixed>
+     */
+    public function arabicFormValues(Page $page, ?array $english = null): array
+    {
+        $english ??= $this->formValues($page);
+        $blocks = $this->pages->blocks($page);
+        $values = [];
+
+        foreach (PageBlocks::for($page->key) as $key => $definition) {
+            $values[$key] = PageBlockValue::arabicForm($definition, $this->stored($blocks->get($key), Locales::AR), $english[$key] ?? null);
         }
 
         return $values;
@@ -132,10 +160,65 @@ class PageService
         $values = [];
 
         foreach (PageBlocks::for($page->key) as $key => $definition) {
-            $values[$key] = PageBlockValue::normalise($definition, $blocks->get($key)?->value);
+            $values[$key] = PageBlockValue::normalise($definition, $blocks->get($key)?->getTranslation('value', Locales::DEFAULT, false));
         }
 
         return $values;
+    }
+
+    /**
+     * The stored Arabic of what visitors see (null where there is none).
+     *
+     * @return array<string, mixed>
+     */
+    public function liveArabicValues(Page $page): array
+    {
+        $blocks = $this->pages->blocks($page);
+        $values = [];
+
+        foreach (PageBlocks::for($page->key) as $key => $definition) {
+            $block = $blocks->get($key);
+            $values[$key] = $block === null ? null : self::blankToNull($block->getTranslation('value', Locales::AR, false));
+        }
+
+        return $values;
+    }
+
+    /**
+     * Blocks whose English an editor changed from the original wording and
+     * that have no Arabic yet (the original wording has its Arabic built in).
+     *
+     * @return list<string> block keys
+     */
+    public function missingArabic(Page $page): array
+    {
+        $blocks = $this->pages->blocks($page);
+        $missing = [];
+
+        foreach (PageBlocks::for($page->key) as $key => $definition) {
+            $block = $blocks->get($key);
+            $english = $this->stored($block, Locales::DEFAULT);
+
+            if ($english !== null && ! PageBlockValue::isDefault($definition, $english) && $this->stored($block, Locales::AR) === null
+                && ! in_array($definition->type, [PageBlockType::Image], true)) {
+                $missing[] = $key;
+            }
+        }
+
+        return $missing;
+    }
+
+    public function needsArabic(Page $page): bool
+    {
+        return $this->missingArabic($page) !== [];
+    }
+
+    /**
+     * Pages with changed English wording that has no Arabic yet.
+     */
+    public function countNeedingArabic(): int
+    {
+        return $this->pages->all()->filter(fn (Page $page): bool => $this->needsArabic($page))->count();
     }
 
     public function hasDraft(Page $page): bool
@@ -148,17 +231,23 @@ class PageService
      * see stores the change; one that matches again drops its draft.
      *
      * @param  array<string, mixed>  $values  block key => value (blocks left out keep their draft)
+     * @param  array<string, mixed>|null  $arabic  block key => Arabic form value (null: Arabic left as it is)
      */
-    public function saveDraft(Page $page, array $values): Page
+    public function saveDraft(Page $page, array $values, ?array $arabic = null): Page
     {
         $live = $this->liveValues($page);
+        $liveArabic = $this->liveArabicValues($page);
+        $current = $arabic === null ? $this->arabicFormValues($page) : [];
 
-        DB::transaction(function () use ($page, $values, $live): void {
+        DB::transaction(function () use ($page, $values, $arabic, $current, $live, $liveArabic): void {
             foreach ($this->definitionsIn($page, $values) as $order => $definition) {
                 $value = PageBlockValue::normalise($definition, $values[$definition->key]);
+                $arabicValue = PageBlockValue::fromArabicForm($definition, ($arabic ?? $current)[$definition->key] ?? null, $value);
+                $draft = [Locales::DEFAULT => $value, Locales::AR => $arabicValue];
+                $unchanged = $value == $live[$definition->key] && $arabicValue == $liveArabic[$definition->key];
 
                 $this->pages->saveBlock($page, $definition->key, $definition->type, [
-                    'draft_value' => $value == $live[$definition->key] ? null : $value,
+                    'draft_value' => $unchanged ? null : $draft,
                     'sort_order' => $order,
                 ]);
             }
@@ -175,23 +264,26 @@ class PageService
      * page is published and its cache cleared.
      *
      * @param  array<string, mixed>  $values
+     * @param  array<string, mixed>|null  $arabic  block key => Arabic form value (null: the saved Arabic draft, else the live Arabic)
      */
-    public function publish(Page $page, array $values, ?User $actor = null): Page
+    public function publish(Page $page, array $values, ?User $actor = null, ?array $arabic = null): Page
     {
         $values = array_replace($this->formValues($page), array_intersect_key($values, PageBlocks::for($page->key)));
+        $arabic = array_replace($this->arabicFormValues($page, $values), array_intersect_key($arabic ?? [], PageBlocks::for($page->key)));
         $wasPublished = $page->isPublished();
 
-        DB::transaction(function () use ($page, $values): void {
+        DB::transaction(function () use ($page, $values, $arabic): void {
             foreach ($this->definitionsIn($page, $values) as $order => $definition) {
                 $value = PageBlockValue::normalise($definition, $values[$definition->key]);
+                $arabicValue = PageBlockValue::fromArabicForm($definition, $arabic[$definition->key] ?? null, $value);
                 $block = $this->pages->saveBlock($page, $definition->key, $definition->type, [
-                    'value' => $value,
+                    'value' => [Locales::DEFAULT => $value, Locales::AR => $arabicValue],
                     'draft_value' => null,
                     'sort_order' => $order,
                 ]);
 
                 if ($definition->type->hasImage()) {
-                    $this->syncImageDetails($block, $value);
+                    $this->syncImageDetails($block, $value, $arabicValue);
                 }
             }
 
@@ -270,7 +362,10 @@ class PageService
         $block = $this->pages->block($page, $key);
         $media = $block?->media()->find($mediaId);
 
-        if ($block === null || $media === null || in_array($mediaId, [(int) ($block->value['media_id'] ?? 0), (int) ($block->draft_value['media_id'] ?? 0)], true)) {
+        $live = $block?->getTranslation('value', Locales::DEFAULT, false);
+        $draft = $block?->getTranslation('draft_value', Locales::DEFAULT, false);
+
+        if ($block === null || $media === null || in_array($mediaId, [(int) (is_array($live) ? ($live['media_id'] ?? 0) : 0), (int) (is_array($draft) ? ($draft['media_id'] ?? 0) : 0)], true)) {
             return false;
         }
 
@@ -288,11 +383,13 @@ class PageService
     }
 
     /**
-     * Copy the published details onto the media item, so the media library shows them too.
+     * Copy the published details onto the media item, so the media library shows them too
+     * (the Arabic words under the media item's Arabic translations).
      *
      * @param  array<string, mixed>  $value
+     * @param  array<string, mixed>|null  $arabic
      */
-    private function syncImageDetails(PageBlock $block, array $value): void
+    private function syncImageDetails(PageBlock $block, array $value, ?array $arabic = null): void
     {
         $media = ($value['media_id'] ?? null) === null ? null : $block->media()->find($value['media_id']);
 
@@ -307,9 +404,32 @@ class PageService
             MediaProperties::YEAR => $value['year'] ?? null,
         ], fn ($property): bool => $property !== null);
 
+        foreach ([MediaProperties::ALT_TEXT, MediaProperties::CAPTION, MediaProperties::PLACE] as $property) {
+            if (filled($arabic[$property] ?? null)) {
+                $properties[MediaProperties::translationPath(Locales::AR, $property)] = $arabic[$property];
+            }
+        }
+
         if ($properties !== []) {
             $this->media->updateProperties($media, $properties);
         }
+    }
+
+    /**
+     * A block's stored value in one language (its draft when there is one).
+     */
+    private function stored(?PageBlock $block, string $locale): mixed
+    {
+        if ($block === null) {
+            return null;
+        }
+
+        return self::blankToNull($block->getTranslation($block->hasDraft() ? 'draft_value' : 'value', $locale, false));
+    }
+
+    private static function blankToNull(mixed $value): mixed
+    {
+        return $value === '' || $value === [] ? null : $value;
     }
 
     /**

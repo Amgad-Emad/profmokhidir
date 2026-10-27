@@ -34,6 +34,9 @@ final class SettingKeys
     /** First-party, cookieless visitor analytics: off ("0") until the client approves it, then on ("1"). */
     public const string ANALYTICS_ENABLED = 'analytics_enabled';
 
+    /** Arabic pages: running-text numbers in Western ("latin", the default) or Arabic-Indic digits ("arabic"). Years, citations, DOIs and data always use Western digits. */
+    public const string ARABIC_DIGITS = 'arabic_digits';
+
     /**
      * @return list<string>
      */
@@ -50,6 +53,7 @@ final class SettingKeys
             self::CHAT_IMAGE_MAX_MB,
             self::CHAT_DOCUMENT_MAX_MB,
             self::ANALYTICS_ENABLED,
+            self::ARABIC_DIGITS,
         ];
     }
 
@@ -79,16 +83,17 @@ final class SettingKeys
     public static function labels(): array
     {
         return [
-            self::CONTACT_EMAIL => 'Public contact email',
-            self::CONTACT_PHONE => 'Public contact phone',
-            self::CONTACT_ADDRESS => 'Public postal address',
-            self::NOTIFICATION_EMAIL => 'Notification address',
-            self::MAIL_FROM_NAME => 'Mail sender name',
-            self::MAIL_FROM_ADDRESS => 'Mail sender address',
-            self::CHAT_UPLOADS_ENABLED => 'Members may attach files',
-            self::CHAT_IMAGE_MAX_MB => 'Largest image (MB)',
-            self::CHAT_DOCUMENT_MAX_MB => 'Largest document (MB)',
-            self::ANALYTICS_ENABLED => 'Record visitor analytics',
+            self::CONTACT_EMAIL => __('Public contact email'),
+            self::CONTACT_PHONE => __('Public contact phone'),
+            self::CONTACT_ADDRESS => __('Public postal address'),
+            self::NOTIFICATION_EMAIL => __('Notification address'),
+            self::MAIL_FROM_NAME => __('Mail sender name'),
+            self::MAIL_FROM_ADDRESS => __('Mail sender address'),
+            self::CHAT_UPLOADS_ENABLED => __('Members may attach files'),
+            self::CHAT_IMAGE_MAX_MB => __('Largest image (MB)'),
+            self::CHAT_DOCUMENT_MAX_MB => __('Largest document (MB)'),
+            self::ANALYTICS_ENABLED => __('Record visitor analytics'),
+            self::ARABIC_DIGITS => __('Digits on Arabic pages'),
         ];
     }
 

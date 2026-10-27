@@ -21,19 +21,19 @@
                                 <x-ornament type="rule-dot" class="honour__ornament" />
                             @endunless
                             <article class="honour__plaque" aria-labelledby="award-{{ $award->getKey() }}" data-rise>
-                                <h2 id="award-{{ $award->getKey() }}" class="honour__name">@typeset($award->name)</h2>
+                                <h2 @contentLang($award) id="award-{{ $award->getKey() }}" class="honour__name">@typeset($award->name)</h2>
                                 @if (filled($award->organisation) || $award->year)
                                     <p class="honour__meta">
-                                        @if (filled($award->organisation))<span class="honour__organisation">@typeset($award->organisation)</span>@endif
+                                        @if (filled($award->organisation))<span @contentLang($award, 'organisation') class="honour__organisation">@typeset($award->organisation)</span>@endif
                                         @if (filled($award->organisation) && $award->year)<span class="honour__separator" aria-hidden="true">{{ \App\Constants\DateFormats::META_SEPARATOR }}</span>@endif
                                         @if ($award->year)<span class="honour__year">{{ $award->year }}</span>@endif
                                     </p>
                                 @endif
                                 @if (filled($award->description))
-                                    <p class="honour__description">@typeset($award->description)</p>
+                                    <p @contentLang($award, 'description') class="honour__description">@typeset($award->description)</p>
                                 @endif
                                 @if (filled($award->source_url))
-                                    <p class="honour__source"><x-external-link :href="$award->source_url" label="Source" /></p>
+                                    <p class="honour__source"><x-external-link :href="$award->source_url" :label="__('Source')" /></p>
                                 @endif
                             </article>
                         </li>

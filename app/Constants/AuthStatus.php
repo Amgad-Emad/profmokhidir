@@ -44,15 +44,15 @@ final class AuthStatus
     public static function messages(): array
     {
         return [
-            self::PROFILE_UPDATED => 'Your details have been saved.',
-            self::PASSWORD_UPDATED => 'Your password has been changed.',
-            self::TWO_FACTOR_ENABLED => 'Scan the code with your authenticator app, then enter a code to finish.',
-            self::TWO_FACTOR_CONFIRMED => 'Two-factor authentication is on. Store your recovery codes somewhere safe.',
-            self::TWO_FACTOR_DISABLED => 'Two-factor authentication has been turned off.',
-            self::RECOVERY_CODES_GENERATED => 'New recovery codes have been generated. The old ones no longer work.',
-            self::VERIFICATION_LINK_SENT => 'A new verification link has been sent to your email address.',
-            self::SIGNED_OUT => 'You have signed out.',
-            self::ACCOUNT_DEACTIVATED => 'This account has been deactivated. Contact an administrator.',
+            self::PROFILE_UPDATED => __('Your details have been saved.'),
+            self::PASSWORD_UPDATED => __('Your password has been changed.'),
+            self::TWO_FACTOR_ENABLED => __('Scan the code with your authenticator app, then enter a code to finish.'),
+            self::TWO_FACTOR_CONFIRMED => __('Two-factor authentication is on. Store your recovery codes somewhere safe.'),
+            self::TWO_FACTOR_DISABLED => __('Two-factor authentication has been turned off.'),
+            self::RECOVERY_CODES_GENERATED => __('New recovery codes have been generated. The old ones no longer work.'),
+            self::VERIFICATION_LINK_SENT => __('A new verification link has been sent to your email address.'),
+            self::SIGNED_OUT => __('You have signed out.'),
+            self::ACCOUNT_DEACTIVATED => __('This account has been deactivated. Contact an administrator.'),
         ];
     }
 

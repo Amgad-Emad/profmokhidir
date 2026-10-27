@@ -116,11 +116,11 @@ SVG);
             <div class="mt-10 grid gap-5 md:grid-cols-2" data-rise-group>
                 <div class="card">
                     <p class="t-label text-bronze">Links, focus and selection on light</p>
-                    <p class="t-body mt-3">Links <a href="#type">underline on hover</a>. Tab to a <x-button type="button" class="ml-1">control</x-button> to see the bronze focus ring. Select this text to see the linen highlight.</p>
+                    <p class="t-body mt-3">Links <a href="#type">underline on hover</a>. Tab to a <x-button type="button" class="ms-1">control</x-button> to see the bronze focus ring. Select this text to see the linen highlight.</p>
                 </div>
                 <div class="card on-dark border-cypress bg-evergreen text-champagne">
                     <p class="t-label text-brass">Links, focus and selection on dark</p>
-                    <p class="t-body mt-3">Links <a href="#type">underline on hover</a>. Tab to a <x-button type="button" class="ml-1">control</x-button> to see the brass focus ring. Monospace is for <code class="font-mono text-sm">technical specs</code> only.</p>
+                    <p class="t-body mt-3">Links <a href="#type">underline on hover</a>. Tab to a <x-button type="button" class="ms-1">control</x-button> to see the brass focus ring. Monospace is for <code class="font-mono text-sm">technical specs</code> only.</p>
                 </div>
             </div>
         </section>
@@ -246,11 +246,11 @@ SVG);
                 </div>
                 <div class="card on-dark flex items-center gap-3 border-cypress bg-evergreen text-champagne">
                     <x-brand.lockup variant="horizontal" />
-                    <p class="t-label ml-auto text-brass">Horizontal lockup</p>
+                    <p class="t-label ms-auto text-brass">Horizontal lockup</p>
                 </div>
                 <div class="card flex items-center gap-3">
                     <x-brand.lockup variant="horizontal" tone="evergreen" />
-                    <p class="t-label ml-auto text-bronze">Horizontal lockup</p>
+                    <p class="t-label ms-auto text-bronze">Horizontal lockup</p>
                 </div>
             </div>
             <div class="mt-5 grid gap-5 md:grid-cols-2" data-rise-group>
@@ -355,11 +355,11 @@ SVG);
             <p class="t-body mt-2 max-w-measure text-ash" data-rise>App\Services\TypesetterService runs on database text as it renders: curly quotes, en dashes for ranges, non-breaking spaces before units, after titles and between initials, an ellipsis, small caps for capitals.</p>
             <div class="mt-6 overflow-x-auto" data-rise>
                 <table class="w-full text-left text-base">
-                    <thead><tr class="border-b border-stone"><th class="t-label py-3 pr-6 text-bronze">As written</th><th class="t-label py-3 text-bronze">As rendered</th></tr></thead>
+                    <thead><tr class="border-b border-stone"><th class="t-label py-3 pe-6 text-bronze">As written</th><th class="t-label py-3 text-bronze">As rendered</th></tr></thead>
                     <tbody>
                         @foreach ($typesetExamples as $example)
                             <tr class="border-b border-stone align-top">
-                                <td class="py-4 pr-6 font-mono text-sm text-ash">{{ $example['before'] }}</td>
+                                <td class="py-4 pe-6 font-mono text-sm text-ash">{{ $example['before'] }}</td>
                                 <td class="py-4 font-display text-xl">{!! $example['after'] !!}</td>
                             </tr>
                         @endforeach

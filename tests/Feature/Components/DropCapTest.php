@@ -30,7 +30,21 @@ class DropCapTest extends TestCase
 
         $this->assertStringContainsString('.drop-cap > p:first-of-type::first-letter', $css);
         $this->assertStringContainsString('initial-letter: 3;', $css);
-        $this->assertStringContainsString('float: left;', $css);
+        $this->assertStringContainsString('float: inline-start;', $css);
         $this->assertStringContainsString('color: var(--ink);', $css);
+    }
+
+    #[Test]
+    public function in_arabic_the_first_word_is_emphasised_instead_of_a_dropped_initial(): void
+    {
+        app()->setLocale('ar');
+
+        $html = Blade::render('<x-drop-cap class="prose-bio"><h2>عنوان</h2><p class="x">كان الأستاذ معلمًا.</p><p>فقرة ثانية.</p></x-drop-cap>');
+
+        $this->assertSame('<div class="drop-cap prose-bio"><h2>عنوان</h2><p class="x"><span class="drop-cap__lead">كان</span> الأستاذ معلمًا.</p><p>فقرة ثانية.</p></div>', trim($html));
+
+        $css = file_get_contents(resource_path('css/locale.css'));
+        $this->assertStringContainsString('.drop-cap:lang(ar) > p:first-of-type::first-letter', $css);
+        $this->assertMatchesRegularExpression('/\.drop-cap__lead:lang\(ar\) \{[^}]*font-weight: 700;/', $css);
     }
 }

@@ -5,14 +5,16 @@ declare(strict_types=1);
 namespace App\Livewire\Admin;
 
 use App\Constants\AdminUx;
-use App\Constants\ContentStatus;
 use App\Constants\ConfirmDialog;
+use App\Constants\ContentStatus;
 use App\Constants\ContentTypes;
 use App\Constants\DateFormats;
+use App\Constants\Locales;
 use App\Constants\StatusTone;
 use App\Exceptions\ImagesNotReadyException;
 use App\Livewire\Admin\Concerns\ConfirmsActions;
 use App\Livewire\Admin\Concerns\NotifiesEditors;
+use App\Models\Concerns\HasTranslatableContent;
 use App\Repositories\Contracts\ContentRepositoryInterface;
 use App\Services\AbstractContentService;
 use BackedEnum;
@@ -21,6 +23,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -109,7 +112,50 @@ abstract class ContentIndex extends Component
             $this->sort = '';
         }
 
-        $this->filters = array_intersect_key($this->filters, array_flip([...$this->service()->filterColumns(), ContentRepositoryInterface::FILTER_PLACEHOLDER]));
+        $this->filters = array_intersect_key($this->filters, array_flip($this->allowedFilters()));
+    }
+
+    /**
+     * Filter keys this screen accepts: the type's columns and the pseudo
+     * filters (sample text; needs Arabic for types written in both languages).
+     *
+     * @return list<string>
+     */
+    protected function allowedFilters(): array
+    {
+        $filters = [...$this->service()->filterColumns(), ContentRepositoryInterface::FILTER_PLACEHOLDER];
+
+        if ($this->translates()) {
+            $filters[] = ContentRepositoryInterface::FILTER_NEEDS_TRANSLATION;
+        }
+
+        return $filters;
+    }
+
+    /**
+     * Whether the type is written in English and Arabic.
+     */
+    protected function translates(): bool
+    {
+        return in_array(HasTranslatableContent::class, class_uses_recursive(ContentTypes::get($this->type())['model']), true);
+    }
+
+    /**
+     * The translatable fields of a record still empty in Arabic, by label
+     * ("Title, Summary"), or [] when it is complete (or not translatable).
+     *
+     * @return list<string>
+     */
+    public function missingArabic(Model $item): array
+    {
+        if (! method_exists($item, 'missingTranslations')) {
+            return [];
+        }
+
+        return array_map(
+            fn (string $column): string => __(Str::ucfirst(str_replace('_', ' ', $column))),
+            $item->missingTranslations(Locales::AR),
+        );
     }
 
     /**
@@ -117,7 +163,7 @@ abstract class ContentIndex extends Component
      */
     public function setFilter(string $field, ?string $value = null): void
     {
-        if (! in_array($field, [...$this->service()->filterColumns(), ContentRepositoryInterface::FILTER_PLACEHOLDER], true)) {
+        if (! in_array($field, $this->allowedFilters(), true)) {
             return;
         }
 
@@ -194,7 +240,7 @@ abstract class ContentIndex extends Component
 
         try {
             $this->service()->publish($model, auth()->user());
-            $this->notify(sprintf('%s published.', $this->singular()));
+            $this->notify(__(':type published.', ['type' => __($this->singular())]));
         } catch (ImagesNotReadyException $exception) {
             $this->addError('publish', $exception->getMessage());
         }
@@ -206,7 +252,7 @@ abstract class ContentIndex extends Component
         $this->authorize('publish', $model);
 
         $this->service()->unpublish($model, auth()->user());
-        $this->notify(sprintf('%s moved back to draft.', $this->singular()));
+        $this->notify(__(':type moved back to draft.', ['type' => __($this->singular())]));
     }
 
     /**
@@ -220,7 +266,7 @@ abstract class ContentIndex extends Component
 
         $this->service()->delete($model, auth()->user());
         $this->selected = array_values(array_diff($this->selected, [$id]));
-        $this->toast(sprintf('%s moved to the trash.', $this->singular()), AdminUx::TOAST_SUCCESS, $this->undoWith('restoreMany', [[$id]]));
+        $this->toast(__(':type moved to the trash.', ['type' => __($this->singular())]), AdminUx::TOAST_SUCCESS, $this->undoWith('restoreMany', [[$id]]));
     }
 
     /**
@@ -259,12 +305,12 @@ abstract class ContentIndex extends Component
         $this->selected = [];
 
         if ($refused !== []) {
-            $this->toast(sprintf('%d published. Not published yet, because images still need details: %s.', $published, implode(', ', $refused)), AdminUx::TOAST_ERROR);
+            $this->toast(__(':count published. Not published yet, because images still need details: :titles.', ['count' => $published, 'titles' => implode(__(', '), $refused)]), AdminUx::TOAST_ERROR);
 
             return;
         }
 
-        $this->toast(sprintf('%d %s published.', $published, $published === 1 ? strtolower($this->singular()) : strtolower(ContentTypes::get($this->type())['plural'])));
+        $this->toast(trans_choice('{1} :count :singular published.|[0,*] :count :plural published.', $published, ['singular' => mb_strtolower(__($this->singular())), 'plural' => mb_strtolower(__(ContentTypes::get($this->type())['plural']))]));
     }
 
     public function bulkUnpublish(): void
@@ -282,7 +328,7 @@ abstract class ContentIndex extends Component
         }
 
         $this->selected = [];
-        $this->toast(sprintf('%d moved back to draft.', $count));
+        $this->toast(__(':count moved back to draft.', ['count' => $count]));
     }
 
     public function bulkTrash(): void
@@ -296,7 +342,7 @@ abstract class ContentIndex extends Component
         }
 
         $this->selected = [];
-        $this->toast(sprintf('%d moved to the trash.', count($ids)), AdminUx::TOAST_SUCCESS, $this->undoWith('restoreMany', [$ids]));
+        $this->toast(__(':count moved to the trash.', ['count' => count($ids)]), AdminUx::TOAST_SUCCESS, $this->undoWith('restoreMany', [$ids]));
     }
 
     /**
@@ -312,7 +358,7 @@ abstract class ContentIndex extends Component
             $this->service()->restore((int) $id, auth()->user());
         }
 
-        $this->toast(count($ids) === 1 ? sprintf('%s restored.', $this->singular()) : sprintf('%d restored.', count($ids)));
+        $this->toast(count($ids) === 1 ? __(':type restored.', ['type' => __($this->singular())]) : __(':count restored.', ['count' => count($ids)]));
     }
 
     /**
@@ -328,7 +374,7 @@ abstract class ContentIndex extends Component
         $this->authorize('create', ContentTypes::get($this->type())['model']);
 
         $this->service()->restore($id, auth()->user());
-        $this->notify(sprintf('%s restored.', $this->singular()));
+        $this->notify(__(':type restored.', ['type' => __($this->singular())]));
     }
 
     /**
@@ -352,7 +398,7 @@ abstract class ContentIndex extends Component
         $this->authorize('forceDelete', $model);
 
         $this->service()->forceDelete($id, auth()->user());
-        $this->toast(sprintf('%s deleted permanently.', $this->singular()));
+        $this->toast(__(':type deleted permanently.', ['type' => __($this->singular())]));
     }
 
     public function moveUp(int $id): void
@@ -407,7 +453,7 @@ abstract class ContentIndex extends Component
             'columns' => $this->columns(),
             'sortable' => $this->service()->sortableColumns(),
             'filterOptions' => $this->filterOptions() + [
-                'status' => ['label' => 'Status', 'options' => ContentStatus::labels()],
+                'status' => ['label' => __('Status'), 'options' => ContentStatus::labels()],
             ],
             'items' => $items,
             'trashedCount' => $this->service()->countTrashed(),
@@ -419,9 +465,10 @@ abstract class ContentIndex extends Component
             'emptyText' => ContentTypes::emptyText($this->type()),
             'hasFilters' => trim($this->search) !== '' || array_filter($this->filters, fn ($value): bool => $value !== null && $value !== '') !== [],
             'placeholderFilter' => ContentRepositoryInterface::FILTER_PLACEHOLDER,
+            'translationFilter' => $this->translates() ? ContentRepositoryInterface::FILTER_NEEDS_TRANSLATION : null,
             'maxChips' => self::MAX_CHIPS,
             'purging' => $this->purgeDialog(),
-        ])->layout('components.layouts.admin', ['title' => $type['plural']]);
+        ])->layout('components.layouts.admin', ['title' => __($type['plural'])]);
     }
 
     /**
@@ -443,7 +490,7 @@ abstract class ContentIndex extends Component
         }
 
         if ($value instanceof CarbonInterface) {
-            return ['text' => $value->format(DateFormats::LONG)];
+            return ['text' => $value->translatedFormat(DateFormats::LONG)];
         }
 
         if (is_array($value)) {
@@ -486,7 +533,7 @@ abstract class ContentIndex extends Component
         return [
             'title' => ConfirmDialog::purgeTitle($this->singular()),
             'body' => ConfirmDialog::purgeBody($this->cell($model, array_key_first($this->columns()))['text']),
-            'confirm' => ConfirmDialog::PURGE_LABEL,
+            'confirm' => __(ConfirmDialog::PURGE_LABEL),
         ];
     }
 
@@ -505,6 +552,6 @@ abstract class ContentIndex extends Component
 
     protected function notify(string $message): void
     {
-        $this->toast($message);
+        $this->toast(__($message));
     }
 }

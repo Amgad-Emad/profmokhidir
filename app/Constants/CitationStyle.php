@@ -34,12 +34,12 @@ enum CitationStyle: string
      */
     public function edition(): string
     {
-        return match ($this) {
+        return __(match ($this) {
             self::Apa => '7th edition',
             self::Mla => '9th edition',
             self::Chicago => '17th edition, bibliography',
             self::Bibtex => 'For LaTeX reference managers',
-        };
+        });
     }
 
     /**

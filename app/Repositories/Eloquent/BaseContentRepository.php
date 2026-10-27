@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Repositories\Eloquent;
 
 use App\Constants\ContentStatus;
+use App\Constants\Locales;
 use App\Constants\Placeholders;
+use App\Models\Concerns\HasTranslatableContent;
 use App\Repositories\Contracts\ContentRepositoryInterface;
 use DateTimeInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -73,7 +75,10 @@ abstract class BaseContentRepository extends BaseEloquentRepository implements C
                 throw new InvalidArgumentException(sprintf('Cannot sort %s by "%s".', $this->model::class, $sortBy));
             }
 
-            $query->orderBy($sortBy, $sortDirection === self::SORT_DESC ? 'desc' : 'asc')
+            // Translatable columns sort by their English text.
+            $column = $this->isTranslatable($sortBy) ? $sortBy.'->'.Locales::DEFAULT : $sortBy;
+
+            $query->orderBy($column, $sortDirection === self::SORT_DESC ? 'desc' : 'asc')
                 ->orderByDesc($this->model->getKeyName());
         } else {
             $query->ordered();
@@ -181,6 +186,28 @@ abstract class BaseContentRepository extends BaseEloquentRepository implements C
         return $this->whereContains($this->query(), $needle)->count();
     }
 
+    public function countNeedingTranslation(string $locale = Locales::AR): int
+    {
+        if (! $this->translates()) {
+            return 0;
+        }
+
+        return $this->query()->needingTranslation($locale)->count();
+    }
+
+    /**
+     * Whether the type has English and Arabic columns (HasTranslatableContent).
+     */
+    protected function translates(): bool
+    {
+        return in_array(HasTranslatableContent::class, class_uses_recursive($this->model), true);
+    }
+
+    protected function isTranslatable(string $column): bool
+    {
+        return $this->translates() && $this->model->isTranslatableAttribute($column);
+    }
+
     /**
      * @param  Builder<TModel>  $query
      * @return Builder<TModel>
@@ -191,7 +218,7 @@ abstract class BaseContentRepository extends BaseEloquentRepository implements C
 
         return $query->where(function (Builder $query) use ($columns, $needle): void {
             foreach ($columns as $column) {
-                $query->orWhere($column, 'like', '%'.$this->escapeLike($needle).'%');
+                $this->orWhereLike($query, $column, $needle);
             }
         });
     }
@@ -237,11 +264,12 @@ abstract class BaseContentRepository extends BaseEloquentRepository implements C
             ->when($term !== '', function (Builder $query) use ($term): void {
                 $query->where(function (Builder $query) use ($term): void {
                     foreach ($this->searchColumns as $column) {
-                        $query->orWhere($column, 'like', '%'.$this->escapeLike($term).'%');
+                        $this->orWhereLike($query, $column, $term);
                     }
                 });
             })
             ->when((bool) ($filters[self::FILTER_PLACEHOLDER] ?? false), fn (Builder $query) => $this->whereContains($query, Placeholders::MARKER))
+            ->when($this->translates() && (bool) ($filters[self::FILTER_NEEDS_TRANSLATION] ?? false), fn (Builder $query) => $query->needingTranslation(Locales::AR))
             ->when($filters !== [], function (Builder $query) use ($filters): void {
                 foreach ($filters as $column => $value) {
                     if ($value === null || $value === '' || ! in_array($column, $this->filterColumns, true)) {
@@ -251,6 +279,26 @@ abstract class BaseContentRepository extends BaseEloquentRepository implements C
                     $query->where($column, $value instanceof \BackedEnum ? $value->value : $value);
                 }
             });
+    }
+
+    /**
+     * Case-insensitive "contains" on a column. JSON (English/Arabic) columns
+     * compare in a binary collation, so they are matched as lower-cased text
+     * (every language at once).
+     *
+     * @param  Builder<TModel>  $query
+     */
+    protected function orWhereLike(Builder $query, string $column, string $term): void
+    {
+        $pattern = '%'.$this->escapeLike($term).'%';
+
+        if (! $this->isTranslatable($column)) {
+            $query->orWhere($column, 'like', $pattern);
+
+            return;
+        }
+
+        $query->orWhereRaw('LOWER(CAST('.$query->getQuery()->getGrammar()->wrap($this->model->qualifyColumn($column)).' AS CHAR CHARACTER SET utf8mb4)) LIKE ?', [mb_strtolower($pattern)]);
     }
 
     protected function softDeletes(): bool

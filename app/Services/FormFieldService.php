@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Constants\FormControls;
+use App\Constants\Locales;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\Str;
 use Illuminate\Support\ViewErrorBag;
@@ -150,44 +151,63 @@ final class FormFieldService
 
         if ($field['required']) {
             $messages['data-msg-missing'] = match ($kind) {
-                'select', 'radio', 'combobox' => strtr(FormControls::MESSAGE_CHOOSE, [':label' => $label]),
-                'check' => FormControls::MESSAGE_CHECK,
-                'code' => strtr(FormControls::MESSAGE_CODE, [':length' => (string) ($limits['max'] ?? 6)]),
-                default => strtr(FormControls::MESSAGE_REQUIRED, [':label' => $label]),
+                'select', 'radio', 'combobox' => __(FormControls::MESSAGE_CHOOSE, ['label' => $label]),
+                'check' => __(FormControls::MESSAGE_CHECK),
+                'code' => __(FormControls::MESSAGE_CODE, ['length' => (string) ($limits['max'] ?? 6)]),
+                default => __(FormControls::MESSAGE_REQUIRED, ['label' => $label]),
             };
         }
 
         $messages += match ($kind) {
-            'email' => ['data-msg-type' => FormControls::MESSAGE_EMAIL],
-            'url' => ['data-msg-type' => FormControls::MESSAGE_URL],
+            'email' => ['data-msg-type' => __(FormControls::MESSAGE_EMAIL)],
+            'url' => ['data-msg-type' => __(FormControls::MESSAGE_URL)],
             'year' => ['data-msg-range' => FormControls::yearMessage(isset($limits['min']) ? (int) $limits['min'] : null, isset($limits['max']) ? (int) $limits['max'] : null)],
-            'date' => ['data-msg-range' => FormControls::MESSAGE_DATE],
-            'code' => ['data-msg-range' => strtr(FormControls::MESSAGE_CODE, [':length' => (string) ($limits['max'] ?? 6)])],
+            'date' => ['data-msg-range' => __(FormControls::MESSAGE_DATE)],
+            'code' => ['data-msg-range' => __(FormControls::MESSAGE_CODE, ['length' => (string) ($limits['max'] ?? 6)])],
             'number' => isset($limits['min'], $limits['max'])
-                ? ['data-msg-range' => strtr(FormControls::MESSAGE_RANGE, [':min' => (string) $limits['min'], ':max' => (string) $limits['max']])]
-                : ['data-msg-range' => FormControls::MESSAGE_NUMBER],
+                ? ['data-msg-range' => __(FormControls::MESSAGE_RANGE, ['min' => (string) $limits['min'], 'max' => (string) $limits['max']])]
+                : ['data-msg-range' => __(FormControls::MESSAGE_NUMBER)],
             default => [],
         };
 
         if ($field['maxlength'] !== null) {
-            $messages['data-msg-long'] = strtr(FormControls::MESSAGE_TOO_LONG, [':max' => (string) $field['maxlength']]);
+            $messages['data-msg-long'] = __(FormControls::MESSAGE_TOO_LONG, ['max' => (string) $field['maxlength']]);
         }
 
         if (isset($limits['minlength'])) {
-            $messages['data-msg-short'] = strtr(FormControls::MESSAGE_TOO_SHORT, [':min' => (string) $limits['minlength']]);
+            $messages['data-msg-short'] = __(FormControls::MESSAGE_TOO_SHORT, ['min' => (string) $limits['minlength']]);
         }
 
         return $messages;
+    }
+
+    /**
+     * The text direction of a control on a right-to-left page (null on left-to-right pages,
+     * which keep the browser's default): addresses, passwords, codes and numbers stay
+     * left to right; free text follows what is typed (dir="auto"), so an English entry
+     * in the Arabic dashboard reads correctly. A `dir` attribute on the component wins.
+     */
+    public function direction(string $kind): ?string
+    {
+        if (! Locales::isRtl(app()->getLocale())) {
+            return null;
+        }
+
+        return match ($kind) {
+            'email', 'url', 'password', 'tel', 'number', 'code', 'year' => Locales::LTR,
+            'text', 'search', 'textarea' => 'auto',
+            default => null,
+        };
     }
 
     /** "Required", "Optional", or nothing when the field opts out of the marker. */
     public function requirement(bool $required, ?bool $optional = true): ?string
     {
         if ($required) {
-            return FormControls::REQUIRED;
+            return __(FormControls::REQUIRED);
         }
 
-        return $optional === false ? null : FormControls::OPTIONAL;
+        return $optional === false ? null : __(FormControls::OPTIONAL);
     }
 
     /**

@@ -32,7 +32,7 @@ final class ConfirmDialog
      */
     public static function purgeTitle(string $singular): string
     {
-        return strtr(self::PURGE_TITLE, [':type' => mb_strtolower($singular)]);
+        return __(self::PURGE_TITLE, ['type' => mb_strtolower(__($singular))]);
     }
 
     /**
@@ -40,6 +40,6 @@ final class ConfirmDialog
      */
     public static function purgeBody(string $title): string
     {
-        return strtr(self::PURGE_BODY, [':title' => $title]).' '.self::IRREVERSIBLE;
+        return __(self::PURGE_BODY, ['title' => $title]).' '.__(self::IRREVERSIBLE);
     }
 }

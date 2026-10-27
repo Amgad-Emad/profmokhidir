@@ -185,8 +185,8 @@ return [
     'custom' => [
         // Every year field (year, start_year, details.year …): one message naming the range.
         '*year' => [
-            'integer' => FormControls::yearMessage(),
-            'between' => FormControls::yearMessage(),
+            'integer' => FormControls::yearMessage(locale: 'en'),
+            'between' => FormControls::yearMessage(locale: 'en'),
             'gte' => 'Enter an end year no earlier than the start year.',
         ],
     ],

@@ -9,10 +9,10 @@
     $compact = $compact ?? false;
 @endphp
 @if (! $searchable)
-    <p class="search-results__prompt {{ $onDark ? 'text-ink' : 'text-ink-muted' }}">{{ Search::PROMPT }}</p>
+    <p class="search-results__prompt {{ $onDark ? 'text-ink' : 'text-ink-muted' }}">{{ __(Search::PROMPT) }}</p>
 @elseif ($results['groups'] === [])
-    <x-empty-state :message="Search::NONE_FOUND" :attribution="Search::NONE_ATTRIBUTION" :tone="$onDark ? 'ivory' : 'evergreen'" class="search-results__empty" />
-    <nav class="search-results__chapters" aria-label="Chapters">
+    <x-empty-state :message="__(Search::NONE_FOUND)" :attribution="__(Search::NONE_ATTRIBUTION)" :tone="$onDark ? 'ivory' : 'evergreen'" class="search-results__empty" />
+    <nav class="search-results__chapters" aria-label="{{ __('Chapters') }}">
         <ul class="search-results__chapter-list">
             @foreach ($sections as $item)
                 <li><a href="{{ $item['url'] }}" class="search-results__chapter link-draw smallcaps">{{ $item['label'] }}</a></li>
@@ -25,7 +25,7 @@
         <section class="search-results__group" aria-labelledby="search-group-{{ $group['key'] }}">
             <h2 id="search-group-{{ $group['key'] }}" class="search-results__heading">
                 <a href="{{ $group['url'] }}" class="link-draw">{{ $group['label'] }}</a>
-                <span class="search-results__count smallcaps">{{ $group['total'] }}</span>
+                <span class="search-results__count smallcaps">@num($group['total'])</span>
             </h2>
             <hr class="rule-brass search-results__rule">
             <ol class="search-results__list">
@@ -40,14 +40,14 @@
                                 <span class="search-results__excerpt">{!! $hit['excerpt'] !!}</span>
                             @endif
                             @if ($hit['members'])
-                                <span class="search-results__members smallcaps">{{ \App\Constants\TeachingAccess::MEMBERS_NOTE }}</span>
+                                <span class="search-results__members smallcaps">{{ __(\App\Constants\TeachingAccess::MEMBERS_NOTE) }}</span>
                             @endif
                         </a>
                     </li>
                 @endforeach
             </ol>
             @if ($group['more'] > 0)
-                <p class="search-results__more"><a href="{{ $group['url'] }}" class="link-draw smallcaps">{{ $group['more'] }} more in {{ $group['label'] }}</a></p>
+                <p class="search-results__more"><a href="{{ $group['url'] }}" class="link-draw smallcaps">{{ __(':count more in :section', ['count' => app(\App\Services\LocaleService::class)->digits($group['more']), 'section' => $group['label']]) }}</a></p>
             @endif
         </section>
     @endforeach

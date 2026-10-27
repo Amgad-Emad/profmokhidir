@@ -1,5 +1,6 @@
 // Admin and community-chat layouts. Livewire ships its own Alpine build via
 // @livewireScripts; the components below register on alpine:init.
+import './i18n';
 import './theme';
 import { initForms, registerForms } from './forms';
 import { adminShell } from './admin/shell';

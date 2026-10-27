@@ -9,7 +9,8 @@ use Locale;
 
 /**
  * Country names and flag emoji for ISO 3166 alpha-2 codes (the analytics
- * country lists). "ZZ" is the unknown country: no flag, named "Unknown".
+ * country lists), in the current language (PHP intl). "ZZ" is the unknown
+ * country: no flag, named "Unknown".
  */
 final class Countries
 {
@@ -35,10 +36,10 @@ final class Countries
         $code = self::normalise($code);
 
         if ($code === Analytics::UNKNOWN_COUNTRY) {
-            return Analytics::UNKNOWN_LABEL;
+            return __(Analytics::UNKNOWN_LABEL);
         }
 
-        $name = class_exists(Locale::class) ? Locale::getDisplayRegion('-'.$code, 'en') : '';
+        $name = class_exists(Locale::class) ? Locale::getDisplayRegion('-'.$code, app()->getLocale()) : '';
 
         return $name !== '' && $name !== $code ? $name : $code;
     }

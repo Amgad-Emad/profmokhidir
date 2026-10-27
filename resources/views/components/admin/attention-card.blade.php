@@ -4,8 +4,8 @@
 --}}
 @props(['card'])
 <article {{ $attributes->class(['attention-card']) }} aria-labelledby="attention-{{ $card['key'] }}" data-queue="{{ $card['key'] }}">
-    <p class="attention-card__count" aria-hidden="true">{{ $card['count'] }}</p>
-    <h3 id="attention-{{ $card['key'] }}" class="attention-card__title"><span class="sr-only">{{ $card['count'] }} · </span>{{ $card['title'] }}</h3>
+    <p class="attention-card__count" aria-hidden="true">@num($card['count'])</p>
+    <h3 id="attention-{{ $card['key'] }}" class="attention-card__title"><span class="sr-only">@num($card['count']) · </span>{{ $card['title'] }}</h3>
     <p class="attention-card__detail">{{ $card['detail'] }}</p>
     @if ($card['items'] !== [])
         <ul class="attention-card__items">
@@ -14,5 +14,5 @@
             @endforeach
         </ul>
     @endif
-    <a href="{{ $card['url'] }}" class="attention-card__action" data-attention-action>{{ $card['action'] }}<x-icon name="arrow" class="size-4" /></a>
+    <a href="{{ $card['url'] }}" class="attention-card__action" data-attention-action>{{ $card['action'] }}<x-icon name="arrow" class="rtl-mirror size-4" /></a>
 </article>

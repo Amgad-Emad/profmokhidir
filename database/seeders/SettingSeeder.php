@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Constants\ChatAttachments;
+use App\Constants\Locales;
 use App\Constants\SettingKeys;
 use App\Services\SettingService;
 use Illuminate\Database\Seeder;
@@ -30,6 +31,7 @@ class SettingSeeder extends Seeder
             SettingKeys::CHAT_DOCUMENT_MAX_MB => (string) ChatAttachments::DOCUMENT_MAX_MB,
             // Off: visitor analytics waits for the client's approval.
             SettingKeys::ANALYTICS_ENABLED => '0',
+            SettingKeys::ARABIC_DIGITS => Locales::DIGITS_LATIN,
         ];
 
         $settings->seedDefaults($defaults);

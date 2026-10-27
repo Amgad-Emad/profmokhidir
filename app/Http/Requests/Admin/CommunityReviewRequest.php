@@ -36,7 +36,7 @@ class CommunityReviewRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'note.max' => 'Shorten the note to :max characters or fewer.',
+            'note.max' => __('Shorten the note to :max characters or fewer.'),
         ];
     }
 }

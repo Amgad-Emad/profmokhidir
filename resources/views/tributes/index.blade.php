@@ -23,11 +23,11 @@
                 <div class="frontispiece" data-rise-group>
                     <p id="featured-title" class="t-label text-accent-text">{{ $copy['featuredLabel'] }}</p>
                     <blockquote class="frontispiece__quote t-quote text-ink">
-                        <p><span class="hang-quote">&ldquo;</span>@typeset($featured->message)&rdquo;</p>
+                        <p dir="auto"><span class="hang-quote">&ldquo;</span>@typeset($featured->message)&rdquo;</p>
                     </blockquote>
-                    <p class="frontispiece__author smallcaps">@typeset($featured->name)</p>
+                    <p class="frontispiece__author smallcaps" dir="auto">@typeset($featured->name)</p>
                     <x-meta class="frontispiece__meta" :items="[$featured->relationship?->label(), $featured->location]" />
-                    <a href="{{ $page->cardUrl($featured) }}" class="tribute-entry__card t-label" download="{{ \App\Constants\TributeCards::filename((int) $featured->getKey()) }}">{{ $copy['shareLabel'] }}<span class="sr-only"> for the tribute from {{ $featured->name }} (PNG image)</span></a>
+                    <a href="{{ $page->cardUrl($featured) }}" class="tribute-entry__card t-label" download="{{ \App\Constants\TributeCards::filename((int) $featured->getKey()) }}">{{ $copy['shareLabel'] }}<span class="sr-only"> {{ __('for the tribute from :name (PNG image)', ['name' => $featured->name]) }}</span></a>
                 </div>
                 <x-ornament type="fleuron" />
             </div>
@@ -41,8 +41,8 @@
 
             <div class="mt-10 text-center" data-rise>
                 <h2 id="book-title" class="t-label text-accent-text">{{ $copy['bookLabel'] }}</h2>
-                <nav class="book-filters mt-6" aria-label="Filter by relationship">
-                    <span class="book-filters__item"><a href="{{ $clearUrl }}" class="book-filter smallcaps"{!! $activeRelationship === null ? ' aria-current="true"' : '' !!}>All</a></span>
+                <nav class="book-filters mt-6" aria-label="{{ __('Filter by relationship') }}">
+                    <span class="book-filters__item"><a href="{{ $clearUrl }}" class="book-filter smallcaps"{!! $activeRelationship === null ? ' aria-current="true"' : '' !!}>{{ __('All') }}</a></span>
                     @foreach ($filters as $filter)
                         <span class="book-filters__item"><a href="{{ $filter['url'] }}" class="book-filter smallcaps"{!! $filter['active'] ? ' aria-current="true"' : '' !!}>{{ $filter['label'] }}</a></span>
                     @endforeach

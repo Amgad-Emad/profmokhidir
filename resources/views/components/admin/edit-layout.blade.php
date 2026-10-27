@@ -1,6 +1,6 @@
 {{--
     The edit screen: the form split into named sections (<x-admin.form-section>), a sticky "On this
-    page" section nav on the left on wide screens (when there are two or more), the placeholder
+    page" section nav at the start side on wide screens (when there are two or more), the placeholder
     notice, and the sticky save bar (<x-admin.save-bar>) along the bottom. `after` holds sections
     that save on their own (photographs, the portrait), outside the form but in the same nav.
     Alpine `editScreen` (resources/js/admin/editing.js) tracks changes and autosaves drafts.
@@ -19,8 +19,8 @@
 <div {{ $attributes->class(['edit-layout', 'edit-layout--nav' => count($sections) > 1]) }} x-data="editScreen({{ \Illuminate\Support\Js::from($config) }})" data-edit-screen
      data-autosave="{{ $autosave ? 'true' : 'false' }}" data-saved-at="{{ $editor['savedAt'] }}">
     @if (count($sections) > 1)
-        <nav class="edit-layout__nav" aria-label="Sections of this form" x-data="sectionNav">
-            <p class="t-label text-accent-text">On this page</p>
+        <nav class="edit-layout__nav" aria-label="{{ __('Sections of this form') }}" x-data="sectionNav">
+            <p class="t-label text-accent-text">{{ __('On this page') }}</p>
             <ol class="edit-layout__links">
                 @foreach ($sections as $id => $label)
                     <li><a href="#section-{{ $id }}" class="edit-layout__link" x-bind:aria-current="current === '{{ $id }}' ? 'true' : null" data-section-link="{{ $id }}">{{ $label }}</a></li>
@@ -32,11 +32,11 @@
     <div class="edit-layout__body">
         @if ($editor['placeholders'] !== [])
             <x-alert tone="bronze" class="mb-8" data-placeholder-summary>
-                {{ count($editor['placeholders']) === 1 ? 'One field' : count($editor['placeholders']).' fields' }} on this page still {{ count($editor['placeholders']) === 1 ? 'holds' : 'hold' }} sample text from the site set-up. {{ count($editor['placeholders']) === 1 ? 'It is' : 'They are' }} marked “{{ Placeholders::FLAG }}”.
+                {{ trans_choice('{1} One field on this page still holds sample text from the site set-up. It is marked “:flag”.|[2,*] :count fields on this page still hold sample text from the site set-up. They are marked “:flag”.', count($editor['placeholders']), ['flag' => __(Placeholders::FLAG)]) }}
             </x-alert>
         @endif
 
-        <x-form.error-summary after-save :intro="\App\Constants\FormControls::ERROR_SUMMARY_INTRO" />
+        <x-form.error-summary after-save :intro="__(\App\Constants\FormControls::ERROR_SUMMARY_INTRO)" />
         <div class="edit-layout__sections">{{ $slot }}</div>
 
         {{ $after ?? '' }}

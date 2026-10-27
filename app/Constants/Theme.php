@@ -44,14 +44,17 @@ enum Theme: string
     /** The toggle's accessible name while this theme is showing ("Switch to dark theme"). */
     public function switchLabel(): string
     {
-        return sprintf(ThemeSettings::SWITCH_LABEL, strtolower($this->opposite()->label()));
+        return match ($this->opposite()) {
+            self::Dark => __('Switch to dark theme'),
+            self::Light => __('Switch to light theme'),
+        };
     }
 
     public function label(): string
     {
         return match ($this) {
-            self::Light => 'Light',
-            self::Dark => 'Dark',
+            self::Light => __('Light'),
+            self::Dark => __('Dark'),
         };
     }
 

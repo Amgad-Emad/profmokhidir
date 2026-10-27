@@ -7,7 +7,7 @@
     <div class="mega-menu__inner">
         <div class="mega-menu__title">
             <p class="t-numeral text-accent-text" aria-hidden="true">{{ $chapter['numeral'] }}</p>
-            <p class="mega-menu__name"><span class="sr-only">Chapter {{ $chapter['numeral'] }}: </span>{{ $chapter['label'] }}</p>
+            <p class="mega-menu__name"><span class="sr-only">{{ __('Chapter :numeral:', ['numeral' => $chapter['numeral']]) }} </span>{{ $chapter['label'] }}</p>
             <p class="mega-menu__strap">{{ $chapter['strap'] }}</p>
         </div>
         <ul class="mega-menu__links">

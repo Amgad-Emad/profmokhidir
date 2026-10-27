@@ -39,7 +39,7 @@
         >
     </div>
     @if ($lightbox)
-            <span class="sr-only">View larger</span>
+            <span class="sr-only">{{ __('View larger') }}</span>
         </a>
     @endif
     @if ($label && $hasCaption())

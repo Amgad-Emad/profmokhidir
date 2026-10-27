@@ -15,7 +15,7 @@
     /* Scroll cue: a small label above a 1px accent line that draws downward once. */
     .scroll-cue {
         position: absolute;
-        left: 50%;
+        left: 50%; /* centred: physical on purpose, same in both directions */
         bottom: var(--space-4);
         transform: translateX(-50%);
         display: flex;
@@ -48,14 +48,14 @@
         display: grid;
         gap: var(--space-3);
         padding-block: var(--space-8);
-        padding-left: var(--space-4);
+        padding-inline-start: var(--space-4);
     }
 
     .life-chapter__line {
         position: absolute;
         top: 0;
         bottom: 0;
-        left: 0;
+        inset-inline-start: 0;
         width: 1px;
         background-color: var(--accent-line);
         transform-origin: center top;
@@ -66,7 +66,7 @@
         content: '';
         position: absolute;
         z-index: 1;
-        left: -4px;
+        inset-inline-start: -4px;
         top: calc(var(--space-8) + 0.5rem);
         width: 9px;
         height: 9px;
@@ -149,7 +149,7 @@
             grid-template-columns: 13rem minmax(0, 1fr);
             gap: var(--space-6);
             padding-block: var(--space-12);
-            padding-left: var(--space-8);
+            padding-inline-start: var(--space-8);
         }
 
         .life-chapter__inner::before {

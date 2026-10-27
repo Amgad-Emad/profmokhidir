@@ -28,11 +28,11 @@ enum CommunityStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::None => 'Not applied',
-            self::Pending => 'Pending review',
-            self::Approved => 'Approved',
-            self::Rejected => 'Rejected',
-            self::Suspended => 'Suspended',
+            self::None => __('Not applied'),
+            self::Pending => __('Pending review'),
+            self::Approved => __('Approved'),
+            self::Rejected => __('Rejected'),
+            self::Suspended => __('Suspended'),
         };
     }
 

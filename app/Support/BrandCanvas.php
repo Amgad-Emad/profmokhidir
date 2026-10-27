@@ -6,6 +6,7 @@ namespace App\Support;
 
 use App\Constants\Brand;
 use App\Constants\SocialCards;
+use ArPHP\I18N\Arabic;
 use GdImage;
 use RuntimeException;
 
@@ -15,11 +16,21 @@ use RuntimeException;
  * Grotesk from resources/fonts, centred and letter-spaced text. Everything is
  * drawn at a multiple of the final size and downsampled for smooth edges.
  * Shared by the Open Graph cards (brand:social-cards) and the tribute share cards.
+ *
+ * Arabic: GD neither joins Arabic letters nor lays them out right to left, so
+ * any text containing Arabic is shaped first (ar-php converts it to its
+ * presentation forms in visual order) and set in Amiri (SocialCards::FONT_ARABIC*)
+ * in place of the Latin brand fonts. Arabic is never letter-spaced, since
+ * tracking would break the joins. Lines are wrapped in logical order and
+ * shaped one at a time, so each line reads right to left on its own.
  */
 final class BrandCanvas
 {
     /** Drawn at this multiple and downsampled for smooth edges. */
     public const int SUPERSAMPLE = 3;
+
+    /** Arabic drawn through tracked() (labels) is set this much larger than the Latin size asked for. */
+    public const float ARABIC_LABEL_SCALE = 1.3;
 
     private GdImage $canvas;
 
@@ -128,7 +139,7 @@ final class BrandCanvas
      */
     public function wrap(string $text, string $fontFile, int $size, int $maxWidth): array
     {
-        $font = self::font($fontFile);
+        $font = self::font(self::fontFor($fontFile, $text));
         $size = $this->px($size);
         $maxWidth = $this->px($maxWidth);
         $lines = [];
@@ -143,7 +154,7 @@ final class BrandCanvas
 
                 $candidate = $current === '' ? $word : $current.' '.$word;
 
-                if ($current !== '' && $this->textWidth($candidate, $font, $size) > $maxWidth) {
+                if ($current !== '' && $this->textWidth(self::visual($candidate), $font, $size) > $maxWidth) {
                     $lines[] = $current;
                     $current = $word;
                 } else {
@@ -164,8 +175,38 @@ final class BrandCanvas
      */
     public function centred(string $text, string $fontFile, int $size, string $hex, int $top): void
     {
-        $font = self::font($fontFile);
+        $font = self::font(self::fontFor($fontFile, $text));
+        $text = self::visual($text);
         $size = $this->px($size);
+        $box = imagettfbbox($size, 0, $font, $text);
+        $x = (int) round($this->width() / 2 - ($box[2] - $box[0]) / 2 - $box[0]);
+        imagettftext($this->canvas, $size, 0, $x, $this->px($top) - $box[7], $this->colour($hex), $font, $text);
+    }
+
+    /**
+     * Draw a label line made of separate parts (relationship, place) when any of
+     * them is Arabic: each part is shaped on its own and the parts are laid out
+     * right to left on Arabic pages (`rtl`), left to right otherwise, so a Latin
+     * place beside an Arabic label (or the reverse) never scrambles. Untracked,
+     * in Amiri bold at ARABIC_LABEL_SCALE. Without Arabic, falls back to tracked().
+     *
+     * @param  list<string>  $parts
+     */
+    public function labelRuns(array $parts, string $separator, int $size, string $hex, int $top, float $tracking, bool $rtl): void
+    {
+        $parts = array_values(array_filter($parts, fn (string $part): bool => $part !== ''));
+
+        if (! self::isArabic(implode('', $parts))) {
+            $this->tracked(mb_strtoupper(implode($separator, $parts)), SocialCards::FONT_LABEL, $size, $hex, $top, $tracking);
+
+            return;
+        }
+
+        $runs = array_map(fn (string $part): string => self::isArabic($part) ? self::visual($part) : mb_strtoupper($part), $parts);
+        $text = implode($separator, $rtl ? array_reverse($runs) : $runs);
+
+        $font = self::font(SocialCards::FONT_ARABIC_BOLD);
+        $size = $this->px((int) round($size * self::ARABIC_LABEL_SCALE));
         $box = imagettfbbox($size, 0, $font, $text);
         $x = (int) round($this->width() / 2 - ($box[2] - $box[0]) / 2 - $box[0]);
         imagettftext($this->canvas, $size, 0, $x, $this->px($top) - $box[7], $this->colour($hex), $font, $text);
@@ -176,6 +217,13 @@ final class BrandCanvas
      */
     public function tracked(string $text, string $fontFile, int $size, string $hex, int $top, float $tracking): void
     {
+        if (self::isArabic($text)) {
+            // Untracked, and a little larger: Amiri's small sizes read smaller than Hanken's.
+            $this->centred($text, $fontFile, (int) round($size * self::ARABIC_LABEL_SCALE), $hex, $top);
+
+            return;
+        }
+
         $font = self::font($fontFile);
         $size = $this->px($size);
         $spacing = $size * $tracking;
@@ -248,6 +296,47 @@ final class BrandCanvas
         }
 
         return $path;
+    }
+
+    /**
+     * Whether the text contains Arabic letters (and so must be shaped and set in Amiri).
+     */
+    public static function isArabic(string $text): bool
+    {
+        return preg_match('/\p{Arabic}/u', $text) === 1;
+    }
+
+    /**
+     * The font a run of text is drawn in: the brand font asked for, or Amiri
+     * (bold for the label face) when the text contains Arabic.
+     */
+    public static function fontFor(string $fontFile, string $text): string
+    {
+        if (! self::isArabic($text)) {
+            return $fontFile;
+        }
+
+        return $fontFile === SocialCards::FONT_LABEL ? SocialCards::FONT_ARABIC_BOLD : SocialCards::FONT_ARABIC;
+    }
+
+    /**
+     * One line of text in the order GD draws it: Arabic is joined (presentation
+     * forms) and laid out right to left, with any Latin words and figures kept in
+     * reading order inside it. Text without Arabic is returned unchanged.
+     */
+    public static function visual(string $line): string
+    {
+        if (! self::isArabic($line)) {
+            return $line;
+        }
+
+        static $shaper = null;
+        $shaper ??= new Arabic;
+
+        // Vowel marks (tashkeel) are dropped: GD cannot position them over the joined forms.
+        $line = (string) preg_replace('/[\x{0610}-\x{061A}\x{064B}-\x{065F}\x{0670}\x{06D6}-\x{06ED}]/u', '', $line);
+
+        return $shaper->utf8Glyphs($line, PHP_INT_MAX, false, true);
     }
 
     /**

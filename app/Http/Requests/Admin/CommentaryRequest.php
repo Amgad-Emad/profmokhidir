@@ -38,6 +38,6 @@ class CommentaryRequest extends ContentRequest
      */
     public function attributes(): array
     {
-        return ['external_url' => 'external link'];
+        return ['external_url' => __('external link')];
     }
 }

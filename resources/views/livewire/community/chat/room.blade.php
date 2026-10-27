@@ -41,7 +41,7 @@
 
             {{-- The site's lightbox, fed with the images of the message that was opened. --}}
             <div x-data="chatLightbox" x-on:chat-lightbox.window="openWith($event.detail)" data-chat-lightbox>
-                <x-lightbox :label="ChatCopy::ATTACH_GALLERY_LABEL" />
+                <x-lightbox :label="__(ChatCopy::ATTACH_GALLERY_LABEL)" />
             </div>
         </div>
     @endif

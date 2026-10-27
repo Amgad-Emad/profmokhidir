@@ -4,11 +4,11 @@
     on an ancestor. The photograph hangs large on evergreen; its museum label and credit sit to the side on
     desktop and below on mobile. Keyboard: arrows move, Escape closes, Tab is trapped. Touch: swipe. Fades only.
 --}}
-@props(['label' => 'Photographs'])
+@props(['label' => null])
 <dialog
     x-ref="dialog"
     class="lightbox on-dark"
-    aria-label="{{ $label }}"
+    aria-label="{{ $label ?? __('Photographs') }}"
     @close="onClose()"
     @keydown="onKeydown($event)"
     @click="onBackdropClick($event)"
@@ -19,7 +19,7 @@
         <div class="lightbox__bar">
             <p class="t-label text-accent-text" aria-live="polite" x-text="counter()"></p>
             <button type="button" x-ref="close" class="lightbox__control" @click="close()">
-                <span class="t-label">Close</span>
+                <span class="t-label">{{ __('Close') }}</span>
                 <svg class="h-3 w-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true" focusable="false"><path d="M1 1l10 10M11 1L1 11" /></svg>
             </button>
         </div>
@@ -46,15 +46,15 @@
                     <span class="museum-label__meta smallcaps" x-show="current.meta" x-text="current.meta"></span>
                     <span class="museum-label__note" x-show="current.note" x-text="current.note"></span>
                 </div>
-                <p class="t-label text-accent-text" x-show="current.credit"><span class="sr-only">Credit: </span><span x-text="current.credit"></span></p>
+                <p class="t-label text-accent-text" x-show="current.credit"><span class="sr-only">{{ __('Credit:') }} </span><span x-text="current.credit"></span></p>
                 <div class="lightbox__nav" x-show="items.length > 1">
                     <button type="button" class="lightbox__arrow lightbox__arrow--prev" @click="prev()">
-                        <span class="sr-only">Previous photograph</span>
-                        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true" focusable="false"><path d="M8 1 3 6l5 5" /></svg>
+                        <span class="sr-only">{{ __('Previous photograph') }}</span>
+                        <svg class="rtl-mirror" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true" focusable="false"><path d="M8 1 3 6l5 5" /></svg>
                     </button>
                     <button type="button" class="lightbox__arrow lightbox__arrow--next" @click="next()">
-                        <span class="sr-only">Next photograph</span>
-                        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true" focusable="false"><path d="m4 1 5 5-5 5" /></svg>
+                        <span class="sr-only">{{ __('Next photograph') }}</span>
+                        <svg class="rtl-mirror" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true" focusable="false"><path d="m4 1 5 5-5 5" /></svg>
                     </button>
                 </div>
             </figcaption>

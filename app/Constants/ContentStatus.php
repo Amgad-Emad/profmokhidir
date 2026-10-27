@@ -25,8 +25,8 @@ enum ContentStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Draft => 'Draft',
-            self::Published => 'Published',
+            self::Draft => __('Draft'),
+            self::Published => __('Published'),
         };
     }
 }

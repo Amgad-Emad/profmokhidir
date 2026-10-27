@@ -86,7 +86,7 @@ class DashboardService
 
             $cards[$key] = [
                 // The tributes item is named for its task ("Review tributes"); the figure counts tributes.
-                'label' => $key === AdminNavigation::TRIBUTES ? 'Tributes' : $item['label'],
+                'label' => $key === AdminNavigation::TRIBUTES ? __('Tributes') : $item['label'],
                 'count' => $count,
                 'route' => $item['route'],
                 'permission' => $item['permission'],
@@ -104,9 +104,9 @@ class DashboardService
     public function queues(): array
     {
         return [
-            AdminNavigation::TRIBUTES => $this->queue(AdminNavigation::TRIBUTES, 'Tributes pending review', $this->tributeService->countPending(), 'tribute'),
-            AdminNavigation::APPLICATIONS => $this->queue(AdminNavigation::APPLICATIONS, 'Community applications pending', $this->community->countPending(), 'application'),
-            AdminNavigation::CHAT_REPORTS => $this->queue(AdminNavigation::CHAT_REPORTS, 'Chat reports open', $this->chat->countOpenReports(), 'report'),
+            AdminNavigation::TRIBUTES => $this->queue(AdminNavigation::TRIBUTES, __('Tributes pending review'), $this->tributeService->countPending(), 'tribute'),
+            AdminNavigation::APPLICATIONS => $this->queue(AdminNavigation::APPLICATIONS, __('Community applications pending'), $this->community->countPending(), 'application'),
+            AdminNavigation::CHAT_REPORTS => $this->queue(AdminNavigation::CHAT_REPORTS, __('Chat reports open'), $this->chat->countOpenReports(), 'report'),
         ];
     }
 
@@ -141,13 +141,13 @@ class DashboardService
             }
 
             $cards[] = $this->card($key, $queue['label'], $queue['count'], match ($key) {
-                AdminNavigation::TRIBUTES => 'Visitors have left tributes. Read each one, then approve it for the public page or decline it.',
-                AdminNavigation::APPLICATIONS => 'People have asked to join the Scientific Community. Approve them to open the members\' chat.',
-                default => 'Members have reported chat messages. Look at each and keep or remove the message.',
+                AdminNavigation::TRIBUTES => __('Visitors have left tributes. Read each one, then approve it for the public page or decline it.'),
+                AdminNavigation::APPLICATIONS => __('People have asked to join the Scientific Community. Approve them to open the members\' chat.'),
+                default => __('Members have reported chat messages. Look at each and keep or remove the message.'),
             }, match ($key) {
-                AdminNavigation::TRIBUTES => 'Review tributes',
-                AdminNavigation::APPLICATIONS => 'Review applications',
-                default => 'Open reports',
+                AdminNavigation::TRIBUTES => __('Review tributes'),
+                AdminNavigation::APPLICATIONS => __('Review applications'),
+                default => __('Open reports'),
             }, route($queue['route']));
         }
 
@@ -158,17 +158,17 @@ class DashboardService
         $missingAlt = $this->media->countMissingAltText();
 
         if ($missingAlt > 0) {
-            $cards[] = $this->card('missing-alt', 'Images without alt text', $missingAlt,
-                'Alt text describes a photo for people who cannot see it. Each image needs a sentence before its page can be published.',
-                'Add alt text', route(AdminNavigation::routeFor(AdminNavigation::MEDIA_LIBRARY), [MediaRepositoryInterface::FILTER_MISSING_ALT => 1]));
+            $cards[] = $this->card('missing-alt', __('Images without alt text'), $missingAlt,
+                __('Alt text describes a photo for people who cannot see it. Each image needs a sentence before its page can be published.'),
+                __('Add alt text'), route(AdminNavigation::routeFor(AdminNavigation::MEDIA_LIBRARY), [MediaRepositoryInterface::FILTER_MISSING_ALT => 1]));
         }
 
         $drafts = $this->staleDrafts($now);
 
         if ($drafts['count'] > 0) {
-            $card = $this->card('stale-drafts', 'Drafts waiting more than '.AdminUx::STALE_DRAFT_DAYS.' days', $drafts['count'],
-                'These were started but never published. Finish and publish them, or move them to the trash.',
-                'Open the oldest', $drafts['items'][0]['url']);
+            $card = $this->card('stale-drafts', __('Drafts waiting more than :days days', ['days' => app(LocaleService::class)->digits(AdminUx::STALE_DRAFT_DAYS)]), $drafts['count'],
+                __('These were started but never published. Finish and publish them, or move them to the trash.'),
+                __('Open the oldest'), $drafts['items'][0]['url']);
             $card['items'] = $drafts['items'];
             $cards[] = $card;
         }
@@ -204,11 +204,11 @@ class DashboardService
 
         $items = array_map(function (array $entry): array {
             $record = $entry['record'];
-            $label = $record->getAttribute('title') ?? $record->getAttribute('name') ?? $record->getAttribute('quote') ?? ContentTypes::get($entry['type'])['singular'];
+            $label = $record->getAttribute('title') ?? $record->getAttribute('name') ?? $record->getAttribute('quote') ?? __(ContentTypes::get($entry['type'])['singular']);
 
             return [
                 'label' => Str::limit((string) $label, 80),
-                'meta' => ContentTypes::get($entry['type'])['singular'].' · last changed '.$record->updated_at->diffForHumans(),
+                'meta' => __(':type · last changed :ago', ['type' => __(ContentTypes::get($entry['type'])['singular']), 'ago' => $record->updated_at->diffForHumans()]),
                 'url' => route(ContentTypes::editRoute($entry['type']), [ContentTypes::routeParameter($entry['type']) => $record->getKey()]),
             ];
         }, array_slice($found, 0, AdminUx::ATTENTION_ITEMS));
@@ -228,10 +228,10 @@ class DashboardService
         }
 
         return [
-            ['key' => 'new-publication', 'label' => 'New publication', 'hint' => 'A paper, book or chapter, with its PDF', 'icon' => AdminUx::icon(AdminNavigation::PUBLICATIONS), 'url' => route(ContentTypes::createRoute(ContentTypes::PUBLICATION))],
-            ['key' => 'new-commentary', 'label' => 'New commentary', 'hint' => 'An essay or note for the Commentary Corner', 'icon' => AdminUx::icon(AdminNavigation::COMMENTARY), 'url' => route(ContentTypes::createRoute(ContentTypes::COMMENTARY))],
-            ['key' => 'upload-photos', 'label' => 'Upload photos', 'hint' => 'Into an album, then add captions', 'icon' => AdminUx::icon(AdminNavigation::ALBUMS), 'url' => route(AdminNavigation::routeFor(AdminNavigation::MEDIA_LIBRARY)).'#upload'],
-            ['key' => 'new-cv-entry', 'label' => 'Add CV entry', 'hint' => 'A post, degree or appointment', 'icon' => AdminUx::icon(AdminNavigation::CV), 'url' => route(ContentTypes::createRoute(ContentTypes::CV_ENTRY))],
+            ['key' => 'new-publication', 'label' => __('New publication'), 'hint' => __('A paper, book or chapter, with its PDF'), 'icon' => AdminUx::icon(AdminNavigation::PUBLICATIONS), 'url' => route(ContentTypes::createRoute(ContentTypes::PUBLICATION))],
+            ['key' => 'new-commentary', 'label' => __('New commentary'), 'hint' => __('An essay or note for the Commentary Corner'), 'icon' => AdminUx::icon(AdminNavigation::COMMENTARY), 'url' => route(ContentTypes::createRoute(ContentTypes::COMMENTARY))],
+            ['key' => 'upload-photos', 'label' => __('Upload photos'), 'hint' => __('Into an album, then add captions'), 'icon' => AdminUx::icon(AdminNavigation::ALBUMS), 'url' => route(AdminNavigation::routeFor(AdminNavigation::MEDIA_LIBRARY)).'#upload'],
+            ['key' => 'new-cv-entry', 'label' => __('Add CV entry'), 'hint' => __('A post, degree or appointment'), 'icon' => AdminUx::icon(AdminNavigation::CV), 'url' => route(ContentTypes::createRoute(ContentTypes::CV_ENTRY))],
         ];
     }
 
@@ -253,8 +253,8 @@ class DashboardService
         $now ??= Carbon::now();
 
         return [
-            'salutation' => DashboardGreeting::salutation((int) $now->format('G')),
-            'date' => $now->format(DateFormats::GREETING),
+            'salutation' => __(DashboardGreeting::salutation((int) $now->format('G'))),
+            'date' => $now->translatedFormat(DateFormats::GREETING),
             'datetime' => $now->format(DateFormats::MACHINE),
         ];
     }

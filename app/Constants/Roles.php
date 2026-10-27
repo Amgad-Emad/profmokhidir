@@ -45,10 +45,10 @@ final class Roles
     public static function labels(): array
     {
         return [
-            self::ADMIN => 'Administrator',
-            self::EDITOR => 'Editor',
-            self::MEMBER => 'Community member',
-            self::APPLICANT => 'Applicant',
+            self::ADMIN => __('Administrator'),
+            self::EDITOR => __('Editor'),
+            self::MEMBER => __('Community member'),
+            self::APPLICANT => __('Applicant'),
         ];
     }
 

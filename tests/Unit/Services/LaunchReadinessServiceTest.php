@@ -58,7 +58,9 @@ class LaunchReadinessServiceTest extends TestCase
             $this->assertNotNull($checks[LaunchChecklist::PUBLISHED.'-'.$nav]['url']);
         }
 
-        $this->assertSame(1, $this->service->checklist()['done']);
+        // Done on an empty site: no sample text is left and nothing waits for Arabic.
+        $this->assertTrue($checks[LaunchChecklist::TRANSLATION]['done']);
+        $this->assertSame(2, $this->service->checklist()['done']);
     }
 
     #[Test]

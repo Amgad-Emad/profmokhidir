@@ -471,7 +471,7 @@
     }
 
     .cite__edition {
-        margin-left: 0.5rem;
+        margin-inline-start: 0.5rem;
         font-family: var(--font-sans);
         font-variant-caps: normal;
         letter-spacing: normal;
@@ -529,7 +529,7 @@
 
     .cv-ledger__updated .smallcaps {
         color: var(--accent-text);
-        margin-right: 0.5rem;
+        margin-inline-end: 0.5rem;
     }
 
     .cv-ledger__layout {
@@ -556,8 +556,8 @@
             top: 7rem;
             padding-block: 0;
             border-block: 0;
-            border-left: 1px solid var(--rule);
-            padding-left: var(--space-3);
+            border-inline-start: 1px solid var(--rule);
+            padding-inline-start: var(--space-3);
         }
     }
 
@@ -638,7 +638,7 @@
 
     @media (min-width: 640px) {
         .ledger__years {
-            text-align: right;
+            text-align: end;
         }
     }
 
@@ -777,14 +777,15 @@
         position: relative;
         display: grid;
         gap: var(--space-2) var(--space-6);
-        padding: var(--space-4) 0 var(--space-4) 3rem;
+        padding-block: var(--space-4);
+        padding-inline: 3rem 0;
         border-top: 1px solid var(--rule);
     }
 
     .syllabus__item::before {
         content: counter(reading) '.';
         position: absolute;
-        left: 0;
+        inset-inline-start: 0;
         top: var(--space-4);
         font-family: var(--font-display);
         font-size: 1.5rem;
@@ -848,8 +849,8 @@
         position: fixed;
         top: var(--header-height, 5rem); /* directly under the fixed header, which condenses on scroll */
         transition: top var(--duration-masthead, 400ms) var(--ease-rise);
-        left: 0;
-        right: 0;
+        inset-inline-start: 0;
+        inset-inline-end: 0;
         z-index: 39;
         height: 1px;
         background-color: var(--accent-line);
@@ -891,8 +892,8 @@
     .essay__contents {
         position: sticky;
         top: 8rem;
-        padding-left: var(--space-2);
-        border-left: 1px solid var(--rule);
+        padding-inline-start: var(--space-2);
+        border-inline-start: 1px solid var(--rule);
     }
 
     .essay__contents-list {
@@ -922,7 +923,7 @@
     }
 
     .essay__contents-sub a {
-        padding-left: var(--space-2);
+        padding-inline-start: var(--space-2);
         font-size: 1rem;
     }
 
@@ -1132,9 +1133,10 @@
         display: block !important;
         float: none !important;
         width: auto !important;
-        margin: 4pt 0 6pt 1.5em !important;
-        padding-left: 6pt !important;
-        border-left: 0.5pt solid var(--accent-line) !important;
+        margin-block: 4pt 6pt !important;
+        margin-inline: 1.5em 0 !important;
+        padding-inline-start: 6pt !important;
+        border-inline-start: 0.5pt solid var(--accent-line) !important;
         font-size: 9pt !important;
         line-height: 1.4 !important;
         text-indent: 0;

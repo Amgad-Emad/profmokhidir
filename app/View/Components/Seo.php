@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\View\Components;
 
+use App\Constants\Locales;
 use App\Constants\Seo as SeoConstants;
 use App\Constants\SocialCards;
+use App\Services\LocaleService;
 use App\Services\SeoService;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\Request;
 use Illuminate\View\Component;
 
 /**
@@ -31,11 +34,24 @@ class Seo extends Component
 
     public string $imageAltText;
 
+    /** hreflang => address of this page in each language (empty for pages in one form only). @var array<string, string> */
+    public array $alternates;
+
+    public string $ogLocale;
+
+    /** @var list<string> */
+    public array $ogAlternateLocales;
+
+    public ?string $defaultAlternate;
+
     /**
      * @param  array<string, mixed>|list<array<string, mixed>>|null  $schema
+     * @param  list<string>|null  $locales  languages the page exists in (content without an Arabic version: English alone)
      */
     public function __construct(
         SeoService $seo,
+        LocaleService $localeService,
+        Request $request,
         ?string $title = null,
         ?string $description = null,
         ?string $canonical = null,
@@ -44,6 +60,7 @@ class Seo extends Component
         ?array $schema = null,
         public bool $noindex = false,
         ?string $imageAlt = null,
+        ?array $locales = null,
     ) {
         $this->pageTitle = $seo->title($title);
         $this->metaDescription = $seo->description($description);
@@ -52,11 +69,20 @@ class Seo extends Component
         $this->imageAltText = filled($imageAlt) ? $imageAlt : SocialCards::QUOTE;
         $this->type = $seo->ogType($type);
         $this->jsonLd = $schema === null || $schema === [] ? null : $seo->jsonLd($schema);
+
+        $this->alternates = $localeService->alternates($request, $locales);
+        $current = app()->getLocale();
+        $this->ogLocale = Locales::og($current);
+        $this->ogAlternateLocales = array_values(array_map(
+            fn (string $locale): string => Locales::og($locale),
+            array_filter(Locales::all(), fn (string $locale): bool => $locale !== $current && isset($this->alternates[Locales::definitions()[$locale]['hreflang']])),
+        ));
+        $this->defaultAlternate = $this->alternates[Locales::definitions()[Locales::DEFAULT]['hreflang']] ?? null;
     }
 
     public function siteName(): string
     {
-        return SeoConstants::SITE_NAME;
+        return __(SeoConstants::SITE_NAME);
     }
 
     public function render(): View

@@ -34,12 +34,12 @@ class CommunityApplicationReceived extends Notification implements ShouldQueue
         $details = array_filter([$this->applicant->affiliation, $this->applicant->academic_field]);
 
         return (new MailMessage)
-            ->subject('A community application is waiting for review')
-            ->greeting($notifiable instanceof User ? 'Hello '.$notifiable->name.',' : 'Hello,')
-            ->line($this->applicant->name.' has applied to join the Scientific Community on '.config('app.name').'.')
-            ->line($details === [] ? 'No affiliation or field was given.' : implode(' · ', $details))
-            ->action('Review applications', route(AdminNavigation::routeFor(AdminNavigation::APPLICATIONS)))
-            ->line('They cannot use the chat until an administrator approves them.');
+            ->subject(__('A community application is waiting for review'))
+            ->greeting($notifiable instanceof User ? __('Hello :name,', ['name' => $notifiable->name]) : __('Hello,'))
+            ->line(__(':name has applied to join the Scientific Community on :site.', ['name' => $this->applicant->name, 'site' => config('app.name')]))
+            ->line($details === [] ? __('No affiliation or field was given.') : implode(' · ', $details))
+            ->action(__('Review applications'), route(AdminNavigation::routeFor(AdminNavigation::APPLICATIONS)))
+            ->line(__('They cannot use the chat until an administrator approves them.'));
     }
 
     /**

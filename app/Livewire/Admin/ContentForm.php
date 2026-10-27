@@ -7,10 +7,12 @@ namespace App\Livewire\Admin;
 use App\Constants\AdminUx;
 use App\Constants\ContentStatus;
 use App\Constants\ContentTypes;
+use App\Constants\Locales;
 use App\Constants\Placeholders;
 use App\Constants\RevisionKind;
 use App\Exceptions\ImagesNotReadyException;
 use App\Http\Requests\Admin\ContentRequest;
+use App\Livewire\Admin\Concerns\EditsTranslations;
 use App\Livewire\Admin\Concerns\NotifiesEditors;
 use App\Models\Revision;
 use App\Services\AbstractContentService;
@@ -32,12 +34,16 @@ use Livewire\Component;
  * $form; validation rules, messages and attribute names come from the type's
  * Form Request so they are defined once. Fields validate as they are left
  * (inline messages), and the whole form on save.
+ * Translatable columns are edited in English and Arabic (EditsTranslations).
  */
 abstract class ContentForm extends Component
 {
-    use AuthorizesRequests, NotifiesEditors;
+    use AuthorizesRequests, EditsTranslations, NotifiesEditors;
 
     public const string FIELD_PREFIX = 'form.';
+
+    /** Key of $form holding the other languages' text: $form['translations']['ar']['title']. */
+    public const string TRANSLATIONS = 'translations';
 
     public ?int $recordId = null;
 
@@ -76,7 +82,7 @@ abstract class ContentForm extends Component
 
         if ($record === null) {
             $this->authorize('create', $modelClass);
-            $this->form = $this->defaults();
+            $this->form = $this->withTranslationDefaults($this->defaults());
 
             return;
         }
@@ -104,6 +110,12 @@ abstract class ContentForm extends Component
 
         foreach ($this->request()->rules() as $field => $fieldRules) {
             $rules[self::FIELD_PREFIX.$field] = array_map(fn ($rule) => $this->prefixRuleReference($rule), $fieldRules);
+
+            if ($this->isTranslatableKey($field)) {
+                foreach (Locales::prefixed() as $locale) {
+                    $rules[$this->translationKey($locale, $field)] = $this->translationRules($fieldRules);
+                }
+            }
         }
 
         return $rules;
@@ -140,6 +152,12 @@ abstract class ContentForm extends Component
 
         foreach ($this->request()->messages() as $key => $message) {
             $messages[str_starts_with($key, '*.') ? $key : self::FIELD_PREFIX.$key] = $message;
+
+            if (! str_starts_with($key, '*.') && $this->isTranslatableKey($key)) {
+                foreach (Locales::prefixed() as $locale) {
+                    $messages[$this->translationKey($locale, $key)] = $message;
+                }
+            }
         }
 
         return $messages;
@@ -152,12 +170,22 @@ abstract class ContentForm extends Component
     {
         $attributes = [];
 
+        $labels = [];
+
         foreach (array_keys($this->request()->rules()) as $field) {
-            $attributes[self::FIELD_PREFIX.$field] = Str::of($field)->replace(['.*.', '.*', '_'], [' ', '', ' '])->lower()->toString();
+            $labels[$field] = Str::of($field)->replace(['.*.', '.*', '_'], [' ', '', ' '])->lower()->toString();
         }
 
-        foreach ($this->request()->attributes() as $field => $label) {
-            $attributes[self::FIELD_PREFIX.$field] = $label;
+        $labels = array_replace($labels, $this->request()->attributes());
+
+        foreach ($labels as $field => $label) {
+            $attributes[self::FIELD_PREFIX.$field] = __($label);
+
+            if ($this->isTranslatableKey($field)) {
+                foreach (Locales::prefixed() as $locale) {
+                    $attributes[$this->translationKey($locale, $field)] = __(':field (Arabic)', ['field' => __($label)]);
+                }
+            }
         }
 
         return $attributes;
@@ -209,7 +237,7 @@ abstract class ContentForm extends Component
         $record = $this->record();
 
         if ($record !== null && $record->getAttribute('status') === ContentStatus::Published) {
-            $this->dispatch(AdminUx::EVENT_SAVED, autosave: false, blocked: 'Published: press Update to put changes live');
+            $this->dispatch(AdminUx::EVENT_SAVED, autosave: false, blocked: __('Published: press Update to put changes live'));
 
             return;
         }
@@ -217,12 +245,12 @@ abstract class ContentForm extends Component
         $validator = Validator::make(['form' => $this->form], $this->rules(), $this->messages(), $this->validationAttributes());
 
         if ($validator->fails()) {
-            $this->dispatch(AdminUx::EVENT_SAVED, blocked: 'Not saved yet: '.rtrim((string) $validator->errors()->first(), '.'));
+            $this->dispatch(AdminUx::EVENT_SAVED, blocked: __('Not saved yet: :reason', ['reason' => rtrim((string) $validator->errors()->first(), '.')]));
 
             return;
         }
 
-        $data = $this->transform($validator->validated()['form'] ?? []);
+        $data = $this->dataFrom($validator->validated()['form'] ?? []);
         $data['status'] = ContentStatus::Draft->value;
 
         try {
@@ -261,11 +289,24 @@ abstract class ContentForm extends Component
         }
 
         $this->form = array_replace($this->form, array_intersect_key($data, $this->defaults()));
+
+        // Versions saved before the record had translations leave the current ones as they are.
+        foreach (Locales::prefixed() as $locale) {
+            $translated = $data[self::TRANSLATIONS][$locale] ?? null;
+
+            if (is_array($translated)) {
+                $this->form[self::TRANSLATIONS][$locale] = array_replace(
+                    $this->form[self::TRANSLATIONS][$locale] ?? [],
+                    array_intersect_key($translated, array_flip($this->translatableFields())),
+                );
+            }
+        }
+
         $this->restoredRevision = true;
         $this->showHistory = false;
         $this->resetErrorBag();
         $this->dispatch(AdminUx::EVENT_CHANGED);
-        $this->toast('Earlier version loaded into the form. Save to keep it, or leave without saving to discard it.', AdminUx::TOAST_INFO);
+        $this->toast(__('Earlier version loaded into the form. Save to keep it, or leave without saving to discard it.'), AdminUx::TOAST_INFO);
     }
 
     public function toggleHistory(): void
@@ -288,7 +329,7 @@ abstract class ContentForm extends Component
             $validated = $this->validate()['form'] ?? [];
         } catch (ValidationException $exception) {
             $this->form['status'] = $previousStatus;
-            $this->toast('Not saved: some fields need attention. They are listed at the top of the form.', AdminUx::TOAST_ERROR);
+            $this->toast(__('Not saved: some fields need attention. They are listed at the top of the form.'), AdminUx::TOAST_ERROR);
 
             throw $exception;
         }
@@ -297,7 +338,7 @@ abstract class ContentForm extends Component
         $wasPublished = $this->record()?->getAttribute('status') === ContentStatus::Published;
 
         try {
-            $record = $this->store($this->transform($validated));
+            $record = $this->store($this->dataFrom($validated));
         } catch (ImagesNotReadyException $exception) {
             $this->form['status'] = $previousStatus;
             $this->addError(self::FIELD_PREFIX.'status', $exception->getMessage());
@@ -315,10 +356,10 @@ abstract class ContentForm extends Component
         $this->restoredRevision = false;
 
         $message = match (true) {
-            $isPublished && ! $wasPublished => sprintf('%s published. It is on the public site now.', $this->singular()),
-            ! $isPublished && $wasPublished => sprintf('%s moved back to draft. Visitors no longer see it.', $this->singular()),
+            $isPublished && ! $wasPublished => __(':type published. It is on the public site now.', ['type' => __($this->singular())]),
+            ! $isPublished && $wasPublished => __(':type moved back to draft. Visitors no longer see it.', ['type' => __($this->singular())]),
             $isNew => $this->createdMessage(),
-            default => sprintf('%s saved.', $this->singular()),
+            default => __(':type saved.', ['type' => __($this->singular())]),
         };
 
         if ($isNew && $this->redirectsAfterCreate()) {
@@ -358,7 +399,7 @@ abstract class ContentForm extends Component
 
     protected function createdMessage(): string
     {
-        return sprintf('%s created.', $this->singular());
+        return __(':type created.', ['type' => __($this->singular())]);
     }
 
     /**
@@ -398,7 +439,10 @@ abstract class ContentForm extends Component
      */
     public function placeholderFields(): array
     {
-        return array_keys(array_filter($this->form, fn ($value): bool => Placeholders::contains($value)));
+        return array_keys(array_filter(
+            array_diff_key($this->form, [self::TRANSLATIONS => true]),
+            fn ($value): bool => Placeholders::contains($value),
+        ));
     }
 
     public function publicUrl(): ?string
@@ -435,8 +479,8 @@ abstract class ContentForm extends Component
             'statusOptions' => ContentStatus::labels(),
             'editor' => $this->editorState($record),
         ])->layout('components.layouts.admin', [
-            'title' => ($record === null ? 'New ' : 'Edit ').strtolower($type['singular']),
-            'crumb' => $record === null ? 'New '.strtolower($type['singular']) : $this->recordLabel($record),
+            'title' => __($record === null ? 'New :type' : 'Edit :type', ['type' => mb_strtolower(__($type['singular']))]),
+            'crumb' => $record === null ? __('New :type', ['type' => mb_strtolower(__($type['singular']))]) : $this->recordLabel($record),
         ]);
     }
 
@@ -457,7 +501,7 @@ abstract class ContentForm extends Component
             'revisions' => $record !== null && $this->showHistory ? app(RevisionService::class)->history($record) : collect(),
             'revisionCount' => $record === null ? 0 : app(RevisionService::class)->count($record),
             'placeholders' => $this->placeholderFields(),
-            'singular' => strtolower(ContentTypes::get($this->type())['singular']),
+            'singular' => mb_strtolower(__(ContentTypes::get($this->type())['singular'])),
         ];
     }
 
@@ -465,7 +509,7 @@ abstract class ContentForm extends Component
     {
         $label = $record->getAttribute('title') ?? $record->getAttribute('name') ?? $record->getAttribute('quote');
 
-        return $label === null ? ContentTypes::get($this->type())['singular'] : Str::limit(strip_tags((string) $label), 60);
+        return $label === null ? __(ContentTypes::get($this->type())['singular']) : Str::limit(strip_tags((string) $label), 60);
     }
 
     /** Blade view of the concrete form. */
@@ -519,7 +563,16 @@ abstract class ContentForm extends Component
     {
         $form = [];
 
-        foreach (array_keys($this->defaults()) as $field) {
+        $translatable = $this->translatableFields();
+
+        foreach ($this->defaults() as $field => $default) {
+            if (in_array($field, $translatable, true)) {
+                // Explicitly English: reading the attribute would follow the editor's language.
+                $form[$field] = $this->translationOf($record, $field, Locales::DEFAULT, $default);
+
+                continue;
+            }
+
             $value = $record->getAttribute($field);
 
             $form[$field] = match (true) {
@@ -527,6 +580,12 @@ abstract class ContentForm extends Component
                 $value instanceof CarbonInterface => $value->format('Y-m-d'),
                 default => $value,
             };
+        }
+
+        foreach (Locales::prefixed() as $locale) {
+            foreach ($translatable as $field) {
+                $form[self::TRANSLATIONS][$locale][$field] = $this->translationOf($record, $field, $locale, $this->defaults()[$field]);
+            }
         }
 
         return $form;
@@ -541,8 +600,11 @@ abstract class ContentForm extends Component
         return ContentTypes::get($this->type())['singular'];
     }
 
+    /**
+     * A success toast; plain English messages are translated here.
+     */
     protected function notify(string $message): void
     {
-        $this->toast($message);
+        $this->toast(__($message));
     }
 }

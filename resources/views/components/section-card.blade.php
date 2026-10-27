@@ -24,5 +24,5 @@
     @if (filled($card['summary']))
         <span class="section-card__summary" id="{{ $id }}-summary">{{ $card['summary'] }}</span>
     @endif
-    <span class="section-card__action"><span id="{{ $id }}-action">{{ SectionCards::ACTION }}</span> <span class="section-card__arrow" aria-hidden="true">{{ SectionCards::ARROW }}</span></span>
+    <span class="section-card__action"><span id="{{ $id }}-action">{{ __(SectionCards::ACTION) }}</span> <span class="section-card__arrow rtl-mirror" aria-hidden="true">{{ SectionCards::ARROW }}</span></span>
 </a>

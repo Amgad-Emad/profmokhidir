@@ -75,7 +75,8 @@ final class AuthScreens
     public const string AUTOCOMPLETE_ONE_TIME_CODE = 'one-time-code';
 
     /**
-     * Screen key => title (also the <title>), intro, primary action and its loading label.
+     * Screen key => title (also the <title>), intro, primary action and its loading label,
+     * in the current language (the English source is the translation key).
      *
      * @return array<string, array{title: string, intro: string, action: string, busy: string}>
      */
@@ -83,46 +84,46 @@ final class AuthScreens
     {
         return [
             self::LOGIN => [
-                'title' => 'Sign in',
-                'intro' => 'Members of the Scientific Community and the editorial staff sign in here.',
-                'action' => 'Sign in',
-                'busy' => 'Signing in…',
+                'title' => __('Sign in'),
+                'intro' => __('Members of the Scientific Community and the editorial staff sign in here.'),
+                'action' => __('Sign in'),
+                'busy' => __('Signing in…'),
             ],
             self::FORGOT_PASSWORD => [
-                'title' => 'Reset your password',
-                'intro' => 'Enter your email address and we will send you a link to choose a new password.',
-                'action' => 'Email me a reset link',
-                'busy' => 'Sending…',
+                'title' => __('Reset your password'),
+                'intro' => __('Enter your email address and we will send you a link to choose a new password.'),
+                'action' => __('Email me a reset link'),
+                'busy' => __('Sending…'),
             ],
             self::RESET_PASSWORD => [
-                'title' => 'Choose a new password',
-                'intro' => 'Choose a password you use nowhere else.',
-                'action' => 'Save password',
-                'busy' => 'Saving…',
+                'title' => __('Choose a new password'),
+                'intro' => __('Choose a password you use nowhere else.'),
+                'action' => __('Save password'),
+                'busy' => __('Saving…'),
             ],
             self::VERIFY_EMAIL => [
-                'title' => 'Verify your email',
-                'intro' => 'Before continuing, please confirm your email address using the link we sent you. Did not receive it? We can send another.',
-                'action' => 'Resend verification email',
-                'busy' => 'Sending…',
+                'title' => __('Verify your email'),
+                'intro' => __('Before continuing, please confirm your email address using the link we sent you. Did not receive it? We can send another.'),
+                'action' => __('Resend verification email'),
+                'busy' => __('Sending…'),
             ],
             self::CONFIRM_PASSWORD => [
-                'title' => 'Confirm your password',
-                'intro' => 'This is a secure area. Please confirm your password before continuing.',
-                'action' => 'Confirm',
-                'busy' => 'Confirming…',
+                'title' => __('Confirm your password'),
+                'intro' => __('This is a secure area. Please confirm your password before continuing.'),
+                'action' => __('Confirm'),
+                'busy' => __('Confirming…'),
             ],
             self::TWO_FACTOR => [
-                'title' => 'Two-factor authentication',
-                'intro' => 'Enter the six-digit code from your authenticator app.',
-                'action' => 'Continue',
-                'busy' => 'Checking…',
+                'title' => __('Two-factor authentication'),
+                'intro' => __('Enter the six-digit code from your authenticator app.'),
+                'action' => __('Continue'),
+                'busy' => __('Checking…'),
             ],
             self::COMMUNITY_SIGNUP => [
-                'title' => 'Apply to join',
-                'intro' => 'Tell us a little about yourself. An administrator reviews every application.',
-                'action' => 'Apply to join',
-                'busy' => 'Sending your application…',
+                'title' => __('Apply to join'),
+                'intro' => __('Tell us a little about yourself. An administrator reviews every application.'),
+                'action' => __('Apply to join'),
+                'busy' => __('Sending your application…'),
             ],
         ];
     }
@@ -158,10 +159,10 @@ final class AuthScreens
     public static function passwordStrengthLevels(): array
     {
         return [
-            ['key' => 'short', 'from' => 0, 'label' => 'Too short'],
-            ['key' => 'fair', 'from' => self::PASSWORD_MIN_LENGTH, 'label' => 'Fair'],
-            ['key' => 'good', 'from' => self::PASSWORD_GOOD_LENGTH, 'label' => 'Good'],
-            ['key' => 'strong', 'from' => self::PASSWORD_STRONG_LENGTH, 'label' => 'Strong'],
+            ['key' => 'short', 'from' => 0, 'label' => __('Too short')],
+            ['key' => 'fair', 'from' => self::PASSWORD_MIN_LENGTH, 'label' => __('Fair')],
+            ['key' => 'good', 'from' => self::PASSWORD_GOOD_LENGTH, 'label' => __('Good')],
+            ['key' => 'strong', 'from' => self::PASSWORD_STRONG_LENGTH, 'label' => __('Strong')],
         ];
     }
 

@@ -1,10 +1,12 @@
 <?php
 
 use App\Constants\Analytics;
+use App\Constants\Locales;
 use App\Constants\ThemeSettings;
 use App\Http\Middleware\EnablePreview;
 use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\EnsureCommunityMember;
+use App\Http\Middleware\SetLocale;
 use App\Http\Responses\LoginResponse;
 use App\Services\AuthenticationService;
 use Illuminate\Foundation\Application;
@@ -32,13 +34,19 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         // The theme cookie stays plain so the inline head script can read it before the first paint.
-        $middleware->encryptCookies(except: [ThemeSettings::COOKIE]);
+        // So is the language choice, which the switcher and the Arabic suggestion read too.
+        $middleware->encryptCookies(except: [ThemeSettings::COOKIE, Locales::COOKIE, Locales::SUGGESTION_COOKIE]);
 
         // Analytics beacons come from sendBeacon, which cannot carry a CSRF token; they change nothing a visitor owns.
         $middleware->validateCsrfTokens(except: [ltrim(Analytics::COLLECT_PATH, '/')]);
 
         // Signed preview links show a draft on its public page; global so it runs before any page service is built.
         $middleware->prepend(EnablePreview::class);
+
+        // The language: first by the address prefix (so a 404 under /ar is in Arabic), then, once a
+        // route has matched, by the route itself or the saved choice (App\Services\LocaleService).
+        $middleware->prepend(SetLocale::class.':'.SetLocale::PATH_MODE);
+        $middleware->web(append: [SetLocale::class]);
 
         // Deactivated accounts are signed out on their next request, whatever the page.
         $middleware->web(append: [EnsureAccountIsActive::class]);

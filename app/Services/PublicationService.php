@@ -140,7 +140,7 @@ class PublicationService extends AbstractContentService
             $data['doi'] = preg_replace('#^https?://(dx\.)?doi\.org/#i', '', trim($data['doi']));
         }
 
-        return $this->withUniqueSlug($data, $existing);
+        return $this->withEnglishSlug($data, $existing);
     }
 
     private function publications(): PublicationRepositoryInterface

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Admin;
 
+use App\Constants\Locales;
 use App\Constants\MediaProperties;
 use App\Constants\MediaTreatment;
 use Illuminate\Validation\Rules\Enum;
@@ -37,7 +38,27 @@ class ImageDetailsRequest extends ContentRequest
             MediaProperties::TREATMENT => ['required', new Enum(MediaTreatment::class)],
             MediaProperties::CREDIT => ['nullable', 'string', 'max:255'],
             MediaProperties::PERMISSIONS_NOTE => ['nullable', 'string', 'max:500'],
-        ];
+        ] + self::translationRules();
+    }
+
+    /**
+     * The Arabic alt text, caption and place: always optional (left empty,
+     * Arabic pages show the English), with the English limits.
+     *
+     * @return array<string, list<string>>
+     */
+    public static function translationRules(): array
+    {
+        $rules = [];
+        $limits = [MediaProperties::ALT_TEXT => 255, MediaProperties::CAPTION => 500, MediaProperties::PLACE => 120];
+
+        foreach (Locales::prefixed() as $locale) {
+            foreach ($limits as $property => $max) {
+                $rules[MediaProperties::translationPath($locale, $property)] = ['nullable', 'string', 'max:'.$max];
+            }
+        }
+
+        return $rules;
     }
 
     /**
@@ -54,11 +75,11 @@ class ImageDetailsRequest extends ContentRequest
     public static function detailMessages(): array
     {
         return [
-            MediaProperties::ALT_TEXT.'.required' => 'Describe the image for people who cannot see it.',
-            MediaProperties::CAPTION.'.required' => 'Add a caption before publishing.',
-            MediaProperties::PLACE.'.required' => 'Add the place before publishing.',
-            MediaProperties::YEAR.'.required' => 'Add the year before publishing.',
-            MediaProperties::TREATMENT.'.Illuminate\Validation\Rules\Enum' => 'Choose the portrait or archive treatment.',
+            MediaProperties::ALT_TEXT.'.required' => __('Describe the image for people who cannot see it.'),
+            MediaProperties::CAPTION.'.required' => __('Add a caption before publishing.'),
+            MediaProperties::PLACE.'.required' => __('Add the place before publishing.'),
+            MediaProperties::YEAR.'.required' => __('Add the year before publishing.'),
+            MediaProperties::TREATMENT.'.Illuminate\Validation\Rules\Enum' => __('Choose the portrait or archive treatment.'),
         ];
     }
 
@@ -75,9 +96,17 @@ class ImageDetailsRequest extends ContentRequest
      */
     public static function detailAttributes(): array
     {
-        return [
-            MediaProperties::ALT_TEXT => 'alt text',
-            MediaProperties::PERMISSIONS_NOTE => 'permissions note',
+        $attributes = [
+            MediaProperties::ALT_TEXT => __('alt text'),
+            MediaProperties::PERMISSIONS_NOTE => __('permissions note'),
         ];
+
+        foreach (Locales::prefixed() as $locale) {
+            foreach ([MediaProperties::ALT_TEXT => __('alt text'), MediaProperties::CAPTION => __('caption'), MediaProperties::PLACE => __('place')] as $property => $label) {
+                $attributes[MediaProperties::translationPath($locale, $property)] = __(':field (Arabic)', ['field' => $label]);
+            }
+        }
+
+        return $attributes;
     }
 }

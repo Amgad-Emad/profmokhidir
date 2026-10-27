@@ -13,37 +13,37 @@
 @php
     $published = $editor['status'] === ContentStatus::Published;
 @endphp
-<div class="save-bar" role="region" aria-label="Save" data-save-bar>
+<div class="save-bar" role="region" aria-label="{{ __('Save') }}" data-save-bar>
     <div class="save-bar__state">
         <x-admin.status-badge :tone="StatusTone::forContent($editor['status'])" :label="$editor['status']->label()" data-save-status />
-        <p class="save-bar__note" aria-live="polite" x-text="stateLabel" x-bind:data-tone="stateTone" data-save-note>{{ $editor['savedAt'] ? 'Saved' : 'Not saved yet' }}</p>
+        <p class="save-bar__note" aria-live="polite" x-text="stateLabel" x-bind:data-tone="stateTone" data-save-note>{{ $editor['savedAt'] ? __('Saved') : __('Not saved yet') }}</p>
     </div>
     <div class="save-bar__actions">
         @if ($editor['revisionCount'] > 0)
             <x-button variant="quiet" size="sm" type="button" wire:click="toggleHistory" aria-haspopup="dialog" data-history-open>
-                <x-icon name="history" class="size-4" />History
+                <x-icon name="history" class="size-4" />{{ __('History') }}
             </x-button>
         @endif
         @if ($editor['previewUrl'])
             <a href="{{ $editor['previewUrl'] }}" target="_blank" rel="noopener" class="save-bar__link" x-on:click="preview($event)" data-preview>
-                <x-icon name="eye" class="size-4" />Preview<span class="sr-only"> (opens the public page in a new tab)</span>
+                <x-icon name="eye" class="size-4" />{{ __('Preview') }}<span class="sr-only"> {{ __('(opens the public page in a new tab)') }}</span>
             </a>
         @endif
         @if ($published && $editor['publicUrl'])
             <a href="{{ $editor['publicUrl'] }}" target="_blank" rel="noopener" class="save-bar__link" data-view-on-site>
-                <x-icon name="external" class="size-4" />View on site<span class="sr-only"> (opens in a new tab)</span>
+                <x-icon name="external" class="size-4" />{{ __('View on site') }}<span class="sr-only"> {{ __('(opens in a new tab)') }}</span>
             </a>
         @endif
         @if ($published && $draftable)
-            <x-button variant="quiet" size="sm" type="button" wire:click="unpublish" wire:loading.attr="disabled" data-unpublish>Unpublish</x-button>
-            <x-button type="button" wire:click="save" wire:loading.attr="disabled" data-shortcut="save" data-save>{{ $saveLabel ?? 'Save draft' }}</x-button>
-            <x-button type="button" variant="primary" wire:click="publish" wire:loading.attr="disabled" data-shortcut="publish" data-publish>{{ $publishLabel ?? 'Update' }}</x-button>
+            <x-button variant="quiet" size="sm" type="button" wire:click="unpublish" wire:loading.attr="disabled" data-unpublish>{{ __('Unpublish') }}</x-button>
+            <x-button type="button" wire:click="save" wire:loading.attr="disabled" data-shortcut="save" data-save>{{ $saveLabel ?? __('Save draft') }}</x-button>
+            <x-button type="button" variant="primary" wire:click="publish" wire:loading.attr="disabled" data-shortcut="publish" data-publish>{{ $publishLabel ?? __('Update') }}</x-button>
         @elseif ($published)
-            <x-button variant="quiet" size="sm" type="button" wire:click="unpublish" wire:loading.attr="disabled" data-unpublish>Unpublish</x-button>
-            <x-button type="button" variant="primary" wire:click="publish" wire:loading.attr="disabled" data-shortcut="save publish" data-save>{{ $saveLabel ?? 'Update' }}</x-button>
+            <x-button variant="quiet" size="sm" type="button" wire:click="unpublish" wire:loading.attr="disabled" data-unpublish>{{ __('Unpublish') }}</x-button>
+            <x-button type="button" variant="primary" wire:click="publish" wire:loading.attr="disabled" data-shortcut="save publish" data-save>{{ $saveLabel ?? __('Update') }}</x-button>
         @else
-            <x-button type="button" wire:click="save" wire:loading.attr="disabled" data-shortcut="save" data-save>{{ $saveLabel ?? 'Save draft' }}</x-button>
-            <x-button type="button" variant="primary" wire:click="publish" wire:loading.attr="disabled" data-shortcut="publish" data-publish>Publish</x-button>
+            <x-button type="button" wire:click="save" wire:loading.attr="disabled" data-shortcut="save" data-save>{{ $saveLabel ?? __('Save draft') }}</x-button>
+            <x-button type="button" variant="primary" wire:click="publish" wire:loading.attr="disabled" data-shortcut="publish" data-publish>{{ __('Publish') }}</x-button>
         @endif
     </div>
 </div>

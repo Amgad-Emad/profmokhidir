@@ -7,6 +7,7 @@ namespace App\Livewire\Admin\Pages;
 use App\Constants\AdminUx;
 use App\Constants\ContentStatus;
 use App\Constants\ErrorPages;
+use App\Constants\Locales;
 use App\Constants\PageBlocks;
 use App\Constants\PageBlockType;
 use App\Constants\PageLinks;
@@ -48,11 +49,20 @@ class Edit extends Component
 
     public const string FIELD_PREFIX = 'form.';
 
+    /** The Arabic tab's fields: arabic.<block key>... */
+    public const string ARABIC_PREFIX = 'arabic.';
+
+    /** Revisions keep the Arabic tab under this key beside the blocks. */
+    public const string REVISION_TRANSLATIONS = 'translations';
+
     #[Locked]
     public string $pageKey;
 
     /** @var array<string, mixed> block key => value, as PageBlockValue shapes it */
     public array $form = [];
+
+    /** @var array<string, mixed> block key => its Arabic words (PageBlockValue::arabicForm) */
+    public array $arabic = [];
 
     /** @var array<string, UploadedFile|null> image block key => the file being uploaded */
     public array $uploads = [];
@@ -76,6 +86,7 @@ class Edit extends Component
         $this->authorize('update', $record);
         $this->pageKey = $page;
         $this->form = $this->pages()->formValues($record);
+        $this->arabic = $this->pages()->arabicFormValues($record, $this->form);
     }
 
     public function record(): Page
@@ -95,6 +106,10 @@ class Edit extends Component
                 fn ($rule) => is_string($rule) && str_starts_with($rule, 'required_with:') ? 'required_with:'.self::FIELD_PREFIX.substr($rule, 14) : $rule,
                 $fieldRules,
             );
+        }
+
+        foreach ($this->request()->arabicRules() as $field => $fieldRules) {
+            $rules[self::ARABIC_PREFIX.$field] = $fieldRules;
         }
 
         return $rules;
@@ -125,6 +140,10 @@ class Edit extends Component
             $attributes[self::FIELD_PREFIX.$field] = $label;
         }
 
+        foreach ($this->request()->arabicAttributes() as $field => $label) {
+            $attributes[self::ARABIC_PREFIX.$field] = $label;
+        }
+
         return $attributes;
     }
 
@@ -133,7 +152,7 @@ class Edit extends Component
      */
     public function updated(string $name): void
     {
-        if (str_starts_with($name, self::FIELD_PREFIX)) {
+        if (str_starts_with($name, self::FIELD_PREFIX) || str_starts_with($name, self::ARABIC_PREFIX)) {
             $this->validateOnly($name);
         }
 
@@ -150,11 +169,11 @@ class Edit extends Component
         $this->authorize('update', $this->record());
         $this->validateForm();
 
-        $page = $this->pages()->saveDraft($this->record(), $this->form);
+        $page = $this->pages()->saveDraft($this->record(), $this->form, $this->arabic);
         $this->afterSave($page, $this->restoredRevision ? RevisionKind::Restore : RevisionKind::Save);
         $this->toast($page->isPublished()
-            ? 'Draft saved. Visitors still see the published wording until you publish the changes.'
-            : 'Draft saved. Visitors see the original wording until the page is published.');
+            ? __('Draft saved. Visitors still see the published wording until you publish the changes.')
+            : __('Draft saved. Visitors see the original wording until the page is published.'));
     }
 
     /**
@@ -167,9 +186,9 @@ class Edit extends Component
         $this->validateForm();
 
         $wasPublished = $record->isPublished();
-        $page = $this->pages()->publish($record, $this->form, auth()->user());
+        $page = $this->pages()->publish($record, $this->form, auth()->user(), $this->arabic);
         $this->afterSave($page, RevisionKind::Publish);
-        $this->toast($wasPublished ? 'Changes published. They are on the public site now.' : 'Page published. Visitors see these words now.');
+        $this->toast($wasPublished ? __('Changes published. They are on the public site now.') : __('Page published. Visitors see these words now.'));
     }
 
     /**
@@ -182,7 +201,7 @@ class Edit extends Component
 
         $this->pages()->unpublish($record, auth()->user());
         $this->dispatch(AdminUx::EVENT_SAVED, at: now()->toIso8601String());
-        $this->toast('Page moved back to draft. Visitors see the original wording.');
+        $this->toast(__('Page moved back to draft. Visitors see the original wording.'));
     }
 
     /**
@@ -193,15 +212,15 @@ class Edit extends Component
     public function autosave(): void
     {
         $this->authorize('update', $this->record());
-        $validator = Validator::make(['form' => $this->form], $this->rules(), $this->messages(), $this->validationAttributes());
+        $validator = Validator::make(['form' => $this->form, 'arabic' => $this->arabic], $this->rules(), $this->messages(), $this->validationAttributes());
 
         if ($validator->fails()) {
-            $this->dispatch(AdminUx::EVENT_SAVED, blocked: 'Not saved yet: '.rtrim((string) $validator->errors()->first(), '.'));
+            $this->dispatch(AdminUx::EVENT_SAVED, blocked: __('Not saved yet: :reason', ['reason' => rtrim((string) $validator->errors()->first(), '.')]));
 
             return;
         }
 
-        $page = $this->pages()->saveDraft($this->record(), $this->form);
+        $page = $this->pages()->saveDraft($this->record(), $this->form, $this->arabic);
         $this->afterSave($page, RevisionKind::Autosave);
     }
 
@@ -215,9 +234,10 @@ class Edit extends Component
 
         $this->pages()->discardDraft($record);
         $this->form = $this->pages()->formValues($record);
+        $this->arabic = $this->pages()->arabicFormValues($record, $this->form);
         $this->resetErrorBag();
         $this->dispatch(AdminUx::EVENT_SAVED, at: now()->toIso8601String());
-        $this->toast('Unpublished changes discarded. The form shows the published wording.', AdminUx::TOAST_INFO);
+        $this->toast(__('Unpublished changes discarded. The form shows the published wording.'), AdminUx::TOAST_INFO);
     }
 
     /**
@@ -226,8 +246,12 @@ class Edit extends Component
     public function restoreDefault(string $key): void
     {
         if (PageBlocks::has($this->pageKey, $key)) {
-            $this->form[$key] = PageBlockValue::normalise(PageBlocks::get($this->pageKey, $key), null);
+            $definition = PageBlocks::get($this->pageKey, $key);
+            $this->form[$key] = PageBlockValue::normalise($definition, null);
+            // The Arabic tab empties too, so Arabic pages show the original wording in Arabic.
+            $this->arabic[$key] = PageBlockValue::arabicForm($definition, null, $this->form[$key]);
             $this->resetErrorBag(self::FIELD_PREFIX.$key);
+            $this->resetErrorBag(self::ARABIC_PREFIX.$key);
             $this->dispatch(AdminUx::EVENT_CHANGED);
         }
     }
@@ -249,6 +273,7 @@ class Edit extends Component
         }
 
         $this->form[$key][] = $item;
+        $this->arabic[$key] = PageBlockValue::arabicForm($definition, $this->arabic[$key] ?? [], $this->form[$key]);
         $this->dispatch(AdminUx::EVENT_CHANGED);
     }
 
@@ -260,8 +285,9 @@ class Edit extends Component
             return;
         }
 
-        unset($this->form[$key][$index]);
+        unset($this->form[$key][$index], $this->arabic[$key][$index]);
         $this->form[$key] = array_values($this->form[$key]);
+        $this->arabic[$key] = array_values((array) ($this->arabic[$key] ?? []));
         $this->resetErrorBag();
         $this->dispatch(AdminUx::EVENT_CHANGED);
     }
@@ -279,6 +305,10 @@ class Edit extends Component
         }
 
         [$this->form[$key][$index], $this->form[$key][$target]] = [$this->form[$key][$target], $this->form[$key][$index]];
+
+        if (isset($this->arabic[$key][$index], $this->arabic[$key][$target])) {
+            [$this->arabic[$key][$index], $this->arabic[$key][$target]] = [$this->arabic[$key][$target], $this->arabic[$key][$index]];
+        }
         $this->dispatch(AdminUx::EVENT_CHANGED);
     }
 
@@ -316,9 +346,12 @@ class Edit extends Component
             return;
         }
 
+        $arabic = $data[self::REVISION_TRANSLATIONS][Locales::AR] ?? [];
+
         foreach (PageBlocks::for($this->pageKey) as $key => $definition) {
             if (array_key_exists($key, $data)) {
                 $this->form[$key] = PageBlockValue::normalise($definition, $data[$key]);
+                $this->arabic[$key] = PageBlockValue::arabicForm($definition, $this->arabicStored($definition, $arabic[$key] ?? null), $this->form[$key]);
             }
         }
 
@@ -326,7 +359,7 @@ class Edit extends Component
         $this->showHistory = false;
         $this->resetErrorBag();
         $this->dispatch(AdminUx::EVENT_CHANGED);
-        $this->toast('Earlier version loaded into the form. Save to keep it, or leave without saving to discard it.', AdminUx::TOAST_INFO);
+        $this->toast(__('Earlier version loaded into the form. Save to keep it, or leave without saving to discard it.'), AdminUx::TOAST_INFO);
     }
 
     public function toggleHistory(): void
@@ -349,10 +382,10 @@ class Edit extends Component
             'hasDraft' => $this->pages()->hasDraft($record),
             'editor' => $this->editorState($record),
             'previewUrls' => $this->previewUrls($record),
-            'imageHint' => implode(', ', array_map('strtoupper', Uploads::IMAGE_EXTENSIONS)).', up to '.Uploads::imageMaxLabel().'.',
+            'imageHint' => __(':types, up to :size.', ['types' => implode(', ', array_map('strtoupper', Uploads::IMAGE_EXTENSIONS)), 'size' => Uploads::imageMaxLabel()]),
         ])->layout('components.layouts.admin', [
-            'title' => 'Edit page: '.$definition['title'],
-            'crumb' => $definition['title'],
+            'title' => __('Edit page: :page', ['page' => __($definition['title'])]),
+            'crumb' => __($definition['title']),
         ]);
     }
 
@@ -396,7 +429,7 @@ class Edit extends Component
             'revisions' => $this->showHistory ? $revisions->history($page) : collect(),
             'revisionCount' => $revisions->count($page),
             'placeholders' => [],
-            'singular' => 'page',
+            'singular' => __('page'),
         ];
     }
 
@@ -443,7 +476,7 @@ class Edit extends Component
         try {
             $this->validate();
         } catch (ValidationException $exception) {
-            $this->toast('Not saved: some fields need attention. They are listed at the top of the form.', AdminUx::TOAST_ERROR);
+            $this->toast(__('Not saved: some fields need attention. They are listed at the top of the form.'), AdminUx::TOAST_ERROR);
 
             throw $exception;
         }
@@ -452,9 +485,27 @@ class Edit extends Component
     private function afterSave(Page $page, RevisionKind $kind): void
     {
         $this->form = $this->pages()->formValues($page);
-        app(RevisionService::class)->record($page, $this->form, $kind, auth()->user());
+        $this->arabic = $this->pages()->arabicFormValues($page, $this->form);
+        app(RevisionService::class)->record($page, [...$this->form, self::REVISION_TRANSLATIONS => [Locales::AR => $this->arabic]], $kind, auth()->user());
         $this->restoredRevision = false;
         $this->dispatch(AdminUx::EVENT_SAVED, at: $page->updated_at?->toIso8601String(), autosave: true);
+    }
+
+    /**
+     * A revision keeps the Arabic tab as it was typed; lists are read back by position.
+     */
+    private function arabicStored(PageBlockDefinition $definition, mixed $form): mixed
+    {
+        if ($definition->type !== PageBlockType::List || ! is_array($form) || ! $definition->fixedItems) {
+            return $form;
+        }
+
+        // Fixed lists are matched by key: give each typed item its English item's key.
+        return array_map(
+            fn (mixed $item, int $index): array => [...(is_array($item) ? $item : []), 'key' => $this->form[$definition->key][$index]['key'] ?? null],
+            array_values($form),
+            array_keys(array_values($form)),
+        );
     }
 
     private function listDefinition(string $key): ?PageBlockDefinition

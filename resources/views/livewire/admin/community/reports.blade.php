@@ -2,21 +2,21 @@
 @use('App\Constants\StatusTone')
 @use('App\Livewire\Admin\Community\Reports')
 <div>
-    <x-admin.page-header eyebrow="Community" title="Chat reports" intro="Messages members have reported. Resolve a report, remove the message, or suspend its author; each action is recorded in the audit log." />
+    <x-admin.page-header :eyebrow="__('Community')" :title="__('Chat reports')" :intro="__('Messages members have reported. Resolve a report, remove the message, or suspend its author; each action is recorded in the audit log.')" />
 
     <div class="mt-8"><x-admin.flash /></div>
 
-    <div class="flex flex-wrap items-center gap-2 border-b border-rule" role="tablist" aria-label="Report state">
+    <div class="flex flex-wrap items-center gap-2 border-b border-rule" role="tablist" aria-label="{{ __('Report state') }}">
         <button type="button" role="tab" wire:click="showTab('{{ Reports::TAB_OPEN }}')" aria-selected="{{ $tab === Reports::TAB_OPEN ? 'true' : 'false' }}" class="admin-tab inline-flex items-center gap-2" data-tab="open">
-            <x-icon name="clock" class="size-4" />Open<span class="font-mono text-sm text-ink-muted">{{ $openCount }}</span>
+            <x-icon name="clock" class="size-4" />{{ __('Open') }}<span class="font-mono text-sm text-ink-muted">@num($openCount)</span>
         </button>
         <button type="button" role="tab" wire:click="showTab('{{ Reports::TAB_RESOLVED }}')" aria-selected="{{ $tab === Reports::TAB_RESOLVED ? 'true' : 'false' }}" class="admin-tab inline-flex items-center gap-2" data-tab="resolved">
-            <x-icon name="check" class="size-4" />Resolved
+            <x-icon name="check" class="size-4" />{{ __('Resolved') }}
         </button>
     </div>
 
     @if ($reports->isEmpty())
-        <x-empty-state :message="$tab === Reports::TAB_OPEN ? 'No reports are waiting.' : 'No reports have been resolved yet.'" />
+        <x-empty-state :message="$tab === Reports::TAB_OPEN ? __('No reports are waiting.') : __('No reports have been resolved yet.')" />
     @else
         <ul class="mt-6 space-y-4" data-reports>
             @foreach ($reports as $report)
@@ -25,27 +25,27 @@
                     <div class="flex flex-col gap-4 lg:flex-row lg:items-start">
                         <div class="min-w-0 flex-1">
                             <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm">
-                                <p class="font-medium text-ink">Reported by {{ $report->reporter?->name ?? 'a former member' }}</p>
-                                <time datetime="{{ $report->created_at->toIso8601String() }}" class="font-normal text-ink-muted">{{ $report->created_at->format(DateFormats::LONG) }}</time>
+                                <p class="font-medium text-ink">{{ __('Reported by :name', ['name' => $report->reporter?->name ?? __('a former member')]) }}</p>
+                                <time datetime="{{ $report->created_at->toIso8601String() }}" class="font-normal text-ink-muted">{{ $report->created_at->translatedFormat(DateFormats::LONG) }}</time>
                                 @if ($message?->channel)
-                                    <span class="font-normal text-ink-muted">in {{ $message->channel->name }}</span>
+                                    <span class="font-normal text-ink-muted">{{ __('in :channel', ['channel' => $message->channel->name]) }}</span>
                                 @endif
                             </div>
-                            <p class="mt-2 text-base font-normal text-ink" data-reason>{{ $report->reason ?: 'No reason given.' }}</p>
+                            <p class="mt-2 text-base font-normal text-ink" dir="auto" data-reason>{{ $report->reason ?: __('No reason given.') }}</p>
 
                             <div class="mt-4 rounded-card border border-rule bg-surface-sunken p-4">
-                                <p class="t-label text-accent-text">Message by {{ $message?->user?->name ?? 'a former member' }}</p>
+                                <p class="t-label text-accent-text">{{ __('Message by :name', ['name' => $message?->user?->name ?? __('a former member')]) }}</p>
                                 @if ($message === null || $message->trashed())
-                                    <p class="mt-2 font-display text-lg font-light italic text-ink-muted">{{ \App\Constants\ChatSettings::REMOVED_PLACEHOLDER }}</p>
+                                    <p class="mt-2 font-display text-lg font-light italic text-ink-muted">{{ __(\App\Constants\ChatSettings::REMOVED_PLACEHOLDER) }}</p>
                                 @else
-                                    <p class="mt-2 whitespace-pre-wrap text-base font-normal text-ink" data-message>{{ $message->body }}</p>
+                                    <p class="mt-2 whitespace-pre-wrap text-base font-normal text-ink" dir="auto" data-message>{{ $message->body }}</p>
                                     {{-- A report covers the message's files too: each opens through the same signed, access-checked link members use. --}}
                                     @php $files = \App\Support\ChatAttachmentData::collection($message); @endphp
                                     @if ($files !== [])
-                                        <ul class="mt-3 space-y-1 text-sm" aria-label="{{ \App\Constants\ChatCopy::ATTACHMENTS_LABEL }}" data-report-attachments>
+                                        <ul class="mt-3 space-y-1 text-sm" aria-label="{{ __(\App\Constants\ChatCopy::ATTACHMENTS_LABEL) }}" data-report-attachments>
                                             @foreach ($files as $file)
                                                 <li class="flex flex-wrap items-baseline gap-x-2">
-                                                    <a href="{{ $file['url'] }}" class="text-ink underline decoration-accent-line underline-offset-4" target="_blank" rel="noopener">{{ $file['name'] }}</a>
+                                                    <a href="{{ $file['url'] }}" class="text-ink underline decoration-accent-line underline-offset-4" target="_blank" rel="noopener" dir="auto">{{ $file['name'] }}</a>
                                                     <span class="font-normal text-ink-muted">{{ $file['type'] }} · {{ $file['size_label'] }}@if ($file['alt'] !== '') · “{{ $file['alt'] }}”@endif</span>
                                                 </li>
                                             @endforeach
@@ -54,18 +54,18 @@
                                 @endif
                             </div>
                             @if ($report->isResolved())
-                                <p class="mt-3 text-sm font-normal text-ink-muted">Resolved <x-date :date="$report->resolved_at" />@if ($report->resolver) by {{ $report->resolver->name }}@endif</p>
+                                <p class="mt-3 text-sm font-normal text-ink-muted">{{ __('Resolved') }} <x-date :date="$report->resolved_at" />@if ($report->resolver) {{ __('by :name', ['name' => $report->resolver->name]) }}@endif</p>
                             @endif
                         </div>
                         <div class="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 text-sm lg:flex-col lg:items-end">
-                            <x-admin.status-badge :tone="$report->isResolved() ? StatusTone::Cypress : StatusTone::Bronze" :label="$report->isResolved() ? 'Resolved' : 'Open'" />
+                            <x-admin.status-badge :tone="$report->isResolved() ? StatusTone::Cypress : StatusTone::Bronze" :label="$report->isResolved() ? __('Resolved') : __('Open')" />
                             @if (! $report->isResolved())
-                                <x-button variant="quiet" size="sm" type="button" wire:click="resolve({{ $report->getKey() }})" data-resolve>Resolve</x-button>
+                                <x-button variant="quiet" size="sm" type="button" wire:click="resolve({{ $report->getKey() }})" data-resolve>{{ __('Resolve') }}</x-button>
                                 @if ($message !== null && ! $message->trashed())
-                                    <x-button variant="danger" size="sm" type="button" wire:click="confirm('{{ Reports::ACTION_DELETE }}', {{ $report->getKey() }})" data-delete-message><x-icon name="trash" class="size-4" />Remove message</x-button>
+                                    <x-button variant="danger" size="sm" type="button" wire:click="confirm('{{ Reports::ACTION_DELETE }}', {{ $report->getKey() }})" data-delete-message><x-icon name="trash" class="size-4" />{{ __('Remove message') }}</x-button>
                                 @endif
                                 @if ($message?->user !== null && $message->user->community_status->canChat())
-                                    <x-button variant="danger" size="sm" type="button" wire:click="confirm('{{ Reports::ACTION_SUSPEND }}', {{ $report->getKey() }})" data-suspend-author>Suspend author</x-button>
+                                    <x-button variant="danger" size="sm" type="button" wire:click="confirm('{{ Reports::ACTION_SUSPEND }}', {{ $report->getKey() }})" data-suspend-author>{{ __('Suspend author') }}</x-button>
                                 @endif
                             @endif
                         </div>
@@ -76,8 +76,8 @@
         {{ $reports->links('components.admin.pagination') }}
     @endif
 
-    <x-admin.confirm-dialog :show="$this->isConfirming(Reports::ACTION_DELETE)" danger title="Remove this message permanently?" action="deleteMessage" confirm-label="Remove message">
-        Members will see "{{ \App\Constants\ChatSettings::REMOVED_PLACEHOLDER }}" in its place, its attached files are deleted, and every report about it will be resolved. {{ \App\Constants\ConfirmDialog::IRREVERSIBLE }}
+    <x-admin.confirm-dialog :show="$this->isConfirming(Reports::ACTION_DELETE)" danger :title="__('Remove this message permanently?')" action="deleteMessage" :confirm-label="__('Remove message')">
+        {{ __('Members will see ":placeholder" in its place, its attached files are deleted, and every report about it will be resolved.', ['placeholder' => __(\App\Constants\ChatSettings::REMOVED_PLACEHOLDER)]) }} {{ __(\App\Constants\ConfirmDialog::IRREVERSIBLE) }}
     </x-admin.confirm-dialog>
 
     @if ($this->isConfirming(Reports::ACTION_SUSPEND))
@@ -85,15 +85,15 @@
             <form wire:submit="suspendAuthor" role="alertdialog" aria-modal="true" aria-labelledby="suspend-title" aria-describedby="suspend-description" class="confirm-dialog confirm-dialog--danger max-w-lg" novalidate>
                 <div class="confirm-dialog__head">
                     <span class="confirm-dialog__icon" data-danger-icon><x-icon name="warning" class="size-6" /></span>
-                    <h2 id="suspend-title" class="confirm-dialog__title">Suspend the author?</h2>
+                    <h2 id="suspend-title" class="confirm-dialog__title">{{ __('Suspend the author?') }}</h2>
                 </div>
-                <p id="suspend-description" class="confirm-dialog__body">Their chat access ends immediately, they will be emailed, and this report is resolved.</p>
+                <p id="suspend-description" class="confirm-dialog__body">{{ __('Their chat access ends immediately, they will be emailed, and this report is resolved.') }}</p>
                 <div class="mt-6">
-                    <x-form.textarea model="note" label="Note to the member (optional)" rows="3" />
+                    <x-form.textarea model="note" :label="__('Note to the member (optional)')" rows="3" />
                 </div>
                 <div class="confirm-dialog__actions">
-                    <x-button type="button" variant="quiet" wire:click="cancelConfirmation" x-init="$nextTick(() => $el.focus())" data-cancel>Cancel</x-button>
-                    <x-button type="submit" variant="danger-filled" wire:loading.attr="disabled" data-confirm>Suspend</x-button>
+                    <x-button type="button" variant="quiet" wire:click="cancelConfirmation" x-init="$nextTick(() => $el.focus())" data-cancel>{{ __('Cancel') }}</x-button>
+                    <x-button type="submit" variant="danger-filled" wire:loading.attr="disabled" data-confirm>{{ __('Suspend') }}</x-button>
                 </div>
             </form>
         </div>

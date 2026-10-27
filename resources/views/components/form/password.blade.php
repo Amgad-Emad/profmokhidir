@@ -8,7 +8,7 @@
 @props([
     'name' => 'password',
     'model' => null,
-    'label' => 'Password',
+    'label' => null,
     'autocomplete' => \App\Constants\AuthScreens::AUTOCOMPLETE_CURRENT_PASSWORD,
     'required' => true,
     'strength' => false,
@@ -21,11 +21,12 @@
     use App\Constants\AuthScreens;
     use App\Constants\FormControls;
 
-    $hint ??= $strength ? AuthScreens::PASSWORD_HINT : null;
+    $label ??= __('Password');
+    $hint ??= $strength ? __(AuthScreens::PASSWORD_HINT) : null;
     $fieldId = $id ?? app(\App\Services\FormFieldService::class)->idFor($model, $name);
     $strengthId = $fieldId.'-strength';
 @endphp
-<div {{ $attributes->only('class')->class(['form-password']) }} x-data="formPassword(@js(['levels' => AuthScreens::passwordStrengthLevels(), 'warning' => FormControls::CAPS_LOCK]))">
+<div {{ $attributes->only('class')->class(['form-password']) }} x-data="formPassword(@js(['levels' => AuthScreens::passwordStrengthLevels(), 'warning' => __(FormControls::CAPS_LOCK)]))">
     <x-form.input
         :name="$name"
         :model="$model"
@@ -49,7 +50,7 @@
         {{ $attributes->except(['class']) }}
     >
         <x-slot:action>
-            <button type="button" class="form-control__action" x-on:click="toggle()" x-bind:aria-pressed="visible ? 'true' : 'false'" aria-pressed="false" aria-label="{{ FormControls::SHOW_PASSWORD }}" aria-controls="{{ $fieldId }}">
+            <button type="button" class="form-control__action" x-on:click="toggle()" x-bind:aria-pressed="visible ? 'true' : 'false'" aria-pressed="false" aria-label="{{ __(FormControls::SHOW_PASSWORD) }}" aria-controls="{{ $fieldId }}">
                 <x-icon name="eye" class="size-5" x-show="!visible" />
                 <x-icon name="eye-off" class="size-5" x-show="visible" x-cloak />
             </button>

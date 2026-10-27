@@ -10,8 +10,8 @@
     .form-listbox {
         position: absolute;
         top: calc(100% + 0.5rem);
-        right: 0;
-        left: 0;
+        inset-inline-end: 0;
+        inset-inline-start: 0;
         z-index: 30;
         max-height: 18rem;
         overflow-y: auto;
@@ -38,7 +38,7 @@
 
     .form-listbox__option[data-active='true'] {
         background-color: var(--surface-sunken);
-        box-shadow: inset 2px 0 0 var(--ink);
+        box-shadow: inset calc(2px * var(--inline-sign, 1)) 0 0 var(--ink); /* along the inline start */
     }
 
     .form-listbox__option[aria-selected='true'] {
@@ -74,7 +74,7 @@
         align-items: center;
         gap: 0.25rem;
         min-height: 2rem;
-        padding-left: 0.75rem;
+        padding-inline-start: 0.75rem;
         border: 1px solid var(--rule);
         border-radius: 999px;
         background-color: var(--surface-sunken);
@@ -319,7 +319,7 @@
         content: '';
         position: absolute;
         top: 0.1875rem;
-        left: 0.1875rem;
+        inset-inline-start: 0.1875rem;
         width: 1rem;
         height: 1rem;
         border-radius: 999px;
@@ -336,7 +336,7 @@
 
     .form-toggle__input:checked::before {
         background-color: var(--fill-ink);
-        transform: translateX(1.25rem);
+        transform: translateX(calc(1.25rem * var(--inline-sign, 1)));
     }
 
     .form-toggle:hover .form-toggle__input {

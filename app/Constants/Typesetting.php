@@ -26,6 +26,25 @@ final class Typesetting
     /** Drop caps span this many lines of the paragraph they open. */
     public const int DROP_CAP_LINES = 3;
 
+    /**
+     * <x-drop-cap> in Arabic: letters join, so instead of a dropped initial the first word of the first
+     * paragraph is wrapped in this class and set in Amiri 700 (resources/css/locale.css).
+     */
+    public const string DROP_CAP_LEAD_CLASS = 'drop-cap__lead';
+
+    /**
+     * <x-icon> names that point along the line of text and so flip on right-to-left pages (they carry
+     * .rtl-mirror): arrows, chevrons, reply, send, undo/redo, the sidebar collapse/expand and panel
+     * icons, lists and the external-link arrow. Chevron-down is included so its rotated (sideways)
+     * states point the right way. Never the MK mark, logos, media, charts, clocks or checks.
+     *
+     * @var list<string>
+     */
+    public const array MIRRORED_ICONS = [
+        'arrow', 'chevron-left', 'chevron-down', 'reply', 'send', 'undo', 'redo',
+        'collapse', 'expand', 'panel', 'list-bullet', 'list-numbered', 'external',
+    ];
+
     public const string LEFT_DOUBLE_QUOTE = "\u{201C}";
 
     public const string RIGHT_DOUBLE_QUOTE = "\u{201D}";

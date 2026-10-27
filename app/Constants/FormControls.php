@@ -167,16 +167,16 @@ final class FormControls
     public static function editorTools(): array
     {
         return [
-            'heading2' => ['label' => 'Heading', 'icon' => 'heading', 'shortcut' => 'Mod-Alt-2', 'group' => 'block'],
-            'heading3' => ['label' => 'Subheading', 'icon' => 'subheading', 'shortcut' => 'Mod-Alt-3', 'group' => 'block'],
-            'bold' => ['label' => 'Bold', 'icon' => 'bold', 'shortcut' => 'Mod-B', 'group' => 'inline'],
-            'italic' => ['label' => 'Italic', 'icon' => 'italic', 'shortcut' => 'Mod-I', 'group' => 'inline'],
-            'bulletList' => ['label' => 'Bulleted list', 'icon' => 'list-bullet', 'shortcut' => 'Mod-Shift-8', 'group' => 'list'],
-            'orderedList' => ['label' => 'Numbered list', 'icon' => 'list-numbered', 'shortcut' => 'Mod-Shift-7', 'group' => 'list'],
-            'blockquote' => ['label' => 'Quote', 'icon' => 'quote', 'shortcut' => 'Mod-Shift-B', 'group' => 'list'],
-            'link' => ['label' => 'Link', 'icon' => 'link', 'shortcut' => 'Mod-K', 'group' => 'link'],
-            'undo' => ['label' => 'Undo', 'icon' => 'undo', 'shortcut' => 'Mod-Z', 'group' => 'history'],
-            'redo' => ['label' => 'Redo', 'icon' => 'redo', 'shortcut' => 'Mod-Shift-Z', 'group' => 'history'],
+            'heading2' => ['label' => __('Heading'), 'icon' => 'heading', 'shortcut' => 'Mod-Alt-2', 'group' => 'block'],
+            'heading3' => ['label' => __('Subheading'), 'icon' => 'subheading', 'shortcut' => 'Mod-Alt-3', 'group' => 'block'],
+            'bold' => ['label' => __('Bold'), 'icon' => 'bold', 'shortcut' => 'Mod-B', 'group' => 'inline'],
+            'italic' => ['label' => __('Italic'), 'icon' => 'italic', 'shortcut' => 'Mod-I', 'group' => 'inline'],
+            'bulletList' => ['label' => __('Bulleted list'), 'icon' => 'list-bullet', 'shortcut' => 'Mod-Shift-8', 'group' => 'list'],
+            'orderedList' => ['label' => __('Numbered list'), 'icon' => 'list-numbered', 'shortcut' => 'Mod-Shift-7', 'group' => 'list'],
+            'blockquote' => ['label' => __('Quote'), 'icon' => 'quote', 'shortcut' => 'Mod-Shift-B', 'group' => 'list'],
+            'link' => ['label' => __('Link'), 'icon' => 'link', 'shortcut' => 'Mod-K', 'group' => 'link'],
+            'undo' => ['label' => __('Undo'), 'icon' => 'undo', 'shortcut' => 'Mod-Z', 'group' => 'history'],
+            'redo' => ['label' => __('Redo'), 'icon' => 'redo', 'shortcut' => 'Mod-Shift-Z', 'group' => 'history'],
         ];
     }
 
@@ -194,32 +194,37 @@ final class FormControls
         return (int) now()->addYear()->format('Y');
     }
 
-    public static function yearMessage(?int $min = null, ?int $max = null): string
+    /**
+     * "Enter a year between 1900 and 2027." in the current language, or in `$locale`
+     * (each lang/{locale}/validation.php file names its own, since they load for one language).
+     */
+    public static function yearMessage(?int $min = null, ?int $max = null, ?string $locale = null): string
     {
-        return strtr(self::MESSAGE_YEAR, [':min' => (string) ($min ?? self::YEAR_MIN), ':max' => (string) ($max ?? self::yearMax())]);
+        return __(self::MESSAGE_YEAR, ['min' => (string) ($min ?? self::YEAR_MIN), 'max' => (string) ($max ?? self::yearMax())], $locale);
     }
 
     /**
      * The browser-side messages forms.js shows on blur, keyed by the
-     * ValidityState flag they explain (placeholders filled per field).
+     * ValidityState flag they explain (placeholders filled per field), in the
+     * current language.
      *
      * @return array<string, string>
      */
     public static function browserMessages(): array
     {
         return [
-            'valueMissing' => self::MESSAGE_REQUIRED,
-            'valueMissingChoice' => self::MESSAGE_CHOOSE,
-            'valueMissingCheck' => self::MESSAGE_CHECK,
-            'typeMismatchEmail' => self::MESSAGE_EMAIL,
-            'typeMismatchUrl' => self::MESSAGE_URL,
-            'tooLong' => self::MESSAGE_TOO_LONG,
-            'tooShort' => self::MESSAGE_TOO_SHORT,
-            'badInput' => self::MESSAGE_NUMBER,
-            'stepMismatch' => self::MESSAGE_NUMBER,
-            'range' => self::MESSAGE_RANGE,
-            'year' => self::MESSAGE_YEAR,
-            'date' => self::MESSAGE_DATE,
+            'valueMissing' => __(self::MESSAGE_REQUIRED),
+            'valueMissingChoice' => __(self::MESSAGE_CHOOSE),
+            'valueMissingCheck' => __(self::MESSAGE_CHECK),
+            'typeMismatchEmail' => __(self::MESSAGE_EMAIL),
+            'typeMismatchUrl' => __(self::MESSAGE_URL),
+            'tooLong' => __(self::MESSAGE_TOO_LONG),
+            'tooShort' => __(self::MESSAGE_TOO_SHORT),
+            'badInput' => __(self::MESSAGE_NUMBER),
+            'stepMismatch' => __(self::MESSAGE_NUMBER),
+            'range' => __(self::MESSAGE_RANGE),
+            'year' => __(self::MESSAGE_YEAR),
+            'date' => __(self::MESSAGE_DATE),
         ];
     }
 }

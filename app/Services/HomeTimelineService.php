@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Constants\DateFormats;
 use App\Constants\HomeTimeline;
+use App\Constants\Locales;
 use App\Constants\MediaProperties;
 use App\Constants\MediaTreatment;
 use App\Models\Award;
@@ -92,7 +93,7 @@ class HomeTimelineService
                 continue;
             }
 
-            $milestones[] = $this->milestone($year, (string) $entry->yearRange(), $entry->title, $entry->organisation, $entry->section->value);
+            $milestones[] = $this->milestone($year, (string) $entry->yearRange(), $entry->title, $entry->organisation, $entry->section->value, (string) Locales::attributesFor($entry));
         }
 
         foreach ($this->awards->published() as $award) {
@@ -101,7 +102,7 @@ class HomeTimelineService
                 continue;
             }
 
-            $milestones[] = $this->milestone($award->year, (string) $award->year, $award->name, $award->organisation, HomeTimeline::KIND_AWARD);
+            $milestones[] = $this->milestone($award->year, (string) $award->year, $award->name, $award->organisation, HomeTimeline::KIND_AWARD, (string) Locales::attributesFor($award));
         }
 
         return $milestones;
@@ -202,9 +203,11 @@ class HomeTimelineService
     }
 
     /**
-     * @return array{year: int, years: string, title: string, detail: ?string, kind: string, label: string}
+     * `lang` marks a title shown in its English fallback on an Arabic page (Locales::attributesFor).
+     *
+     * @return array{year: int, years: string, title: string, detail: ?string, kind: string, label: string, lang: string}
      */
-    private function milestone(int $year, string $years, string $title, ?string $detail, string $kind): array
+    private function milestone(int $year, string $years, string $title, ?string $detail, string $kind, string $lang = ''): array
     {
         return [
             'year' => $year,
@@ -213,6 +216,7 @@ class HomeTimelineService
             'detail' => filled($detail) ? $detail : null,
             'kind' => $kind,
             'label' => HomeTimeline::kindLabel($kind),
+            'lang' => $lang,
         ];
     }
 }

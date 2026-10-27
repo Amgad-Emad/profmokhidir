@@ -7,7 +7,7 @@ Roles and permissions use spatie/laravel-permission; all media uses spatie/larav
 Check composer.json and package.json for exact versions and use APIs that match them.
 
 ## Product
-Public academic profile website for Prof. Mohamed Osman Khidir (profmokhidir.com) with an admin dashboard for content editors. English only for release 1. Analytics: first-party, cookieless, off by default; enabled only after client approval.
+Public academic profile website for Prof. Mohamed Osman Khidir (profmokhidir.com) with an admin dashboard for content editors. English and Arabic (RTL); English is the default (Arabic under /ar; admin, chat and sign-in follow the user's saved language). Analytics: first-party, cookieless, off by default; enabled only after client approval.
 
 Public sections (in navigation order):
 1. About Prof. Mokhidir: biography, portrait, title and affiliation, expertise, key facts.
@@ -48,9 +48,18 @@ Type:
 - JetBrains Mono: technical specs only.
 - Scale: display 96px, heading 48px, quote 32px italic, body 18px (17px mobile), label 12px uppercase at weight 500 with 0.24em tracking.
 
+Arabic type (a documented exception: Cormorant Garamond and Hanken Grotesk have no Arabic glyphs; rules in resources/css/locale.css, App\Constants\Typography and BrandAudit):
+- Display and headings: Amiri 400 and 700, wherever Cormorant is used. Body and UI: IBM Plex Sans Arabic 400 and 500, wherever Hanken Grotesk is used. JetBrains Mono unchanged. These two are the only extra families allowed.
+- Loaded from Google Fonts with display=swap, only on Arabic pages. In the stacks the self-hosted Latin brand font is listed before its Arabic partner (the Latin files cover Latin only, so English words, Western digits and Latin punctuation stay in the brand fonts and Arabic letters fall through to Amiri / IBM Plex Sans Arabic; Google's Arabic CSS also ships Latin subsets, which must not take over).
+- Arabic has no letter-spacing and no uppercase: labels drop the tracking and text-transform. Slightly larger sizes and line-height: body about 19px at line-height 1.8 (18px on phones), labels about 14px; small text never below 15px still holds.
+- No italics in Arabic: the quote style keeps its colour and size, upright; <em> is weight and ink, not oblique.
+- Old-style figures, small caps, extra ligatures and drop caps are Latin-only: in Arabic use lining figures and, instead of a drop cap, the first word in Amiri 700.
+- Western digits (0–9) by default in both languages; a site setting may switch Arabic running text to Arabic-Indic digits (years, citations, DOIs and data stay Western).
+- Mirror directional icons (.rtl-mirror: arrows, chevrons, back, breadcrumbs separators), never the MK mark, logos, media players, maps, charts' time axes or code. Use logical CSS properties; :dir(rtl) only where they cannot express it.
+
 Mark: "MK" in Cormorant Garamond Light inside a 1px brass hairline ring. Below 32px use a solid evergreen disc with ivory MK. Clear space is one sixth of the ring diameter on every side. Never fill, recolour, tilt or add effects to the mark. Lockups: stacked (mark over "Professor / Mohamed Osman Khidir") and horizontal (for nav, footer).
 
-Motion: unhurried and scroll-linked. Content rises 40px and fades in over 1200ms, staggered 120ms, easing cubic-bezier(0.16,1,0.3,1). Hero elements scale 1.0 to 0.7 with scroll. Brass rules draw left to right over 1600ms ease-in-out to open sections. Nothing bounces, spins or flashes. Respect prefers-reduced-motion (show content instantly).
+Motion: unhurried and scroll-linked. Content rises 40px and fades in over 1200ms, staggered 120ms, easing cubic-bezier(0.16,1,0.3,1). Hero elements scale 1.0 to 0.7 with scroll. Brass rules draw left to right (right to left on Arabic pages) over 1600ms ease-in-out to open sections. Nothing bounces, spins or flashes. Respect prefers-reduced-motion (show content instantly).
 
 Photography: portraits in warm monochrome (desaturate, warm with ~12% ivory tone); archive photos in an evergreen-to-ivory duotone; detail crops of books and handwriting. No filters, vignettes, heavy grain or bright colour. Every photo has a caption with place and year in the label style.
 

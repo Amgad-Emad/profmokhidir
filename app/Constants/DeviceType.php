@@ -20,9 +20,9 @@ enum DeviceType: string
     public function label(): string
     {
         return match ($this) {
-            self::Mobile => 'Mobile',
-            self::Tablet => 'Tablet',
-            self::Desktop => 'Desktop',
+            self::Mobile => __('Mobile'),
+            self::Tablet => __('Tablet'),
+            self::Desktop => __('Desktop'),
         };
     }
 }

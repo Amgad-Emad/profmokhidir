@@ -3,10 +3,10 @@
     the quick actions, the "Before launch" checklist, recent activity in plain language, and the
     audience figures (first-party analytics) and the published count per section. Data from DashboardService::summary().
 --}}
-<x-layouts.admin title="Dashboard">
+<x-layouts.admin :title="__('Dashboard')">
     <header class="flex flex-col gap-2">
-        <p class="t-label text-accent-text">Dashboard</p>
-        <h1 class="t-heading">{{ $greeting['salutation'] }}, {{ auth()->user()->name }}</h1>
+        <p class="t-label text-accent-text">{{ __('Dashboard') }}</p>
+        <h1 class="t-heading">{{ __(':salutation, :name', ['salutation' => $greeting['salutation'], 'name' => auth()->user()->name]) }}</h1>
         <p class="smallcaps text-xl text-ink-muted" data-greeting-date><time datetime="{{ $greeting['datetime'] }}">{{ $greeting['date'] }}</time></p>
     </header>
 
@@ -15,13 +15,13 @@
         <section class="two-factor-card mt-10" aria-labelledby="two-factor-card-heading" data-two-factor-card>
             <x-icon name="shield" class="two-factor-card__icon size-6" />
             <div class="min-w-0 flex-1">
-                <h2 id="two-factor-card-heading" class="font-display text-2xl font-light text-ink-strong">{{ \App\Constants\AdminUx::TWO_FACTOR_REMINDER_TITLE }}</h2>
-                <p class="mt-2 max-w-2xl text-base font-normal text-ink-muted">{{ \App\Constants\AdminUx::TWO_FACTOR_REMINDER_TEXT }}</p>
+                <h2 id="two-factor-card-heading" class="font-display text-2xl font-light text-ink-strong">{{ __(\App\Constants\AdminUx::TWO_FACTOR_REMINDER_TITLE) }}</h2>
+                <p class="mt-2 max-w-2xl text-base font-normal text-ink-muted">{{ __(\App\Constants\AdminUx::TWO_FACTOR_REMINDER_TEXT) }}</p>
                 <div class="mt-5 flex flex-wrap items-center gap-4">
-                    <x-button variant="primary" size="sm" :href="route(\App\Constants\AdminNavigation::ACCOUNT_ROUTE).'#two-factor'" data-two-factor-setup>{{ \App\Constants\AdminUx::TWO_FACTOR_REMINDER_ACTION }}</x-button>
+                    <x-button variant="primary" size="sm" :href="route(\App\Constants\AdminNavigation::ACCOUNT_ROUTE).'#two-factor'" data-two-factor-setup>{{ __(\App\Constants\AdminUx::TWO_FACTOR_REMINDER_ACTION) }}</x-button>
                     <form novalidate method="POST" action="{{ route(\App\Constants\AdminUx::TWO_FACTOR_REMINDER_ROUTE) }}" data-two-factor-dismiss>
                         @csrf
-                        <x-button variant="quiet" size="sm" data-leave-ok>{{ \App\Constants\AdminUx::TWO_FACTOR_REMINDER_DISMISS }}</x-button>
+                        <x-button variant="quiet" size="sm" data-leave-ok>{{ __(\App\Constants\AdminUx::TWO_FACTOR_REMINDER_DISMISS) }}</x-button>
                     </form>
                 </div>
             </div>
@@ -31,12 +31,12 @@
     {{-- Needs your attention --}}
     <section class="mt-12" aria-labelledby="attention-heading" data-section="attention">
         <div class="dashboard-heading">
-            <h2 id="attention-heading" class="dashboard-heading__title">Needs your attention</h2>
+            <h2 id="attention-heading" class="dashboard-heading__title">{{ __('Needs your attention') }}</h2>
             <hr class="rule-brass flex-1" data-rule>
         </div>
 
         @if ($cards === [])
-            <p class="dashboard-calm" data-attention-empty><x-icon name="check" class="size-5" />Nothing is waiting for review. Everything is up to date.</p>
+            <p class="dashboard-calm" data-attention-empty><x-icon name="check" class="size-5" />{{ __('Nothing is waiting for review. Everything is up to date.') }}</p>
         @else
             <div class="attention-grid mt-6">
                 @foreach ($cards as $card)
@@ -50,7 +50,7 @@
     @if ($actions !== [])
         <section class="mt-14" aria-labelledby="actions-heading" data-section="actions">
             <div class="dashboard-heading">
-                <h2 id="actions-heading" class="dashboard-heading__title">Start something</h2>
+                <h2 id="actions-heading" class="dashboard-heading__title">{{ __('Start something') }}</h2>
                 <hr class="rule-brass flex-1" data-rule>
             </div>
             <ul class="quick-actions mt-6">
@@ -72,10 +72,10 @@
         @if ($checklist !== null)
             <section aria-labelledby="launch-heading" data-section="launch">
                 <div class="dashboard-heading">
-                    <h2 id="launch-heading" class="dashboard-heading__title">Before launch</h2>
+                    <h2 id="launch-heading" class="dashboard-heading__title">{{ __('Before launch') }}</h2>
                     <hr class="rule-brass flex-1" data-rule>
                 </div>
-                <p class="mt-3 text-base font-normal text-ink-muted">What still needs doing before the site is announced. Each line updates as the work is done.</p>
+                <p class="mt-3 text-base font-normal text-ink-muted">{{ __('What still needs doing before the site is announced. Each line updates as the work is done.') }}</p>
                 <x-admin.launch-checklist :checklist="$checklist" class="mt-6" />
             </section>
         @endif
@@ -83,18 +83,18 @@
         {{-- Recent activity --}}
         <section aria-labelledby="activity-heading" data-section="activity">
             <div class="dashboard-heading">
-                <h2 id="activity-heading" class="dashboard-heading__title">Recent activity</h2>
+                <h2 id="activity-heading" class="dashboard-heading__title">{{ __('Recent activity') }}</h2>
                 <hr class="rule-brass flex-1" data-rule>
             </div>
 
             @if ($feed === [])
-                <x-empty-state message="No activity has been recorded yet." class="py-8" />
+                <x-empty-state :message="__('No activity has been recorded yet.')" class="py-8" />
             @else
                 <ol class="activity-feed mt-6" data-activity>
                     @foreach ($feed as $entry)
                         <li class="activity-feed__item">
                             <p>{{ $entry['sentence'] }}</p>
-                            <time datetime="{{ $entry['at']->toIso8601String() }}" title="{{ $entry['at']->format(\App\Constants\DateFormats::LONG.', H:i') }}">{{ $entry['at']->diffForHumans() }}</time>
+                            <time datetime="{{ $entry['at']->toIso8601String() }}" title="{{ $entry['at']->translatedFormat(\App\Constants\DateFormats::LONG.', H:i') }}">{{ $entry['at']->diffForHumans() }}</time>
                         </li>
                     @endforeach
                 </ol>
@@ -110,12 +110,12 @@
     {{-- Published per section --}}
     <section class="mt-14" aria-labelledby="published-heading" data-section="published">
         <div class="dashboard-heading">
-            <h2 id="published-heading" class="dashboard-heading__title">On the site now</h2>
+            <h2 id="published-heading" class="dashboard-heading__title">{{ __('On the site now') }}</h2>
             <hr class="rule-brass flex-1" data-rule>
         </div>
         <div class="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
             @foreach ($published as $key => $card)
-                <x-admin.stat-card :label="$card['label']" :count="$card['count']" caption="published"
+                <x-admin.stat-card :label="$card['label']" :count="$card['count']" :caption="__('published')"
                                    :href="auth()->user()->can($card['permission']) ? route($card['route']) : null" data-stat="{{ $key }}" />
             @endforeach
         </div>

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Constants\Disks;
 use App\Constants\MediaCollections;
 use App\Models\Concerns\HasResponsiveImages;
+use App\Models\Concerns\HasTranslatableContent;
 use App\Models\Concerns\Publishable;
 use Database\Factories\ProfileFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -24,7 +25,14 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 class Profile extends Model implements HasMedia
 {
     /** @use HasFactory<ProfileFactory> */
-    use HasFactory, HasResponsiveImages, InteractsWithMedia, Publishable;
+    use HasFactory, HasResponsiveImages, HasTranslatableContent, InteractsWithMedia, Publishable;
+
+    /**
+     * Language-specific columns (English and Arabic); the first is the primary one.
+     *
+     * @var list<string>
+     */
+    public array $translatable = ['name', 'title', 'affiliation', 'short_bio', 'full_bio', 'expertise', 'key_facts', 'contact_note'];
 
     /**
      * @return array<string, string>

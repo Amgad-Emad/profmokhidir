@@ -40,8 +40,8 @@ class VideoRequest extends ContentRequest
     public function messages(): array
     {
         return parent::messages() + [
-            'provider.Illuminate\Validation\Rules\Enum' => 'Choose where the video is hosted.',
-            'media_url.required_unless' => 'Enter the video link, or choose "Uploaded file" and upload it.',
+            'provider.Illuminate\Validation\Rules\Enum' => __('Choose where the video is hosted.'),
+            'media_url.required_unless' => __('Enter the video link, or choose "Uploaded file" and upload it.'),
         ] + PhotoArchiveRequest::archiveMessages();
     }
 
@@ -50,6 +50,6 @@ class VideoRequest extends ContentRequest
      */
     public function attributes(): array
     {
-        return ['media_url' => 'video link', 'captions_url' => 'captions link'] + PhotoArchiveRequest::archiveAttributes();
+        return ['media_url' => __('video link'), 'captions_url' => __('captions link')] + PhotoArchiveRequest::archiveAttributes();
     }
 }

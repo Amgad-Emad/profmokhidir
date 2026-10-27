@@ -30,22 +30,22 @@ enum TributeRelationship: string
     public function plural(): string
     {
         return match ($this) {
-            self::Student => 'Students',
-            self::Colleague => 'Colleagues',
-            self::Family => 'Family',
-            self::Friend => 'Friends',
-            self::Other => 'Others',
+            self::Student => __('Students'),
+            self::Colleague => __('Colleagues'),
+            self::Family => __('Family'),
+            self::Friend => __('Friends'),
+            self::Other => __('Others'),
         };
     }
 
     public function label(): string
     {
         return match ($this) {
-            self::Student => 'Student',
-            self::Colleague => 'Colleague',
-            self::Family => 'Family',
-            self::Friend => 'Friend',
-            self::Other => 'Other',
+            self::Student => __('Student'),
+            self::Colleague => __('Colleague'),
+            self::Family => __('Family'),
+            self::Friend => __('Friend'),
+            self::Other => __('Other'),
         };
     }
 }

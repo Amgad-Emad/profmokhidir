@@ -4,17 +4,20 @@
         <div class="mx-auto max-w-measure">
             <x-chapter-opening :number="$chapter" :label="$section['label']" :title="$item->title" level="1" id="section-title" />
 
+            <x-locale.fallback-note :model="$item" />
+
             <x-meta class="mt-8" :items="[$item->typeLabel(), $item->category, $item->date]" data-rise />
 
             @if (filled($item->summary))
-                <p class="mt-10 font-display text-2xl font-light italic leading-snug text-ink-muted" data-rise>{{ $item->summary }}</p>
+                <p class="mt-10 font-display text-2xl font-light italic leading-snug text-ink-muted" data-rise @contentLang($item, 'summary')>{{ $item->summary }}</p>
             @endif
 
             @if ($body !== '')
-                <div class="prose-bio mt-10" data-rise>{!! $body !!}</div>
+                @php $bodyLang = \App\Constants\Locales::attributesFor($item, 'body'); @endphp
+                <div class="prose-bio mt-10" data-rise{!! $bodyLang->isEmpty() ? '' : ' '.$bodyLang !!}>{!! $body !!}</div>
             @endif
 
-            <nav class="mt-16" aria-label="Back" data-rise>
+            <nav class="mt-16" aria-label="{{ __('Back') }}" data-rise>
                 <hr class="rule-brass" data-rule>
                 <x-button :href="$section['url']" class="mt-10">{{ $pageCopy->text('other', 'back_label') }}</x-button>
             </nav>

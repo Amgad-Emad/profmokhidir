@@ -44,14 +44,14 @@
     $limits = $limits + array_filter(['min' => $attributes->get('min'), 'max' => $attributes->get('max'), 'minlength' => $attributes->get('minlength')], fn ($v) => $v !== null);
     $current = $model === null && $type !== 'password' ? old($field['key'], $value) : null;
     $inputAttributes = $forms->controlAttributes($field, array_merge(
-        ['type' => $type, 'value' => is_scalar($current) ? (string) $current : null, 'placeholder' => \App\Constants\FormControls::BLANK_PLACEHOLDER],
+        ['type' => $type, 'value' => is_scalar($current) ? (string) $current : null, 'placeholder' => \App\Constants\FormControls::BLANK_PLACEHOLDER, 'dir' => $forms->direction($kind ?? $type)],
         $forms->browserMessages($field, $kind ?? $type, $limits),
         $control,
     ), $attributes->except(['class'])->getAttributes());
     $frameClasses = ['form-control', 'form-control--compact' => $size === 'compact', 'form-control--display' => $size === 'display'];
     $frameAttributes = new \Illuminate\View\ComponentAttributeBag($frame);
 @endphp
-<x-form.field :field="$field" :hide-label="$hideLabel" :class="$attributes->get('class')" :counter-text="$field['counter'] ? strtr(\App\Constants\FormControls::COUNTER_FORMAT, [':count' => (string) mb_strlen((string) ($model === null ? $current : $value)), ':max' => (string) $maxlength]) : null">
+<x-form.field :field="$field" :hide-label="$hideLabel" :class="$attributes->get('class')" :counter-text="$field['counter'] ? __(\App\Constants\FormControls::COUNTER_FORMAT, ['count' => (string) mb_strlen((string) ($model === null ? $current : $value)), 'max' => (string) $maxlength]) : null">
     <div @class($frameClasses) {{ $frameAttributes }} @if ($loading) wire:loading.attr="data-loading" wire:target="{{ $loading }}" @endif>
         @if ($prefix)
             <span class="form-control__affix" aria-hidden="true">{{ $prefix }}</span>

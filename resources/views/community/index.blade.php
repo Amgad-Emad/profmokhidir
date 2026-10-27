@@ -21,7 +21,7 @@
                     <h2 id="conduct-heading" class="sr-only">{{ $copy['conductHeading'] }}</h2>
                     <ol class="mt-4 space-y-3 text-base font-normal text-ink-muted" data-conduct>
                         @foreach ($copy['conduct'] as $rule)
-                            <li class="flex gap-4"><span class="font-mono text-sm text-accent-text">{{ sprintf('%02d', $loop->iteration) }}</span><span>{{ $rule }}</span></li>
+                            <li class="flex gap-4"><span class="font-mono text-sm text-accent-text">{{ app(\App\Services\LocaleService::class)->digits(sprintf('%02d', $loop->iteration)) }}</span><span>{{ $rule }}</span></li>
                         @endforeach
                     </ol>
                 </section>
@@ -61,15 +61,15 @@
                                 @csrf
                                 <x-form.error-summary :targets="['throttle' => 'apply-heading']" />
                                 @include('community.partials.application-fields', ['copy' => $copy])
-                                <x-button variant="primary" class="w-full" :busy="AuthScreens::screen(AuthScreens::COMMUNITY_SIGNUP)['busy']">{{ AuthScreens::screen(AuthScreens::COMMUNITY_SIGNUP)['action'] }}</x-button>
+                                <x-button variant="primary" class="w-full" :busy="__(AuthScreens::screen(AuthScreens::COMMUNITY_SIGNUP)['busy'])">{{ __(AuthScreens::screen(AuthScreens::COMMUNITY_SIGNUP)['action']) }}</x-button>
                             </form>
                         </section>
                     @endif
                 @else
-                    <section class="lg:pl-8" aria-labelledby="apply-heading">
+                    <section class="lg:ps-8" aria-labelledby="apply-heading">
                         <p class="t-label text-accent-text">{{ $copy['applyHeading'] }}</p>
-                        <h2 id="apply-heading" class="mt-3 font-display text-4xl font-light leading-tight">{{ AuthScreens::screen(AuthScreens::COMMUNITY_SIGNUP)['title'] }}</h2>
-                        <p class="t-body mt-4 text-ink-muted">{{ $copy['applyIntro'] }} Already a member? <a href="{{ $loginUrl }}" class="link-hairline">Sign in</a>.</p>
+                        <h2 id="apply-heading" class="mt-3 font-display text-4xl font-light leading-tight">{{ __(AuthScreens::screen(AuthScreens::COMMUNITY_SIGNUP)['title']) }}</h2>
+                        <p class="t-body mt-4 text-ink-muted">{{ $copy['applyIntro'] }} {!! __('Already a member? :link.', ['link' => '<a href="'.e($loginUrl).'" class="link-hairline">'.e(__('Sign in')).'</a>']) !!}</p>
                         <hr class="rule-brass mt-6" data-rule>
 
                         <form novalidate method="POST" action="{{ $applyUrl }}" class="form-style-underline mt-8 space-y-8" x-data="authForm()" x-on:submit="submit($event)" data-apply-form>
@@ -77,14 +77,14 @@
 
                             <x-form.error-summary :targets="['throttle' => 'apply-heading']" />
 
-                            <x-form.input name="name" label="Your name" required autocomplete="name" />
-                            <x-form.input name="email" label="Email" type="email" required autocomplete="email" hint="We will send a link to confirm it." />
-                            <x-form.password name="password" label="Password" :autocomplete="AuthScreens::AUTOCOMPLETE_NEW_PASSWORD" :strength="true" />
-                            <x-form.password name="password_confirmation" label="Confirm password" :autocomplete="AuthScreens::AUTOCOMPLETE_NEW_PASSWORD" />
+                            <x-form.input name="name" :label="__('Your name')" required autocomplete="name" />
+                            <x-form.input name="email" :label="__('Email')" type="email" required autocomplete="email" :hint="__('We will send a link to confirm it.')" />
+                            <x-form.password name="password" :label="__('Password')" :autocomplete="AuthScreens::AUTOCOMPLETE_NEW_PASSWORD" :strength="true" />
+                            <x-form.password name="password_confirmation" :label="__('Confirm password')" :autocomplete="AuthScreens::AUTOCOMPLETE_NEW_PASSWORD" />
 
                             @include('community.partials.application-fields', ['copy' => $copy])
 
-                            <x-button variant="primary" class="w-full" :busy="AuthScreens::screen(AuthScreens::COMMUNITY_SIGNUP)['busy']">{{ AuthScreens::screen(AuthScreens::COMMUNITY_SIGNUP)['action'] }}</x-button>
+                            <x-button variant="primary" class="w-full" :busy="__(AuthScreens::screen(AuthScreens::COMMUNITY_SIGNUP)['busy'])">{{ __(AuthScreens::screen(AuthScreens::COMMUNITY_SIGNUP)['action']) }}</x-button>
                         </form>
                     </section>
                 @endif

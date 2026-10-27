@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasTranslatableContent;
 use App\Models\Concerns\Publishable;
 use Database\Factories\HomeQuoteFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -17,7 +18,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class HomeQuote extends Model
 {
     /** @use HasFactory<HomeQuoteFactory> */
-    use HasFactory, Publishable, SoftDeletes;
+    use HasFactory, HasTranslatableContent, Publishable, SoftDeletes;
+
+    /**
+     * Language-specific columns (English and Arabic); the first is the primary one.
+     *
+     * @var list<string>
+     */
+    public array $translatable = ['quote', 'attribution'];
 
     /**
      * "Name, Source", either part optional, or null when neither is set.

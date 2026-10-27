@@ -86,11 +86,11 @@ final class Uploads
 
     public static function imageMaxLabel(): string
     {
-        return (self::IMAGE_MAX_KILOBYTES / 1024).' MB';
+        return __(':size MB', ['size' => self::IMAGE_MAX_KILOBYTES / 1024]);
     }
 
     public static function documentMaxLabel(): string
     {
-        return (self::DOCUMENT_MAX_KILOBYTES / 1024).' MB';
+        return __(':size MB', ['size' => self::DOCUMENT_MAX_KILOBYTES / 1024]);
     }
 }

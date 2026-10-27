@@ -14,14 +14,14 @@ final class Duration
         $seconds = (int) round(max(0, $seconds));
 
         if ($seconds < 60) {
-            return $seconds.'s';
+            return __(':secondss', ['seconds' => $seconds]);
         }
 
         if ($seconds < 3600) {
-            return intdiv($seconds, 60).'m '.str_pad((string) ($seconds % 60), 2, '0', STR_PAD_LEFT).'s';
+            return __(':minutesm :secondss', ['minutes' => intdiv($seconds, 60), 'seconds' => str_pad((string) ($seconds % 60), 2, '0', STR_PAD_LEFT)]);
         }
 
-        return intdiv($seconds, 3600).'h '.str_pad((string) intdiv($seconds % 3600, 60), 2, '0', STR_PAD_LEFT).'m';
+        return __(':hoursh :minutesm', ['hours' => intdiv($seconds, 3600), 'minutes' => str_pad((string) intdiv($seconds % 3600, 60), 2, '0', STR_PAD_LEFT)]);
     }
 
     /**

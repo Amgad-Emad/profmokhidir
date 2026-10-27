@@ -34,6 +34,6 @@ class OtherItemRequest extends ContentRequest
      */
     public function attributes(): array
     {
-        return ['item_type' => 'type', 'destination_url' => 'destination link'];
+        return ['item_type' => __('type'), 'destination_url' => __('destination link')];
     }
 }

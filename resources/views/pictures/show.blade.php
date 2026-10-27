@@ -5,15 +5,17 @@
             @if (filled($album->description)){{ $album->description }}@endif
         </x-chapter-opening>
 
+        <x-locale.fallback-note :model="$album" />
+
         @if ($wall === [])
             <x-empty-state class="mt-6" :message="$pageCopy->text('pictures', 'album_empty')" />
         @else
             <p class="exhibition__meta smallcaps mt-8" data-rise>
-                @if ($range)<span>{{ $range }}</span>{{ \App\Constants\DateFormats::META_SEPARATOR }}@endif<span>{{ count($wall) }} {{ \Illuminate\Support\Str::plural('photograph', count($wall)) }}</span>
+                @if ($range)<span>{{ $range }}</span>{{ \App\Constants\DateFormats::META_SEPARATOR }}@endif<span>{{ trans_choice('{1} :count photograph|[2,*] :count photographs', count($wall), ['count' => app(\App\Services\LocaleService::class)->digits(count($wall))]) }}</span>
             </p>
 
             <div class="gallery" x-data="lightbox">
-                <ul class="wall mt-16" data-rise-group aria-label="Photographs in {{ $album->title }}">
+                <ul class="wall mt-16" data-rise-group aria-label="{{ __('Photographs in :album', ['album' => $album->title]) }}">
                     @foreach ($wall as $hung)
                         <li @class(['wall__item', 'wall__item--featured' => $hung['featured']]) style="--span: {{ $hung['span'] }}">
                             <x-photo :media="$hung['photo']" :lightbox="true" :label="true" :lift="true" :show-caption="true" :sizes="$hung['sizes']" />
@@ -25,12 +27,12 @@
             </div>
         @endif
 
-        <nav class="mt-24 border-t border-rule pt-8" aria-label="More albums">
+        <nav class="mt-24 border-t border-rule pt-8" aria-label="{{ __('More albums') }}">
             <ul class="flex flex-wrap gap-x-8 gap-y-3">
                 <li><a href="{{ route('pictures') }}" class="link-meta">{{ $pageCopy->text('pictures', 'back_label') }}</a></li>
-                <li><a href="{{ route('pictures', [\App\Constants\Archive::QUERY_VIEW => \App\Constants\PictureView::Decades->value]) }}" class="link-meta">Through the decades</a></li>
+                <li><a href="{{ route('pictures', [\App\Constants\Archive::QUERY_VIEW => \App\Constants\PictureView::Decades->value]) }}" class="link-meta">{{ __('Through the decades') }}</a></li>
                 @foreach ($albums as $other)
-                    <li><a href="{{ route('pictures.show', $other->slug) }}" class="link-meta">{{ $other->title }}</a></li>
+                    <li><a href="{{ route('pictures.show', $other->slug) }}" class="link-meta" @contentLang($other)>{{ $other->title }}</a></li>
                 @endforeach
             </ul>
         </nav>

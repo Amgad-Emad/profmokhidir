@@ -41,7 +41,7 @@
 
     /* "Name · Required": the requirement in the muted hint style, never louder than the label. */
     .form-requirement {
-        margin-left: 0.5rem;
+        margin-inline-start: 0.5rem;
         font-family: var(--font-sans);
         font-size: 0.9375rem; /* 15px */
         font-weight: 400;
@@ -52,7 +52,7 @@
     }
 
     .form-requirement > span {
-        margin-right: 0.125rem;
+        margin-inline-end: 0.125rem;
     }
 
     .form-label--hidden {
@@ -334,7 +334,7 @@
         justify-content: center;
         min-width: 2.75rem;
         min-height: 2.75rem;
-        margin-right: 0.125rem;
+        margin-inline-end: 0.125rem;
         border-radius: var(--radius-card);
         color: var(--ink-muted);
         transition: color 300ms var(--ease-rise);
@@ -355,7 +355,7 @@
     .form-control__status {
         display: none;
         flex: none;
-        margin-right: 0.75rem;
+        margin-inline-end: 0.75rem;
         color: var(--success-tone);
     }
 
@@ -437,9 +437,9 @@
     .form-control:has([data-loading])::after {
         content: '';
         position: absolute;
-        right: 0.5rem;
+        inset-inline-end: 0.5rem;
         bottom: -1px;
-        left: 0.5rem;
+        inset-inline-start: 0.5rem;
         height: 1px;
         background-color: var(--ink);
         transform-origin: left center;
@@ -484,7 +484,7 @@
         content: '';
         position: absolute;
         top: 50%;
-        right: 1rem;
+        inset-inline-end: 1rem;
         width: 0.625rem;
         height: 0.625rem;
         transform: translateY(-50%);
@@ -494,11 +494,11 @@
     }
 
     .form-style-underline .form-control--select::after {
-        right: 0.25rem;
+        inset-inline-end: 0.25rem;
     }
 
     .form-control--select .form-control__input {
-        padding-right: 2.75rem;
+        padding-inline-end: 2.75rem;
         cursor: pointer;
     }
 

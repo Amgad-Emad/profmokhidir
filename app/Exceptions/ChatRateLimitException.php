@@ -13,7 +13,7 @@ class ChatRateLimitException extends RuntimeException
 {
     public static function make(int $retryAfterSeconds): self
     {
-        $exception = new self(sprintf('You are sending messages too quickly. Please wait %d seconds.', max(1, $retryAfterSeconds)));
+        $exception = new self(__('You are sending messages too quickly. Please wait :seconds seconds.', ['seconds' => max(1, $retryAfterSeconds)]));
         $exception->retryAfter = max(1, $retryAfterSeconds);
 
         return $exception;

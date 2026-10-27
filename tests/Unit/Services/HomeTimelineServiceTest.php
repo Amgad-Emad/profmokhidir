@@ -63,7 +63,7 @@ class HomeTimelineServiceTest extends TestCase
 
         $this->assertSame([
             'year' => 1958, 'years' => '1958–1962', 'title' => 'B.Sc.', 'detail' => 'University of Khartoum',
-            'kind' => CvSection::Education->value, 'label' => 'Education',
+            'kind' => CvSection::Education->value, 'label' => 'Education', 'lang' => '',
         ], $chapters[0]['milestones'][0]);
         $this->assertSame(['Teaching Award', 'End only'], array_column($chapters[2]['milestones'], 'title'));
         $this->assertSame('Award', $chapters[2]['milestones'][0]['label']);

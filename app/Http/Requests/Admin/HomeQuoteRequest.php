@@ -27,7 +27,7 @@ class HomeQuoteRequest extends ContentRequest
     public function messages(): array
     {
         return parent::messages() + [
-            'quote.max' => 'Keep the quotation short: :max characters at most, so it reads as an interlude.',
+            'quote.max' => __('Keep the quotation short: :max characters at most, so it reads as an interlude.'),
         ];
     }
 }

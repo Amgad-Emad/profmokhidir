@@ -9,6 +9,8 @@
  |                    them) and a copy button that confirms quietly with "Copied".
  */
 
+import { isRtl } from './i18n';
+
 const DESKTOP = '(min-width: 1024px)'; // Tailwind `lg`: the filters sit beside the results.
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 const COPIED_MS = 2400;
@@ -79,9 +81,12 @@ export function citePanel() {
         move(event) {
             const tabs = Array.from(event.currentTarget.closest('[role="tablist"]').querySelectorAll('[role="tab"]'));
             const index = tabs.indexOf(event.currentTarget);
+            // The tabs run right to left on Arabic pages, so the arrows swap there.
+            const forward = isRtl() ? 'ArrowLeft' : 'ArrowRight';
+            const backward = isRtl() ? 'ArrowRight' : 'ArrowLeft';
             const next = {
-                ArrowRight: (index + 1) % tabs.length,
-                ArrowLeft: (index - 1 + tabs.length) % tabs.length,
+                [forward]: (index + 1) % tabs.length,
+                [backward]: (index - 1 + tabs.length) % tabs.length,
                 Home: 0,
                 End: tabs.length - 1,
             }[event.key];

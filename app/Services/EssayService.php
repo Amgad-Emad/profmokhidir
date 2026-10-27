@@ -61,7 +61,15 @@ class EssayService
      */
     public function readingTime(string $html): string
     {
-        return $this->readingMinutes($html).' '.Essay::READING_TIME_SUFFIX;
+        return $this->readingLabel($this->readingMinutes($html));
+    }
+
+    /**
+     * "8 min read" for a number of minutes, in the current language.
+     */
+    public function readingLabel(int $minutes): string
+    {
+        return trans_choice(Essay::READING_TIME, $minutes, ['count' => app(LocaleService::class)->digits($minutes)]);
     }
 
     /**

@@ -5,7 +5,7 @@
                 <x-brand.lockup variant="stacked" :href="route('home')" />
                 <p class="t-quote max-w-xl">{{ $closingLine }}</p>
             </div>
-            <nav aria-label="Sections">
+            <nav aria-label="{{ __('Sections') }}">
                 <p class="t-label text-accent-text">{{ $heading }}</p>
                 <ul class="mt-6 grid grid-cols-2 gap-x-10 gap-y-3 sm:grid-cols-3 lg:grid-cols-2">
                     @foreach ($sections as $item)
@@ -20,8 +20,9 @@
             <p class="t-label text-accent-text">{{ $domain }}</p>
             <p class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm font-normal text-ink-muted">
                 @if ($privacyUrl)
-                    <a href="{{ $privacyUrl }}" class="footer-link"@if (request()->routeIs(\App\Constants\Analytics::PRIVACY_ROUTE)) aria-current="page"@endif>{{ $privacyLabel }}</a>
+                    <a href="{{ $privacyUrl }}" class="footer-link"@if (\App\Constants\Locales::baseRouteName(request()->route()?->getName()) === \App\Constants\Analytics::PRIVACY_ROUTE) aria-current="page"@endif>{{ $privacyLabel }}</a>
                 @endif
+                <x-locale.switcher variant="footer" class="footer-link" />
                 <span>{{ $copyright }}</span>
             </p>
         </div>

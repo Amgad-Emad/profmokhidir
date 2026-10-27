@@ -19,8 +19,8 @@ enum PictureView: string
     public function label(): string
     {
         return match ($this) {
-            self::Albums => 'Albums',
-            self::Decades => 'Through the decades',
+            self::Albums => __('Albums'),
+            self::Decades => __('Through the decades'),
         };
     }
 

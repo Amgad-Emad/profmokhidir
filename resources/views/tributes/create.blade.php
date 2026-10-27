@@ -1,13 +1,13 @@
 @use('App\Constants\TributeForm')
 @inject('typesetter', 'App\Services\TypesetterService')
-<x-layouts.public :title="$title" description="Share a memory of Professor Khidir. Tributes are read before they are published.">
+<x-layouts.public :title="$title" :description="__('Share a memory of Professor Khidir. Tributes are read before they are published.')">
     <section class="mx-auto max-w-3xl px-4 py-20 sm:px-6 lg:py-28" aria-labelledby="section-title">
         <x-section-header :label="$section['label']" :title="$title" level="1" id="section-title">
             {{ $intro }}
         </x-section-header>
 
         <p class="tribute-steps mt-8" data-rise data-step="{{ $step }}">
-            <span class="smallcaps"><span class="sr-only">Step {{ TributeForm::position($step) }} of {{ count($steps) }}</span><span aria-hidden="true">Step {{ $typesetter->roman(TributeForm::position($step)) }} of {{ $typesetter->roman(count($steps)) }}</span></span>
+            <span class="smallcaps"><span class="sr-only">{{ __('Step :step of :total', ['step' => app(\App\Services\LocaleService::class)->digits(TributeForm::position($step)), 'total' => app(\App\Services\LocaleService::class)->digits(count($steps))]) }}</span><span aria-hidden="true">{{ __('Step :step of :total', ['step' => $typesetter->roman(TributeForm::position($step)), 'total' => $typesetter->roman(count($steps))]) }}</span></span>
             @foreach ($steps as $key => $label)
                 @if ($key === $step)
                     <span class="smallcaps tribute-steps__current" aria-current="step">{{ $label }}</span>
@@ -38,7 +38,7 @@
 
             {{-- Honeypot: hidden from people, filled by bots, never validated. --}}
             <div class="form-honeypot" aria-hidden="true">
-                <label for="{{ \App\Http\Requests\StoreTributeRequest::HONEYPOT }}">Website</label>
+                <label for="{{ \App\Http\Requests\StoreTributeRequest::HONEYPOT }}">{{ __('Website') }}</label>
                 <input type="text" id="{{ \App\Http\Requests\StoreTributeRequest::HONEYPOT }}" name="{{ \App\Http\Requests\StoreTributeRequest::HONEYPOT }}" tabindex="-1" autocomplete="off" value="">
             </div>
 

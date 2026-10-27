@@ -40,6 +40,38 @@ final class MediaProperties
 
     public const string FOCUS_Y = 'focus_y';
 
+    /** Arabic (and any other non-default language) versions of the described properties: translations.ar.alt_text. */
+    public const string TRANSLATIONS = 'translations';
+
+    /**
+     * Properties written in each language (the rest are the same in every language).
+     *
+     * @return list<string>
+     */
+    public static function translatable(): array
+    {
+        return [self::ALT_TEXT, self::CAPTION, self::PLACE, self::NOTE];
+    }
+
+    /**
+     * Where a property's version in a language is kept ("translations.ar.alt_text").
+     */
+    public static function translationPath(string $locale, string $property): string
+    {
+        return self::TRANSLATIONS.'.'.$locale.'.'.$property;
+    }
+
+    /**
+     * Whether a key is a translation path of a described property ("translations.ar.alt_text").
+     */
+    public static function isTranslationPath(string $key): bool
+    {
+        $parts = explode('.', $key);
+
+        return count($parts) === 3 && $parts[0] === self::TRANSLATIONS && Locales::isValid($parts[1])
+            && $parts[1] !== Locales::DEFAULT && in_array($parts[2], self::translatable(), true);
+    }
+
     /**
      * @return list<string>
      */

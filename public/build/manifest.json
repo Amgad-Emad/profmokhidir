@@ -1,11 +1,21 @@
 {
-  "_lightbox-Dp1V0Utr.js": {
-    "file": "assets/lightbox-Dp1V0Utr.js",
-    "name": "lightbox"
+  "_i18n-DFSjS90y.js": {
+    "file": "assets/i18n-DFSjS90y.js",
+    "name": "i18n"
   },
-  "_theme-YhDtDxIR.js": {
-    "file": "assets/theme-YhDtDxIR.js",
+  "_lightbox-B7x0plgN.js": {
+    "file": "assets/lightbox-B7x0plgN.js",
+    "name": "lightbox",
+    "imports": [
+      "_i18n-DFSjS90y.js"
+    ]
+  },
+  "_theme-B_4eTF1Q.js": {
+    "file": "assets/theme-B_4eTF1Q.js",
     "name": "theme",
+    "imports": [
+      "_i18n-DFSjS90y.js"
+    ],
     "dynamicImports": [
       "node_modules/@tiptap/core/dist/index.js",
       "node_modules/@tiptap/starter-kit/dist/index.js",
@@ -43,7 +53,7 @@
     "isDynamicEntry": true
   },
   "resources/css/app.css": {
-    "file": "assets/app-zyk3xauk.css",
+    "file": "assets/app-L_98Ks8g.css",
     "name": "app",
     "names": [
       "app.css"
@@ -52,19 +62,23 @@
     "isEntry": true
   },
   "resources/js/admin.js": {
-    "file": "assets/admin-BawxHMZw.js",
+    "file": "assets/admin-Bequqj-7.js",
     "name": "admin",
     "src": "resources/js/admin.js",
     "isEntry": true,
     "imports": [
-      "_theme-YhDtDxIR.js"
+      "_i18n-DFSjS90y.js",
+      "_theme-B_4eTF1Q.js"
     ]
   },
   "resources/js/admin/analytics-chart.js": {
-    "file": "assets/analytics-chart-D8234-Zp.js",
+    "file": "assets/analytics-chart-DgOaNlIa.js",
     "name": "analytics-chart",
     "src": "resources/js/admin/analytics-chart.js",
-    "isEntry": true
+    "isEntry": true,
+    "imports": [
+      "_i18n-DFSjS90y.js"
+    ]
   },
   "resources/js/analytics.js": {
     "file": "assets/analytics-BIjmbqHw.js",
@@ -73,26 +87,28 @@
     "isDynamicEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-BtPTsnnr.js",
+    "file": "assets/app-DrI9UYdw.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "imports": [
-      "_lightbox-Dp1V0Utr.js",
-      "_theme-YhDtDxIR.js"
+      "_i18n-DFSjS90y.js",
+      "_lightbox-B7x0plgN.js",
+      "_theme-B_4eTF1Q.js"
     ],
     "dynamicImports": [
       "resources/js/analytics.js"
     ]
   },
   "resources/js/chat.js": {
-    "file": "assets/chat-Bxw46Wt3.js",
+    "file": "assets/chat-D_cTyl55.js",
     "name": "chat",
     "src": "resources/js/chat.js",
     "isEntry": true,
     "imports": [
-      "_lightbox-Dp1V0Utr.js",
-      "_theme-YhDtDxIR.js"
+      "_i18n-DFSjS90y.js",
+      "_lightbox-B7x0plgN.js",
+      "_theme-B_4eTF1Q.js"
     ],
     "dynamicImports": [
       "node_modules/katex/dist/katex.mjs"

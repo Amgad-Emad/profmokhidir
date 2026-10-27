@@ -42,7 +42,7 @@ class SectionCardTest extends TestCase
         $this->assertStringContainsString('aria-describedby="section-card-cv-summary"', $html);
         $this->assertMatchesRegularExpression('/<span class="section-card__numeral t-label" aria-hidden="true">II<\/span>/', $html);
         $this->assertMatchesRegularExpression('/<span class="section-card__title" id="section-card-cv-title" role="heading" aria-level="3">CV and Achievements<\/span>/', $html);
-        $this->assertMatchesRegularExpression('/<span id="section-card-cv-action">Explore<\/span> <span class="section-card__arrow" aria-hidden="true">→<\/span>/u', $html);
+        $this->assertMatchesRegularExpression('/<span id="section-card-cv-action">Explore<\/span> <span class="section-card__arrow rtl-mirror" aria-hidden="true">→<\/span>/u', $html);
         $this->assertStringNotContainsString('section-card__strip', $html, 'no strip without an image');
     }
 

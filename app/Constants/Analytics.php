@@ -158,13 +158,13 @@ final class Analytics
      */
     public static function sections(): array
     {
-        $sections = [self::SECTION_HOME => 'Home'];
+        $sections = [self::SECTION_HOME => __('Home')];
 
         foreach (Sections::definitions() as $key => $section) {
-            $sections[$key] = $section['label'];
+            $sections[$key] = __($section['label']);
         }
 
-        $sections[self::SECTION_OTHER_PAGES] = 'Other pages';
+        $sections[self::SECTION_OTHER_PAGES] = __('Other pages');
 
         return $sections;
     }

@@ -36,22 +36,20 @@ class ImagesNotReadyException extends RuntimeException
             }
         }
 
-        return sprintf(
-            '%d %s still %s %s. Add the details in the media library before publishing.',
+        return trans_choice(
+            '{1} :count image still lacks :details. Add the details in the media library before publishing.|[2,*] :count images still lack :details. Add the details in the media library before publishing.',
             $count,
-            $count === 1 ? 'image' : 'images',
-            $count === 1 ? 'lacks' : 'lack',
-            implode(', ', array_values($labels)),
+            ['details' => implode(__(', '), array_values($labels))],
         );
     }
 
     public static function label(string $property): string
     {
         return match ($property) {
-            MediaProperties::ALT_TEXT => 'alt text',
-            MediaProperties::CAPTION => 'a caption',
-            MediaProperties::PLACE => 'a place',
-            MediaProperties::YEAR => 'a year',
+            MediaProperties::ALT_TEXT => __('alt text'),
+            MediaProperties::CAPTION => __('a caption'),
+            MediaProperties::PLACE => __('a place'),
+            MediaProperties::YEAR => __('a year'),
             default => str_replace('_', ' ', $property),
         };
     }

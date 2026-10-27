@@ -48,13 +48,13 @@ class StoreTributeRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Enter your name.',
-            'relationship.required' => 'Choose how you knew Professor Khidir.',
-            'relationship.Illuminate\Validation\Rules\Enum' => 'Please choose one of the listed relationships.',
-            'message.required' => 'Write your tribute.',
-            'message.max' => 'Shorten your tribute to :max characters or fewer.',
-            'email.email' => 'Enter an email address in the form name@example.com, or leave it empty.',
-            'consent.accepted' => 'Tick the box to agree that your tribute may be published.',
+            'name.required' => __('Enter your name.'),
+            'relationship.required' => __('Choose how you knew Professor Khidir.'),
+            'relationship.Illuminate\Validation\Rules\Enum' => __('Please choose one of the listed relationships.'),
+            'message.required' => __('Write your tribute.'),
+            'message.max' => __('Shorten your tribute to :max characters or fewer.'),
+            'email.email' => __('Enter an email address in the form name@example.com, or leave it empty.'),
+            'consent.accepted' => __('Tick the box to agree that your tribute may be published.'),
         ];
     }
 
@@ -64,7 +64,7 @@ class StoreTributeRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'message' => 'tribute',
+            'message' => __('tribute'),
         ];
     }
 

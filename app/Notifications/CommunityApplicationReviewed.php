@@ -38,27 +38,27 @@ class CommunityApplicationReviewed extends Notification implements ShouldQueue
         $communityUrl = route(Sections::definitions()[Sections::COMMUNITY]['route']);
         $mail = (new MailMessage)
             ->subject($this->subject())
-            ->greeting('Hello '.$notifiable->name.',');
+            ->greeting(__('Hello :name,', ['name' => $notifiable->name]));
 
         foreach ($this->lines() as $line) {
             $mail->line($line);
         }
 
         if (filled($this->note)) {
-            $mail->line('Note from the reviewer: '.$this->note);
+            $mail->line(__('Note from the reviewer: :note', ['note' => $this->note]));
         }
 
-        return $mail->action($this->status === CommunityStatus::Approved ? 'Open the community' : 'Visit the community page', $communityUrl);
+        return $mail->action($this->status === CommunityStatus::Approved ? __('Open the community') : __('Visit the community page'), $communityUrl);
     }
 
     public function subject(): string
     {
         return match ($this->status) {
-            CommunityStatus::Approved => 'Your community application has been approved',
-            CommunityStatus::Rejected => 'About your community application',
-            CommunityStatus::Suspended => 'Your community membership has been suspended',
-            CommunityStatus::None => 'Your community membership has ended',
-            CommunityStatus::Pending => 'Your community application has been received',
+            CommunityStatus::Approved => __('Your community application has been approved'),
+            CommunityStatus::Rejected => __('About your community application'),
+            CommunityStatus::Suspended => __('Your community membership has been suspended'),
+            CommunityStatus::None => __('Your community membership has ended'),
+            CommunityStatus::Pending => __('Your community application has been received'),
         };
     }
 
@@ -67,24 +67,26 @@ class CommunityApplicationReviewed extends Notification implements ShouldQueue
      */
     public function lines(): array
     {
+        $site = ['site' => config('app.name')];
+
         return match ($this->status) {
             CommunityStatus::Approved => [
-                'Your application to join the Scientific Community on '.config('app.name').' has been approved.',
-                'You can now sign in and take part in the members\' chat.',
+                __('Your application to join the Scientific Community on :site has been approved.', $site),
+                __('You can now sign in and take part in the members\' chat.'),
             ],
             CommunityStatus::Rejected => [
-                'Thank you for applying to join the Scientific Community on '.config('app.name').'.',
-                'On this occasion your application has not been accepted.',
+                __('Thank you for applying to join the Scientific Community on :site.', $site),
+                __('On this occasion your application has not been accepted.'),
             ],
             CommunityStatus::Suspended => [
-                'Your membership of the Scientific Community on '.config('app.name').' has been suspended by an administrator, and the chat is closed to you for now.',
+                __('Your membership of the Scientific Community on :site has been suspended by an administrator, and the chat is closed to you for now.', $site),
             ],
             CommunityStatus::None => [
-                'Your membership of the Scientific Community on '.config('app.name').' has ended.',
-                'You are welcome to apply again.',
+                __('Your membership of the Scientific Community on :site has ended.', $site),
+                __('You are welcome to apply again.'),
             ],
             CommunityStatus::Pending => [
-                'Your application to join the Scientific Community on '.config('app.name').' has been received and will be reviewed by an administrator.',
+                __('Your application to join the Scientific Community on :site has been received and will be reviewed by an administrator.', $site),
             ],
         };
     }

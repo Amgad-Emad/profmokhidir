@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Constants\CacheKeys;
+use App\Constants\Locales;
 use App\Constants\MediaProperties;
 use App\Constants\PageBlocks;
+use App\Constants\PageBlockType;
 use App\Constants\Pages;
 use App\Models\Page;
 use App\Repositories\Contracts\PageRepositoryInterface;
+use App\Support\PageBlockDefinition;
 use App\Support\PageBlockValue;
 use App\Support\PreviewContext;
 use App\Support\ResponsiveImage;
@@ -29,6 +32,11 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * the built-in copy (App\Constants\PageBlocks), so nothing renders empty.
  * During a signed preview of a page its draft values are shown instead. If the
  * database cannot be reached (the error pages), the built-in copy is used.
+ * Blocks are per language: the cache holds every language's stored value and
+ * each request picks its own. An Arabic page shows the Arabic value; where
+ * there is none, the English value with every built-in string translated
+ * (copy an editor changed in English and has not translated stays English),
+ * and the built-in copy in Arabic wherever the English would fall back to it.
  * Bound per request; the values read are kept for the rest of the request.
  */
 class PageContentService
@@ -200,7 +208,8 @@ class PageContentService
     private function load(string $page): array
     {
         $previewId = $this->preview->idFor(new Page);
-        $memo = $page.'#'.($previewId ?? 0);
+        $locale = app()->getLocale();
+        $memo = $page.'#'.($previewId ?? 0).'#'.$locale;
 
         if (isset($this->loaded[$memo])) {
             return $this->loaded[$memo];
@@ -218,10 +227,39 @@ class PageContentService
         $values = [];
 
         foreach (PageBlocks::for($page) as $key => $definition) {
-            $values[$key] = PageBlockValue::normalise($definition, $stored['values'][$key] ?? null);
+            $values[$key] = $this->localise($definition, $stored['values'][$key] ?? [], $locale);
         }
 
         return $this->loaded[$memo] = ['values' => $values, 'media' => $stored['media']];
+    }
+
+    /**
+     * A block's value in the language, from its stored value per language.
+     *
+     * @param  array<string, mixed>  $stored  locale => stored value
+     */
+    private function localise(PageBlockDefinition $definition, array $stored, string $locale): mixed
+    {
+        $english = $stored[Locales::DEFAULT] ?? null;
+
+        if ($locale === Locales::DEFAULT) {
+            return PageBlockValue::normalise($definition, $english);
+        }
+
+        $localized = $definition->localized();
+        $own = $stored[$locale] ?? null;
+
+        if (blank($own)) {
+            return PageBlockValue::normalise($localized, $english === null ? null : $definition->translate($english));
+        }
+
+        // An Arabic image, link or search value holds its words only; the image,
+        // its crop and the destination are the English value's.
+        if (is_array($own) && is_array($english) && in_array($definition->type, [PageBlockType::Image, PageBlockType::Link, PageBlockType::Seo], true)) {
+            $own = array_replace($english, array_filter($own, fn (mixed $value): bool => filled($value)));
+        }
+
+        return PageBlockValue::normalise($localized, $own);
     }
 
     /**
@@ -247,8 +285,12 @@ class PageContentService
                 continue;
             }
 
-            $value = $previewing && $block->hasDraft() ? $block->draft_value : $block->value;
-            $values[$key] = $value;
+            // Every language's value (raw), so the cached copy serves each language.
+            $column = $previewing && $block->hasDraft() ? 'draft_value' : 'value';
+            // Raw, so an optional block emptied on purpose ("") stays empty instead of taking its default.
+            $raw = json_decode((string) ($block->getAttributes()[$column] ?? 'null'), true);
+            $values[$key] = is_array($raw) && Locales::isLocaleMap($raw) ? $raw : [];
+            $value = $values[$key][Locales::DEFAULT] ?? null;
             $mediaId = is_array($value) ? (int) ($value['media_id'] ?? 0) : 0;
 
             if ($block->type->hasImage() && $mediaId > 0 && ($item = $block->media->firstWhere('id', $mediaId)) !== null) {

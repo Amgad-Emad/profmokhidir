@@ -25,7 +25,7 @@
             @endif
 
             <a href="#{{ $anchor }}" class="scroll-cue t-label text-accent-text">
-                <span>{{ $copy['scroll'] }}</span><span class="sr-only"> to {{ $copy['chapters'] }}</span>
+                <span>{{ $copy['scroll'] }}</span><span class="sr-only"> {{ __('to :section', ['section' => $copy['chapters']]) }}</span>
                 <span class="scroll-cue__line" aria-hidden="true" data-rule></span>
             </a>
         </div>
@@ -43,7 +43,7 @@
                     <div class="life-chapter__inner" data-scroll-line>
                         <span class="life-chapter__line" aria-hidden="true"></span>
                         <header class="life-chapter__marker">
-                            <p class="t-numeral text-accent-text"><span class="sr-only">Chapter </span>{{ $chapter['numeral'] }}</p>
+                            <p class="t-numeral text-accent-text"><span class="sr-only">{{ __('Chapter') }} </span>{{ $chapter['numeral'] }}</p>
                             <h3 id="{{ $chapter['id'] }}" class="life-chapter__years">{{ $chapter['years'] }}</h3>
                         </header>
                         <div class="life-chapter__body">
@@ -51,7 +51,7 @@
                                 @foreach ($chapter['milestones'] as $milestone)
                                     <li class="milestone">
                                         <p class="milestone__year">{{ $milestone['years'] }}</p>
-                                        <p class="milestone__title">@typeset($milestone['title'])</p>
+                                        <p {!! $milestone['lang'] ?? '' !!} class="milestone__title">@typeset($milestone['title'])</p>
                                         <p class="milestone__meta">
                                             <span class="smallcaps text-accent-text">{{ $milestone['label'] }}</span>
                                             @if ($milestone['detail'])
@@ -75,7 +75,7 @@
             @if ($chapter['interlude'])
                 <figure class="interlude glow-brass on-dark bg-surface text-ink">
                     <div class="mx-auto max-w-4xl px-8 py-24 lg:py-32">
-                        <blockquote class="t-quote pull-quote" data-rise>
+                        <blockquote @contentLang($chapter['interlude'], 'quote') class="t-quote pull-quote" data-rise>
                             <p><span class="hang-quote">&ldquo;</span>@typeset($chapter['interlude']->quote)&rdquo;</p>
                         </blockquote>
                         @if ($chapter['interlude']->credit())
@@ -105,7 +105,7 @@
                     @foreach ($stats as $stat)
                         <div class="figure">
                             <dt class="smallcaps figure__label">{{ $stat['label'] }}</dt>
-                            <dd class="figures-lining figure__value">{{ number_format($stat['value']) }}</dd>
+                            <dd class="figures-lining figure__value">@num(number_format($stat['value']))</dd>
                         </div>
                     @endforeach
                 </dl>

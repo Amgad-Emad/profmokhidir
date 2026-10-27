@@ -65,7 +65,7 @@ class AdminShellService
         return [
             'dashboard' => [
                 'key' => 'dashboard',
-                'label' => AdminUx::DASHBOARD_LABEL,
+                'label' => __(AdminUx::DASHBOARD_LABEL),
                 'url' => route(AdminNavigation::DASHBOARD_ROUTE),
                 'icon' => AdminUx::icon('dashboard'),
                 'active' => $currentRoute === AdminNavigation::DASHBOARD_ROUTE,
@@ -102,7 +102,7 @@ class AdminShellService
      */
     public function breadcrumbs(?string $currentRoute, ?string $title = null): array
     {
-        $crumbs = [['label' => AdminUx::DASHBOARD_LABEL, 'url' => route(AdminNavigation::DASHBOARD_ROUTE)]];
+        $crumbs = [['label' => __(AdminUx::DASHBOARD_LABEL), 'url' => route(AdminNavigation::DASHBOARD_ROUTE)]];
 
         if ($currentRoute === null || $currentRoute === AdminNavigation::DASHBOARD_ROUTE) {
             $crumbs[0]['url'] = null;
@@ -150,8 +150,8 @@ class AdminShellService
                 }
 
                 $entries[] = [
-                    'group' => 'Create',
-                    'label' => 'New '.strtolower($definition['singular']),
+                    'group' => __('Create'),
+                    'label' => __('New :type', ['type' => mb_strtolower(__($definition['singular']))]),
                     'hint' => AdminNavigation::get($definition['nav'])['label'],
                     'url' => route(ContentTypes::createRoute($type)),
                     'icon' => 'plus',
@@ -160,8 +160,8 @@ class AdminShellService
             }
 
             $entries[] = [
-                'group' => 'Create',
-                'label' => 'Upload photos',
+                'group' => __('Create'),
+                'label' => __('Upload photos'),
                 'hint' => AdminNavigation::get(AdminNavigation::MEDIA_LIBRARY)['label'],
                 'url' => route(AdminNavigation::routeFor(AdminNavigation::MEDIA_LIBRARY)).'#upload',
                 'icon' => 'upload',
@@ -170,9 +170,9 @@ class AdminShellService
         }
 
         $entries[] = [
-            'group' => 'Go to',
-            'label' => AdminUx::DASHBOARD_LABEL,
-            'hint' => 'Home of the dashboard',
+            'group' => __('Go to'),
+            'label' => __(AdminUx::DASHBOARD_LABEL),
+            'hint' => __('Home of the dashboard'),
             'url' => route(AdminNavigation::DASHBOARD_ROUTE),
             'icon' => AdminUx::icon('dashboard'),
             'keywords' => 'home start attention checklist',
@@ -184,7 +184,7 @@ class AdminShellService
             }
 
             $entries[] = [
-                'group' => 'Go to',
+                'group' => __('Go to'),
                 'label' => $item['label'],
                 'hint' => AdminNavigation::groups()[$item['group']],
                 'url' => route($item['route']),
@@ -194,9 +194,9 @@ class AdminShellService
         }
 
         $entries[] = [
-            'group' => 'Go to',
-            'label' => 'View the public site',
-            'hint' => 'Opens the home page',
+            'group' => __('Go to'),
+            'label' => __('View the public site'),
+            'hint' => __('Opens the home page'),
             'url' => route('home'),
             'icon' => 'external',
             'keywords' => 'website public home',

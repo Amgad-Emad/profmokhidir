@@ -1,7 +1,7 @@
 /*
  | The correspondence room (App\Constants\ChatCopy / ChatSettings): one Scientific
  | Community conversation on the page surface, set like letters, with the "About this
- | room" panel (About, Pinned, Members) on the right. Imported by app.css. Colours go
+ | room" panel (About, Pinned, Members) at the inline end (the right, the left in Arabic). Imported by app.css. Colours go
  | through the semantic tokens: the accent only for hairlines, the ring and small
  | labels. Nothing moves faster than the brand allows and every transition is removed
  | under prefers-reduced-motion.
@@ -53,7 +53,7 @@
         min-height: 0;
     }
 
-    /* From 1024px the panel is a collapsible column on the right; below that it is a drawer. */
+    /* From 1024px the panel is a collapsible column at the inline end; below that it is a drawer. */
     @media (min-width: 1024px) {
         .chat-shell.has-panel {
             grid-template-columns: minmax(0, 1fr) var(--chat-panel);
@@ -196,7 +196,7 @@
         width: 100%;
         padding: var(--space-1) var(--space-2);
         border-radius: var(--radius-card);
-        text-align: left;
+        text-align: start;
         transition: background-color 400ms var(--ease-rise);
     }
 
@@ -427,7 +427,7 @@
     .chat-message__body ul,
     .chat-message__body ol {
         margin: var(--space-1) 0;
-        padding-left: 1.5em;
+        padding-inline-start: 1.5em;
     }
 
     .chat-message__body ul {
@@ -451,6 +451,15 @@
 
     .chat-run.is-mine .chat-code {
         background-color: var(--surface);
+    }
+
+    /* Maths and code read left to right in every language, even inside an Arabic message. */
+    .chat-math,
+    .chat-code,
+    .chat-message__body code,
+    .chat-filemark {
+        direction: ltr;
+        unicode-bidi: isolate;
     }
 
     .chat-math[data-math='display'] {
@@ -510,15 +519,16 @@
         font-size: inherit;
     }
 
-    /* The quoted original above a reply: an accent hairline at its left. */
+    /* The quoted original above a reply: an accent hairline at its inline start. */
     .chat-reply {
         display: block;
         width: 100%;
         max-width: 100%;
         margin-bottom: var(--space-1);
-        padding: 2px 0 2px var(--space-2);
-        border-left: 1px solid var(--accent-line);
-        text-align: left;
+        padding-block: 2px;
+        padding-inline: var(--space-2) 0;
+        border-inline-start: 1px solid var(--accent-line);
+        text-align: start;
         color: var(--ink-muted);
     }
 
@@ -548,7 +558,7 @@
     .chat-toolbar {
         position: absolute;
         top: calc(-1 * var(--space-3));
-        right: var(--space-1);
+        inset-inline-end: var(--space-1);
         z-index: 6;
         display: flex;
         align-items: center;
@@ -648,7 +658,8 @@
         align-items: center;
         justify-content: center;
         min-height: 2.5rem;
-        margin: calc(-1 * var(--space-6)) 0 0 var(--space-3);
+        margin-block: calc(-1 * var(--space-6)) 0;
+        margin-inline: var(--space-3) 0;
         padding-inline: var(--space-3);
         z-index: 5;
     }
@@ -685,7 +696,7 @@
         min-width: 0;
     }
 
-    /* On a phone the field takes the whole line and its tools sit beneath it, on the right. */
+    /* On a phone the field takes the whole line and its tools sit beneath it, at the inline end. */
     @media (max-width: 479px) {
         .chat-composer__field {
             flex-wrap: wrap;
@@ -783,7 +794,7 @@
     }
 
     .chat-count {
-        margin-left: auto;
+        margin-inline-start: auto;
         font-size: 0.9375rem; /* 15px */
         font-weight: 500;
         font-variant-numeric: tabular-nums;
@@ -800,7 +811,7 @@
         flex-direction: column;
         height: 100%;
         background-color: var(--surface);
-        border-left: 1px solid var(--rule);
+        border-inline-start: 1px solid var(--rule);
         overflow: hidden;
     }
 
@@ -809,7 +820,7 @@
         .chat-panel {
             position: fixed;
             top: var(--chat-header);
-            right: 0;
+            inset-inline-end: 0;
             bottom: 0;
             width: min(24rem, 100%);
             height: auto;
@@ -817,10 +828,15 @@
             box-shadow: -1px 0 0 var(--rule);
         }
 
+        /* The drawer opens from the left in Arabic: its hairline shadow faces the conversation. */
+        :where([dir='rtl']) .chat-panel {
+            box-shadow: 1px 0 0 var(--rule);
+        }
+
         @media (max-width: 479px) {
             .chat-panel {
                 width: 100%;
-                border-left: 0;
+                border-inline-start: 0;
             }
         }
 
@@ -843,7 +859,8 @@
         align-items: center;
         justify-content: space-between;
         gap: var(--space-2);
-        padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+        padding-block: var(--space-2);
+        padding-inline: var(--space-3) var(--space-2);
         border-bottom: 1px solid var(--rule);
     }
 
@@ -889,9 +906,10 @@
     .chat-pin {
         display: block;
         width: 100%;
-        padding: var(--space-1) 0 var(--space-1) var(--space-2);
-        border-left: 1px solid var(--accent-line);
-        text-align: left;
+        padding-block: var(--space-1);
+        padding-inline: var(--space-2) 0;
+        border-inline-start: 1px solid var(--accent-line);
+        text-align: start;
     }
 
     .chat-pin__excerpt {
@@ -975,7 +993,7 @@
 
     .chat-member-menu__panel {
         position: absolute;
-        right: 0;
+        inset-inline-end: 0;
         z-index: 50;
         margin-top: var(--space-1);
         min-width: 16rem;
@@ -1000,7 +1018,7 @@
         font-size: 0.9375rem;
         font-weight: 500;
         color: var(--ink);
-        text-align: left;
+        text-align: start;
         text-decoration: none;
     }
 
@@ -1052,7 +1070,7 @@
     }
 
     .chat-tab__count {
-        margin-left: 0.35em;
+        margin-inline-start: 0.35em;
         letter-spacing: 0.05em;
         font-variant-numeric: lining-nums tabular-nums;
     }
@@ -1100,7 +1118,7 @@
     .chat-member__avatar.is-online::after {
         content: '';
         position: absolute;
-        right: -1px;
+        inset-inline-end: -1px;
         bottom: -1px;
         width: 0.5rem;
         height: 0.5rem;
@@ -1132,7 +1150,7 @@
 
     .chat-member__menu {
         position: absolute;
-        right: 0;
+        inset-inline-end: 0;
         top: 100%;
         z-index: 10;
         min-width: 12rem;
@@ -1145,7 +1163,8 @@
     .chat-member__confirm {
         display: grid;
         gap: var(--space-1);
-        padding: var(--space-1) 0 var(--space-2) calc(2rem + var(--space-2));
+        padding-block: var(--space-1) var(--space-2);
+        padding-inline: calc(2rem + var(--space-2)) 0;
         font-size: 0.9375rem; /* 15px */
         font-weight: 400;
         color: var(--ink);
@@ -1245,7 +1264,7 @@
         border-bottom-color: var(--danger);
     }
 
-    /* Upload progress: a hairline that fills from left to right. */
+    /* Upload progress: a hairline that fills in the reading direction (from the right in Arabic). */
     .chat-progress {
         display: block;
         height: 1px;
@@ -1260,6 +1279,10 @@
         background-color: var(--accent-line);
         transform-origin: left center;
         transition: transform 300ms var(--ease-rise);
+    }
+
+    :where([dir='rtl']) .chat-progress > span {
+        transform-origin: right center;
     }
 
     /* The paperclip sits beside "Aa", in the same quiet outline circle. */
@@ -1383,7 +1406,8 @@
         grid-template-columns: 2.5rem minmax(0, 1fr) auto;
         align-items: center;
         gap: var(--space-2);
-        padding: var(--space-1) var(--space-1) var(--space-1) var(--space-2);
+        padding-block: var(--space-1);
+        padding-inline: var(--space-2) var(--space-1);
         border: 1px solid var(--rule);
         border-radius: var(--radius-card);
         background-color: var(--surface-panel);

@@ -24,7 +24,7 @@ class PlainTextMax implements ValidationRule
         $text = trim(html_entity_decode(strip_tags($value), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
 
         if (mb_strlen($text) > $this->max) {
-            $fail(sprintf('The :attribute must be no longer than %d characters (it has %d).', $this->max, mb_strlen($text)));
+            $fail(__('The :attribute must be no longer than :max characters (it has :count).', ['max' => $this->max, 'count' => mb_strlen($text)]));
         }
     }
 }

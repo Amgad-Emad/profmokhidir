@@ -7,8 +7,10 @@ namespace App\Services;
 use App\Constants\Archive;
 use App\Constants\AuditAction;
 use App\Constants\ContentTypes;
+use App\Constants\Locales;
 use App\Constants\MediaProperties;
 use App\Constants\MediaTreatment;
+use App\Models\Media as LocalizedMedia;
 use App\Models\User;
 use App\Repositories\Contracts\MediaRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -137,15 +139,40 @@ class MediaService
     }
 
     /**
+     * The editable details of an image for the admin forms: each property in
+     * English (never the editor's language) and, under 'translations', the
+     * translated alt text, caption and place per language, without fallback.
+     *
+     * @return array<string, mixed>
+     */
+    public function details(Media $media): array
+    {
+        $details = [];
+
+        foreach ([MediaProperties::ALT_TEXT, MediaProperties::CAPTION, MediaProperties::PLACE, MediaProperties::YEAR, MediaProperties::TREATMENT, MediaProperties::CREDIT, MediaProperties::PERMISSIONS_NOTE] as $key) {
+            $details[$key] = $media instanceof LocalizedMedia ? $media->getTranslatedProperty($key, Locales::DEFAULT) : $media->getCustomProperty($key);
+        }
+
+        foreach (Locales::prefixed() as $locale) {
+            foreach ([MediaProperties::ALT_TEXT, MediaProperties::CAPTION, MediaProperties::PLACE] as $key) {
+                $details[MediaProperties::TRANSLATIONS][$locale][$key] = $media instanceof LocalizedMedia ? $media->getTranslatedProperty($key, $locale) : null;
+            }
+        }
+
+        return $details;
+    }
+
+    /**
      * Whether an image carries everything the public site needs (alt, caption, place, year).
      *
      * @return list<string> missing property keys
      */
     public function missingForPublishing(Media $media): array
     {
+        // English is what publishing needs, whatever language the editor works in.
         return array_values(array_filter(
             MediaProperties::requiredForPublishing(),
-            fn (string $key): bool => blank($media->getCustomProperty($key)),
+            fn (string $key): bool => blank($media instanceof LocalizedMedia ? $media->getTranslatedProperty($key, Locales::DEFAULT) : $media->getCustomProperty($key)),
         ));
     }
 
@@ -190,8 +217,8 @@ class MediaService
             ? ($media->model_type)::withoutGlobalScopes()->find($media->model_id)
             : null;
 
-        $typeLabel = $type === null ? class_basename((string) $media->model_type) : ContentTypes::get($type)['singular'];
-        $label = $owner?->getAttribute('title') ?? $owner?->getAttribute('name') ?? ($owner === null ? 'Not attached to any content' : $typeLabel.' #'.$owner->getKey());
+        $typeLabel = $type === null ? class_basename((string) $media->model_type) : __(ContentTypes::get($type)['singular']);
+        $label = $owner?->getAttribute('title') ?? $owner?->getAttribute('name') ?? ($owner === null ? __('Not attached to any content') : $typeLabel.' #'.$owner->getKey());
         $trashed = $owner !== null && method_exists($owner, 'trashed') && $owner->trashed();
 
         $url = null;
@@ -245,7 +272,26 @@ class MediaService
     {
         $clean = [];
 
+        // Nested translations (['translations' => ['ar' => ['alt_text' => ...]]]) become their paths.
+        if (is_array($properties[MediaProperties::TRANSLATIONS] ?? null)) {
+            foreach ($properties[MediaProperties::TRANSLATIONS] as $locale => $translated) {
+                foreach (is_array($translated) ? $translated : [] as $property => $value) {
+                    $properties[MediaProperties::translationPath((string) $locale, (string) $property)] = $value;
+                }
+            }
+
+            unset($properties[MediaProperties::TRANSLATIONS]);
+        }
+
         foreach ($properties as $key => $value) {
+            if (MediaProperties::isTranslationPath((string) $key)) {
+                // Another language's alt text, caption, place or note: a trimmed string, or null to forget it.
+                $value = is_string($value) ? trim($value) : $value;
+                $clean[$key] = $value === '' ? null : $value;
+
+                continue;
+            }
+
             if (! in_array($key, MediaProperties::all(), true)) {
                 throw new InvalidArgumentException(sprintf('Unknown media property "%s".', $key));
             }

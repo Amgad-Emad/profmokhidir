@@ -10,6 +10,7 @@ use App\Constants\ChatCopy;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Translation\PotentiallyTranslatedString;
 use ZipArchive;
 
 /**
@@ -29,12 +30,12 @@ class ChatAttachmentFile implements ValidationRule
     /**
      * Run the validation rule.
      *
-     * @param  Closure(string, ?string=): \Illuminate\Translation\PotentiallyTranslatedString  $fail
+     * @param  Closure(string, ?string=): PotentiallyTranslatedString  $fail
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (! $value instanceof UploadedFile || ! $value->isValid()) {
-            $fail('The file could not be uploaded. Try again.');
+            $fail(__('The file could not be uploaded. Try again.'));
 
             return;
         }
@@ -42,7 +43,7 @@ class ChatAttachmentFile implements ValidationRule
         $name = $value->getClientOriginalName();
         $extension = strtolower($value->getClientOriginalExtension());
         $kind = ChatAttachments::kindFor($extension);
-        $unsupported = strtr(ChatCopy::ATTACH_UNSUPPORTED, [':name' => $name]);
+        $unsupported = __(ChatCopy::ATTACH_UNSUPPORTED, ['name' => $name]);
 
         if ($kind === null) {
             $fail($unsupported);
@@ -53,7 +54,7 @@ class ChatAttachmentFile implements ValidationRule
         $maxKilobytes = $kind === ChatAttachmentKind::Image ? $this->imageMaxKilobytes : $this->documentMaxKilobytes;
 
         if ($value->getSize() > $maxKilobytes * 1024) {
-            $fail(strtr(ChatCopy::ATTACH_TOO_LARGE, [':name' => $name, ':max' => (string) intdiv($maxKilobytes, 1024)]));
+            $fail(__(ChatCopy::ATTACH_TOO_LARGE, ['name' => $name, 'max' => (string) intdiv($maxKilobytes, 1024)]));
 
             return;
         }

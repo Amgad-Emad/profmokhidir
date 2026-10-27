@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Constants\AuditAction;
 use App\Constants\CacheKeys;
 use App\Constants\ContentStatus;
+use App\Constants\Locales;
 use App\Models\User;
 use App\Repositories\Contracts\ContentRepositoryInterface;
 use App\Repositories\Contracts\RevisionRepositoryInterface;
@@ -111,6 +112,14 @@ abstract class AbstractContentService
     public function countContaining(string $needle): int
     {
         return $this->repository->countContaining($needle);
+    }
+
+    /**
+     * Records with a column filled in English but not yet in the language (Arabic by default).
+     */
+    public function countNeedingTranslation(string $locale = Locales::AR): int
+    {
+        return $this->repository->countNeedingTranslation($locale);
     }
 
     /**
@@ -422,12 +431,62 @@ abstract class AbstractContentService
     }
 
     /**
+     * Apply a clean-up to a value, or to each language of a locale map
+     * (['en' => , 'ar' => ], as the bilingual edit screens send them).
+     *
+     * @param  Closure(mixed): mixed  $callback
+     */
+    protected function eachLocale(mixed $value, Closure $callback): mixed
+    {
+        return Locales::isLocaleMap($value) ? array_map($callback, $value) : $callback($value);
+    }
+
+    /**
+     * The English text of a value that may be a locale map.
+     */
+    protected function english(mixed $value): mixed
+    {
+        return Locales::isLocaleMap($value) ? ($value[Locales::DEFAULT] ?? null) : $value;
+    }
+
+    /**
+     * withUniqueSlug() (GeneratesSlugs) fed with the English title, so the
+     * address is always derived from English whatever language is edited.
+     *
+     * @param  array<string, mixed>  $data
+     * @param  TModel|null  $existing
+     * @return array<string, mixed>
+     */
+    protected function withEnglishSlug(array $data, ?Model $existing, string $source = 'title'): array
+    {
+        $copy = $data;
+
+        if (array_key_exists($source, $copy)) {
+            $copy[$source] = $this->english($copy[$source]);
+        }
+
+        $slugged = $this->withUniqueSlug($copy, $existing, $source);
+
+        if (array_key_exists('slug', $slugged)) {
+            $data['slug'] = $slugged['slug'];
+        }
+
+        return $data;
+    }
+
+    /**
      * @param  TModel  $model
      * @return array<string, mixed>
      */
     protected function auditMeta(Model $model): array
     {
-        $label = $model->getAttribute('title') ?? $model->getAttribute('name');
+        $label = null;
+
+        foreach (['title', 'name'] as $column) {
+            $label ??= method_exists($model, 'isTranslatableAttribute') && $model->isTranslatableAttribute($column)
+                ? ($model->getTranslation($column, Locales::DEFAULT, false) ?: null)
+                : $model->getAttribute($column);
+        }
 
         return array_filter(['label' => $label], fn ($value): bool => $value !== null);
     }

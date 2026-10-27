@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Constants\Brand;
 use App\Constants\Disks;
+use App\Constants\Locales;
 use App\Constants\SocialCards;
 use App\Constants\TributeCards;
 use App\Constants\Typesetting;
@@ -14,6 +15,7 @@ use App\Repositories\Contracts\TributeRepositoryInterface;
 use App\Support\BrandCanvas;
 use Illuminate\Contracts\Filesystem\Factory as FilesystemFactory;
 use Illuminate\Contracts\Filesystem\Filesystem;
+use Illuminate\Support\Traits\Localizable;
 
 /**
  * One share card per approved tribute, in the brand's Instagram tribute layout
@@ -21,9 +23,16 @@ use Illuminate\Contracts\Filesystem\Filesystem;
  * the public disk and its path remembered on the tribute; it is forgotten when
  * the wording changes or the tribute leaves the site, and drawn afresh on the
  * next request.
+ *
+ * Arabic pages share an Arabic edition of each card (TributeCards::path with the
+ * locale): the labels in Arabic, kept beside the English card and forgotten with
+ * it. Tribute text and names in Arabic are shaped and set in Amiri on either
+ * edition (App\Support\BrandCanvas).
  */
 class TributeShareCardService
 {
+    use Localizable;
+
     public function __construct(
         private readonly TributeRepositoryInterface $tributes,
         private readonly FilesystemFactory $filesystems,
@@ -32,12 +41,25 @@ class TributeShareCardService
 
     /**
      * Absolute path of the tribute's card, drawing it first when it is missing.
-     * Null for tributes that are not approved.
+     * Null for tributes that are not approved. `locale` picks the edition (the
+     * current language by default).
      */
-    public function pathFor(Tribute $tribute): ?string
+    public function pathFor(Tribute $tribute, ?string $locale = null): ?string
     {
         if (! $tribute->isApproved()) {
             return null;
+        }
+
+        $locale ??= app()->getLocale();
+
+        if ($locale !== Locales::DEFAULT && in_array($locale, Locales::all(), true)) {
+            $relative = TributeCards::path((int) $tribute->getKey(), $locale);
+
+            if (! $this->disk()->exists($relative)) {
+                $this->withLocale($locale, fn () => $this->render($tribute)->png($this->disk()->path($relative)));
+            }
+
+            return $this->disk()->path($relative);
         }
 
         $relative = (string) $tribute->share_card_path;
@@ -82,6 +104,14 @@ class TributeShareCardService
      */
     public function forget(Tribute $tribute): void
     {
+        foreach (Locales::all() as $locale) {
+            $edition = TributeCards::path((int) $tribute->getKey(), $locale);
+
+            if ($locale !== Locales::DEFAULT && $tribute->getKey() !== null && $this->disk()->exists($edition)) {
+                $this->disk()->delete($edition);
+            }
+        }
+
         $relative = (string) $tribute->share_card_path;
 
         if ($relative !== '' && $this->disk()->exists($relative)) {
@@ -120,7 +150,7 @@ class TributeShareCardService
             $cut = mb_substr($cut, 0, $space);
         }
 
-        return rtrim($cut, " ,;:.\u{2013}-").Typesetting::ELLIPSIS;
+        return $this->trimEnd($cut, "\u{2013}-").Typesetting::ELLIPSIS;
     }
 
     /**
@@ -131,9 +161,13 @@ class TributeShareCardService
      */
     public function layout(Tribute $tribute, BrandCanvas $canvas): array
     {
-        $quote = Typesetting::LEFT_DOUBLE_QUOTE.$this->excerpt($tribute->message).Typesetting::RIGHT_DOUBLE_QUOTE;
+        $excerpt = $this->excerpt($tribute->message);
+        // Arabic is quoted with guillemets, written in logical order so that, laid out
+        // right to left, the text reads «...» as Arabic print sets it (ar-php draws them as given).
+        [$open, $close] = BrandCanvas::isArabic($excerpt) ? ["\u{00AB}", "\u{00BB}"] : [Typesetting::LEFT_DOUBLE_QUOTE, Typesetting::RIGHT_DOUBLE_QUOTE];
+        $quote = $open.$excerpt.$close;
         $measure = TributeCards::WIDTH - 2 * TributeCards::MARGIN_PX;
-        $sizes = TributeCards::QUOTE_SIZES_PX;
+        $sizes = BrandCanvas::isArabic($excerpt) ? TributeCards::QUOTE_SIZES_ARABIC_PX : TributeCards::QUOTE_SIZES_PX;
         $lines = [];
 
         foreach ($sizes as $size) {
@@ -147,9 +181,17 @@ class TributeShareCardService
         $size = end($sizes) ?: TributeCards::QUOTE_SIZES_PX[0];
         $lines = array_slice($lines, 0, TributeCards::QUOTE_MAX_LINES);
         $last = array_key_last($lines);
-        $lines[$last] = rtrim($lines[$last], " ,;:.\u{201D}").Typesetting::ELLIPSIS.Typesetting::RIGHT_DOUBLE_QUOTE;
+        $lines[$last] = $this->trimEnd($lines[$last], $close).Typesetting::ELLIPSIS.$close;
 
         return ['size' => $size, 'lines' => $lines];
+    }
+
+    /**
+     * Strip trailing spaces and punctuation (Latin and Arabic, plus `extra`) before an ellipsis; multibyte-safe.
+     */
+    private function trimEnd(string $text, string $extra = ''): string
+    {
+        return (string) preg_replace('/[\s,;:.\x{060C}\x{061B}'.preg_quote($extra, '/').']+$/u', '', $text);
     }
 
     private function render(Tribute $tribute): BrandCanvas
@@ -159,12 +201,12 @@ class TributeShareCardService
         $margin = TributeCards::MARGIN_PX;
 
         // Head: "Remembering" in label style with a short brass rule beneath it.
-        $canvas->tracked(mb_strtoupper(TributeCards::LABEL), SocialCards::FONT_LABEL, TributeCards::LABEL_SIZE_PX, Brand::BRASS, $margin, 0.3);
+        $canvas->tracked(mb_strtoupper(__(TributeCards::LABEL)), SocialCards::FONT_LABEL, TributeCards::LABEL_SIZE_PX, Brand::BRASS, $margin, 0.3);
         $canvas->rule(TributeCards::RULE_WIDTH_PX, $margin + 44);
 
         // The tribute, set in the display italic and centred vertically in the body of the card.
         ['size' => $size, 'lines' => $lines] = $this->layout($tribute, $canvas);
-        $lineHeight = (int) round($size * TributeCards::QUOTE_LEADING);
+        $lineHeight = (int) round($size * (BrandCanvas::isArabic($tribute->message) ? TributeCards::QUOTE_LEADING_ARABIC : TributeCards::QUOTE_LEADING));
         $blockHeight = count($lines) * $lineHeight;
         $footTop = TributeCards::HEIGHT - $margin - TributeCards::MARK_SIZE_PX - 120;
         $bodyTop = $margin + 120;
@@ -178,10 +220,11 @@ class TributeShareCardService
         $nameTop = $quoteTop + $blockHeight + 40;
         $canvas->tracked(mb_strtoupper($this->typesetter->text($tribute->name)), SocialCards::FONT_DISPLAY, TributeCards::NAME_SIZE_PX, Brand::CHAMPAGNE, $nameTop, TributeCards::NAME_TRACKING_EM);
 
-        $meta = implode('  ·  ', array_filter([$tribute->relationship?->label(), $tribute->location]));
+        $meta = array_values(array_filter([(string) $tribute->relationship?->label(), (string) $tribute->location]));
 
-        if ($meta !== '') {
-            $canvas->tracked(mb_strtoupper($meta), SocialCards::FONT_LABEL, 13, Brand::BRASS, $nameTop + 48, 0.3);
+        if ($meta !== []) {
+            $metaTop = $nameTop + (BrandCanvas::isArabic($tribute->name) ? TributeCards::META_GAP_ARABIC_PX : TributeCards::META_GAP_PX);
+            $canvas->labelRuns($meta, '  ·  ', 13, Brand::BRASS, $metaTop, 0.3, Locales::dir(app()->getLocale()) === Locales::RTL);
         }
 
         // Foot: the mark in its ring above the domain.

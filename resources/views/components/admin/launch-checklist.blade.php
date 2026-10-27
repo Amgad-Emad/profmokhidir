@@ -11,7 +11,7 @@
 @endphp
 <div {{ $attributes->class(['launch-checklist']) }} data-checklist>
     <p class="launch-checklist__progress">
-        <span class="font-medium">{{ $checklist['done'] }} of {{ $checklist['total'] }}</span> ready
+        <span class="font-medium">{{ __(':done of :total ready', ['done' => app(\App\Services\LocaleService::class)->digits($checklist['done']), 'total' => app(\App\Services\LocaleService::class)->digits($checklist['total'])]) }}</span>
         <span class="launch-checklist__track" aria-hidden="true"><span class="launch-checklist__bar" style="--progress: {{ $percent }}%"></span></span>
     </p>
     @if ($todo !== [])
@@ -20,9 +20,9 @@
             <li class="launch-checklist__item" data-check="{{ $check['key'] }}" data-done="{{ $check['done'] ? 'true' : 'false' }}">
                 <span class="launch-checklist__mark">
                     @if ($check['done'])
-                        <x-icon name="check" class="size-4" label="Done" />
+                        <x-icon name="check" class="size-4" :label="__('Done')" />
                     @else
-                        <x-icon name="minus" class="size-4" label="To do" />
+                        <x-icon name="minus" class="size-4" :label="__('To do')" />
                     @endif
                 </span>
                 <div class="launch-checklist__text">
@@ -38,15 +38,15 @@
     @endif
     @if ($done !== [])
         <details class="launch-checklist__done" @if ($todo === []) open @endif>
-            <summary>{{ count($done) }} already done</summary>
+            <summary>{{ trans_choice('{1} :count already done|[2,*] :count already done', count($done), ['count' => app(\App\Services\LocaleService::class)->digits(count($done))]) }}</summary>
             <ol class="launch-checklist__list">
                 @foreach ($done as $check)
             <li class="launch-checklist__item" data-check="{{ $check['key'] }}" data-done="{{ $check['done'] ? 'true' : 'false' }}">
                 <span class="launch-checklist__mark">
                     @if ($check['done'])
-                        <x-icon name="check" class="size-4" label="Done" />
+                        <x-icon name="check" class="size-4" :label="__('Done')" />
                     @else
-                        <x-icon name="minus" class="size-4" label="To do" />
+                        <x-icon name="minus" class="size-4" :label="__('To do')" />
                     @endif
                 </span>
                 <div class="launch-checklist__text">

@@ -66,7 +66,7 @@ class SeoServiceTest extends TestCase
     #[Test]
     public function robots_disallows_the_dashboard_and_chat_and_names_the_sitemap(): void
     {
-        $this->assertSame("User-agent: *\nDisallow: /admin\nDisallow: /community/chat\n\nSitemap: ".url(Seo::SITEMAP_PATH)."\n", $this->seo->robots());
+        $this->assertSame("User-agent: *\nDisallow: /admin\nDisallow: /community/chat\nDisallow: /language\n\nSitemap: ".url(Seo::SITEMAP_PATH)."\n", $this->seo->robots());
     }
 
     #[Test]

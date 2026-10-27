@@ -20,6 +20,7 @@
  | formCombobox, formTags, formUpload and formEditor (forms/editor.js).
  */
 import formEditor from './forms/editor';
+import { t } from './i18n';
 
 const FIELD = '[data-form-field]';
 const CONTROLS = 'input:not([type=hidden]):not([type=file]), select, textarea';
@@ -393,6 +394,8 @@ export function formOtp({ length = 6 } = {}) {
             if (value !== '' && index < this.length - 1) this.box(index + 1).focus();
         },
 
+        // The boxes always run left to right (dir="ltr" on the row, as a code is read), so the
+        // arrow keys stay physical even on a right-to-left page.
         keydown(index, event) {
             if (event.key === 'Backspace' && event.target.value === '' && index > 0) {
                 event.preventDefault();
@@ -438,7 +441,7 @@ export function formOtp({ length = 6 } = {}) {
     };
 }
 
-export function formCombobox({ options = [], value = null, noMatches = '', results: resultsFormat = ':count options' } = {}) {
+export function formCombobox({ options = [], value = null, noMatches = '', results: resultsFormat = t(':count options') } = {}) {
     const labelFor = (current) => options.find((option) => option.value === String(current ?? ''))?.label ?? '';
 
     return {

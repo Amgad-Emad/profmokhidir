@@ -41,7 +41,7 @@
     .auth__tools {
         position: absolute;
         top: var(--space-1);
-        right: var(--space-1);
+        inset-inline-end: var(--space-1);
     }
 
     .auth__column {

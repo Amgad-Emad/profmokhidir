@@ -38,8 +38,8 @@ final class TributeForm
     public static function steps(): array
     {
         return [
-            self::STEP_WRITE => 'Write',
-            self::STEP_PREVIEW => 'Preview',
+            self::STEP_WRITE => __('Write'),
+            self::STEP_PREVIEW => __('Preview'),
         ];
     }
 
@@ -61,11 +61,11 @@ final class TributeForm
     public static function fields(): array
     {
         return [
-            self::FIELD_NAME => ['label' => 'Your name', 'hint' => 'As you would like it to appear beside your tribute.'],
-            self::FIELD_RELATIONSHIP => ['label' => 'How you knew him', 'hint' => 'Student, colleague, family or friend.'],
-            self::FIELD_LOCATION => ['label' => 'Where you are writing from', 'hint' => 'Optional. Town or city and country, for example Khartoum, Sudan.'],
-            self::FIELD_MESSAGE => ['label' => 'Your tribute', 'hint' => 'Share a memory, a lesson or a moment. A few lines are enough.'],
-            self::FIELD_EMAIL => ['label' => 'Email', 'hint' => 'Optional, and never shown publicly. Only used if we need to reach you about your tribute.'],
+            self::FIELD_NAME => ['label' => __('Your name'), 'hint' => __('As you would like it to appear beside your tribute.')],
+            self::FIELD_RELATIONSHIP => ['label' => __('How you knew him'), 'hint' => __('Student, colleague, family or friend.')],
+            self::FIELD_LOCATION => ['label' => __('Where you are writing from'), 'hint' => __('Optional. Town or city and country, for example Khartoum, Sudan.')],
+            self::FIELD_MESSAGE => ['label' => __('Your tribute'), 'hint' => __('Share a memory, a lesson or a moment. A few lines are enough.')],
+            self::FIELD_EMAIL => ['label' => __('Email'), 'hint' => __('Optional, and never shown publicly. Only used if we need to reach you about your tribute.')],
         ];
     }
 

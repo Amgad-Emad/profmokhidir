@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Constants;
 
+use App\Services\LocaleService;
+
 /**
  * Site-wide search: the route, the query limits, the fulltext behaviour and
  * the sections searched, in navigation order. The dialog in the header and
@@ -118,15 +120,14 @@ final class Search
     public static function summary(int $results, int $sections): string
     {
         if ($results === 0) {
-            return 'No results';
+            return __('No results');
         }
 
-        return sprintf(
-            '%d %s in %d %s',
-            $results,
-            $results === 1 ? 'result' : 'results',
-            $sections,
-            $sections === 1 ? 'section' : 'sections',
-        );
+        $digits = app(LocaleService::class);
+
+        return __(':results in :sections', [
+            'results' => trans_choice('{1} :count result|[2,*] :count results', $results, ['count' => $digits->digits($results)]),
+            'sections' => trans_choice('{1} :count section|[2,*] :count sections', $sections, ['count' => $digits->digits($sections)]),
+        ]);
     }
 }

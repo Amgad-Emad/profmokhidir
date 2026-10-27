@@ -39,13 +39,13 @@ class TributeAwaitingReview extends Notification implements ShouldQueue
         $from = implode(' · ', array_filter([$tribute->relationship?->label(), $tribute->location]));
 
         return (new MailMessage)
-            ->subject('A tribute is waiting for review')
-            ->greeting($notifiable instanceof User ? 'Hello '.$notifiable->name.',' : 'Hello,')
-            ->line('A new tribute has been submitted on '.config('app.name').' and is waiting for review.')
-            ->line('From: '.$tribute->name.($from !== '' ? ' ('.$from.')' : ''))
+            ->subject(__('A tribute is waiting for review'))
+            ->greeting($notifiable instanceof User ? __('Hello :name,', ['name' => $notifiable->name]) : __('Hello,'))
+            ->line(__('A new tribute has been submitted on :site and is waiting for review.', ['site' => config('app.name')]))
+            ->line($from !== '' ? __('From: :name (:details)', ['name' => $tribute->name, 'details' => $from]) : __('From: :name', ['name' => $tribute->name]))
             ->line('"'.$this->excerpt().'"')
-            ->action('Open the dashboard', route('admin.dashboard'))
-            ->line('It will not appear on the site until it has been approved.');
+            ->action(__('Open the dashboard'), route('admin.dashboard'))
+            ->line(__('It will not appear on the site until it has been approved.'));
     }
 
     /**

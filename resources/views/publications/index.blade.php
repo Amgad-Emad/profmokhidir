@@ -5,6 +5,7 @@
 --}}
 @inject('pageCopy', 'App\Services\PageContentService')
 @inject('typesetter', 'App\Services\TypesetterService')
+@inject('localeService', 'App\Services\LocaleService')
 <x-layouts.public :title="$section['title']" :description="$section['summary']" :schema="$schema" :canonical="$clearUrl">
     <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28" aria-labelledby="section-title">
         <x-chapter-opening :number="$chapter" :label="$section['label']" :title="$section['title']" level="1" id="section-title">
@@ -22,7 +23,7 @@
                         @foreach ($featured as $work)
                             <li class="selected-works__item">
                                 <x-meta :items="[$work->type?->label()]" />
-                                <p class="selected-works__title">@typeset($work->title)</p>
+                                <p @contentLang($work) class="selected-works__title">@typeset($work->title)</p>
                                 @if (filled($work->venue_publisher))
                                     <p class="selected-works__venue">@typeset($work->venue_publisher)</p>
                                 @endif
@@ -40,7 +41,7 @@
                     <x-button type="button" x-ref="toggle" aria-controls="catalogue-filters" x-bind:aria-expanded="open.toString()" x-on:click="show()">
                         {{ $pageCopy->text('publications', 'refine_label') }}
                         @if ($activeCount > 0)
-                            <span class="catalogue__badge">{{ $activeCount }}<span class="sr-only"> active</span></span>
+                            <span class="catalogue__badge">@num($activeCount)<span class="sr-only"> {{ __('active') }}</span></span>
                         @endif
                     </x-button>
                 </div>
@@ -53,39 +54,39 @@
                     x-bind:role="open ? 'dialog' : null" x-bind:aria-modal="open ? 'true' : null"
                     x-on:keydown.escape="open && close()" x-on:keydown.tab="trap($event)">
                     <div class="catalogue__filters-head">
-                        <h2 id="catalogue-filters-title" class="catalogue__heading">Refine</h2>
+                        <h2 id="catalogue-filters-title" class="catalogue__heading">{{ __('Refine') }}</h2>
                         <button type="button" class="catalogue__close lg:hidden" x-cloak x-ref="close" x-on:click="close()">
-                            <x-icon name="close" class="size-5" /><span class="sr-only">Close the filters</span>
+                            <x-icon name="close" class="size-5" /><span class="sr-only">{{ __('Close the filters') }}</span>
                         </button>
                     </div>
 
                     <form novalidate method="get" action="{{ $clearUrl }}" class="catalogue__form">
                         @if ($types !== [])
-                            <x-form.radio-group name="type" label="Type" :optional="false" :value="$active['type']?->value ?? ''"
-                                                :options="['' => 'All types'] + collect($types)->mapWithKeys(fn ($type) => [$type['value'] => $type['label']])->all()" />
+                            <x-form.radio-group name="type" :label="__('Type')" :optional="false" :value="$active['type']?->value ?? ''"
+                                                :options="['' => __('All types')] + collect($types)->mapWithKeys(fn ($type) => [$type['value'] => $type['label']])->all()" />
                         @endif
 
                         @if ($years !== [])
                             <fieldset class="form-fieldset">
-                                <legend class="t-label form-label">Years</legend>
+                                <legend class="t-label form-label">{{ __('Years') }}</legend>
                                 <div class="catalogue__range">
-                                    <x-form.select name="from" id="filter-from" label="From" :optional="false" size="compact" :value="$active['from']"
-                                                   placeholder="Earliest" :options="array_combine(array_reverse($years), array_reverse($years))" />
-                                    <x-form.select name="to" id="filter-to" label="To" :optional="false" size="compact" :value="$active['to']"
-                                                   placeholder="Latest" :options="array_combine($years, $years)" />
+                                    <x-form.select name="from" id="filter-from" :label="__('From')" :optional="false" size="compact" :value="$active['from']"
+                                                   :placeholder="__('Earliest')" :options="array_combine(array_reverse($years), array_reverse($years))" />
+                                    <x-form.select name="to" id="filter-to" :label="__('To')" :optional="false" size="compact" :value="$active['to']"
+                                                   :placeholder="__('Latest')" :options="array_combine($years, $years)" />
                                 </div>
                             </fieldset>
                         @endif
 
                         @if ($topics !== [])
-                            <x-form.radio-group name="topic" label="Topic" :optional="false" :value="$active['topic'] ?? ''"
-                                                :options="['' => 'All topics'] + array_combine($topics, $topics)" />
+                            <x-form.radio-group name="topic" :label="__('Topic')" :optional="false" :value="$active['topic'] ?? ''"
+                                                :options="['' => __('All topics')] + array_combine($topics, $topics)" />
                         @endif
 
                         <div class="flex flex-wrap items-center gap-3">
-                            <button type="submit" class="filter-pill">Apply</button>
+                            <button type="submit" class="filter-pill">{{ __('Apply') }}</button>
                             @if ($isFiltered)
-                                <a href="{{ $clearUrl }}" class="filter-pill">Clear filters</a>
+                                <a href="{{ $clearUrl }}" class="filter-pill">{{ __('Clear filters') }}</a>
                             @endif
                         </div>
                     </form>
@@ -96,7 +97,7 @@
                         @if ($publications->total() === 0)
                             {{ $pageCopy->text('publications', 'none_match') }}
                         @else
-                            Showing {{ $publications->firstItem() }}–{{ $publications->lastItem() }} of {{ $publications->total() }} {{ $publications->total() === 1 ? 'record' : 'records' }}@foreach ($activeSummary as $part) · {{ $part }}@endforeach
+                            {{ trans_choice('{1} Showing :first–:last of :count record|[2,*] Showing :first–:last of :count records', $publications->total(), ['first' => $localeService->digits($publications->firstItem()), 'last' => $localeService->digits($publications->lastItem()), 'count' => $localeService->digits($publications->total())]) }}@foreach ($activeSummary as $part) · {{ $part }}@endforeach
                         @endif
                     </p>
 
@@ -108,7 +109,7 @@
                         <section class="catalogue__decade" aria-labelledby="{{ $group['anchor'] }}">
                             <div class="catalogue__decade-head" data-rise>
                                 <h2 id="{{ $group['anchor'] }}" class="catalogue__decade-title">{{ $group['label'] }}</h2>
-                                <span class="catalogue__decade-count">{{ $group['count'] }} {{ $group['count'] === 1 ? 'record' : 'records' }}</span>
+                                <span class="catalogue__decade-count">{{ trans_choice('{1} :count record|[2,*] :count records', $group['count'], ['count' => $localeService->digits($group['count'])]) }}</span>
                             </div>
                             <hr class="rule-brass" data-rule>
 
@@ -122,7 +123,7 @@
                                         <p class="record__year" aria-hidden="true">{{ $publication->year }}</p>
                                         <article class="record__body" aria-labelledby="publication-{{ $id }}-title">
                                             <x-meta :items="[$publication->type?->label(), $publication->topic]" />
-                                            <h3 id="publication-{{ $id }}-title" class="record__title">@typeset($publication->title)</h3>
+                                            <h3 @contentLang($publication) id="publication-{{ $id }}-title" class="record__title">@typeset($publication->title)</h3>
                                             @if (filled($publication->authors))
                                                 <p class="record__authors">{{ $authors[$id] }}</p>
                                             @endif
@@ -136,23 +137,23 @@
                                             @endif
 
                                             @if ($publication->doiUrl() || filled($publication->url) || $file)
-                                            <ul class="record__links" aria-label="Links for {{ $publication->title }}">
+                                            <ul class="record__links" aria-label="{{ __('Links for :title', ['title' => $publication->title]) }}">
                                                 @if ($publication->doiUrl())
                                                     <li><a href="{{ $publication->doiUrl() }}" rel="noopener" class="record__doi"><span class="record__doi-label">DOI</span> <span class="font-mono">{{ $publication->doi }}</span></a></li>
                                                 @endif
                                                 @if (filled($publication->url))
-                                                    <li><x-external-link :href="$publication->url" label="Read online" /></li>
+                                                    <li><x-external-link :href="$publication->url" :label="__('Read online')" /></li>
                                                 @endif
                                                 @if ($file)
-                                                    <li><x-file-link :media="$file" :href="$file->getUrl()" label="Download" /></li>
+                                                    <li><x-file-link :media="$file" :href="$file->getUrl()" :label="__('Download')" /></li>
                                                 @endif
                                             </ul>
                                             @endif
 
                                             <details class="cite" x-data="citePanel" data-default-style="{{ $citations[$id][0]['style']->value }}">
-                                                <summary class="link-meta">Cite<span class="sr-only"> {{ $publication->title }}</span></summary>
+                                                <summary class="link-meta">{{ __('Cite') }}<span class="sr-only"> {{ $publication->title }}</span></summary>
                                                 <div class="cite__panel">
-                                                    <div class="cite__tabs" role="tablist" aria-label="Citation format" x-cloak>
+                                                    <div class="cite__tabs" role="tablist" aria-label="{{ __('Citation format') }}" x-cloak>
                                                         @foreach ($citations[$id] as $citation)
                                                             <button type="button" role="tab" class="cite__tab" data-style="{{ $citation['style']->value }}"
                                                                 id="cite-{{ $id }}-{{ $citation['style']->value }}-tab" aria-controls="cite-{{ $id }}-{{ $citation['style']->value }}"
@@ -163,7 +164,7 @@
                                                     </div>
                                                     @foreach ($citations[$id] as $citation)
                                                         <div role="tabpanel" class="cite__format" id="cite-{{ $id }}-{{ $citation['style']->value }}" aria-labelledby="cite-{{ $id }}-{{ $citation['style']->value }}-tab"
-                                                            data-format="{{ $citation['style']->value }}" x-show="style === '{{ $citation['style']->value }}'" tabindex="0">
+                                                            data-format="{{ $citation['style']->value }}" dir="ltr" x-show="style === '{{ $citation['style']->value }}'" tabindex="0">
                                                             <p class="cite__style">{{ $citation['label'] }} <span class="cite__edition">{{ $citation['edition'] }}</span></p>
                                                             @if ($citation['code'])
                                                                 <pre class="cite__code" data-cite-text>{!! $citation['html'] !!}</pre>
@@ -173,8 +174,8 @@
                                                         </div>
                                                     @endforeach
                                                     <div class="cite__actions" x-cloak>
-                                                        <button type="button" class="filter-pill" x-on:click="copy()"><span x-text="copied ? 'Copied' : 'Copy'">Copy</span></button>
-                                                        <span class="sr-only" role="status" x-text="copied ? 'Citation copied to the clipboard' : ''"></span>
+                                                        <button type="button" class="filter-pill" x-on:click="copy()"><span x-text="copied ? {{ \Illuminate\Support\Js::from(__('Copied')) }} : {{ \Illuminate\Support\Js::from(__('Copy')) }}">{{ __('Copy') }}</span></button>
+                                                        <span class="sr-only" role="status" x-text="copied ? {{ \Illuminate\Support\Js::from(__('Citation copied to the clipboard')) }} : ''"></span>
                                                     </div>
                                                 </div>
                                             </details>

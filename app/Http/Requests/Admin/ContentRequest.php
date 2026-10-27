@@ -35,9 +35,9 @@ abstract class ContentRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'status.Illuminate\Validation\Rules\Enum' => 'Choose either draft or published.',
-            'slug.regex' => 'Use lowercase letters, numbers and hyphens only.',
-            '*.url' => 'Enter a full web address starting with https://.',
+            'status.Illuminate\Validation\Rules\Enum' => __('Choose either draft or published.'),
+            'slug.regex' => __('Use lowercase letters, numbers and hyphens only.'),
+            '*.url' => __('Enter a full web address starting with https://.'),
         ];
     }
 

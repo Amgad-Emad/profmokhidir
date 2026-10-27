@@ -13,6 +13,7 @@
  */
 
 import { focusablesIn, trapTab } from './focus-trap';
+import { t } from './i18n';
 
 // App\Constants\Search::MIN_LENGTH and the debounce the field uses (ms).
 const MIN_LENGTH = 2;
@@ -112,7 +113,7 @@ export default function siteSearch() {
 
             this.controller = new AbortController();
             this.loading = true;
-            this.status = SEARCHING;
+            this.status = t(SEARCHING);
 
             fetch(url.toString(), {
                 headers: { Accept: 'application/json' },

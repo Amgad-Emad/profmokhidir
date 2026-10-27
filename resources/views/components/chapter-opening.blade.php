@@ -16,7 +16,7 @@
     @if ($numeral || $label)
         <p class="chapter-opening__label text-accent-text" data-rise>
             @if ($numeral)
-                <span class="t-numeral"><span class="sr-only">Chapter </span>{{ $numeral }}</span>
+                <span class="t-numeral"><span class="sr-only">{{ __('Chapter') }} </span>{{ $numeral }}</span>
             @endif
             @if ($label)
                 <span class="t-label">{{ $label }}</span>

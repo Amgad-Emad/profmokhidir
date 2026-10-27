@@ -4,6 +4,7 @@ namespace Tests\Unit\Design;
 
 use App\Constants\Brand;
 use App\Constants\BrandAudit;
+use App\Constants\Typography;
 use Illuminate\Support\Facades\File;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -12,7 +13,8 @@ use Tests\TestCase;
  * Brand audit over the source stylesheets, scripts, Blade templates and the
  * built CSS: only the nine brand colours (plus white, black and transparent),
  * and only in the token file (every other file goes through the semantic
- * tokens), only the three brand fonts, no bounce or spin animations and no
+ * tokens), only the three brand fonts (plus the two Arabic faces, in the
+ * :lang(ar) stacks only), no bounce or spin animations and no
  * gradient other than the brass glow; Hanken Grotesk never at weight 300,
  * grayscale smoothing only on large display type on dark, labels at 0.24em.
  */
@@ -150,11 +152,11 @@ class BrandAuditTest extends TestCase
             preg_match_all($pattern, $contents, $classes);
 
             foreach (array_unique($classes[0]) as $value) {
-                $offenders[] = "{$file}: ".trim($value, " ,{:");
+                $offenders[] = "{$file}: ".trim($value, ' ,{:');
             }
         }
 
-        $this->assertSame([], $offenders, "Raw brand colours outside ".BrandAudit::TOKEN_FILE." (use the semantic tokens):\n".implode("\n", $offenders));
+        $this->assertSame([], $offenders, 'Raw brand colours outside '.BrandAudit::TOKEN_FILE." (use the semantic tokens):\n".implode("\n", $offenders));
     }
 
     #[Test]
@@ -189,6 +191,63 @@ class BrandAuditTest extends TestCase
         }
 
         $this->assertSame([], array_values(array_unique($offenders)), "Off-brand fonts:\n".implode("\n", array_unique($offenders)));
+    }
+
+    /**
+     * Families in a font stack that the brand does not permit.
+     *
+     * @return list<string>
+     */
+    private function offBrandFamilies(string $stack): array
+    {
+        $families = array_map(fn (string $family): string => trim($family, "'\" \n\t"), explode(',', $stack));
+
+        return array_values(array_filter($families, fn (string $family): bool => $family !== '' && ! in_array($family, BrandAudit::permittedFontFamilies(), true)));
+    }
+
+    #[Test]
+    public function the_arabic_faces_are_the_only_extra_families_and_appear_only_in_the_locale_stacks(): void
+    {
+        $arabic = BrandAudit::arabicFontFamilies();
+        $this->assertSame([Typography::ARABIC_DISPLAY_FAMILY, Typography::ARABIC_SANS_FAMILY], $arabic);
+        $this->assertSame(['Amiri', 'IBM Plex Sans Arabic'], $arabic);
+
+        $offenders = [];
+
+        foreach ([...$this->sources(), ...$this->builds()] as $file => $contents) {
+            // Font stacks declared as theme tokens are checked like font-family declarations.
+            preg_match_all('/--font-(?:display|sans|mono)\s*:\s*([^;}]+)/i', $contents, $tokens);
+
+            foreach ($tokens[1] as $stack) {
+                foreach ($this->offBrandFamilies($stack) as $family) {
+                    $offenders[] = "{$file}: {$family}";
+                }
+            }
+
+            if ($file !== BrandAudit::LOCALE_FILE && ! str_starts_with($file, 'public/build/')) {
+                foreach ($arabic as $family) {
+                    if (str_contains($contents, $family)) {
+                        $offenders[] = "{$file}: {$family} outside ".BrandAudit::LOCALE_FILE;
+                    }
+                }
+            }
+        }
+
+        $this->assertSame([], array_values(array_unique($offenders)), "Off-brand fonts:\n".implode("\n", array_unique($offenders)));
+
+        // The Arabic stacks put the Latin brand face first, then the Arabic face.
+        $locale = file_get_contents(base_path(BrandAudit::LOCALE_FILE));
+        $this->assertStringContainsString("--font-display: '".Typography::DISPLAY_FAMILY."', '".Typography::ARABIC_DISPLAY_FAMILY."',", $locale);
+        $this->assertStringContainsString("--font-sans: '".Typography::SANS_FAMILY."', '".Typography::ARABIC_SANS_FAMILY."',", $locale);
+
+        // The Google stylesheet asks for exactly the two faces, at the documented weights, with swap.
+        preg_match_all('/family=([^:&]+):wght@([\d;]+)/', Typography::ARABIC_STYLESHEET, $requested, PREG_SET_ORDER);
+        $this->assertSame([['Amiri', '400;700'], ['IBM Plex Sans Arabic', '400;500']], array_map(fn (array $m): array => [str_replace('+', ' ', $m[1]), $m[2]], $requested));
+        $this->assertStringEndsWith('&display=swap', Typography::ARABIC_STYLESHEET);
+
+        // Any other family is still rejected, Arabic or not.
+        $this->assertSame(['Noto Naskh Arabic'], $this->offBrandFamilies("'Noto Naskh Arabic', 'Amiri', serif"));
+        $this->assertSame(['Inter'], $this->offBrandFamilies("'Hanken Grotesk', Inter, 'IBM Plex Sans Arabic'"));
     }
 
     #[Test]

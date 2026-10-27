@@ -69,10 +69,10 @@ class TributesPageTest extends TestCase
                 '<nav class="book-filters mt-6" aria-label="Filter by relationship">',
                 'class="book-filter smallcaps" aria-current="true">All</a>', 'Students</a>', 'Colleagues</a>', 'Family</a>', 'Friends</a>',
                 '<ol class="book mt-14" data-rise-group data-book>',
-                '<li class="book__leaf">', '<article class="tribute-entry">', '<blockquote class="tribute-entry__text">', '<span class="hang-quote">&ldquo;</span>He taught me to look twice.&rdquo;</p>',
-                '<h3 class="tribute-entry__author smallcaps">Ahmed El-Sheikh</h3>', 't-label text-accent-text tribute-entry__meta">Student · Khartoum, Sudan',
+                '<li class="book__leaf">', '<article class="tribute-entry">', '<blockquote class="tribute-entry__text" dir="auto">', '<span class="hang-quote">&ldquo;</span>He taught me to look twice.&rdquo;</p>',
+                '<h3 class="tribute-entry__author smallcaps" dir="auto">Ahmed El-Sheikh</h3>', 't-label text-accent-text tribute-entry__meta">Student · Khartoum, Sudan',
                 'role="separator" data-ornament="rule-dot"',
-                '<li class="book__leaf">', 'A generous colleague.&rdquo;</p>', '<h3 class="tribute-entry__author smallcaps">Leila Mahmoud</h3>', 't-label text-accent-text tribute-entry__meta">Colleague</p>',
+                '<li class="book__leaf">', 'A generous colleague.&rdquo;</p>', '<h3 class="tribute-entry__author smallcaps" dir="auto">Leila Mahmoud</h3>', 't-label text-accent-text tribute-entry__meta">Colleague</p>',
                 'folio folio--bottom',
             ], false)
             ->assertDontSee('Others</a>', false)
@@ -116,7 +116,7 @@ class TributesPageTest extends TestCase
             ->assertSeeInOrder([
                 'data-featured', '<div class="frontispiece" data-rise-group>', 'class="t-label text-accent-text">'.Taglines::TRIBUTES_FEATURED_LABEL,
                 '<blockquote class="frontispiece__quote t-quote text-ink">', '<span class="hang-quote">&ldquo;</span>He never answered a question with an answer.&rdquo;',
-                '<p class="frontispiece__author smallcaps">Ahmed El-Sheikh</p>', 't-label text-accent-text frontispiece__meta">Student · Khartoum, Sudan',
+                '<p class="frontispiece__author smallcaps" dir="auto">Ahmed El-Sheikh</p>', 't-label text-accent-text frontispiece__meta">Student · Khartoum, Sudan',
                 'href="'.route('tributes.card', $featured).'"', 'data-ornament="fleuron"',
                 'data-book', 'Zq Other',
             ], false)

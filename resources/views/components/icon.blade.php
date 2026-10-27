@@ -1,7 +1,11 @@
 {{-- Small inline line icons (1.5px stroke, currentColor) so state is never shown by colour alone. Decorative by default; pass a `label` to expose it to screen readers. --}}
+{{-- Icons that point along the line of text (App\Constants\Typesetting::MIRRORED_ICONS) carry .rtl-mirror and flip on right-to-left pages (resources/css/locale.css). --}}
 @props(['name', 'label' => null])
-@php $hasSize = preg_match('/\bsize-/', (string) $attributes->get('class')) === 1; @endphp
-<svg {{ $attributes->class(['inline-block shrink-0', 'size-5' => ! $hasSize]) }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"{!! $label ? ' role="img" aria-label="'.e($label).'"' : ' aria-hidden="true" focusable="false"' !!}>
+@php
+    $hasSize = preg_match('/\bsize-/', (string) $attributes->get('class')) === 1;
+    $mirrors = in_array($name, \App\Constants\Typesetting::MIRRORED_ICONS, true);
+@endphp
+<svg {{ $attributes->class(['inline-block shrink-0', 'size-5' => ! $hasSize, 'rtl-mirror' => $mirrors]) }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"{!! $label ? ' role="img" aria-label="'.e($label).'"' : ' aria-hidden="true" focusable="false"' !!}>
 @switch($name)
     @case('check')
         <path d="M5 12.5l4.5 4.5L19 7.5" />

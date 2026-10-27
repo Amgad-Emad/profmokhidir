@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Constants\AuditAction;
 use App\Constants\CacheKeys;
 use App\Constants\ChatAttachments;
+use App\Constants\Locales;
 use App\Constants\SettingKeys;
 use App\Models\User;
 use App\Repositories\Contracts\SettingRepositoryInterface;
@@ -81,6 +82,8 @@ class SettingService
             SettingKeys::CHAT_DOCUMENT_MAX_MB => (string) ChatAttachments::DOCUMENT_MAX_MB,
             // Off until the client approves visitor analytics.
             SettingKeys::ANALYTICS_ENABLED => '0',
+            // Western digits on Arabic pages until the client prefers Arabic-Indic ones.
+            SettingKeys::ARABIC_DIGITS => Locales::DIGITS_LATIN,
         ];
     }
 

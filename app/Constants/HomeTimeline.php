@@ -73,7 +73,7 @@ final class HomeTimeline
      */
     public static function kindLabel(string $kind): string
     {
-        return match ($kind) {
+        return __(match ($kind) {
             CvSection::Education->value => 'Education',
             CvSection::Appointment->value => 'Appointment',
             CvSection::Leadership->value => 'Leadership',
@@ -81,7 +81,7 @@ final class HomeTimeline
             CvSection::Achievement->value => 'Achievement',
             self::KIND_AWARD => 'Award',
             default => throw new InvalidArgumentException(sprintf('Unknown milestone kind "%s".', $kind)),
-        };
+        });
     }
 
     /**
@@ -103,6 +103,6 @@ final class HomeTimeline
     {
         $labels = self::stats()[$key] ?? throw new InvalidArgumentException(sprintf('Unknown figure "%s".', $key));
 
-        return $value === 1 ? $labels[0] : $labels[1];
+        return __($value === 1 ? $labels[0] : $labels[1]);
     }
 }

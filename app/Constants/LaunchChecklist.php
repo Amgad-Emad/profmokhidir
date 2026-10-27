@@ -21,6 +21,9 @@ final class LaunchChecklist
 
     public const string PUBLISHED = 'published';
 
+    /** Content with English copy that has no Arabic yet. */
+    public const string TRANSLATION = 'translation';
+
     /**
      * Sections that must each have at least one published item, keyed by
      * admin navigation item, with the content type that fills them.
@@ -60,5 +63,15 @@ final class LaunchChecklist
             ContentTypes::OTHER_ITEM,
             ContentTypes::HOME_QUOTE,
         ];
+    }
+
+    /**
+     * Content types counted by the "Needs Arabic translation" check.
+     *
+     * @return list<string>
+     */
+    public static function translationTypes(): array
+    {
+        return self::placeholderTypes();
     }
 }

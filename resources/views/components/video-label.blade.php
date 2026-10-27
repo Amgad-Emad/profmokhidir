@@ -9,7 +9,8 @@
 @if ($video->date || $parts !== [])
     <p {{ $attributes->class(['t-label', 'text-accent-text']) }}>
         @foreach ($parts as $index => $part)
-            @if ($index > 0){{ \App\Constants\DateFormats::META_SEPARATOR }}@endif{{ $part }}
+            @php $partLang = \App\Constants\Locales::attributesFor($video, $index === 0 && filled($video->event) ? 'event' : 'location'); @endphp
+            @if ($index > 0){{ \App\Constants\DateFormats::META_SEPARATOR }}@endif@if ($partLang->isEmpty()){{ $part }}@else<span {{ $partLang }}>{{ $part }}</span>@endif
         @endforeach
         @if ($video->date)
             @if ($parts !== []){{ \App\Constants\DateFormats::META_SEPARATOR }}@endif<x-date :date="$video->date" />

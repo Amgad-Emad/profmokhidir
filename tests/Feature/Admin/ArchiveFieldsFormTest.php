@@ -43,7 +43,7 @@ class ArchiveFieldsFormTest extends TestCase
             ->assertHasNoErrors()
             ->assertRedirect();
 
-        $publication = Publication::query()->where('title', 'Principles of Dryland Agronomy')->sole();
+        $publication = Publication::query()->where('title->en', 'Principles of Dryland Agronomy')->sole();
         $this->assertTrue($publication->is_featured);
         $this->assertSame('Agronomy', $publication->topic);
 

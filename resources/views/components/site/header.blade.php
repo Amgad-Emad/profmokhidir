@@ -13,7 +13,7 @@
         <div class="site-header__bar mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 sm:gap-6 sm:px-6 lg:gap-10">
             <x-brand.lockup variant="horizontal" label-tone="champagne" :href="route('home')" class="site-header__lockup shrink-0" />
 
-            <nav class="site-chapters hidden lg:block" aria-label="{{ Masthead::NAV_LABEL }}" x-ref="chapters">
+            <nav class="site-chapters hidden lg:block" aria-label="{{ __(Masthead::NAV_LABEL) }}" x-ref="chapters">
                 <ul class="flex items-center gap-8 xl:gap-10">
                     @foreach ($chapters as $chapter)
                         <li class="site-chapter" data-chapter="{{ $chapter['key'] }}" @mouseenter="hoverOpen('{{ $chapter['key'] }}')" @mouseleave="hoverClose('{{ $chapter['key'] }}')" @focusout="onFocusOut($event, '{{ $chapter['key'] }}')" @click.outside="onClickOutside('{{ $chapter['key'] }}')">
@@ -28,18 +28,20 @@
                 {{-- Opens the search dialog; without JavaScript it is a plain link to /search. Phones search from the top of the full-screen menu instead. --}}
                 <a href="{{ $searchUrl }}" id="{{ Masthead::SEARCH_OPENER_ID }}" class="site-search-toggle max-sm:hidden" aria-keyshortcuts="{{ $searchShortcuts }}" @click.prevent="$dispatch('search-open', { opener: $el })">
                     <svg class="site-search-toggle__icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true" focusable="false"><circle cx="8.5" cy="8.5" r="6" /><path d="m13 13 5.5 5.5" /></svg>
-                    <span class="sr-only">{{ Search::TITLE }}</span>
+                    <span class="sr-only">{{ __(Search::TITLE) }}</span>
                     <kbd class="site-search-toggle__key" aria-hidden="true">/</kbd>
                 </a>
 
                 <x-button size="sm" :href="$tributeUrl" class="site-header__tribute hidden xl:inline-flex">{{ $tributeLabel }}</x-button>
+
+                <x-locale.switcher variant="masthead" class="site-header__locale max-sm:hidden" />
 
                 <x-theme.switch id="theme-switch-masthead" :class="$account !== null ? 'site-header__theme site-header__theme--in-menu' : 'site-header__theme'" />
 
                 @include('site.masthead.account-menu')
 
                 <button type="button" x-ref="toggle" class="site-menu-toggle lg:hidden" aria-expanded="false" :aria-expanded="open ? 'true' : 'false'" aria-controls="{{ Masthead::MENU_ID }}" @click="toggleMenu()">
-                    <span class="t-label max-sm:sr-only">{{ Masthead::MENU }}</span>
+                    <span class="t-label max-sm:sr-only">{{ __(Masthead::MENU) }}</span>
                     <span class="site-menu-toggle__icon" aria-hidden="true"><span></span><span></span></span>
                 </button>
             </div>

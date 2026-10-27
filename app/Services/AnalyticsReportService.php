@@ -13,6 +13,7 @@ use App\Repositories\Contracts\AnalyticsEventRepositoryInterface;
 use App\Repositories\Contracts\AnalyticsRollupRepositoryInterface;
 use App\Support\Countries;
 use App\Support\Duration;
+use App\Support\UserAgent;
 use App\Support\WorldMap;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Carbon;
@@ -59,11 +60,11 @@ class AnalyticsReportService
             'days' => $days,
             'previous_from' => $start->subDays($days),
             'previous_to' => $start->subDay(),
-            'label' => $days === 1 ? $start->format(DateFormats::LONG) : $start->format(DateFormats::LONG).' – '.$end->format(DateFormats::LONG),
+            'label' => $days === 1 ? $start->translatedFormat(DateFormats::LONG) : $start->translatedFormat(DateFormats::LONG).' – '.$end->translatedFormat(DateFormats::LONG),
             'comparison' => match ($range) {
-                AnalyticsRange::Today => 'yesterday',
-                AnalyticsRange::Year => 'the previous 12 months',
-                default => $days === 1 ? 'the day before' : 'the previous '.$days.' days',
+                AnalyticsRange::Today => __('yesterday'),
+                AnalyticsRange::Year => __('the previous 12 months'),
+                default => $days === 1 ? __('the day before') : __('the previous :count days', ['count' => app(LocaleService::class)->digits($days)]),
             },
         ];
     }
@@ -94,7 +95,7 @@ class AnalyticsReportService
             'sections' => Analytics::sections(),
             'referrers' => array_slice($this->referrers($current['referrers']), 0, Analytics::LIST_LIMIT),
             'devices' => $this->ranked($current['technologies'][AnalyticsDimension::Device->value], 'value', fn (string $value): string => DeviceType::tryFrom($value)?->label() ?? $value),
-            'browsers' => array_slice($this->ranked($current['technologies'][AnalyticsDimension::Browser->value], 'value', fn (string $value): string => $value), 0, Analytics::LIST_LIMIT),
+            'browsers' => array_slice($this->ranked($current['technologies'][AnalyticsDimension::Browser->value], 'value', fn (string $value): string => $value === UserAgent::OTHER_BROWSER ? __($value) : $value), 0, Analytics::LIST_LIMIT),
             'campaigns' => array_slice($this->ranked($current['technologies'][AnalyticsDimension::UtmSource->value], 'value', fn (string $value): string => $value), 0, Analytics::LIST_LIMIT),
             'hasData' => array_sum(array_column($current['daily'], 'pageviews')) > 0,
         ];
@@ -195,10 +196,10 @@ class AnalyticsReportService
         ];
 
         return [
-            'visitors' => $card('visitors', 'Unique visitors', number_format($now['visitors']), 'Each visitor is counted once per day.'),
-            'pageviews' => $card('pageviews', 'Page views', number_format($now['pageviews']), 'Every page opened.'),
-            'engaged' => $card('engaged', 'Engaged time per visit', Duration::short($now['engaged']), 'Time spent reading, on average.'),
-            'returning' => $card('returning', 'Returning visitors', number_format($now['returning'], 0).'%', 'Came back for another visit the same day.'),
+            'visitors' => $card('visitors', __('Unique visitors'), number_format($now['visitors']), __('Each visitor is counted once per day.')),
+            'pageviews' => $card('pageviews', __('Page views'), number_format($now['pageviews']), __('Every page opened.')),
+            'engaged' => $card('engaged', __('Engaged time per visit'), Duration::short($now['engaged']), __('Time spent reading, on average.')),
+            'returning' => $card('returning', __('Returning visitors'), number_format($now['returning'], 0).'%', __('Came back for another visit the same day.')),
         ];
     }
 
@@ -281,7 +282,7 @@ class AnalyticsReportService
         $before = $bucket($previous);
 
         return array_map(fn (array $point, int $index): array => [
-            'label' => strlen($point['key']) === 7 ? CarbonImmutable::parse($point['key'].'-01')->format('M Y') : CarbonImmutable::parse($point['key'])->format('j M'),
+            'label' => strlen($point['key']) === 7 ? CarbonImmutable::parse($point['key'].'-01')->translatedFormat('M Y') : CarbonImmutable::parse($point['key'])->translatedFormat('j M'),
             'date' => $point['key'],
             'visitors' => $point['visitors'],
             'previous' => $before[$index]['visitors'] ?? 0,
@@ -331,7 +332,7 @@ class AnalyticsReportService
      */
     private function referrers(array $rows): array
     {
-        return $this->ranked($rows, 'referrer_domain', fn (string $domain): string => $domain === '' ? Analytics::DIRECT_LABEL : $domain);
+        return $this->ranked($rows, 'referrer_domain', fn (string $domain): string => $domain === '' ? __(Analytics::DIRECT_LABEL) : $domain);
     }
 
     /**

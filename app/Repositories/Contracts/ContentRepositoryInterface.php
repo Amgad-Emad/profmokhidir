@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories\Contracts;
 
+use App\Constants\Locales;
 use DateTimeInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
@@ -24,6 +25,9 @@ interface ContentRepositoryInterface extends BaseRepositoryInterface
 
     /** Pseudo filter for search(): true keeps records still holding Placeholders::MARKER. */
     public const string FILTER_PLACEHOLDER = 'placeholder';
+
+    /** Pseudo filter for search(): true keeps records with a column filled in English but not in Arabic. */
+    public const string FILTER_NEEDS_TRANSLATION = 'needs_translation';
 
     /**
      * Admin listing: optional free-text term over the type's search columns,
@@ -103,6 +107,12 @@ interface ContentRepositoryInterface extends BaseRepositoryInterface
      * in any searchable or placeholder column.
      */
     public function countContaining(string $needle): int;
+
+    /**
+     * Records (published or draft, not trashed) with a column filled in
+     * English but empty in the language.
+     */
+    public function countNeedingTranslation(string $locale = Locales::AR): int;
 
     /**
      * Drafts last changed before the given moment, oldest first.

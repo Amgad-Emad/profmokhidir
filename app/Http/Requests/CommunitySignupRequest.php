@@ -73,15 +73,15 @@ class CommunitySignupRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Enter your name.',
-            'email.required' => 'Enter your email address.',
-            'email.unique' => 'An account with this email address already exists. Sign in to continue.',
-            'affiliation.required' => 'Enter your university, institute or organisation.',
-            'academic_field.required' => 'Enter your academic field, for example soil science.',
-            'reason_for_joining.required' => 'Say briefly why you would like to join.',
-            'reason_for_joining.max' => 'Shorten your reason to :max characters or fewer.',
-            'conduct_agreed.accepted' => 'Tick the box to agree to the conduct rules.',
-            'privacy_agreed.accepted' => 'Tick the box to confirm you have read the privacy note.',
+            'name.required' => __('Enter your name.'),
+            'email.required' => __('Enter your email address.'),
+            'email.unique' => __('An account with this email address already exists. Sign in to continue.'),
+            'affiliation.required' => __('Enter your university, institute or organisation.'),
+            'academic_field.required' => __('Enter your academic field, for example soil science.'),
+            'reason_for_joining.required' => __('Say briefly why you would like to join.'),
+            'reason_for_joining.max' => __('Shorten your reason to :max characters or fewer.'),
+            'conduct_agreed.accepted' => __('Tick the box to agree to the conduct rules.'),
+            'privacy_agreed.accepted' => __('Tick the box to confirm you have read the privacy note.'),
         ];
     }
 
@@ -91,8 +91,8 @@ class CommunitySignupRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'academic_field' => 'academic field',
-            'reason_for_joining' => 'reason for joining',
+            'academic_field' => __('academic field'),
+            'reason_for_joining' => __('reason for joining'),
         ];
     }
 

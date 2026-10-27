@@ -129,12 +129,12 @@ class VideosPageService
         $embed = $video->provider->isEmbeddable() ? VideoEmbed::embedUrl($video->provider, $url) : null;
 
         if ($embed !== null) {
-            return $this->playerData(Embed::KIND_EMBED, embedUrl: $embed, captions: $video->captions_url, url: $url, host: ExternalLink::hostOf($url ?? ''), label: 'Watch on '.$video->provider->label(), poster: $poster);
+            return $this->playerData(Embed::KIND_EMBED, embedUrl: $embed, captions: $video->captions_url, url: $url, host: ExternalLink::hostOf($url ?? ''), label: __('Watch on :host', ['host' => $video->provider->label()]), poster: $poster);
         }
 
         $host = ExternalLink::hostOf($url ?? '');
 
-        return $this->playerData(Embed::KIND_LINK, captions: $video->captions_url, url: $url, host: $host, label: $host === '' ? 'Watch the video' : 'Watch on '.$host, poster: $poster);
+        return $this->playerData(Embed::KIND_LINK, captions: $video->captions_url, url: $url, host: $host, label: $host === '' ? __('Watch the video') : __('Watch on :host', ['host' => $host]), poster: $poster);
     }
 
     /**

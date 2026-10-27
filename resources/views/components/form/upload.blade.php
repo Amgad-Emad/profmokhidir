@@ -41,16 +41,16 @@
     $currentMeta = $media ? strtoupper((string) pathinfo((string) $media->file_name, PATHINFO_EXTENSION)).' · '.\App\Support\FileSize::format((int) $media->size) : null;
     $currentPreview = $media && $image ? $media->getUrl() : null;
     $copy = [
-        'progress' => FormControls::UPLOAD_PROGRESS,
-        'done' => FormControls::UPLOAD_DONE,
-        'failed' => FormControls::UPLOAD_FAILED,
+        'progress' => __(FormControls::UPLOAD_PROGRESS),
+        'done' => __(FormControls::UPLOAD_DONE),
+        'failed' => __(FormControls::UPLOAD_FAILED),
     ];
 @endphp
 <x-form.field :field="$field" :class="$attributes->get('class')" x-data="formUpload({{ \Illuminate\Support\Js::from(['image' => (bool) $image, 'name' => $currentName, 'meta' => $currentMeta, 'preview' => $currentPreview, 'copy' => $copy]) }})" data-upload-field>
     <div class="form-drop" x-bind:data-dragging="dragging ? 'true' : 'false'" x-on:dragenter="dragging = true" x-on:dragleave="dragging = false" x-on:drop="dragging = false"
          @if ($model) x-on:livewire-upload-start="start()" x-on:livewire-upload-progress="progress($event.detail.progress)" x-on:livewire-upload-finish="finish()" x-on:livewire-upload-error="fail()" x-on:livewire-upload-cancel="fail()" @endif>
         <x-icon :name="$image ? 'image' : 'upload'" class="form-drop__icon size-6" />
-        <p><span>{{ $multiple && $image ? FormControls::UPLOAD_DROP_IMAGES : FormControls::UPLOAD_DROP }}</span> <span class="form-drop__choose">{{ $multiple && $image ? FormControls::UPLOAD_CHOOSE_IMAGES : FormControls::UPLOAD_CHOOSE }}</span></p>
+        <p><span>{{ $multiple && $image ? __(FormControls::UPLOAD_DROP_IMAGES) : __(FormControls::UPLOAD_DROP) }}</span> <span class="form-drop__choose">{{ $multiple && $image ? __(FormControls::UPLOAD_CHOOSE_IMAGES) : __(FormControls::UPLOAD_CHOOSE) }}</span></p>
         <input class="form-drop__input" {{ $fileAttributes }} x-ref="input" x-on:change="chosen($event)">
     </div>
 
@@ -69,20 +69,20 @@
         </div>
         <div class="form-file__actions">
             @if ($href)
-                <a href="{{ $href }}" target="_blank" rel="noopener" class="form-file__action">Open<span class="sr-only"> {{ $currentName }} (opens in a new tab)</span></a>
+                <a href="{{ $href }}" target="_blank" rel="noopener" class="form-file__action">{{ __('Open') }}<span class="sr-only"> {{ __(':name (opens in a new tab)', ['name' => $currentName]) }}</span></a>
             @endif
-            <x-button variant="quiet" size="sm" type="button" x-on:click="$refs.input.click()">{{ FormControls::UPLOAD_REPLACE }}<span class="sr-only"> {{ \Illuminate\Support\Str::lower($label) }}</span></x-button>
+            <x-button variant="quiet" size="sm" type="button" x-on:click="$refs.input.click()">{{ __(FormControls::UPLOAD_REPLACE) }}<span class="sr-only"> {{ \Illuminate\Support\Str::lower($label) }}</span></x-button>
             @if ($remove)
-                <x-button variant="danger" size="sm" type="button" wire:click="{{ $remove }}" x-on:click="clear()">{{ FormControls::UPLOAD_REMOVE }}<span class="sr-only"> {{ \Illuminate\Support\Str::lower($label) }}</span></x-button>
+                <x-button variant="danger" size="sm" type="button" wire:click="{{ $remove }}" x-on:click="clear()">{{ __(FormControls::UPLOAD_REMOVE) }}<span class="sr-only"> {{ \Illuminate\Support\Str::lower($label) }}</span></x-button>
             @elseif ($model === null)
-                <x-button variant="danger" size="sm" type="button" x-on:click="clear()">{{ FormControls::UPLOAD_REMOVE }}<span class="sr-only"> {{ \Illuminate\Support\Str::lower($label) }}</span></x-button>
+                <x-button variant="danger" size="sm" type="button" x-on:click="clear()">{{ __(FormControls::UPLOAD_REMOVE) }}<span class="sr-only"> {{ \Illuminate\Support\Str::lower($label) }}</span></x-button>
             @endif
         </div>
     </div>
 
     @if ($image && $alt)
         <div class="mt-6" x-show="fileName" @if (! $currentName) x-cloak @endif data-alt-prompt>
-            <x-form.input :model="$alt" label="Alt text" :hint="FormControls::UPLOAD_ALT_PROMPT" :required="$altRequired" />
+            <x-form.input :model="$alt" :label="__('Alt text')" :hint="__(FormControls::UPLOAD_ALT_PROMPT)" :required="$altRequired" />
         </div>
     @endif
     {{ $slot }}

@@ -6,7 +6,7 @@ use App\Constants\AdminNavigation;
 use App\Constants\Permissions;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 class AdminNavigationTest extends TestCase
 {

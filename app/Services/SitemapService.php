@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Constants\Locales;
 use App\Constants\Sections;
+use App\Constants\Seo;
 use App\Models\Album;
 use App\Models\Commentary;
 use App\Models\OtherItem;
@@ -14,9 +16,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
 /**
- * The sitemap of published content: the home page, every public section and
- * the detail pages of published videos, albums, commentaries and other items.
- * Each entry carries the last change of the content behind it. Lists come
+ * The sitemaps of published content, one per language under a sitemap index:
+ * the home page, every public section and the detail pages of published
+ * videos, albums, commentaries and other items. Each entry carries the last
+ * change of the content behind it. The Arabic sitemap lists a detail page (and
+ * the About page) only when its content has an Arabic version. Lists come
  * from the content services, so they share the public page caches.
  *
  * @phpstan-type Entry array{loc: string, lastmod: string|null}
@@ -38,9 +42,42 @@ class SitemapService
     ) {}
 
     /**
+     * The address of each language's sitemap, for the sitemap index.
+     *
+     * @return array<string, string> locale => url
+     */
+    public function sitemaps(): array
+    {
+        $sitemaps = [];
+
+        foreach (Locales::all() as $locale) {
+            $sitemaps[$locale] = route(Seo::SITEMAP_LOCALE_ROUTE, ['locale' => $locale]);
+        }
+
+        return $sitemaps;
+    }
+
+    /**
+     * The entries of one language's sitemap (addresses in that language).
+     *
      * @return list<Entry>
      */
-    public function entries(): array
+    public function entries(string $locale = Locales::DEFAULT): array
+    {
+        $previous = app()->getLocale();
+        app()->setLocale($locale);
+
+        try {
+            return $this->build($locale);
+        } finally {
+            app()->setLocale($previous);
+        }
+    }
+
+    /**
+     * @return list<Entry>
+     */
+    private function build(string $locale): array
     {
         $profile = $this->profiles->get();
         $lists = [
@@ -63,25 +100,35 @@ class SitemapService
         ]];
 
         foreach (Sections::all() as $key) {
+            if ($key === Sections::ABOUT && $profile !== null && ! $this->inLocale($profile, $locale)) {
+                continue;
+            }
+
             $entries[] = ['loc' => $this->navigation->section($key)['url'], 'lastmod' => $this->format($this->latest($lists[$key]->all()))];
         }
 
         $entries[] = ['loc' => route(Sections::definitions()[Sections::TRIBUTES]['route'].'.create'), 'lastmod' => null];
 
         foreach ($lists[Sections::VIDEOS] as $video) {
-            $entries[] = $this->detail(Sections::VIDEOS, $video, $video->slug);
+            if ($this->inLocale($video, $locale)) {
+                $entries[] = $this->detail(Sections::VIDEOS, $video, $video->slug);
+            }
         }
 
         foreach ($lists[Sections::PICTURES] as $album) {
-            $entries[] = $this->detail(Sections::PICTURES, $album, $album->slug);
+            if ($this->inLocale($album, $locale)) {
+                $entries[] = $this->detail(Sections::PICTURES, $album, $album->slug);
+            }
         }
 
         foreach ($lists[Sections::COMMENTARY] as $commentary) {
-            $entries[] = $this->detail(Sections::COMMENTARY, $commentary, $commentary->slug);
+            if ($this->inLocale($commentary, $locale)) {
+                $entries[] = $this->detail(Sections::COMMENTARY, $commentary, $commentary->slug);
+            }
         }
 
         foreach ($lists[Sections::OTHER] as $item) {
-            if ($item->hasDetail()) {
+            if ($item->hasDetail() && $this->inLocale($item, $locale)) {
                 $entries[] = $this->detail(Sections::OTHER, $item, $item->slug);
             }
         }
@@ -99,6 +146,19 @@ class SitemapService
             'loc' => route(Sections::definitions()[$section]['route'].'.show', $slug),
             'lastmod' => $this->format($this->latest([$model])),
         ];
+    }
+
+    /**
+     * Whether a page about this content belongs in the language's sitemap:
+     * always in English, in another language only when it has a version there.
+     */
+    private function inLocale(?Model $model, string $locale): bool
+    {
+        if ($model === null) {
+            return false;
+        }
+
+        return $locale === Locales::DEFAULT || ! method_exists($model, 'hasLocale') || $model->hasLocale($locale);
     }
 
     /**

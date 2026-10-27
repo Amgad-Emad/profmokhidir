@@ -44,7 +44,7 @@ class DraftContentVisibilityTest extends TestCase
      */
     private function publicPaths(): array
     {
-        return ['/', ...array_column(Sections::definitions(), 'path'), '/tributes/new', '/sitemap.xml'];
+        return ['/', ...array_column(Sections::definitions(), 'path'), '/tributes/new', '/sitemap.xml', '/sitemaps/en.xml', '/sitemaps/ar.xml'];
     }
 
     #[Test]
@@ -100,7 +100,7 @@ class DraftContentVisibilityTest extends TestCase
         $this->get(route('commentary.show', 'zq-live-commentary'))->assertOk()->assertSee(self::LIVE);
         $this->get(route('other.show', 'zq-live-item'))->assertOk()->assertSee(self::LIVE);
 
-        $this->get('/sitemap.xml')->assertOk()
+        $this->get('/sitemaps/en.xml')->assertOk()
             ->assertSee(route('videos.show', 'zq-live-video'))
             ->assertSee(route('commentary.show', 'zq-live-commentary'));
     }

@@ -7,7 +7,8 @@
     quiet notice (App\Http\Responses\LogoutResponse).
 --}}
 @use('App\Constants\AuthScreens')
-@props(['variant' => 'secondary', 'size' => null, 'itemClass' => null, 'label' => AuthScreens::SIGN_OUT])
+@props(['variant' => 'secondary', 'size' => null, 'itemClass' => null, 'label' => null])
+@php $label ??= __(AuthScreens::SIGN_OUT); @endphp
 <form novalidate method="POST" action="{{ route('logout') }}" {{ $attributes }} data-sign-out>
     @csrf
     @if ($itemClass)

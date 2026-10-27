@@ -3,9 +3,12 @@
  | line in the theme's line colour for the period, a dashed brass line for the
  | comparison period. Colours are read from hidden samples styled with the
  | --chart-* tokens, and read again when the theme changes. The table under the
- | chart carries the same figures for screen readers and keyboard users.
+ | chart carries the same figures for screen readers and keyboard users. The
+ | time axis runs left to right in every language; only the tooltip text
+ | follows the page's direction.
  */
 import { CategoryScale, Chart, LinearScale, LineController, LineElement, PointElement, Tooltip } from 'chart.js';
+import { isRtl } from '../i18n';
 
 Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip);
 
@@ -48,6 +51,8 @@ function options(colours, labels) {
                 borderColor: colours.grid,
                 borderWidth: 1,
                 padding: 12,
+                rtl: isRtl(),
+                textDirection: isRtl() ? 'rtl' : 'ltr',
                 titleFont: { ...font(), weight: 500 },
                 bodyFont: font(),
                 callbacks: {

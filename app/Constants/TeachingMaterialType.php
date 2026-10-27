@@ -20,12 +20,12 @@ enum TeachingMaterialType: string
     public function label(): string
     {
         return match ($this) {
-            self::Slides => 'Slides',
-            self::Notes => 'Lecture notes',
-            self::Reading => 'Reading',
-            self::Exercise => 'Exercise',
-            self::Syllabus => 'Syllabus',
-            self::Other => 'Other',
+            self::Slides => __('Slides'),
+            self::Notes => __('Lecture notes'),
+            self::Reading => __('Reading'),
+            self::Exercise => __('Exercise'),
+            self::Syllabus => __('Syllabus'),
+            self::Other => __('Other'),
         };
     }
 }

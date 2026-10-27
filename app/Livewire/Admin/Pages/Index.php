@@ -31,10 +31,11 @@ class Index extends Component
             'page' => $page,
             'definition' => Pages::get($page->key),
             'hasDraft' => $pages->hasDraft($page),
+            'needsArabic' => $pages->needsArabic($page),
             'editUrl' => route(Pages::EDIT_ROUTE, [Pages::ROUTE_PARAMETER => $page->key]),
         ]);
 
         return view('livewire.admin.pages.index', ['rows' => $rows])
-            ->layout('components.layouts.admin', ['title' => 'Pages', 'crumb' => 'Pages']);
+            ->layout('components.layouts.admin', ['title' => __('Pages'), 'crumb' => __('Pages')]);
     }
 }

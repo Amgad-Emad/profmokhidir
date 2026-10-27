@@ -11,17 +11,17 @@
      x-on:admin-palette-open.window="show()" data-command-palette>
     <div class="palette-overlay" x-show="open" x-cloak x-on:click.self="close()" x-on:keydown.escape.prevent.stop="close()">
         <div class="palette" role="dialog" aria-modal="true" aria-labelledby="palette-title" x-trap.noscroll="open">
-            <h2 id="palette-title" class="sr-only">Search or jump to</h2>
+            <h2 id="palette-title" class="sr-only">{{ __('Search or jump to') }}</h2>
             <div class="palette__field">
                 <x-icon name="search" class="size-5 text-ink-muted" />
                 <input type="text" class="palette__input" x-ref="input" x-model="query" x-on:input="search()"
                        role="combobox" aria-expanded="true" aria-controls="palette-results" aria-autocomplete="list"
-                       x-bind:aria-activedescendant="activeId" aria-label="Screen, action or title"
-                       placeholder="Type a screen, an action or a title" autocomplete="off" spellcheck="false"
+                       x-bind:aria-activedescendant="activeId" aria-label="{{ __('Screen, action or title') }}"
+                       placeholder="{{ __('Type a screen, an action or a title') }}" autocomplete="off" spellcheck="false"
                        x-on:keydown.arrow-down.prevent="move(1)" x-on:keydown.arrow-up.prevent="move(-1)" x-on:keydown.enter.prevent="choose()">
                 <kbd class="admin-kbd">Esc</kbd>
             </div>
-            <div id="palette-results" class="palette__results" role="listbox" aria-label="Results">
+            <div id="palette-results" class="palette__results" role="listbox" aria-label="{{ __('Results') }}">
                 <template x-for="group in groups" :key="group.name">
                     <div role="group" x-bind:aria-labelledby="group.id">
                         <p class="palette__group t-label" x-bind:id="group.id" role="presentation" x-text="group.name"></p>
@@ -34,12 +34,12 @@
                         </template>
                     </div>
                 </template>
-                <p class="palette__empty" x-show="groups.length === 0 && !loading" x-text="query.trim() === '' ? '' : 'Nothing matches “' + query.trim() + '”. Try another word.'"></p>
+                <p class="palette__empty" x-show="groups.length === 0 && !loading" x-text="query.trim() === '' ? '' : {{ \Illuminate\Support\Js::from(__('Nothing matches “:term”. Try another word.')) }}.replace(':term', query.trim())"></p>
             </div>
             <p class="palette__foot">
-                <span><kbd class="admin-kbd">↑</kbd><kbd class="admin-kbd">↓</kbd> move</span>
-                <span><kbd class="admin-kbd">Enter</kbd> open</span>
-                <span x-show="loading" x-cloak>Searching…</span>
+                <span><kbd class="admin-kbd">↑</kbd><kbd class="admin-kbd">↓</kbd> {{ __('move') }}</span>
+                <span><kbd class="admin-kbd">Enter</kbd> {{ __('open') }}</span>
+                <span x-show="loading" x-cloak>{{ __('Searching…') }}</span>
             </p>
             <p class="sr-only" role="status" aria-live="polite" x-text="announcement"></p>
         </div>

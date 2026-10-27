@@ -9,6 +9,7 @@ use App\Models\Award;
 use App\Models\Commentary;
 use App\Models\CvEntry;
 use App\Models\HomeQuote;
+use App\Models\Media as LocalizedMedia;
 use App\Models\OtherItem;
 use App\Models\Profile;
 use App\Models\Publication;
@@ -53,7 +54,7 @@ final class CacheSerializable
     {
         return [
             EloquentCollection::class, Collection::class, Carbon::class, CarbonImmutable::class,
-            Media::class, MediaCollection::class,
+            Media::class, LocalizedMedia::class, MediaCollection::class,
         ];
     }
 

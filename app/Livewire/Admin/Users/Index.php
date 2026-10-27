@@ -6,6 +6,7 @@ namespace App\Livewire\Admin\Users;
 
 use App\Constants\AdminNavigation;
 use App\Constants\CommunityStatus;
+use App\Constants\Locales;
 use App\Constants\Roles;
 use App\Exceptions\UserManagementException;
 use App\Http\Requests\Admin\StaffInviteRequest;
@@ -51,8 +52,8 @@ class Index extends Component
 
     public bool $inviting = false;
 
-    /** @var array{name: string, email: string, role: string} */
-    public array $invite = ['name' => '', 'email' => '', 'role' => Roles::EDITOR];
+    /** @var array{name: string, email: string, role: string, locale: string} */
+    public array $invite = ['name' => '', 'email' => '', 'role' => Roles::EDITOR, 'locale' => Locales::DEFAULT];
 
     public ?int $roleEditingId = null;
 
@@ -109,7 +110,7 @@ class Index extends Component
     public function openInvite(): void
     {
         $this->authorize('invite', User::class);
-        $this->invite = ['name' => '', 'email' => '', 'role' => Roles::EDITOR];
+        $this->invite = ['name' => '', 'email' => '', 'role' => Roles::EDITOR, 'locale' => auth()->user()?->preferredLocale() ?? app()->getLocale()];
         $this->resetErrorBag();
         $this->inviting = true;
     }
@@ -133,7 +134,7 @@ class Index extends Component
         $user = $this->users()->invite($validated, auth()->user());
 
         $this->inviting = false;
-        $this->toast($user->name.' has been invited as '.mb_strtolower(Roles::labels()[$validated['role']]).'. They have been emailed a link to set their password.');
+        $this->toast(__(':name has been invited as :role. They have been emailed a link to set their password.', ['name' => $user->name, 'role' => mb_strtolower(Roles::labels()[$validated['role']])]));
     }
 
     // Roles -------------------------------------------------------------------
@@ -184,7 +185,9 @@ class Index extends Component
         }
 
         $this->cancelRole();
-        $this->toast($user->name.' is now '.($role === null ? 'without dashboard access' : mb_strtolower(Roles::labels()[$role])).'.');
+        $this->toast($role === null
+            ? __(':name is now without dashboard access.', ['name' => $user->name])
+            : __(':name is now :role.', ['name' => $user->name, 'role' => mb_strtolower(Roles::labels()[$role])]));
     }
 
     // Deactivate, reactivate, resend --------------------------------------------
@@ -233,9 +236,9 @@ class Index extends Component
 
         try {
             $message = match ($action) {
-                self::ACTION_DEACTIVATE => $this->users()->deactivate($user, $actor)->name.'\'s account has been deactivated. They can no longer sign in.',
-                self::ACTION_REACTIVATE => $this->users()->reactivate($user, $actor)->name.'\'s account has been reactivated.',
-                self::ACTION_RESEND => $this->users()->resendInvitation($user, $actor)->name.' has been sent a new invitation link.',
+                self::ACTION_DEACTIVATE => __(':name\'s account has been deactivated. They can no longer sign in.', ['name' => $this->users()->deactivate($user, $actor)->name]),
+                self::ACTION_REACTIVATE => __(':name\'s account has been reactivated.', ['name' => $this->users()->reactivate($user, $actor)->name]),
+                self::ACTION_RESEND => __(':name has been sent a new invitation link.', ['name' => $this->users()->resendInvitation($user, $actor)->name]),
                 default => throw new InvalidArgumentException('Unknown action.'),
             };
         } catch (UserManagementException $exception) {
@@ -272,6 +275,7 @@ class Index extends Component
             'roleOptions' => Roles::labels(),
             'statusOptions' => CommunityStatus::labels(),
             'staffRoleOptions' => StaffRoleRequest::labels(),
+            'localeOptions' => array_combine(Locales::all(), array_map(Locales::native(...), Locales::all())),
             'activeAdmins' => $this->users()->countActiveAdmins(),
             'editing' => $this->roleEditingId === null ? null : $this->users()->find($this->roleEditingId),
             'confirming' => $this->confirmingId === null ? null : $this->users()->find($this->confirmingId),
@@ -285,9 +289,9 @@ class Index extends Component
     public function dialogCopy(): ?array
     {
         return match ($this->confirmingAction) {
-            self::ACTION_DEACTIVATE => ['title' => 'Deactivate this account?', 'body' => 'They will be signed out and cannot sign in again until the account is reactivated. Nothing they created is removed.', 'confirm' => 'Deactivate', 'danger' => true],
-            self::ACTION_REACTIVATE => ['title' => 'Reactivate this account?', 'body' => 'They can sign in again with their existing password and role.', 'confirm' => 'Reactivate', 'danger' => false],
-            self::ACTION_RESEND => ['title' => 'Resend the invitation?', 'body' => 'A new set-password link will be emailed. Any earlier link stops working.', 'confirm' => 'Send the link', 'danger' => false],
+            self::ACTION_DEACTIVATE => ['title' => __('Deactivate this account?'), 'body' => __('They will be signed out and cannot sign in again until the account is reactivated. Nothing they created is removed.'), 'confirm' => __('Deactivate'), 'danger' => true],
+            self::ACTION_REACTIVATE => ['title' => __('Reactivate this account?'), 'body' => __('They can sign in again with their existing password and role.'), 'confirm' => __('Reactivate'), 'danger' => false],
+            self::ACTION_RESEND => ['title' => __('Resend the invitation?'), 'body' => __('A new set-password link will be emailed. Any earlier link stops working.'), 'confirm' => __('Send the link'), 'danger' => false],
             default => null,
         };
     }

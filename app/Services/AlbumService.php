@@ -129,7 +129,7 @@ class AlbumService extends AbstractContentService
 
     protected function prepare(array $data, $existing): array
     {
-        return $this->withUniqueSlug($data, $existing);
+        return $this->withEnglishSlug($data, $existing);
     }
 
     private function belongsToAlbum(Album $album, Media $photo): bool

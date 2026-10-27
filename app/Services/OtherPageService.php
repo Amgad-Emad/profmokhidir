@@ -38,7 +38,7 @@ class OtherPageService
             $label = $category === '' ? self::UNCATEGORISED_LABEL : $category;
 
             $categories[] = [
-                'label' => $label,
+                'label' => $category === '' ? __(self::UNCATEGORISED_LABEL) : $category,
                 'anchor' => 'category-'.Str::slug($label),
                 'items' => $items,
             ];

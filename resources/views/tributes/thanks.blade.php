@@ -1,4 +1,4 @@
-<x-layouts.public title="Thank you" :description="$message" :noindex="true" breadcrumb-tone="ivory">
+<x-layouts.public :title="__('Thank you')" :description="$message" :noindex="true" breadcrumb-tone="ivory">
     <section class="glow-brass on-dark bg-surface text-ink" aria-labelledby="section-title">
         <div class="mx-auto flex min-h-[calc(100svh-5rem)] max-w-3xl flex-col justify-center px-4 py-24 sm:px-6 lg:py-32">
             <p class="t-label text-accent-text" data-rise>{{ $section['label'] }}</p>

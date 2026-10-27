@@ -85,13 +85,13 @@ class Form extends ContentForm
             'videoFile' => $videoFile,
             'videoFileUrl' => $videoFile?->getUrl(),
             'videoAccept' => '.'.implode(',.', Uploads::VIDEO_EXTENSIONS),
-            'videoHint' => 'MP4 or WebM up to '.Uploads::documentMaxLabel(),
+            'videoHint' => __('MP4 or WebM up to :size', ['size' => Uploads::documentMaxLabel()]),
         ];
     }
 
     public function updatedVideoFile(): void
     {
-        $this->validate(['videoFile' => Uploads::videoRules()], ['videoFile.mimes' => 'Use an MP4 or WebM video.', 'videoFile.max' => 'Videos can be at most '.Uploads::documentMaxLabel().'.'], ['videoFile' => 'video file']);
+        $this->validate(['videoFile' => Uploads::videoRules()], ['videoFile.mimes' => __('Use an MP4 or WebM video.'), 'videoFile.max' => __('Videos can be at most :size.', ['size' => Uploads::documentMaxLabel()])], ['videoFile' => __('video file')]);
 
         $record = $this->record();
 

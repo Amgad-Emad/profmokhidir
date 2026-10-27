@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Constants\CvSection;
 use App\Constants\DateFormats;
+use App\Models\Concerns\HasTranslatableContent;
 use App\Models\Concerns\Publishable;
 use Database\Factories\CvEntryFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -20,7 +21,21 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class CvEntry extends Model
 {
     /** @use HasFactory<CvEntryFactory> */
-    use HasFactory, Publishable, SoftDeletes;
+    use HasFactory, HasTranslatableContent, Publishable, SoftDeletes;
+
+    /**
+     * Language-specific columns (English and Arabic); the first is the primary one.
+     *
+     * @var list<string>
+     */
+    public array $translatable = ['title', 'organisation', 'role_description'];
+
+    /**
+     * Columns folded into the search column (App\Support\SearchText).
+     *
+     * @var list<string>
+     */
+    protected array $searchColumns = ['title', 'organisation', 'role_description'];
 
     protected string $orderDateColumn = 'start_year';
 
@@ -65,7 +80,7 @@ class CvEntry extends Model
         }
 
         if ($this->end_year === null) {
-            return $this->start_year.DateFormats::RANGE_SEPARATOR.DateFormats::PRESENT;
+            return $this->start_year.DateFormats::RANGE_SEPARATOR.__(DateFormats::PRESENT);
         }
 
         if ($this->end_year === $this->start_year) {

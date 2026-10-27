@@ -55,7 +55,7 @@ class VideoArchiveFieldsTest extends TestCase
             ->assertHasNoErrors()
             ->assertRedirect();
 
-        $video = Video::query()->where('title', 'Inaugural lecture')->sole();
+        $video = Video::query()->where('title->en', 'Inaugural lecture')->sole();
         $this->assertSame(1970, $video->decade);
         $this->assertTrue($video->is_featured);
 

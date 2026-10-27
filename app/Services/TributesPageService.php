@@ -81,7 +81,7 @@ class TributesPageService
                 'bookLabel' => $this->text('book_label'),
                 'shareLabel' => $this->text('share_label'),
                 'empty' => $this->text('empty'),
-                'emptyFiltered' => $this->text('empty_filtered', [':relationship' => mb_strtolower($relationship?->plural() ?? 'anyone else')]),
+                'emptyFiltered' => $this->text('empty_filtered', [':relationship' => mb_strtolower($relationship?->plural() ?? __('anyone else'))]),
             ],
             'shareImage' => $this->shareImage(),
             'createUrl' => route(self::ROUTE_CREATE),
@@ -207,7 +207,7 @@ class TributesPageService
      */
     public function shareImage(): string
     {
-        return asset(SocialCards::TRIBUTES);
+        return asset(SocialCards::forLocale(SocialCards::TRIBUTES));
     }
 
     /**

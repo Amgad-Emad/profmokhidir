@@ -293,8 +293,8 @@
     .link-draw::after {
         content: '';
         position: absolute;
-        left: 0;
-        right: 0;
+        inset-inline-start: 0;
+        inset-inline-end: 0;
         bottom: -0.1em;
         height: 1px;
         background-color: currentColor;
@@ -322,8 +322,8 @@
     .footer-link::after {
         content: '';
         position: absolute;
-        left: 0;
-        right: 0;
+        inset-inline-start: 0;
+        inset-inline-end: 0;
         bottom: 0;
         height: 1px;
         background-color: var(--accent-line);

@@ -43,7 +43,7 @@ class PublicationRequest extends ContentRequest
     public function messages(): array
     {
         return parent::messages() + [
-            'type.Illuminate\Validation\Rules\Enum' => 'Choose one of the publication types.',
+            'type.Illuminate\Validation\Rules\Enum' => __('Choose one of the publication types.'),
         ];
     }
 
@@ -52,6 +52,6 @@ class PublicationRequest extends ContentRequest
      */
     public function attributes(): array
     {
-        return ['venue_publisher' => 'venue or publisher', 'doi' => 'DOI', 'url' => 'link', 'is_featured' => 'selected works'];
+        return ['venue_publisher' => __('venue or publisher'), 'doi' => __('DOI'), 'url' => __('link'), 'is_featured' => __('selected works')];
     }
 }

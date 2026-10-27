@@ -130,8 +130,9 @@ class MastheadTest extends TestCase
         preg_match('/<div class="flex items-center gap-1 sm:gap-3">(.*?)<\/div>\s*<\/div>\s*<\/div>/s', $this->header(), $right);
         preg_match_all('/<(a|button)\b/', $right[1], $controls);
 
-        // Search, the tribute pill, the theme toggle (one button, no menu), the quiet Sign in link and the menu toggle.
-        $this->assertSame(['a', 'a', 'button', 'a', 'button'], $controls[1]);
+        // Search, the tribute pill, the language switcher, the theme toggle (one button, no menu), the quiet Sign in link and the menu toggle.
+        $this->assertSame(['a', 'a', 'a', 'button', 'a', 'button'], $controls[1]);
+        $this->assertStringContainsString('data-locale-switch', $right[1]);
         $this->assertStringContainsString('data-sign-in-link>'.Masthead::SIGN_IN_SHORT.'</a>', $right[1]);
         $this->assertStringContainsString('data-theme-toggle', $right[1]);
         $this->assertStringContainsString('<a href="'.route(Search::ROUTE).'" id="'.Masthead::SEARCH_OPENER_ID.'" class="site-search-toggle max-sm:hidden" aria-keyshortcuts="'.Search::keyShortcuts().'" @click.prevent="$dispatch(\'search-open\', { opener: $el })">', $right[1]);

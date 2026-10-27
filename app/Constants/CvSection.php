@@ -18,12 +18,12 @@ enum CvSection: string
 
     public function label(): string
     {
-        return match ($this) {
+        return __(match ($this) {
             self::Education => 'Education',
             self::Appointment => 'Appointments',
             self::Leadership => 'Leadership',
             self::Project => 'Projects',
             self::Achievement => 'Achievements',
-        };
+        });
     }
 }

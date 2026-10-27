@@ -31,10 +31,10 @@ enum WallFormat: string
     public function label(): string
     {
         return match ($this) {
-            self::Portrait => 'Portrait',
-            self::Square => 'Square',
-            self::Landscape => 'Landscape',
-            self::Panorama => 'Panorama',
+            self::Portrait => __('Portrait'),
+            self::Square => __('Square'),
+            self::Landscape => __('Landscape'),
+            self::Panorama => __('Panorama'),
         };
     }
 

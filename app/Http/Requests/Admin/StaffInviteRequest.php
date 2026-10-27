@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Admin;
 
+use App\Constants\Locales;
 use App\Constants\Permissions;
 use App\Constants\Roles;
 use Illuminate\Foundation\Http\FormRequest;
@@ -28,6 +29,7 @@ class StaffInviteRequest extends FormRequest
             'name' => ['required', 'string', 'max:150'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')],
             'role' => ['required', 'string', Rule::in(Roles::staff())],
+            'locale' => ['nullable', 'string', Rule::in(Locales::all())],
         ];
     }
 
@@ -37,8 +39,8 @@ class StaffInviteRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'email.unique' => 'An account with this email already exists. Change its role from the list instead.',
-            'role.in' => 'Choose administrator or editor.',
+            'email.unique' => __('An account with this email already exists. Change its role from the list instead.'),
+            'role.in' => __('Choose administrator or editor.'),
         ];
     }
 }

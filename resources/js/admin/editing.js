@@ -1,4 +1,5 @@
 import { eventDetail } from './storage';
+import { locale, t } from '../i18n';
 
 /*
  | Edit screens. `editScreen` sits on the form: it notices changes (inputs,
@@ -8,12 +9,13 @@ import { eventDetail } from './storage';
  | whether there is anything to lose. `leaveGuard` asks "Leave without
  | saving?" before following a link, and the browser asks before a reload.
  */
-const relative = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+// Western digits in every language (the site never prints Arabic-Indic digits in data).
+const relative = new Intl.RelativeTimeFormat(`${locale()}-u-nu-latn`, { numeric: 'auto' });
 
 export function timeAgo(iso, now = Date.now()) {
     const seconds = Math.round((new Date(iso).getTime() - now) / 1000);
     if (Number.isNaN(seconds)) return '';
-    if (Math.abs(seconds) < 45) return 'just now';
+    if (Math.abs(seconds) < 45) return t('just now');
     const minutes = Math.round(seconds / 60);
     if (Math.abs(minutes) < 60) return relative.format(minutes, 'minute');
     const hours = Math.round(minutes / 60);
@@ -106,11 +108,11 @@ export function editScreen({ seconds = 30 } = {}) {
         },
 
         get stateLabel() {
-            if (this.saving) return 'Saving…';
+            if (this.saving) return t('Saving…');
             if (this.blocked) return this.blocked;
-            if (this.dirty) return 'Unsaved changes';
-            if (!this.savedAt) return 'Not saved yet';
-            return `Saved ${timeAgo(this.savedAt, this.now)}`;
+            if (this.dirty) return t('Unsaved changes');
+            if (!this.savedAt) return t('Not saved yet');
+            return t('Saved :time', { time: timeAgo(this.savedAt, this.now) });
         },
 
         get stateTone() {

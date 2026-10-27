@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Constants\Locales;
 use App\Constants\Pages;
 use App\Constants\Sections;
 use App\Repositories\Contracts\SectionRepositoryInterface;
@@ -92,6 +93,9 @@ class NavigationService
             return false;
         }
 
+        // An Arabic page's route is "ar.x": it is active wherever its English twin is.
+        $currentRoute = (string) Locales::baseRouteName($currentRoute);
+
         return $currentRoute === $route || str_starts_with($currentRoute, $route.'.');
     }
 
@@ -120,12 +124,12 @@ class NavigationService
 
         return [
             'key' => $key,
-            'label' => $this->pages->keyed(Pages::NAVIGATION, 'sections')[$key]['label'] ?? $definition['label'],
-            'title' => $page === null ? $definition['title'] : $this->pages->text($page, 'title'),
+            'label' => $this->pages->keyed(Pages::NAVIGATION, 'sections')[$key]['label'] ?? __($definition['label']),
+            'title' => $page === null ? __($definition['title']) : $this->pages->text($page, 'title'),
             'url' => route($definition['route']),
             'route' => $definition['route'],
             'placement' => $definition['placement'],
-            'summary' => $page === null ? $definition['summary'] : $this->pages->text($page, 'intro'),
+            'summary' => $page === null ? __($definition['summary']) : $this->pages->text($page, 'intro'),
             'active' => $this->isActive($definition['route'], $currentRoute),
         ];
     }

@@ -4,6 +4,8 @@
         <div class="max-w-4xl">
             <x-chapter-opening :number="$chapter" :label="$section['label']" :title="$video->title" level="1" id="section-title" />
 
+            <x-locale.fallback-note :model="$video" />
+
             <x-video-label :video="$video" class="mt-6" data-rise />
 
             <div class="mt-10" data-rise>
@@ -11,11 +13,11 @@
             </div>
 
             @if (filled($video->description))
-                <p class="t-body mt-10 max-w-measure text-ink" data-rise>{{ $video->description }}</p>
+                <p class="t-body mt-10 max-w-measure text-ink" data-rise @contentLang($video, 'description')>{{ $video->description }}</p>
             @endif
 
             @if ($player['captions_url'] && $player['kind'] !== \App\Constants\VideoEmbed::KIND_FILE)
-                <p class="mt-6" data-rise><x-external-link :href="$player['captions_url']" label="Captions for this recording (WebVTT)" /></p>
+                <p class="mt-6" data-rise><x-external-link :href="$player['captions_url']" :label="__('Captions for this recording (WebVTT)')" /></p>
             @endif
         </div>
 
@@ -37,7 +39,7 @@
                                 </a>
                                 <div class="flex flex-col gap-2">
                                     <x-video-label :video="$other" />
-                                    <h3 class="font-display text-2xl font-light leading-snug text-ink">
+                                    <h3 class="font-display text-2xl font-light leading-snug text-ink" @contentLang($other)>
                                         <a href="{{ $url }}" class="text-ink">{{ $other->title }}</a>
                                     </h3>
                                 </div>
@@ -48,7 +50,7 @@
             </section>
         @endif
 
-        <nav class="mt-20 border-t border-rule pt-8" aria-label="More videos">
+        <nav class="mt-20 border-t border-rule pt-8" aria-label="{{ __('More videos') }}">
             <a href="{{ route('videos') }}" class="link-meta">{{ $pageCopy->text('videos', 'back_label') }}</a>
         </nav>
     </article>

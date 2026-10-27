@@ -22,10 +22,10 @@ enum RevisionKind: string
     public function label(): string
     {
         return match ($this) {
-            self::Autosave => 'Autosaved',
-            self::Save => 'Saved',
-            self::Publish => 'Published',
-            self::Restore => 'Restored an earlier version',
+            self::Autosave => __('Autosaved'),
+            self::Save => __('Saved'),
+            self::Publish => __('Published'),
+            self::Restore => __('Restored an earlier version'),
         };
     }
 }

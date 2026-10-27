@@ -21,8 +21,8 @@ enum ChatAttachmentKind: string
     public function label(): string
     {
         return match ($this) {
-            self::Image => 'Image',
-            self::Document => 'Document',
+            self::Image => __('Image'),
+            self::Document => __('Document'),
         };
     }
 }

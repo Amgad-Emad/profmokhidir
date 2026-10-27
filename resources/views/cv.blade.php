@@ -28,7 +28,7 @@
                                 <li>
                                     <a href="#{{ $item['anchor'] }}">
                                         <span>{{ $item['label'] }}</span>
-                                        <span class="cv-ledger__index-count">{{ $item['count'] }}</span>
+                                        <span class="cv-ledger__index-count">@num($item['count'])</span>
                                     </a>
                                 </li>
                             @endforeach
@@ -38,19 +38,19 @@
                     <div class="cv-ledger__sections">
                         @foreach ($groups as $group)
                             <section id="{{ $group['anchor'] }}" aria-labelledby="{{ $group['anchor'] }}-title" class="cv-ledger__section">
-                                <x-chapter-opening :label="$group['count'].' '.($group['count'] === 1 ? 'entry' : 'entries')" :title="$group['label']" level="2" :id="$group['anchor'].'-title'" />
+                                <x-chapter-opening :label="trans_choice('{1} :count entry|[2,*] :count entries', $group['count'], ['count' => app(\App\Services\LocaleService::class)->digits($group['count'])])" :title="$group['label']" level="2" :id="$group['anchor'].'-title'" />
 
                                 <ol class="ledger" data-rise-group>
                                     @foreach ($group['entries'] as $entry)
                                         <li class="ledger__row">
                                             <p class="ledger__years">{{ $entry->yearRange() ?? '' }}</p>
                                             <div class="ledger__entry">
-                                                <h3 class="ledger__title">@typeset($entry->title)</h3>
+                                                <h3 @contentLang($entry) class="ledger__title">@typeset($entry->title)</h3>
                                                 @if (filled($entry->organisation))
-                                                    <p class="ledger__organisation">@typeset($entry->organisation)</p>
+                                                    <p @contentLang($entry, 'organisation') class="ledger__organisation">@typeset($entry->organisation)</p>
                                                 @endif
                                                 @if (filled($entry->role_description))
-                                                    <p class="ledger__description">@typeset($entry->role_description)</p>
+                                                    <p @contentLang($entry, 'role_description') class="ledger__description">@typeset($entry->role_description)</p>
                                                 @endif
                                             </div>
                                         </li>
@@ -68,6 +68,6 @@
         </div>
 
         {{-- Shown on paper only: the CV itself is never printed. --}}
-        <p class="cv-print-notice">{{ $pageCopy->text('cv', 'print_notice', [':name' => \App\Constants\BrandMark::TITLE, ':url' => $section['url']]) }}</p>
+        <p class="cv-print-notice">{{ $pageCopy->text('cv', 'print_notice', [':name' => __(\App\Constants\BrandMark::TITLE), ':url' => $section['url']]) }}</p>
     </section>
 </x-layouts.public>

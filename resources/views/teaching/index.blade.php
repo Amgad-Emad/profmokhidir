@@ -12,17 +12,17 @@
             @if ($topics !== [] || count($types) > 1)
                 <form novalidate method="get" action="{{ $clearUrl }}" class="mt-12 flex flex-col gap-6 border-y border-rule py-8 sm:flex-row sm:flex-wrap sm:items-end" data-rise>
                     @if ($topics !== [])
-                        <x-form.select name="topic" id="filter-topic" label="Topic" :optional="false" size="compact" class="sm:min-w-56"
-                                       placeholder="All topics" :value="$active['topic']" :options="array_combine($topics, $topics)" />
+                        <x-form.select name="topic" id="filter-topic" :label="__('Topic')" :optional="false" size="compact" class="sm:min-w-56"
+                                       :placeholder="__('All topics')" :value="$active['topic']" :options="array_combine($topics, $topics)" />
                     @endif
                     @if (count($types) > 1)
-                        <x-form.select name="type" id="filter-type" label="Type" :optional="false" size="compact" class="sm:min-w-44"
-                                       placeholder="All types" :value="$active['type']?->value" :options="collect($types)->mapWithKeys(fn ($type) => [$type->value => $type->label()])->all()" />
+                        <x-form.select name="type" id="filter-type" :label="__('Type')" :optional="false" size="compact" class="sm:min-w-44"
+                                       :placeholder="__('All types')" :value="$active['type']?->value" :options="collect($types)->mapWithKeys(fn ($type) => [$type->value => $type->label()])->all()" />
                     @endif
                     <div class="flex flex-wrap gap-3">
-                        <button type="submit" class="filter-pill">Apply</button>
+                        <button type="submit" class="filter-pill">{{ __('Apply') }}</button>
                         @if ($isFiltered)
-                            <a href="{{ $clearUrl }}" class="filter-pill">Clear filters</a>
+                            <a href="{{ $clearUrl }}" class="filter-pill">{{ __('Clear filters') }}</a>
                         @endif
                     </div>
                 </form>
@@ -41,7 +41,7 @@
                     <section class="syllabus__course" aria-labelledby="{{ $course['anchor'] }}">
                         <div class="syllabus__head" data-rise>
                             <h2 id="{{ $course['anchor'] }}" class="syllabus__title">@typeset($course['label'])</h2>
-                            <span class="syllabus__count">{{ $course['materials']->count() }} {{ $course['materials']->count() === 1 ? 'item' : 'items' }}</span>
+                            <span class="syllabus__count">{{ trans_choice('{1} :count item|[2,*] :count items', $course['materials']->count(), ['count' => app(\App\Services\LocaleService::class)->digits($course['materials']->count())]) }}</span>
                         </div>
                         <hr class="rule-brass" data-rule>
                         @if (filled($course['description']))
@@ -57,7 +57,7 @@
                                     $meta = [
                                         $material->type?->label(),
                                         $material->topic,
-                                        filled($material->version) ? 'Version '.$material->version : null,
+                                        filled($material->version) ? __('Version :version', ['version' => $material->version]) : null,
                                         $material->material_date,
                                         isset($files[$id]) ? $files[$id]['type'].' · '.$files[$id]['size'] : null,
                                     ];
@@ -67,22 +67,22 @@
                                         @if ($material->isMembersOnly())
                                             <p class="syllabus__lock"><x-icon name="lock" class="size-3.5" /><span>{{ $material->access->label() }}</span></p>
                                         @endif
-                                        <h3 class="syllabus__item-title">@typeset($material->title)</h3>
+                                        <h3 class="syllabus__item-title" @contentLang($material)>@typeset($material->title)</h3>
                                         @if (filled($material->description))
-                                            <p class="syllabus__item-description">@typeset($material->description)</p>
+                                            <p class="syllabus__item-description" @contentLang($material, 'description')>@typeset($material->description)</p>
                                         @endif
                                         <x-meta class="mt-3" :items="$meta" />
                                         @if ($material->isMembersOnly())
-                                            <p class="syllabus__members">{{ \App\Constants\TeachingAccess::MEMBERS_NOTE }}</p>
+                                            <p class="syllabus__members">{{ __(\App\Constants\TeachingAccess::MEMBERS_NOTE) }}</p>
                                         @endif
                                     </div>
                                     <div class="syllabus__action">
                                         @if ($restricted)
-                                            <a href="{{ $communityUrl }}" class="link-meta">Join the community<span class="sr-only"> to open {{ $material->title }}</span></a>
+                                            <a href="{{ $communityUrl }}" class="link-meta">{{ __('Join the community') }}<span class="sr-only"> {{ __('to open :title', ['title' => $material->title]) }}</span></a>
                                         @elseif ($file)
-                                            <x-file-link :media="$file" :href="$downloadUrls[$id] ?? route('teaching.download', $material)" label="Download" />
+                                            <x-file-link :media="$file" :href="$downloadUrls[$id] ?? route('teaching.download', $material)" :label="__('Download')" />
                                         @elseif (filled($material->external_url))
-                                            <x-external-link :href="$material->external_url" label="Open" />
+                                            <x-external-link :href="$material->external_url" :label="__('Open')" />
                                         @endif
                                     </div>
                                 </li>

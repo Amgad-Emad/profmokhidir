@@ -25,7 +25,7 @@ class CommunitySignupFormTest extends TestCase
         $response = $this->get(route('community'))->assertOk();
 
         $response
-            ->assertSee('<section class="lg:pl-8" aria-labelledby="apply-heading">', false)
+            ->assertSee('<section class="lg:ps-8" aria-labelledby="apply-heading">', false)
             ->assertSee(AuthScreens::screen(AuthScreens::COMMUNITY_SIGNUP)['title'])
             ->assertSee('class="rule-brass mt-6" data-rule', false)
             ->assertSee('x-data="authForm()" x-on:submit="submit($event)" data-apply-form', false)

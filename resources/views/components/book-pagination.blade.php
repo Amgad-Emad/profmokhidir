@@ -5,22 +5,22 @@
 --}}
 @inject('typesetter', 'App\Services\TypesetterService')
 @if ($paginator->hasPages())
-    <nav class="book-pagination" aria-label="Pages of the book">
+    <nav class="book-pagination" aria-label="{{ __('Pages of the book') }}">
         @if ($paginator->onFirstPage())
-            <span class="book-pagination__link smallcaps is-disabled" aria-disabled="true">Previous page</span>
+            <span class="book-pagination__link smallcaps is-disabled" aria-disabled="true">{{ __('Previous page') }}</span>
         @else
-            <a href="{{ $paginator->previousPageUrl() }}" class="book-pagination__link smallcaps" rel="prev">Previous page</a>
+            <a href="{{ $paginator->previousPageUrl() }}" class="book-pagination__link smallcaps" rel="prev">{{ __('Previous page') }}</a>
         @endif
 
         <p class="book-pagination__folio smallcaps">
-            <span class="sr-only">Page {{ $paginator->currentPage() }} of {{ $paginator->lastPage() }}</span>
-            <span aria-hidden="true">Page {{ $typesetter->roman($paginator->currentPage()) }} of {{ $typesetter->roman($paginator->lastPage()) }}</span>
+            <span class="sr-only">{{ __('Page :current of :last', ['current' => $paginator->currentPage(), 'last' => $paginator->lastPage()]) }}</span>
+            <span aria-hidden="true">{{ __('Page :current of :last', ['current' => $typesetter->roman($paginator->currentPage()), 'last' => $typesetter->roman($paginator->lastPage())]) }}</span>
         </p>
 
         @if ($paginator->hasMorePages())
-            <a href="{{ $paginator->nextPageUrl() }}" class="book-pagination__link book-pagination__link--next smallcaps" rel="next">Next page</a>
+            <a href="{{ $paginator->nextPageUrl() }}" class="book-pagination__link book-pagination__link--next smallcaps" rel="next">{{ __('Next page') }}</a>
         @else
-            <span class="book-pagination__link book-pagination__link--next smallcaps is-disabled" aria-disabled="true">Next page</span>
+            <span class="book-pagination__link book-pagination__link--next smallcaps is-disabled" aria-disabled="true">{{ __('Next page') }}</span>
         @endif
     </nav>
 @endif

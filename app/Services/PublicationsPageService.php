@@ -137,7 +137,8 @@ class PublicationsPageService
 
             $groups[] = [
                 'decade' => $decade,
-                'label' => $decade === null ? Catalogue::UNDATED_LABEL : $decade.Catalogue::DECADE_SUFFIX,
+                // ":decades" prints "1970s" in English (the placeholder is :decade); other languages word it their own way.
+                'label' => $decade === null ? __(Catalogue::UNDATED_LABEL) : __(':decade'.Catalogue::DECADE_SUFFIX, ['decade' => $decade]),
                 'anchor' => 'decade-'.($decade ?? 'undated'),
                 'count' => $counts[$decade ?? ''] ?? $items->count(),
                 'items' => $items->values(),
@@ -195,8 +196,8 @@ class PublicationsPageService
         $range = match (true) {
             $filters->from !== null && $filters->to !== null && $filters->from === $filters->to => (string) $filters->from,
             $filters->from !== null && $filters->to !== null => $filters->from.DateFormats::RANGE_SEPARATOR.$filters->to,
-            $filters->from !== null => 'From '.$filters->from,
-            $filters->to !== null => 'Until '.$filters->to,
+            $filters->from !== null => __('From :year', ['year' => $filters->from]),
+            $filters->to !== null => __('Until :year', ['year' => $filters->to]),
             default => null,
         };
 

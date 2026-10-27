@@ -20,9 +20,9 @@ enum AnalyticsDimension: string
     public function label(): string
     {
         return match ($this) {
-            self::Device => 'Devices',
-            self::Browser => 'Browsers',
-            self::UtmSource => 'Campaign sources',
+            self::Device => __('Devices'),
+            self::Browser => __('Browsers'),
+            self::UtmSource => __('Campaign sources'),
         };
     }
 

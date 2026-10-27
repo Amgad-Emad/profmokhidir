@@ -47,7 +47,7 @@ class PhotoArchiveRequest extends ContentRequest
      */
     public static function archiveMessages(): array
     {
-        return [Archive::DECADE.'.in' => 'Choose one of the listed decades.'];
+        return [Archive::DECADE.'.in' => __('Choose one of the listed decades.')];
     }
 
     /**
@@ -63,6 +63,6 @@ class PhotoArchiveRequest extends ContentRequest
      */
     public static function archiveAttributes(): array
     {
-        return [Archive::FEATURED => 'featured'];
+        return [Archive::FEATURED => __('featured')];
     }
 }

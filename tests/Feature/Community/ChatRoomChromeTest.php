@@ -106,7 +106,7 @@ class ChatRoomChromeTest extends TestCase
 
         $this->assertStringContainsString('placeholder="'.ChatCopy::COMPOSER_PLACEHOLDER.'"', $html);
         $this->assertStringContainsString('aria-label="'.ChatCopy::FORMATTING_TOGGLE.'"', $html);
-        $this->assertStringContainsString('<code class="chat-code">**bold**</code>', $html);
+        $this->assertStringContainsString('<code class="chat-code" dir="ltr">**bold**</code>', $html);
         $this->assertStringContainsString('aria-label="'.ChatCopy::SEND.'" data-tip="'.ChatCopy::SEND.'" data-send', $html);
         $this->assertStringContainsString('x-show="hintShown" data-composer-hint>'.ChatCopy::COMPOSER_HINT, $html);
         $this->assertStringContainsString('x-text="countText"', $html);

@@ -2,12 +2,12 @@
     Dashboard navigation on the dark band (an on-dark region): the horizontal lockup, the dashboard
     link, then one collapsible group per AdminNavigation group (Content, Media, Community, Tributes,
     Settings) with the items the user may see. Items that need attention carry a count; the active
-    item carries a brass rule on its left and aria-current. On desktop the whole sidebar collapses
+    item carries a brass rule on its start side and aria-current. On desktop the whole sidebar collapses
     to icons (adminShell in resources/js/admin/shell.js remembers the choice); labels stay in the
     accessibility tree. `nav` comes from AdminShellService::sidebar().
 --}}
 @props(['nav', 'user'])
-<nav class="admin-nav flex h-full flex-col" aria-label="Dashboard">
+<nav class="admin-nav flex h-full flex-col" aria-label="{{ __('Dashboard') }}">
     <div class="admin-nav__brand border-b border-rule">
         <x-brand.lockup variant="horizontal" tone="ivory" :href="route(\App\Constants\AdminNavigation::DASHBOARD_ROUTE)" class="admin-nav__lockup text-ink" compact />
         <a href="{{ route(\App\Constants\AdminNavigation::DASHBOARD_ROUTE) }}" class="admin-nav__mark" aria-hidden="true" tabindex="-1">
@@ -30,7 +30,7 @@
                             aria-expanded="true" x-bind:aria-expanded="open.toString()" aria-controls="nav-group-{{ $group['key'] }}">
                         <span class="t-label">{{ $group['label'] }}</span>
                         @if ($group['count'] > 0)
-                            <span class="admin-count admin-count--quiet" x-show="!open" x-cloak>{{ $group['count'] }}<span class="sr-only"> waiting</span></span>
+                            <span class="admin-count admin-count--quiet" x-show="!open" x-cloak>@num($group['count'])<span class="sr-only"> {{ __('waiting') }}</span></span>
                         @endif
                         <x-icon name="chevron-down" class="admin-nav__chevron size-4" />
                     </button>
@@ -42,7 +42,7 @@
                                 <x-icon :name="$item['icon']" class="admin-nav-link__icon size-5" />
                                 <span class="admin-nav-link__label">{{ $item['label'] }}</span>
                                 @if ($item['count'] > 0)
-                                    <span class="admin-count" data-nav-count="{{ $item['key'] }}">{{ $item['count'] }}<span class="sr-only"> waiting</span></span>
+                                    <span class="admin-count" data-nav-count="{{ $item['key'] }}">@num($item['count'])<span class="sr-only"> {{ __('waiting') }}</span></span>
                                 @endif
                             </a>
                         </li>
@@ -60,7 +60,7 @@
         <x-account.sign-out item-class="admin-nav-link admin-nav__sign-out" data-sidebar-sign-out />
         <button type="button" class="admin-nav__collapse" x-on:click="toggleCollapsed()" x-bind:aria-pressed="collapsed.toString()" aria-pressed="false">
             <x-icon name="collapse" class="admin-nav__collapse-icon size-5" />
-            <span class="admin-nav-link__label">Collapse to icons</span>
+            <span class="admin-nav-link__label">{{ __('Collapse to icons') }}</span>
         </button>
     </div>
 </nav>

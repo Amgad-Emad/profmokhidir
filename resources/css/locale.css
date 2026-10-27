@@ -1,0 +1,333 @@
+/*
+ | Languages and direction: Arabic typography, right-to-left mirroring and the language components
+ | (<x-locale.switcher>, <x-locale.suggestion>, <x-locale.fallback-note>). Imported by app.css.
+ |
+ | Layout uses logical properties everywhere (margin-inline-start, inset-inline-end, text-align: start),
+ | so most of the site mirrors by itself under <html dir="rtl">. This file holds what logical properties
+ | cannot express: transform origins, translateX motion, inset shadows and the mirrored directional icons.
+ | Mirroring follows the element's own direction (:dir()), so an English passage marked dir="ltr" inside
+ | an Arabic page keeps its arrows and hairlines running left to right.
+ */
+
+/* ------------------------------------------------------------------ direction */
+:root,
+[dir='ltr'] {
+    /* 1 left to right, -1 right to left: multiplies horizontal offsets (translateX, inset shadows). */
+    --inline-sign: 1;
+}
+
+[dir='rtl'] {
+    --inline-sign: -1;
+}
+
+@layer components {
+    /*
+     | Directional glyphs and icons (text arrows, the arrow and chevron icons of <x-icon>): mirrored
+     | right to left. `scale` composes with any `transform` already on the element, so a hover nudge
+     | of translateX(4px) moves the mirrored arrow 4px towards the inline end as well.
+     | Never on the MK mark, logos, media players, maps, charts or code.
+     */
+    .rtl-mirror:dir(rtl) {
+        display: inline-block;
+        scale: -1 1;
+    }
+}
+
+/*
+ | Hairlines that draw from the inline start, and the reading-progress line: their scale grows from
+ | the right in Arabic. Unlayered, so they also reach the unlayered [data-rule] reveal in app.css.
+ */
+.nav-link:dir(rtl)::after,
+.chapter-link:dir(rtl)::after,
+.link-draw:dir(rtl)::after,
+.reading-progress:dir(rtl),
+.form-control:dir(rtl)::after,
+[data-rule]:dir(rtl) {
+    transform-origin: right center;
+}
+
+/* ------------------------------------------------------------------ Arabic typography */
+/*
+ | The documented exception to the brand type rules (App\Constants\Typography::ARABIC_*,
+ | App\Constants\BrandAudit::arabicFontFamilies): Cormorant Garamond and Hanken Grotesk have no Arabic
+ | glyphs, so Arabic text takes Amiri (display, headings, quotes) and IBM Plex Sans Arabic (body, UI),
+ | loaded by <x-fonts> on Arabic pages only. The Latin brand face stays first in each stack: its
+ | self-hosted file covers Latin only (unicode-range), so English words, Western digits and Latin
+ | punctuation keep the brand faces while Arabic letters fall through to the Arabic face. (The Google
+ | CSS also ships Latin subsets of both Arabic families; listed first, they would take English words.)
+ */
+@layer base {
+    :lang(ar) {
+        --font-display: 'Cormorant Garamond', 'Amiri', Georgia, 'Times New Roman', serif;
+        --font-sans: 'Hanken Grotesk', 'IBM Plex Sans Arabic', ui-sans-serif, system-ui, sans-serif;
+        /* No synthetic bold, oblique or small caps for Arabic letters. */
+        font-synthesis: none;
+    }
+
+    /*
+     | Arabic is cursive: tracking breaks the joins and it has no capitals, italics, small caps,
+     | old-style figures or discretionary ligatures. These outrank every component (important
+     | declarations in the first layer win over all normal ones), and stop at English passages
+     | marked lang="en" inside an Arabic page.
+     */
+    :lang(ar) {
+        letter-spacing: normal !important;
+        text-transform: none !important;
+        font-style: normal !important;
+        font-variant-caps: normal !important;
+        /* Cormorant's default figures are old-style: Arabic text takes lining figures. Western digits stay. */
+        font-variant-numeric: lining-nums !important;
+        font-variant-ligatures: normal !important;
+        font-feature-settings: normal !important;
+    }
+
+    /* Emphasis by weight and ink instead of a slanted Arabic face: Plex 500 in text, Amiri 700 in headings. */
+    :is(em, i, cite, dfn, var):lang(ar) {
+        font-weight: 500;
+        color: var(--ink-strong);
+    }
+
+    :is(h1, h2, h3, h4, blockquote, .font-display, .t-display, .t-heading, .t-quote) :is(em, i, cite, dfn, var):lang(ar) {
+        font-weight: 700;
+    }
+
+    /* Body: 19px at 1.8 (18px on phones); a step larger than the Latin 18px/1.6, as Arabic sets smaller on the same body. */
+    body:lang(ar) {
+        font-size: 1.125rem; /* 18px on phones */
+        line-height: 1.8;
+    }
+
+    @media (width >= 40rem) {
+        body:lang(ar) {
+            font-size: 1.1875rem; /* 19px */
+        }
+    }
+
+    /* Amiri's ascenders and descenders need more leading than Cormorant's. */
+    :is(h1, h2, h3, h4):lang(ar) {
+        line-height: 1.45;
+    }
+}
+
+@layer components {
+    .t-display:lang(ar) {
+        line-height: 1.3;
+    }
+
+    .t-heading:lang(ar) {
+        line-height: 1.45;
+    }
+
+    .t-quote:lang(ar) {
+        line-height: 1.65;
+    }
+
+    .t-body:lang(ar),
+    .prose-bio:lang(ar) {
+        font-size: 1.125rem; /* 18px on phones */
+        line-height: 1.8;
+    }
+
+    @media (width >= 40rem) {
+        .t-body:lang(ar),
+        .prose-bio:lang(ar) {
+            font-size: 1.1875rem; /* 19px */
+        }
+    }
+
+    .prose-bio:lang(ar) :is(h2, h3, h4) {
+        line-height: 1.45;
+    }
+
+    .prose-bio:lang(ar) blockquote,
+    .epigraph__quote:lang(ar) {
+        line-height: 1.65;
+    }
+
+    /* Decade years in lining figures are wider than the old-style ones: keep "2000–2009" on one line. */
+    .life-chapter__years:lang(ar) {
+        white-space: nowrap;
+    }
+
+    /* Labels: 14px at weight 500 in their own case, without the 0.24em tracking (removed above). */
+    .t-label:lang(ar) {
+        font-size: 0.875rem; /* 14px */
+        line-height: 1.5;
+    }
+
+    /* Small text keeps the 15px floor; Arabic reads better with more leading. */
+    .text-sm:lang(ar) {
+        line-height: 1.7;
+    }
+
+    /*
+     | <x-drop-cap>: Arabic letters join, so a dropped initial would break the first word. In Arabic the
+     | first word is set in Amiri 700 in the strong ink instead (the component wraps it in
+     | .drop-cap__lead); an English passage inside an Arabic page keeps the Latin initial.
+     */
+    .drop-cap:lang(ar) > p:first-of-type::first-letter {
+        float: none;
+        margin: 0;
+        font: inherit;
+        color: inherit;
+        -webkit-initial-letter: normal;
+        initial-letter: normal;
+    }
+
+    .drop-cap__lead:lang(ar) {
+        font-family: var(--font-display);
+        font-weight: 700;
+        color: var(--ink-strong);
+    }
+
+    /* ------------------------------------------------------------ language switcher */
+    /*
+     | One small link naming the other language in its own script. Masthead and toolbar: a quiet 44px
+     | pill with a hairline that strengthens on hover, in the surrounding ink (like the theme toggle).
+     | Footer: a plain small link beside the privacy link. Focus is the shared :focus-visible ring.
+     */
+    .locale-switch {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-sans);
+        font-weight: 500;
+        white-space: nowrap;
+        text-decoration: none;
+        transition:
+            color 300ms var(--ease-rise),
+            border-color 300ms var(--ease-rise);
+    }
+
+    .locale-switch:hover {
+        text-decoration: none;
+    }
+
+    .locale-switch--masthead,
+    .locale-switch--toolbar,
+    .locale-switch--pill {
+        min-height: 2.75rem;
+        padding-inline: 0.625rem;
+        border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+        border-radius: 9999px;
+        color: inherit;
+        font-size: 0.9375rem; /* 15px */
+        line-height: 1;
+    }
+
+    .locale-switch--masthead:hover,
+    .locale-switch--toolbar:hover,
+    .locale-switch--pill:hover {
+        border-color: currentColor;
+        color: var(--ink-strong);
+    }
+
+    .locale-switch--toolbar {
+        min-height: 2.25rem;
+        min-width: 2.75rem;
+    }
+
+    .locale-switch--footer {
+        font-size: inherit;
+        font-weight: 500;
+        color: var(--ink);
+    }
+
+    .locale-switch--footer:hover {
+        color: var(--ink-strong);
+        text-decoration: underline;
+        text-decoration-color: var(--accent-line);
+    }
+
+    /* "العربية" on an English page: the Arabic faces are not loaded there, so the system Arabic face draws it, a size up. */
+    .locale-switch:lang(ar) {
+        font-size: 1rem;
+    }
+
+    /* ------------------------------------------------------------ language suggestion */
+    /*
+     | A quiet card at the bottom corner of English pages for visitors whose browser prefers Arabic.
+     | It is shown only on left-to-right pages, so it sits at the bottom right (physical on purpose:
+     | the card itself is dir="rtl"). On phones it spans the width above the bottom edge, one line high.
+     */
+    .locale-suggestion {
+        position: fixed;
+        right: 1rem;
+        bottom: 1rem;
+        left: 1rem;
+        z-index: 45;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        padding-block: 0.25rem;
+        padding-inline: 1rem 0.25rem;
+        border: 1px solid var(--accent-line);
+        border-radius: var(--radius-card);
+        background-color: var(--surface-panel);
+        color: var(--ink);
+        font-family: var(--font-sans);
+        font-size: 1rem;
+        line-height: 1.5;
+    }
+
+    @media (width >= 40rem) {
+        .locale-suggestion {
+            left: auto;
+            max-width: 20rem;
+        }
+    }
+
+    .locale-suggestion__link {
+        padding-block: 0.625rem;
+        color: var(--ink-strong);
+        font-weight: 500;
+        text-decoration: underline;
+        text-decoration-color: var(--accent-line);
+        text-underline-offset: 0.3em;
+    }
+
+    .locale-suggestion__link:hover {
+        text-decoration-color: currentColor;
+    }
+
+    .locale-suggestion__close {
+        display: inline-flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 9999px;
+        color: var(--ink-muted);
+        transition: color 300ms var(--ease-rise);
+    }
+
+    .locale-suggestion__close:hover {
+        color: var(--ink-strong);
+    }
+
+    @media print {
+        .locale-suggestion {
+            display: none;
+        }
+    }
+
+    /* ------------------------------------------------------------ fallback note */
+    /* "This content is available in English only.": a small muted note with an info icon, under the title. */
+    .locale-fallback-note {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        max-width: var(--container-measure);
+        font-family: var(--font-sans);
+        font-size: 0.9375rem; /* 15px, the small-text floor */
+        font-weight: 400;
+        line-height: 1.6;
+        color: var(--ink-muted);
+    }
+
+    .locale-fallback-note svg {
+        color: var(--accent-text);
+    }
+}

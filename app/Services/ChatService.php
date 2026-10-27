@@ -154,7 +154,7 @@ class ChatService
         $replyTo = $replyToId === null ? null : $this->messages->findWithTrashed($replyToId);
 
         if ($replyToId !== null && ($replyTo === null || (int) $replyTo->channel_id !== (int) $channel->getKey())) {
-            throw new InvalidArgumentException('The message you are replying to is not in this channel.');
+            throw new InvalidArgumentException(__('The message you are replying to is not in this channel.'));
         }
 
         $existing = $this->messages->findByClientUuid((int) $author->getKey(), $clientUuid);
@@ -212,7 +212,7 @@ class ChatService
         $this->guardAccess($editor);
 
         if ((int) $message->user_id !== (int) $editor->getKey()) {
-            throw new AuthorizationException('Only the author may edit a message.');
+            throw new AuthorizationException(__('Only the author may edit a message.'));
         }
 
         $current = $this->messages->findWithTrashed((int) $message->getKey());
@@ -241,7 +241,7 @@ class ChatService
         $isAuthor = (int) $message->user_id === (int) $actor->getKey();
 
         if (! $isAuthor && ! $this->canModerate($actor)) {
-            throw new AuthorizationException('You may not delete this message.');
+            throw new AuthorizationException(__('You may not delete this message.'));
         }
 
         if ($isAuthor && ! $this->canModerate($actor)) {
@@ -474,7 +474,7 @@ class ChatService
         $this->guardAccess($reporter);
 
         if ((int) $message->user_id === (int) $reporter->getKey()) {
-            throw new AuthorizationException('You cannot report your own message.');
+            throw new AuthorizationException(__('You cannot report your own message.'));
         }
 
         $current = $this->messages->findWithTrashed((int) $message->getKey());
@@ -613,7 +613,8 @@ class ChatService
             'name' => $channel->name,
             'slug' => $channel->slug,
             'numeral' => $this->typesetter->roman($index + 1),
-            'description' => $channel->description,
+            // The default room description is fixed copy, shown in the reader's language; anything else as written.
+            'description' => filled($channel->description) ? __((string) $channel->description) : null,
             'unread' => $channel->is($current) ? 0 : ($unread[(int) $channel->getKey()] ?? 0),
             'current' => $channel->is($current),
         ])->values()->all();
@@ -646,11 +647,11 @@ class ChatService
         }
 
         if ($body === '') {
-            throw new InvalidArgumentException('A message cannot be empty.');
+            throw new InvalidArgumentException(__('A message cannot be empty.'));
         }
 
         if (mb_strlen($body) > ChatSettings::BODY_MAX_LENGTH) {
-            throw new InvalidArgumentException(sprintf('A message may not exceed %d characters.', ChatSettings::BODY_MAX_LENGTH));
+            throw new InvalidArgumentException(__('A message may not exceed :max characters.', ['max' => ChatSettings::BODY_MAX_LENGTH]));
         }
 
         return $body;

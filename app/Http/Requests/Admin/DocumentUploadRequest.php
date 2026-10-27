@@ -27,9 +27,9 @@ class DocumentUploadRequest extends ContentRequest
     public function messages(): array
     {
         return parent::messages() + [
-            self::FIELD.'.required' => 'Choose a file to upload.',
-            self::FIELD.'.mimes' => 'Use a PDF, Word, PowerPoint or ZIP file.',
-            self::FIELD.'.max' => 'Files can be at most '.Uploads::documentMaxLabel().'.',
+            self::FIELD.'.required' => __('Choose a file to upload.'),
+            self::FIELD.'.mimes' => __('Use a PDF, Word, PowerPoint or ZIP file.'),
+            self::FIELD.'.max' => __('Files can be at most :size.', ['size' => Uploads::documentMaxLabel()]),
         ];
     }
 
@@ -38,6 +38,6 @@ class DocumentUploadRequest extends ContentRequest
      */
     public function attributes(): array
     {
-        return [self::FIELD => 'file'];
+        return [self::FIELD => __('file')];
     }
 }

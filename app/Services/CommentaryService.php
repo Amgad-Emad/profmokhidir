@@ -78,13 +78,16 @@ class CommentaryService extends AbstractContentService
     protected function prepare(array $data, $existing): array
     {
         if (array_key_exists('body', $data)) {
-            $data['body'] = RichText::sanitise(is_string($data['body']) ? $data['body'] : null) ?: null;
+            $data['body'] = $this->eachLocale($data['body'], fn (mixed $body): ?string => RichText::sanitise(is_string($body) ? $body : null) ?: null);
         }
 
         foreach (['epigraph', 'epigraph_attribution'] as $field) {
             if (array_key_exists($field, $data)) {
-                $value = is_string($data[$field]) ? trim($data[$field]) : '';
-                $data[$field] = $value === '' ? null : $value;
+                $data[$field] = $this->eachLocale($data[$field], function (mixed $value): ?string {
+                    $value = is_string($value) ? trim($value) : '';
+
+                    return $value === '' ? null : $value;
+                });
             }
         }
 
@@ -92,7 +95,7 @@ class CommentaryService extends AbstractContentService
             $data['tags'] = $this->normaliseTags($data['tags']);
         }
 
-        return $this->withUniqueSlug($data, $existing);
+        return $this->withEnglishSlug($data, $existing);
     }
 
     /**

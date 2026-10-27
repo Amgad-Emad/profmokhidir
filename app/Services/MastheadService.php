@@ -104,9 +104,9 @@ class MastheadService
     public function utility(?User $user): array
     {
         $link = match (true) {
-            $user === null => ['label' => Masthead::SIGN_IN, 'url' => route('login')],
-            $user->canAccessChat() => ['label' => Masthead::OPEN_CHAT, 'url' => route('community.chat')],
-            default => ['label' => Masthead::ACCOUNT, 'url' => route(AdminNavigation::ACCOUNT_ROUTE)],
+            $user === null => ['label' => __(Masthead::SIGN_IN), 'url' => route('login')],
+            $user->canAccessChat() => ['label' => __(Masthead::OPEN_CHAT), 'url' => route('community.chat')],
+            default => ['label' => __(Masthead::ACCOUNT), 'url' => route(AdminNavigation::ACCOUNT_ROUTE)],
         };
 
         return ['line' => $this->pages->text(Pages::NAVIGATION, 'utility_line'), 'link' => $link];
@@ -125,14 +125,14 @@ class MastheadService
             return null;
         }
 
-        $items = [['key' => 'account', 'label' => Masthead::ACCOUNT, 'url' => route(AdminNavigation::ACCOUNT_ROUTE), 'icon' => 'user']];
+        $items = [['key' => 'account', 'label' => __(Masthead::ACCOUNT), 'url' => route(AdminNavigation::ACCOUNT_ROUTE), 'icon' => 'user']];
 
         if ($user->canAccessChat()) {
-            $items[] = ['key' => 'chat', 'label' => Masthead::ACCOUNT_MENU_CHAT, 'url' => route('community.chat'), 'icon' => 'users'];
+            $items[] = ['key' => 'chat', 'label' => __(Masthead::ACCOUNT_MENU_CHAT), 'url' => route('community.chat'), 'icon' => 'users'];
         }
 
         if ($this->auth->isStaff($user)) {
-            $items[] = ['key' => 'dashboard', 'label' => Masthead::ACCOUNT_MENU_DASHBOARD, 'url' => route(AdminNavigation::DASHBOARD_ROUTE), 'icon' => 'panel'];
+            $items[] = ['key' => 'dashboard', 'label' => __(Masthead::ACCOUNT_MENU_DASHBOARD), 'url' => route(AdminNavigation::DASHBOARD_ROUTE), 'icon' => 'panel'];
         }
 
         return [
@@ -151,7 +151,7 @@ class MastheadService
     public function featured(string $kind): ?array
     {
         $label = isset(Chapters::featuredLabels()[$kind])
-            ? ($this->pages->keyed(Pages::NAVIGATION, 'featured_labels')[$kind]['label'] ?? Chapters::featuredLabels()[$kind])
+            ? ($this->pages->keyed(Pages::NAVIGATION, 'featured_labels')[$kind]['label'] ?? __(Chapters::featuredLabels()[$kind]))
             : null;
 
         if ($label === null) {
@@ -184,7 +184,7 @@ class MastheadService
             $links[] = [
                 'key' => $item['key'],
                 'label' => $item['label'],
-                'description' => $sections[$section]['line'] ?? $this->chapters->description($section) ?? $item['summary'],
+                'description' => $sections[$section]['line'] ?? $this->translated($this->chapters->description($section)) ?? $item['summary'],
                 'url' => $item['url'],
                 'active' => $item['active'],
             ];
@@ -199,14 +199,19 @@ class MastheadService
 
             $links[] = [
                 'key' => $key,
-                'label' => $actions[$key]['label'] ?? $action['label'],
-                'description' => $actions[$key]['line'] ?? $action['description'],
+                'label' => $actions[$key]['label'] ?? __($action['label']),
+                'description' => $actions[$key]['line'] ?? __($action['description']),
                 'url' => route($action['route']),
                 'active' => false, // Actions are calls to action, never the current page: the section stays the one current item.
             ];
         }
 
         return $links;
+    }
+
+    private function translated(?string $text): ?string
+    {
+        return $text === null ? null : __($text);
     }
 
     private function sees(string $audience, ?User $user): bool
@@ -279,7 +284,7 @@ class MastheadService
             'kind' => Chapters::FEATURED_ALBUM,
             'label' => $label,
             'title' => $album->title,
-            'meta' => $count > 0 ? sprintf('%d %s', $count, $count === 1 ? 'photograph' : 'photographs') : null,
+            'meta' => $count > 0 ? trans_choice('{1} :count photograph|[2,*] :count photographs', $count, ['count' => app(LocaleService::class)->digits($count)]) : null,
             'quote' => null,
             'url' => route('pictures.show', $album),
             'media' => $album->cover(),

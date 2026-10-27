@@ -19,11 +19,13 @@
     'id' => null,
     'bag' => 'default',
     'error' => null,
-    'placeholder' => 'Start writing…',
+    'placeholder' => null,
+    'dir' => 'auto',
 ])
 @use('App\Constants\FormControls')
 @inject('forms', 'App\Services\FormFieldService')
 @php
+    $placeholder ??= __('Start writing…');
     $field = $forms->describe(['error' => $error, 
         'name' => $name, 'model' => $model, 'wire' => '', 'id' => $id, 'label' => $label,
         'hint' => $hint, 'required' => $required, 'optional' => $optional, 'bag' => $bag,
@@ -40,14 +42,15 @@
         'invalid' => $field['invalid'],
         'placeholder' => $placeholder,
         'protocols' => FormControls::LINK_PROTOCOLS,
-        'linkInvalid' => FormControls::LINK_INVALID,
-        'words' => [FormControls::WORD_COUNT_SINGULAR, FormControls::WORD_COUNT_PLURAL],
+        'linkInvalid' => __(FormControls::LINK_INVALID),
+        'words' => [__(FormControls::WORD_COUNT_SINGULAR), __(FormControls::WORD_COUNT_PLURAL)],
+        'dir' => $dir,
     ];
 @endphp
 <x-form.field :field="$field" :class="$attributes->get('class')" data-rich-text>
     <div class="form-control form-control--editor" x-data="formEditor({{ \Illuminate\Support\Js::from($config) }})" @if ($model) wire:ignore @endif x-cloak
          x-bind:data-filled="words > 0 ? 'true' : 'false'">
-        <div class="form-editor__toolbar" role="toolbar" aria-label="{{ FormControls::EDITOR_TOOLBAR }}" aria-controls="{{ $editorId }}" x-on:keydown="toolbarKey($event)">
+        <div class="form-editor__toolbar" role="toolbar" aria-label="{{ __(FormControls::EDITOR_TOOLBAR) }}" aria-controls="{{ $editorId }}" x-on:keydown="toolbarKey($event)">
             @foreach ($groups as $group => $tools)
                 <div class="form-editor__group" role="group">
                     @foreach ($tools as $command => $tool)
@@ -66,13 +69,13 @@
         </div>
 
         <div id="{{ $linkId }}" class="form-editor__dialog" role="dialog" aria-modal="false" aria-labelledby="{{ $linkId }}-title" x-show="linking" x-cloak x-on:keydown.escape.prevent.stop="closeLink()">
-            <p id="{{ $linkId }}-title" class="t-label text-accent-text">{{ FormControls::LINK_DIALOG_TITLE }}</p>
+            <p id="{{ $linkId }}-title" class="t-label text-accent-text">{{ __(FormControls::LINK_DIALOG_TITLE) }}</p>
             <div class="form-field mt-3">
-                <label for="{{ $linkId }}-url" class="form-label t-label">{{ FormControls::LINK_URL_LABEL }}</label>
-                <p id="{{ $linkId }}-hint" class="form-hint">{{ FormControls::LINK_URL_HINT }}</p>
+                <label for="{{ $linkId }}-url" class="form-label t-label">{{ __(FormControls::LINK_URL_LABEL) }}</label>
+                <p id="{{ $linkId }}-hint" class="form-hint">{{ __(FormControls::LINK_URL_HINT) }}</p>
                 <div class="form-field__control">
                     <div class="form-control form-control--compact">
-                        <input id="{{ $linkId }}-url" type="url" class="form-control__input" placeholder="https://" x-ref="linkInput" x-model="linkUrl"
+                        <input id="{{ $linkId }}-url" type="url" dir="ltr" class="form-control__input" placeholder="https://" x-ref="linkInput" x-model="linkUrl"
                                x-bind:aria-invalid="linkError ? 'true' : null" aria-describedby="{{ $linkId }}-hint {{ $linkId }}-error"
                                x-on:keydown.enter.prevent="applyLink()" x-on:blur="checkLink()">
                     </div>
@@ -80,9 +83,9 @@
                 <p id="{{ $linkId }}-error" class="form-message form-error" x-show="linkError" x-cloak role="alert"><x-icon name="warning" class="mt-1 size-4 shrink-0" /><span x-text="linkError"></span></p>
             </div>
             <div class="form-editor__dialog-actions">
-                <x-button type="button" variant="primary" size="sm" x-on:click="applyLink()">{{ FormControls::LINK_APPLY }}</x-button>
-                <x-button variant="quiet" size="sm" type="button" x-show="is('link') === 'true'" x-on:click="removeLink()">{{ FormControls::LINK_REMOVE }}</x-button>
-                <x-button variant="quiet" size="sm" type="button" x-on:click="closeLink()">{{ FormControls::LINK_CANCEL }}</x-button>
+                <x-button type="button" variant="primary" size="sm" x-on:click="applyLink()">{{ __(FormControls::LINK_APPLY) }}</x-button>
+                <x-button variant="quiet" size="sm" type="button" x-show="is('link') === 'true'" x-on:click="removeLink()">{{ __(FormControls::LINK_REMOVE) }}</x-button>
+                <x-button variant="quiet" size="sm" type="button" x-on:click="closeLink()">{{ __(FormControls::LINK_CANCEL) }}</x-button>
             </div>
         </div>
 
@@ -96,7 +99,7 @@
     </div>
     <noscript>
         <div class="form-control">
-            <textarea id="{{ $field['id'] }}" rows="12" class="form-control__input form-control__input--mono" @if ($name) name="{{ $name }}" @endif @if ($model) wire:model.live.blur="{{ $model }}" @endif>{{ $initial }}</textarea>
+            <textarea id="{{ $field['id'] }}" dir="{{ $dir }}" rows="12" class="form-control__input form-control__input--mono" @if ($name) name="{{ $name }}" @endif @if ($model) wire:model.live.blur="{{ $model }}" @endif>{{ $initial }}</textarea>
         </div>
     </noscript>
 </x-form.field>

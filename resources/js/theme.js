@@ -74,7 +74,9 @@ function syncToggle(toggle) {
     if (!button) return;
     const showing = current();
     const next = opposite(showing);
-    button.setAttribute('aria-label', (toggle.dataset.themeLabel || LABEL).replace('%s', next));
+    // The server prints each label in the page's language (data-theme-label-light / -dark).
+    const label = next === 'dark' ? toggle.dataset.themeLabelDark : toggle.dataset.themeLabelLight;
+    button.setAttribute('aria-label', label || (toggle.dataset.themeLabel || LABEL).replace('%s', next));
     button.setAttribute('aria-pressed', showing === 'dark' ? 'true' : 'false');
     button.value = next;
     toggle.dataset.themeShowing = showing;

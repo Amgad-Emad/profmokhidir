@@ -170,7 +170,7 @@ class Applications extends Component
         foreach (self::tabs() as $value) {
             $status = CommunityStatus::from($value);
             $tabs[$value] = [
-                'label' => $status === CommunityStatus::Approved ? 'Members' : $status->label(),
+                'label' => $status === CommunityStatus::Approved ? __('Members') : $status->label(),
                 'count' => $this->service()->countByStatus($status),
                 'tone' => StatusTone::forCommunity($status),
             ];
@@ -195,11 +195,11 @@ class Applications extends Component
     public function dialogCopy(): ?array
     {
         return match ($this->decidingAction) {
-            self::ACTION_APPROVE => ['title' => 'Approve this application?', 'body' => 'They become a member and can use the chat straight away. They will be emailed.', 'confirm' => 'Approve', 'danger' => false],
-            self::ACTION_REJECT => ['title' => 'Reject this application?', 'body' => 'They will be emailed. You can still approve them later from the Rejected tab.', 'confirm' => 'Reject', 'danger' => true],
-            self::ACTION_SUSPEND => ['title' => 'Suspend this member?', 'body' => 'Their chat access ends immediately and they will be emailed. You can reinstate them later.', 'confirm' => 'Suspend', 'danger' => true],
-            self::ACTION_REINSTATE => ['title' => 'Reinstate this member?', 'body' => 'Their chat access returns immediately and they will be emailed.', 'confirm' => 'Reinstate', 'danger' => false],
-            self::ACTION_REMOVE => ['title' => 'Remove this member?', 'body' => 'Their membership ends and they will be emailed. Their account and messages remain; they may apply again.', 'confirm' => 'Remove', 'danger' => true],
+            self::ACTION_APPROVE => ['title' => __('Approve this application?'), 'body' => __('They become a member and can use the chat straight away. They will be emailed.'), 'confirm' => __('Approve'), 'danger' => false],
+            self::ACTION_REJECT => ['title' => __('Reject this application?'), 'body' => __('They will be emailed. You can still approve them later from the Rejected tab.'), 'confirm' => __('Reject'), 'danger' => true],
+            self::ACTION_SUSPEND => ['title' => __('Suspend this member?'), 'body' => __('Their chat access ends immediately and they will be emailed. You can reinstate them later.'), 'confirm' => __('Suspend'), 'danger' => true],
+            self::ACTION_REINSTATE => ['title' => __('Reinstate this member?'), 'body' => __('Their chat access returns immediately and they will be emailed.'), 'confirm' => __('Reinstate'), 'danger' => false],
+            self::ACTION_REMOVE => ['title' => __('Remove this member?'), 'body' => __('Their membership ends and they will be emailed. Their account and messages remain; they may apply again.'), 'confirm' => __('Remove'), 'danger' => true],
             default => null,
         };
     }
@@ -208,35 +208,35 @@ class Applications extends Component
     {
         $this->service()->approve($user, $actor, $note);
 
-        return $user->name.' has been approved and emailed.';
+        return __(':name has been approved and emailed.', ['name' => $user->name]);
     }
 
     private function reject(User $user, User $actor, ?string $note): string
     {
         $this->service()->reject($user, $actor, $note);
 
-        return $user->name.'\'s application has been rejected and they have been emailed.';
+        return __(':name\'s application has been rejected and they have been emailed.', ['name' => $user->name]);
     }
 
     private function suspend(User $user, User $actor, ?string $note): string
     {
         $this->service()->suspend($user, $actor, $note);
 
-        return $user->name.' has been suspended.';
+        return __(':name has been suspended.', ['name' => $user->name]);
     }
 
     private function reinstate(User $user, User $actor, ?string $note): string
     {
         $this->service()->reinstate($user, $actor, $note);
 
-        return $user->name.' has been reinstated.';
+        return __(':name has been reinstated.', ['name' => $user->name]);
     }
 
     private function remove(User $user, User $actor, ?string $note): string
     {
         $this->service()->remove($user, $actor, $note);
 
-        return $user->name.' has been removed from the community.';
+        return __(':name has been removed from the community.', ['name' => $user->name]);
     }
 
     private function service(): CommunityService

@@ -2,13 +2,13 @@
     A row of filter links in the pill style. Each option is ['label' => ..., 'url' => ..., 'active' => bool].
     Links update the query string, so filtering works without JavaScript.
 --}}
-@props(['label', 'options' => [], 'allUrl' => null, 'allActive' => false, 'allLabel' => 'All'])
+@props(['label', 'options' => [], 'allUrl' => null, 'allActive' => false, 'allLabel' => null])
 <nav {{ $attributes->merge(['aria-label' => $label]) }}>
     <p class="t-label text-accent-text">{{ $label }}</p>
     <ul class="mt-4 flex flex-wrap gap-2">
         @if ($allUrl !== null)
             <li>
-                <a href="{{ $allUrl }}" class="filter-pill"{!! $allActive ? ' aria-current="true"' : '' !!}>{{ $allLabel }}</a>
+                <a href="{{ $allUrl }}" class="filter-pill"{!! $allActive ? ' aria-current="true"' : '' !!}>{{ $allLabel ?? __('All') }}</a>
             </li>
         @endif
         @foreach ($options as $option)

@@ -35,12 +35,12 @@
     ], $errors ?? null);
     $current = $model === null ? (string) old($field['key'], $value ?? '') : '';
     $textareaAttributes = $forms->controlAttributes($field, array_merge(
-        ['rows' => $rows, 'placeholder' => \App\Constants\FormControls::BLANK_PLACEHOLDER, 'data-autogrow' => $autogrow ? 'true' : null],
+        ['rows' => $rows, 'placeholder' => \App\Constants\FormControls::BLANK_PLACEHOLDER, 'data-autogrow' => $autogrow ? 'true' : null, 'dir' => $forms->direction($mono ? 'code' : 'textarea')],
         $forms->browserMessages($field, 'textarea', array_filter(['minlength' => $attributes->get('minlength')])),
         $control,
     ), $attributes->except(['class'])->getAttributes());
 @endphp
-<x-form.field :field="$field" :hide-label="$hideLabel" :class="$attributes->get('class')" :counter-text="$field['counter'] ? strtr(\App\Constants\FormControls::COUNTER_FORMAT, [':count' => (string) mb_strlen($model === null ? $current : (string) $value), ':max' => (string) $maxlength]) : null">
+<x-form.field :field="$field" :hide-label="$hideLabel" :class="$attributes->get('class')" :counter-text="$field['counter'] ? __(\App\Constants\FormControls::COUNTER_FORMAT, ['count' => (string) mb_strlen($model === null ? $current : (string) $value), 'max' => (string) $maxlength]) : null">
     <div class="form-control">
         <textarea @class(['form-control__input', 'form-control__input--mono' => $mono, $controlClass => $controlClass !== null]) {{ $textareaAttributes }}>{{ $current }}</textarea>
         {{ $action ?? '' }}

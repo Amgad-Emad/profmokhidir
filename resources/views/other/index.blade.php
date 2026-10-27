@@ -11,7 +11,7 @@
         @else
             <div class="catalogue-index">
                 @if (count($categories) > 1)
-                    <nav class="catalogue-index__toc" aria-label="Categories" data-rise>
+                    <nav class="catalogue-index__toc" aria-label="{{ __('Categories') }}" data-rise>
                         <ul class="flex flex-wrap gap-x-8 gap-y-3">
                             @foreach ($categories as $category)
                                 <li><a href="#{{ $category['anchor'] }}" class="link-meta">{{ $category['label'] }}</a></li>
@@ -24,7 +24,7 @@
                     <section class="catalogue__decade" aria-labelledby="{{ $category['anchor'] }}">
                         <div class="catalogue__decade-head" data-rise>
                             <h2 id="{{ $category['anchor'] }}" class="catalogue__decade-title">{{ $category['label'] }}</h2>
-                            <span class="catalogue__decade-count">{{ $category['items']->count() }} {{ $category['items']->count() === 1 ? 'item' : 'items' }}</span>
+                            <span class="catalogue__decade-count">{{ trans_choice('{1} :count item|[2,*] :count items', $category['items']->count(), ['count' => app(\App\Services\LocaleService::class)->digits($category['items']->count())]) }}</span>
                         </div>
                         <hr class="rule-brass" data-rule>
 
@@ -34,7 +34,7 @@
                                     <p class="record__year" aria-hidden="true">{{ $item->date?->format('Y') }}</p>
                                     <article class="record__body" aria-labelledby="other-{{ $item->getKey() }}-title">
                                         <x-meta :items="[$item->typeLabel(), $item->date]" />
-                                        <h3 id="other-{{ $item->getKey() }}-title" class="record__title">
+                                        <h3 id="other-{{ $item->getKey() }}-title" class="record__title" @contentLang($item)>
                                             @if ($item->hasDetail())
                                                 <a href="{{ route('other.show', $item->slug) }}">@typeset($item->title)</a>
                                             @else
@@ -42,12 +42,12 @@
                                             @endif
                                         </h3>
                                         @if (filled($item->summary))
-                                            <p class="record__summary">@typeset($item->summary)</p>
+                                            <p class="record__summary" @contentLang($item, 'summary')>@typeset($item->summary)</p>
                                         @endif
                                         @if (filled($item->destination_url))
                                             <ul class="record__links"><li><x-external-link :href="$item->destination_url" :label="$pageCopy->text('other', 'visit_label')" /></li></ul>
                                         @elseif ($item->hasDetail())
-                                            <ul class="record__links"><li><a href="{{ route('other.show', $item->slug) }}" class="link-meta">{{ $pageCopy->text('other', 'read_more') }}<span class="sr-only"> about {{ $item->title }}</span></a></li></ul>
+                                            <ul class="record__links"><li><a href="{{ route('other.show', $item->slug) }}" class="link-meta">{{ $pageCopy->text('other', 'read_more') }}<span class="sr-only"> {{ __('about :title', ['title' => $item->title]) }}</span></a></li></ul>
                                         @endif
                                     </article>
                                 </li>

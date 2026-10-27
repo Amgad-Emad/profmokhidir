@@ -27,8 +27,8 @@ enum ChatTransport: string
     public function label(): string
     {
         return match ($this) {
-            self::Poll => 'Polling',
-            self::Broadcast => 'Broadcasting (Reverb)',
+            self::Poll => __('Polling'),
+            self::Broadcast => __('Broadcasting (Reverb)'),
         };
     }
 

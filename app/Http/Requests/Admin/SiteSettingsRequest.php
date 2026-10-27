@@ -5,14 +5,16 @@ declare(strict_types=1);
 namespace App\Http\Requests\Admin;
 
 use App\Constants\ChatAttachments;
+use App\Constants\Locales;
 use App\Constants\Permissions;
 use App\Constants\SettingKeys;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 /**
  * The site settings form: public contact details, the notification address
  * the mail sender, the community chat upload switch and limits, and the
- * visitor analytics switch.
+ * visitor analytics switch, and the digits used on Arabic pages.
  */
 class SiteSettingsRequest extends FormRequest
 {
@@ -37,6 +39,7 @@ class SiteSettingsRequest extends FormRequest
             SettingKeys::CHAT_IMAGE_MAX_MB => ['nullable', 'integer', 'min:'.ChatAttachments::LIMIT_MIN_MB, 'max:'.ChatAttachments::LIMIT_MAX_MB],
             SettingKeys::CHAT_DOCUMENT_MAX_MB => ['nullable', 'integer', 'min:'.ChatAttachments::LIMIT_MIN_MB, 'max:'.ChatAttachments::LIMIT_MAX_MB],
             SettingKeys::ANALYTICS_ENABLED => ['boolean'],
+            SettingKeys::ARABIC_DIGITS => ['nullable', 'string', Rule::in(Locales::digitStyles())],
         ];
     }
 
@@ -54,7 +57,7 @@ class SiteSettingsRequest extends FormRequest
     public function messages(): array
     {
         return [
-            SettingKeys::CONTACT_PHONE.'.regex' => 'Use digits, spaces, brackets, dots, dashes and a leading + only.',
+            SettingKeys::CONTACT_PHONE.'.regex' => __('Use digits, spaces, brackets, dots, dashes and a leading + only.'),
         ];
     }
 }

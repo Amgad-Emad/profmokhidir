@@ -90,19 +90,19 @@ final class ChatFormat
     }
 
     /**
-     * The formatting hints shown to members, in order.
+     * The formatting hints shown to members, in order (what each means in the current language).
      *
      * @return list<array{markup: string, means: string}>
      */
     public static function hints(): array
     {
         return [
-            ['markup' => '**bold**', 'means' => 'bold'],
-            ['markup' => '*italic*', 'means' => 'italic'],
-            ['markup' => '`code`', 'means' => 'inline code'],
-            ['markup' => '- item', 'means' => 'a list'],
-            ['markup' => '[text](https://…)', 'means' => 'a link'],
-            ['markup' => '$E = mc^2$', 'means' => 'maths (KaTeX)'],
+            ['markup' => '**bold**', 'means' => __('bold')],
+            ['markup' => '*italic*', 'means' => __('italic')],
+            ['markup' => '`code`', 'means' => __('inline code')],
+            ['markup' => '- item', 'means' => __('a list')],
+            ['markup' => '[text](https://…)', 'means' => __('a link')],
+            ['markup' => '$E = mc^2$', 'means' => __('maths (KaTeX)')],
         ];
     }
 }

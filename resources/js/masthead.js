@@ -21,6 +21,7 @@
  */
 
 import { focusablesIn, trapTab } from './focus-trap';
+import { isRtl } from './i18n';
 
 const DESKTOP = '(min-width: 1024px)'; // Tailwind `lg`: the chapter bar takes over.
 const FINE_POINTER = '(hover: hover) and (pointer: fine)';
@@ -179,7 +180,9 @@ export default function masthead() {
             const index = buttons.indexOf(event.currentTarget);
             if (index < 0) return;
 
-            const next = buttons[(index + direction + buttons.length) % buttons.length];
+            // The chapters run right to left on Arabic pages, so ArrowRight moves back there.
+            const step = isRtl() ? -direction : direction;
+            const next = buttons[(index + step + buttons.length) % buttons.length];
             const wasOpen = this.openChapter !== null;
             next.focus();
 

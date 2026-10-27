@@ -22,7 +22,7 @@ class Breadcrumbs extends Component
 
     public function ariaLabel(): string
     {
-        return BreadcrumbCopy::ARIA_LABEL;
+        return __(BreadcrumbCopy::ARIA_LABEL);
     }
 
     public function separator(): string

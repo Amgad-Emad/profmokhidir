@@ -39,7 +39,7 @@
 <{{ $tag }}{!! $href ? ' href="'.e($href).'"' : '' !!} {{ $classes }} data-variant="{{ $variant }}">
     <x-brand.mark :size="$size" :tone="$tone" decorative />
     <span @class(['flex flex-col', 'mt-4 items-center gap-2' => $stacked, 'items-start gap-0.5' => ! $stacked])>
-        <span class="t-label {{ $labelColour }}">Professor</span>
-        <span @class(['font-display font-light leading-none', 'text-3xl' => $stacked, 'text-lg sm:text-xl' => ! $stacked && ! $compact, 'text-lg whitespace-nowrap' => ! $stacked && $compact])>Mohamed Osman Khidir</span>
+        <span class="t-label {{ $labelColour }}">{{ __('Professor') }}</span>
+        <span @class(['font-display font-light leading-none', 'text-3xl' => $stacked, 'text-lg sm:text-xl' => ! $stacked && ! $compact, 'text-lg whitespace-nowrap' => ! $stacked && $compact])>{{ __('Mohamed Osman Khidir') }}</span>
     </span>
 </{{ $tag }}>

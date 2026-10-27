@@ -105,7 +105,7 @@ class TeachingPageService
 
             $courses[] = [
                 'name' => $name,
-                'label' => $name === '' ? self::OTHER_COURSE_LABEL : $name,
+                'label' => $name === '' ? __(self::OTHER_COURSE_LABEL) : $name,
                 'anchor' => 'course-'.($name === '' ? 'other' : Str::slug($name)),
                 'description' => $description,
                 'materials' => $materials,

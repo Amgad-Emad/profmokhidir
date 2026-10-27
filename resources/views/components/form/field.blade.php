@@ -26,7 +26,7 @@
     @endif
     <div class="form-field__control">{{ $slot }}</div>
     @if ($field['counter'])
-        <p id="{{ $field['countId'] }}" class="form-message form-counter" data-form-counter data-max="{{ $field['maxlength'] }}" data-format="{{ \App\Constants\FormControls::COUNTER_FORMAT }}" aria-live="off">{{ $counterText ?? strtr(\App\Constants\FormControls::COUNTER_FORMAT, [':count' => '0', ':max' => (string) $field['maxlength']]) }}</p>
+        <p id="{{ $field['countId'] }}" class="form-message form-counter" data-form-counter data-max="{{ $field['maxlength'] }}" data-format="{{ __(\App\Constants\FormControls::COUNTER_FORMAT) }}" aria-live="off">{{ $counterText ?? __(\App\Constants\FormControls::COUNTER_FORMAT, ['count' => '0', 'max' => (string) $field['maxlength']]) }}</p>
     @endif
     <p id="{{ $field['errorId'] }}" class="form-message form-error" data-form-error{!! $field['invalid'] ? ' role="alert"' : '' !!}>@if ($field['invalid'])<x-icon name="warning" class="mt-1 size-4 shrink-0" /><span>{{ $field['error'] }}</span>@endif</p>
 </{{ $as }}>

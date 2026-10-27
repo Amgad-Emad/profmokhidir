@@ -37,15 +37,15 @@ final class FormStates
     public static function all(): array
     {
         return [
-            self::DEFAULT => ['label' => 'Default', 'look' => 'A 1px quiet rule on the field surface.', 'hook' => '.form-control'],
-            self::HOVER => ['label' => 'Hover', 'look' => 'The rule darkens to the strong rule.', 'hook' => ':hover'],
-            self::FOCUS => ['label' => 'Focus', 'look' => 'Mouse, touch or keyboard alike: the field\'s own line turns from 1px muted to 2px strong ink over 200ms, with a faint tint behind the field. No outline, ring or box.', 'hook' => ':focus-within'],
-            self::FILLED => ['label' => 'Filled', 'look' => 'The rule stays strong so an answered field reads as settled.', 'hook' => ':has(:not(:placeholder-shown))'],
-            self::INVALID => ['label' => 'Invalid', 'look' => 'Bronze rule (brass on dark) and a message with a warning icon that names the fix.', 'hook' => '[aria-invalid="true"]'],
-            self::VALID => ['label' => 'Valid (after a correction)', 'look' => 'Only once an invalid field is corrected: a tick and the success tone.', 'hook' => '[data-corrected]'],
-            self::DISABLED => ['label' => 'Disabled', 'look' => 'Dotted rule, muted ink, not-allowed cursor; skipped by Tab.', 'hook' => ':disabled'],
-            self::READONLY => ['label' => 'Read-only', 'look' => 'On the sunken surface behind a quiet dotted rule, so it does not invite typing; still focusable and copyable.', 'hook' => '[readonly]'],
-            self::LOADING => ['label' => 'Loading', 'look' => 'Muted ink and a hairline that draws slowly along the foot of the field.', 'hook' => '[data-loading]'],
+            self::DEFAULT => ['label' => __('Default'), 'look' => __('A 1px quiet rule on the field surface.'), 'hook' => '.form-control'],
+            self::HOVER => ['label' => __('Hover'), 'look' => __('The rule darkens to the strong rule.'), 'hook' => ':hover'],
+            self::FOCUS => ['label' => __('Focus'), 'look' => __('Mouse, touch or keyboard alike: the field\'s own line turns from 1px muted to 2px strong ink over 200ms, with a faint tint behind the field. No outline, ring or box.'), 'hook' => ':focus-within'],
+            self::FILLED => ['label' => __('Filled'), 'look' => __('The rule stays strong so an answered field reads as settled.'), 'hook' => ':has(:not(:placeholder-shown))'],
+            self::INVALID => ['label' => __('Invalid'), 'look' => __('Bronze rule (brass on dark) and a message with a warning icon that names the fix.'), 'hook' => '[aria-invalid="true"]'],
+            self::VALID => ['label' => __('Valid (after a correction)'), 'look' => __('Only once an invalid field is corrected: a tick and the success tone.'), 'hook' => '[data-corrected]'],
+            self::DISABLED => ['label' => __('Disabled'), 'look' => __('Dotted rule, muted ink, not-allowed cursor; skipped by Tab.'), 'hook' => ':disabled'],
+            self::READONLY => ['label' => __('Read-only'), 'look' => __('On the sunken surface behind a quiet dotted rule, so it does not invite typing; still focusable and copyable.'), 'hook' => '[readonly]'],
+            self::LOADING => ['label' => __('Loading'), 'look' => __('Muted ink and a hairline that draws slowly along the foot of the field.'), 'hook' => '[data-loading]'],
         ];
     }
 

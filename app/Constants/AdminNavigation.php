@@ -75,19 +75,19 @@ final class AdminNavigation
     public const string ACCOUNT = 'account';
 
     /**
-     * Group key => heading label, in sidebar order.
+     * Group key => heading label (in the current language), in sidebar order.
      *
      * @return array<string, string>
      */
     public static function groups(): array
     {
         return [
-            self::GROUP_CONTENT => 'Content',
-            self::GROUP_MEDIA => 'Media',
-            self::GROUP_COMMUNITY => 'Community',
-            self::GROUP_TRIBUTES => 'Tributes',
-            self::GROUP_AUDIENCE => 'Audience',
-            self::GROUP_SETTINGS => 'Settings',
+            self::GROUP_CONTENT => self::translate('Content'),
+            self::GROUP_MEDIA => self::translate('Media'),
+            self::GROUP_COMMUNITY => self::translate('Community'),
+            self::GROUP_TRIBUTES => self::translate('Tributes'),
+            self::GROUP_AUDIENCE => self::translate('Audience'),
+            self::GROUP_SETTINGS => self::translate('Settings'),
         ];
     }
 
@@ -129,7 +129,7 @@ final class AdminNavigation
     public static function item(string $label, string $group, string $route, string $path, string $permission): array
     {
         return [
-            'label' => $label,
+            'label' => self::translate($label),
             'group' => $group,
             'route' => str_starts_with($route, self::ROUTE_PREFIX) || $route === self::ACCOUNT_ROUTE ? $route : self::ROUTE_PREFIX.$route,
             'path' => $path,
@@ -209,5 +209,13 @@ final class AdminNavigation
     public static function isValid(string $key): bool
     {
         return array_key_exists($key, self::items());
+    }
+
+    /**
+     * A label in the current language (as written when no translator is booted, e.g. plain unit tests).
+     */
+    private static function translate(string $label): string
+    {
+        return function_exists('app') && app()->bound('translator') ? __($label) : $label;
     }
 }

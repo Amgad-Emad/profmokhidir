@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Constants\Locales;
 use App\Constants\MediaConversions;
 use App\Constants\MediaProperties;
 use App\Constants\MediaTreatment;
@@ -84,12 +85,12 @@ final class ResponsiveImage
     }
 
     /**
-     * "Place, Year" in the label style, or null when neither is known.
+     * "Place, Year" in the label style ("المكان، 1998" with the Arabic comma on Arabic pages), or null when neither is known.
      */
     public static function placeYear(Media $media): ?string
     {
         $parts = array_filter([self::text($media, MediaProperties::PLACE), self::text($media, MediaProperties::YEAR)]);
 
-        return $parts === [] ? null : implode(', ', $parts);
+        return $parts === [] ? null : implode(app()->getLocale() === Locales::AR ? '، ' : ', ', $parts);
     }
 }

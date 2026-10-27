@@ -42,14 +42,14 @@ class ChatMessageRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'body.required_without' => 'Write a message or attach a file first.',
-            'attachments.max' => 'Attach at most :max files to one message.',
-            'attachments.*.id.uuid' => 'One of the files could not be found. Remove it and attach it again.',
-            'attachments.*.alt.max' => 'Keep each image description to :max characters or fewer.',
-            'body.max' => 'Shorten the message to :max characters or fewer.',
-            'client_uuid.required' => 'The message is missing its identifier; please reload the page.',
-            'client_uuid.uuid' => 'The message identifier is invalid; please reload the page.',
-            'reply_to_id.integer' => 'The message you are replying to could not be found.',
+            'body.required_without' => __('Write a message or attach a file first.'),
+            'attachments.max' => __('Attach at most :max files to one message.'),
+            'attachments.*.id.uuid' => __('One of the files could not be found. Remove it and attach it again.'),
+            'attachments.*.alt.max' => __('Keep each image description to :max characters or fewer.'),
+            'body.max' => __('Shorten the message to :max characters or fewer.'),
+            'client_uuid.required' => __('The message is missing its identifier; please reload the page.'),
+            'client_uuid.uuid' => __('The message identifier is invalid; please reload the page.'),
+            'reply_to_id.integer' => __('The message you are replying to could not be found.'),
         ];
     }
 }

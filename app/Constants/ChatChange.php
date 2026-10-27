@@ -23,11 +23,11 @@ enum ChatChange: string
     public function label(): string
     {
         return match ($this) {
-            self::Sent => 'sent',
-            self::Edited => 'edited',
-            self::Deleted => 'deleted',
-            self::Pinned => 'pinned',
-            self::Unpinned => 'unpinned',
+            self::Sent => __('sent'),
+            self::Edited => __('edited'),
+            self::Deleted => __('deleted'),
+            self::Pinned => __('pinned'),
+            self::Unpinned => __('unpinned'),
         };
     }
 }

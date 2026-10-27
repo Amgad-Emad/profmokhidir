@@ -37,7 +37,9 @@ class ExternalLink extends Component
 
     public function text(): string
     {
-        return $this->host === '' ? $this->label : $this->label.' · '.$this->host;
+        $label = __($this->label);
+
+        return $this->host === '' ? $label : $label.' · '.$this->host;
     }
 
     public function render(): View|Closure|string

@@ -11,6 +11,7 @@ use App\Constants\TributeStatus;
 use App\Http\Requests\Admin\TributeEditRequest;
 use App\Livewire\Admin\Concerns\NotifiesEditors;
 use App\Models\Tribute;
+use App\Services\LocaleService;
 use App\Services\TributeService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -66,7 +67,7 @@ class Moderate extends Component
 
         $this->service()->approve($tribute, auth()->user());
         $this->forget($id);
-        $this->notify('Tribute from '.$tribute->name.' approved. It is on the Tributes page now.');
+        $this->notify(__('Tribute from :name approved. It is on the Tributes page now.', ['name' => $tribute->name]));
     }
 
     /**
@@ -81,7 +82,7 @@ class Moderate extends Component
         $previous = [$id => $tribute->status->value];
         $this->service()->reject($tribute, auth()->user());
         $this->forget($id);
-        $this->toast('Tribute from '.$tribute->name.' declined. It will not appear on the site.', AdminUx::TOAST_SUCCESS, $this->undoWith('restoreStatuses', [$previous]));
+        $this->toast(__('Tribute from :name declined. It will not appear on the site.', ['name' => $tribute->name]), AdminUx::TOAST_SUCCESS, $this->undoWith('restoreStatuses', [$previous]));
     }
 
     /**
@@ -98,7 +99,7 @@ class Moderate extends Component
         }
 
         $count = $this->service()->restoreStatuses($statuses, auth()->user());
-        $this->toast($count === 1 ? 'Decline undone.' : 'Declines undone for '.$count.' tributes.');
+        $this->toast($count === 1 ? __('Decline undone.') : __('Declines undone for :count tributes.', ['count' => $this->digits($count)]));
     }
 
     /**
@@ -110,13 +111,13 @@ class Moderate extends Component
         $this->authorize('update', $tribute);
 
         if (! $tribute->isApproved()) {
-            $this->notify('Only an approved tribute can be featured.');
+            $this->notify(__('Only an approved tribute can be featured.'));
 
             return;
         }
 
         $this->service()->feature($tribute, auth()->user());
-        $this->notify('Tribute featured. It now opens the book of remembrance.');
+        $this->notify(__('Tribute featured. It now opens the book of remembrance.'));
     }
 
     public function unfeature(int $id): void
@@ -125,7 +126,7 @@ class Moderate extends Component
         $this->authorize('update', $tribute);
 
         $this->service()->unfeature($tribute, auth()->user());
-        $this->notify('Tribute no longer featured.');
+        $this->notify(__('Tribute no longer featured.'));
     }
 
     public function approveSelected(): void
@@ -134,7 +135,7 @@ class Moderate extends Component
 
         $count = $this->service()->approveMany($this->selected, auth()->user());
         $this->selected = [];
-        $this->notify($count === 1 ? '1 tribute approved.' : $count.' tributes approved.');
+        $this->notify(trans_choice('{1} :count tribute approved.|[2,*] :count tributes approved.', $count, ['count' => $this->digits($count)]));
     }
 
     public function rejectSelected(): void
@@ -153,7 +154,7 @@ class Moderate extends Component
 
         $count = $this->service()->rejectMany($this->selected, auth()->user());
         $this->selected = [];
-        $this->toast($count === 1 ? '1 tribute declined.' : $count.' tributes declined.', AdminUx::TOAST_SUCCESS, $previous === [] ? null : $this->undoWith('restoreStatuses', [$previous]));
+        $this->toast(trans_choice('{1} :count tribute declined.|[2,*] :count tributes declined.', $count, ['count' => $this->digits($count)]), AdminUx::TOAST_SUCCESS, $previous === [] ? null : $this->undoWith('restoreStatuses', [$previous]));
     }
 
     public function startEditing(int $id): void
@@ -187,7 +188,7 @@ class Moderate extends Component
 
         $this->service()->edit($tribute, $this->edit, auth()->user());
         $this->cancelEditing();
-        $this->notify('Tribute updated. The original wording is kept in the audit log.');
+        $this->notify(__('Tribute updated. The original wording is kept in the audit log.'));
     }
 
     public function render(): View
@@ -224,6 +225,11 @@ class Moderate extends Component
     private function service(): TributeService
     {
         return app(TributeService::class);
+    }
+
+    private function digits(int $count): string
+    {
+        return app(LocaleService::class)->digits($count);
     }
 
     private function notify(string $message): void

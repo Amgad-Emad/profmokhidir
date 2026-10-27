@@ -71,6 +71,11 @@ final class Archive
      */
     public static function label(?int $decade): string
     {
-        return $decade === null ? self::UNDATED : $decade.'s';
+        if ($decade === null) {
+            return __(self::UNDATED);
+        }
+
+        // English writes "1970s"; other languages name the decade in a sentence of their own.
+        return app()->getLocale() === Locales::DEFAULT ? $decade.'s' : __('Decade of :decade', ['decade' => $decade]);
     }
 }

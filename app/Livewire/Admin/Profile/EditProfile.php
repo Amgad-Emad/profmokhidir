@@ -6,6 +6,7 @@ namespace App\Livewire\Admin\Profile;
 
 use App\Constants\ContentStatus;
 use App\Constants\ContentTypes;
+use App\Constants\Locales;
 use App\Constants\MediaCollections;
 use App\Constants\MediaTreatment;
 use App\Http\Requests\Admin\ContentRequest;
@@ -93,24 +94,53 @@ class EditProfile extends ContentForm
 
     protected function createdMessage(): string
     {
-        return 'Profile saved.';
+        return __('Profile saved.');
     }
 
-    public function addKeyFact(): void
+    /**
+     * Add an empty key fact row, in English or in a translation.
+     */
+    public function addKeyFact(?string $locale = null): void
     {
-        $this->form['key_facts'][] = ['label' => '', 'value' => ''];
+        $facts = $this->keyFacts($locale);
+        $facts[] = ['label' => '', 'value' => ''];
+        $this->setKeyFacts($locale, $facts);
     }
 
-    public function removeKeyFact(int $index): void
+    public function removeKeyFact(int $index, ?string $locale = null): void
     {
-        unset($this->form['key_facts'][$index]);
-        $this->form['key_facts'] = array_values($this->form['key_facts']);
+        $facts = $this->keyFacts($locale);
+        unset($facts[$index]);
+        $this->setKeyFacts($locale, array_values($facts));
     }
 
     protected function transform(array $validated): array
     {
-        $data = parent::transform($validated);
+        return $this->cleanLists(parent::transform($validated));
+    }
 
+    protected function transformTranslation(array $validated, string $locale): array
+    {
+        $data = $this->cleanLists(parent::transformTranslation($validated, $locale));
+
+        // An empty Arabic list is no translation: visitors see the English one.
+        foreach (['expertise', 'key_facts'] as $list) {
+            if (($data[$list] ?? null) === []) {
+                $data[$list] = null;
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * Expertise as trimmed non-empty phrases; key facts without empty rows.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    private function cleanLists(array $data): array
+    {
         $data['expertise'] = array_values(array_filter(array_map(
             fn ($item): string => trim((string) $item),
             is_array($data['expertise'] ?? null) ? $data['expertise'] : [],
@@ -124,13 +154,33 @@ class EditProfile extends ContentForm
         return $data;
     }
 
-    protected function fromRecord(Model $record): array
+    /**
+     * @return list<array{label: string, value: string}>
+     */
+    private function keyFacts(?string $locale): array
     {
-        $form = parent::fromRecord($record);
-        $form['expertise'] = is_array($record->expertise) ? array_values($record->expertise) : [];
-        $form['key_facts'] = is_array($record->key_facts) ? array_values($record->key_facts) : [];
+        $facts = $this->isTranslation($locale)
+            ? ($this->form[self::TRANSLATIONS][$locale]['key_facts'] ?? [])
+            : ($this->form['key_facts'] ?? []);
 
-        return $form;
+        return is_array($facts) ? array_values($facts) : [];
+    }
+
+    /**
+     * @param  list<array{label: string, value: string}>  $facts
+     */
+    private function setKeyFacts(?string $locale, array $facts): void
+    {
+        if ($this->isTranslation($locale)) {
+            $this->form[self::TRANSLATIONS][$locale]['key_facts'] = $facts;
+        } else {
+            $this->form['key_facts'] = $facts;
+        }
+    }
+
+    private function isTranslation(?string $locale): bool
+    {
+        return $locale !== null && in_array($locale, Locales::prefixed(), true);
     }
 
     protected function imageCollection(): string

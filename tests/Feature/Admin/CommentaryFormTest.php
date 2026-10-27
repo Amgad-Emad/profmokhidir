@@ -56,7 +56,7 @@ class CommentaryFormTest extends TestCase
             ->call('save')
             ->assertHasNoErrors();
 
-        $commentary = Commentary::query()->where('title', 'Toolbar output')->sole();
+        $commentary = Commentary::query()->where('title->en', 'Toolbar output')->sole();
 
         foreach (['<h2>A heading</h2>', '<strong>bold words</strong>', '<em>italic words</em>', '<li><p>first item</p></li>', '<blockquote>', 'href="https://example.org/paper"'] as $fragment) {
             $this->assertStringContainsString($fragment, $commentary->body);

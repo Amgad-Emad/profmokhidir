@@ -22,9 +22,9 @@ enum TributeStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Pending => 'Pending review',
-            self::Approved => 'Approved',
-            self::Rejected => 'Rejected',
+            self::Pending => __('Pending review'),
+            self::Approved => __('Approved'),
+            self::Rejected => __('Rejected'),
         };
     }
 }

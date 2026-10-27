@@ -38,64 +38,71 @@ class ActivityFeedService
     }
 
     /**
-     * The whole line: "<actor> <what happened>".
+     * The whole entry as one sentence in the current language, the actor first.
      */
     public function sentence(AuditLog $log): string
     {
-        return $this->actor($log).' '.$this->predicate($log);
+        [$template, $replace] = $this->template($log);
+
+        return __($template, ['actor' => $this->actor($log), ...$replace]);
     }
 
     public function actor(AuditLog $log): string
     {
-        return $log->user?->name ?? 'A visitor';
+        return $log->user?->name ?? __('A visitor');
     }
 
     /**
-     * What happened, after the actor's name.
+     * The translation key of the entry (with :actor) and its other placeholders.
+     *
+     * @return array{0: string, 1: array<string, string>}
      */
-    public function predicate(AuditLog $log): string
+    private function template(AuditLog $log): array
     {
         $meta = is_array($log->meta) ? $log->meta : [];
         $name = is_string($meta['name'] ?? null) && trim($meta['name']) !== '' ? trim($meta['name']) : null;
         $label = $this->quoted($meta['label'] ?? null);
         $thing = $this->thing($log, $label);
         $person = $log->subject instanceof User ? $log->subject->name : null;
+        $from = $name === null ? [] : ['name' => $name];
 
         return match ($log->action) {
-            AuditAction::TRIBUTE_APPROVED => 'approved a tribute'.($name ? ' from '.$name : ''),
-            AuditAction::TRIBUTE_REJECTED => 'declined a tribute'.($name ? ' from '.$name : ''),
-            AuditAction::TRIBUTE_EDITED => 'edited a tribute'.($name ? ' from '.$name : ''),
-            AuditAction::TRIBUTE_DELETED => 'deleted a tribute'.($name ? ' from '.$name : ''),
-            AuditAction::TRIBUTE_FEATURED => 'featured a tribute'.($name ? ' from '.$name : ''),
-            AuditAction::TRIBUTE_UNFEATURED => 'stopped featuring a tribute'.($name ? ' from '.$name : ''),
-            AuditAction::COMMUNITY_APPLIED => 'applied to join the Scientific Community',
-            AuditAction::COMMUNITY_APPROVED => $person ? 'welcomed '.$person.' to the Scientific Community' : 'approved a community application',
-            AuditAction::COMMUNITY_REJECTED => $person ? 'declined the community application from '.$person : 'declined a community application',
-            AuditAction::CONTENT_CREATED => 'added '.$thing,
-            AuditAction::CONTENT_PUBLISHED => 'published '.$thing,
-            AuditAction::CONTENT_UNPUBLISHED => 'moved '.$thing.' back to draft',
-            AuditAction::CONTENT_DELETED => 'moved '.$thing.' to the trash',
-            AuditAction::CONTENT_RESTORED => 'restored '.$thing.' from the trash',
-            AuditAction::MEDIA_UPLOADED => 'uploaded '.($label ?? 'a file'),
-            AuditAction::MEDIA_UPDATED => 'updated the details of '.($label ?? 'an image'),
-            AuditAction::MEDIA_DELETED => 'deleted '.($label ?? 'a file'),
-            default => AuditAction::label($log->action),
+            AuditAction::TRIBUTE_APPROVED => [$name ? ':actor approved a tribute from :name' : ':actor approved a tribute', $from],
+            AuditAction::TRIBUTE_REJECTED => [$name ? ':actor declined a tribute from :name' : ':actor declined a tribute', $from],
+            AuditAction::TRIBUTE_EDITED => [$name ? ':actor edited a tribute from :name' : ':actor edited a tribute', $from],
+            AuditAction::TRIBUTE_DELETED => [$name ? ':actor deleted a tribute from :name' : ':actor deleted a tribute', $from],
+            AuditAction::TRIBUTE_FEATURED => [$name ? ':actor featured a tribute from :name' : ':actor featured a tribute', $from],
+            AuditAction::TRIBUTE_UNFEATURED => [$name ? ':actor stopped featuring a tribute from :name' : ':actor stopped featuring a tribute', $from],
+            AuditAction::COMMUNITY_APPLIED => [':actor applied to join the Scientific Community', []],
+            AuditAction::COMMUNITY_APPROVED => $person ? [':actor welcomed :person to the Scientific Community', ['person' => $person]] : [':actor approved a community application', []],
+            AuditAction::COMMUNITY_REJECTED => $person ? [':actor declined the community application from :person', ['person' => $person]] : [':actor declined a community application', []],
+            AuditAction::CONTENT_CREATED => [':actor added :thing', ['thing' => $thing]],
+            AuditAction::CONTENT_PUBLISHED => [':actor published :thing', ['thing' => $thing]],
+            AuditAction::CONTENT_UNPUBLISHED => [':actor moved :thing back to draft', ['thing' => $thing]],
+            AuditAction::CONTENT_DELETED => [':actor moved :thing to the trash', ['thing' => $thing]],
+            AuditAction::CONTENT_RESTORED => [':actor restored :thing from the trash', ['thing' => $thing]],
+            AuditAction::MEDIA_UPLOADED => $label ? [':actor uploaded :file', ['file' => $label]] : [':actor uploaded a file', []],
+            AuditAction::MEDIA_UPDATED => $label ? [':actor updated the details of :file', ['file' => $label]] : [':actor updated the details of an image', []],
+            AuditAction::MEDIA_DELETED => $label ? [':actor deleted :file', ['file' => $label]] : [':actor deleted a file', []],
+            default => [':actor :action', ['action' => AuditAction::label($log->action)]],
         };
     }
 
-    /**
-     * "the publication “Soil Fertility Handbook”", or "a publication" without a title.
-     */
     private function thing(AuditLog $log, ?string $label): string
     {
         $type = $log->subject_type === null ? null : ContentTypes::keyForModel($log->subject_type);
-        $noun = $type === null ? 'content' : strtolower(ContentTypes::get($type)['singular']);
 
-        if ($label !== null) {
-            return $type === null ? $label : 'the '.$noun.' '.$label;
+        if ($type === null) {
+            return $label ?? __('content');
         }
 
-        return $type === null ? 'content' : (preg_match('/^[aeiou]/', $noun) === 1 ? 'an ' : 'a ').$noun;
+        $noun = mb_strtolower(__(ContentTypes::get($type)['singular']));
+
+        if ($label !== null) {
+            return __('the :type :label', ['type' => $noun, 'label' => $label]);
+        }
+
+        return preg_match('/^[aeiou]/', $noun) === 1 ? __('an :type', ['type' => $noun]) : __('a :type', ['type' => $noun]);
     }
 
     private function quoted(mixed $value): ?string

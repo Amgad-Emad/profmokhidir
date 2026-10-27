@@ -36,17 +36,33 @@ class StaffInvitation extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $role = $this->role === null ? 'a member of staff' : 'an '.mb_strtolower(Roles::labels()[$this->role] ?? $this->role);
         $minutes = (int) config('auth.passwords.'.config('fortify.passwords', 'users').'.expire', 60);
+        $site = ['site' => config('app.name')];
 
         $mail = (new MailMessage)
-            ->subject('You have been invited to '.config('app.name'))
-            ->greeting('Hello '.$notifiable->name.',')
-            ->line('You have been invited to join the dashboard of '.config('app.name').' as '.$role.'.')
-            ->line('Choose a password with the link below to activate your account. For security the link can only be used once and expires after '.$minutes.' minutes; if it has expired, ask an administrator to resend the invitation.')
-            ->action('Set your password', $this->url($notifiable));
+            ->subject(__('You have been invited to :site', $site))
+            ->greeting(__('Hello :name,', ['name' => $notifiable->name]))
+            ->line($this->invitationLine())
+            ->line(__('Choose a password with the link below to activate your account. For security the link can only be used once and expires after :minutes minutes; if it has expired, ask an administrator to resend the invitation.', ['minutes' => $minutes]))
+            ->action(__('Set your password'), $this->url($notifiable));
 
-        return $mail->line('If you were not expecting this invitation you can ignore this email; nothing happens until the link is used.');
+        return $mail->line(__('If you were not expecting this invitation you can ignore this email; nothing happens until the link is used.'));
+    }
+
+    /**
+     * The opening line naming the role, one whole sentence per role so each
+     * language can phrase it in its own grammar.
+     */
+    public function invitationLine(): string
+    {
+        $site = ['site' => config('app.name')];
+
+        return match ($this->role) {
+            Roles::ADMIN => __('You have been invited to join the dashboard of :site as an administrator.', $site),
+            Roles::EDITOR => __('You have been invited to join the dashboard of :site as an editor.', $site),
+            null => __('You have been invited to join the dashboard of :site as a member of staff.', $site),
+            default => __('You have been invited to join the dashboard of :site as :role.', $site + ['role' => mb_strtolower(Roles::labels()[$this->role] ?? $this->role)]),
+        };
     }
 
     public function url(object $notifiable): string

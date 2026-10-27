@@ -82,7 +82,7 @@ class ThemeSwitchTest extends TestCase
         $this->withUnencryptedCookie(ThemeSettings::COOKIE, 'dark')
             ->get(route('home'))
             ->assertOk()
-            ->assertSee('<html lang="en" data-theme="dark">', false)
+            ->assertSee('<html lang="en" dir="ltr" data-theme="dark">', false)
             ->assertSee('aria-label="Switch to light theme" aria-pressed="true"', false);
     }
 

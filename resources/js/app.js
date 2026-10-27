@@ -9,6 +9,7 @@ import { essayContents, readingProgress } from './essay';
 import { authChallenge, authForm } from './auth';
 import { initForms, registerForms } from './forms';
 import './motion';
+import './i18n';
 import './theme';
 
 // First-party analytics (App\Constants\Analytics): fetched only where the server printed its

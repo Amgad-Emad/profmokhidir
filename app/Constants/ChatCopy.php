@@ -60,6 +60,13 @@ final class ChatCopy
 
     public const string MEMBER_ONLINE = 'online';
 
+    /** The Members tab's summary line ("12 members · 3 online"). */
+    public const string MEMBERS_ONE = '1 member';
+
+    public const string MEMBERS_MANY = ':count members';
+
+    public const string ONLINE_COUNT = ':count online';
+
     public const string MEMBER_MENU = 'Actions for :name';
 
     public const string MEMBER_VIEW_PROFILE = 'View profile';
@@ -225,37 +232,40 @@ final class ChatCopy
     public const string UPLOADS_OFF = 'File uploads are switched off for now.';
 
     /**
-     * Everything the script needs as copy, keyed for the client config.
+     * Everything the script needs as copy, keyed for the client config, in the current language.
      *
      * @return array<string, string>
      */
     public static function client(): array
     {
         return [
-            'sending' => self::SENDING,
-            'notSent' => self::NOT_SENT,
-            'retry' => self::RETRY,
-            'reconnecting' => self::RECONNECTING,
-            'offline' => self::OFFLINE_BANNER,
-            'linkCopied' => self::LINK_COPIED,
-            'replyRemoved' => self::REPLY_REMOVED,
-            'newOne' => self::NEW_MESSAGES_ONE,
-            'newMany' => self::NEW_MESSAGES_MANY,
-            'searchNone' => self::SEARCH_NONE,
-            'searchTooShort' => self::SEARCH_TOO_SHORT,
-            'reportThanks' => self::REPORT_THANKS,
-            'countLeft' => self::COUNT_LEFT,
-            'countOver' => self::COUNT_OVER,
-            'attachTooMany' => self::ATTACH_TOO_MANY,
-            'attachTooLarge' => self::ATTACH_TOO_LARGE,
-            'attachUnsupported' => self::ATTACH_UNSUPPORTED,
-            'attachFailed' => self::ATTACH_FAILED,
-            'attachWait' => self::ATTACH_WAIT,
-            'attachDefaultAlt' => self::ATTACH_DEFAULT_ALT,
-            'attachRemove' => self::ATTACH_REMOVE,
-            'memberMenu' => self::MEMBER_MENU,
-            'suspendConfirm' => self::MEMBER_SUSPEND_CONFIRM,
-            'memberSearchNone' => self::MEMBER_SEARCH_NONE,
+            'sending' => __(self::SENDING),
+            'notSent' => __(self::NOT_SENT),
+            'retry' => __(self::RETRY),
+            'reconnecting' => __(self::RECONNECTING),
+            'offline' => __(self::OFFLINE_BANNER),
+            'linkCopied' => __(self::LINK_COPIED),
+            'replyRemoved' => __(self::REPLY_REMOVED),
+            'newOne' => __(self::NEW_MESSAGES_ONE),
+            'newMany' => __(self::NEW_MESSAGES_MANY),
+            'searchNone' => __(self::SEARCH_NONE),
+            'searchTooShort' => __(self::SEARCH_TOO_SHORT),
+            'reportThanks' => __(self::REPORT_THANKS),
+            'countLeft' => __(self::COUNT_LEFT),
+            'countOver' => __(self::COUNT_OVER),
+            'attachTooMany' => __(self::ATTACH_TOO_MANY),
+            'attachTooLarge' => __(self::ATTACH_TOO_LARGE),
+            'attachUnsupported' => __(self::ATTACH_UNSUPPORTED),
+            'attachFailed' => __(self::ATTACH_FAILED),
+            'attachWait' => __(self::ATTACH_WAIT),
+            'attachDefaultAlt' => __(self::ATTACH_DEFAULT_ALT),
+            'attachRemove' => __(self::ATTACH_REMOVE),
+            'memberMenu' => __(self::MEMBER_MENU),
+            'suspendConfirm' => __(self::MEMBER_SUSPEND_CONFIRM),
+            'memberSearchNone' => __(self::MEMBER_SEARCH_NONE),
+            'membersOne' => __(self::MEMBERS_ONE),
+            'membersMany' => __(self::MEMBERS_MANY),
+            'onlineCount' => __(self::ONLINE_COUNT),
         ];
     }
 }

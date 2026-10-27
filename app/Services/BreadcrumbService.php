@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Constants\Breadcrumbs;
+use App\Constants\Locales;
 use App\Constants\Seo;
 
 /**
@@ -25,15 +26,18 @@ class BreadcrumbService
      */
     public function trail(?string $route, ?string $title = null): array
     {
+        // An Arabic page's route is "ar.x": the trail is the same as on its English twin.
+        $route = Locales::baseRouteName($route);
+
         if ($route === null || in_array($route, Breadcrumbs::hidden(), true)) {
             return [];
         }
 
-        $crumbs = [['label' => Breadcrumbs::HOME_LABEL, 'url' => route('home'), 'current' => false]];
+        $crumbs = [['label' => __(Breadcrumbs::HOME_LABEL), 'url' => route('home'), 'current' => false]];
         $standalone = Breadcrumbs::standalone();
 
         if (array_key_exists($route, $standalone)) {
-            $crumbs[] = ['label' => $title ?: $standalone[$route], 'url' => url()->current(), 'current' => true];
+            $crumbs[] = ['label' => $title ?: __($standalone[$route]), 'url' => url()->current(), 'current' => true];
 
             return $crumbs;
         }

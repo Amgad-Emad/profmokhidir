@@ -13,6 +13,6 @@ class ChatMessageRemovedException extends RuntimeException
 {
     public static function make(): self
     {
-        return new self('This message has been removed.');
+        return new self(__('This message has been removed.'));
     }
 }

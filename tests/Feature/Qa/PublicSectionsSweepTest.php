@@ -92,7 +92,7 @@ class PublicSectionsSweepTest extends TestCase
             $this->get(route('other.show', $other->slug))->assertOk()->assertSee($other->title);
         }
 
-        $this->get(route('sitemap'))->assertOk()
+        $this->get(route('sitemap.locale', ['locale' => 'en']))->assertOk()
             ->assertSee(route('videos.show', $video->slug))
             ->assertSee(route('pictures.show', $album->slug))
             ->assertSee(route('commentary.show', $commentary->slug));

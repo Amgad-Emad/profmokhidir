@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use App\Constants\CommunityStatus;
+use App\Constants\Locales;
 use App\Constants\Roles;
 use App\Constants\Theme;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -26,10 +28,10 @@ use Spatie\Permission\Traits\HasRoles;
 #[Fillable([
     'name', 'email', 'password',
     'community_status', 'affiliation', 'academic_field', 'reason_for_joining',
-    'reviewed_by', 'reviewed_at', 'review_note', 'deactivated_at', 'theme',
+    'reviewed_by', 'reviewed_at', 'review_note', 'deactivated_at', 'theme', 'locale',
 ])]
 #[Hidden(['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'])]
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements HasLocalePreference, MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasRoles, Notifiable, TwoFactorAuthenticatable;
@@ -49,6 +51,14 @@ class User extends Authenticatable implements MustVerifyEmail
             'deactivated_at' => 'datetime',
             'theme' => Theme::class,
         ];
+    }
+
+    /**
+     * Emails and notifications go out in the language the person chose, else English.
+     */
+    public function preferredLocale(): string
+    {
+        return Locales::isValid($this->locale) ? $this->locale : Locales::DEFAULT;
     }
 
     public function reviewer(): BelongsTo

@@ -21,8 +21,6 @@ final class Seo
 
     public const string DESCRIPTION_ELLIPSIS = '…';
 
-    public const string LOCALE = 'en_GB';
-
     public const string OG_TYPE_WEBSITE = 'website';
 
     public const string OG_TYPE_ARTICLE = 'article';
@@ -55,6 +53,11 @@ final class Seo
 
     public const string SITEMAP_ROUTE = 'sitemap';
 
+    /** One sitemap per language (/sitemaps/en.xml, /sitemaps/ar.xml); /sitemap.xml is their index. */
+    public const string SITEMAP_LOCALE_PATH = '/sitemaps/{locale}.xml';
+
+    public const string SITEMAP_LOCALE_ROUTE = 'sitemap.locale';
+
     public const string SITEMAP_NAMESPACE = 'http://www.sitemaps.org/schemas/sitemap/0.9';
 
     public const string ROBOTS_PATH = '/robots.txt';
@@ -66,13 +69,14 @@ final class Seo
     public const string TEXT_CONTENT_TYPE = 'text/plain; charset=UTF-8';
 
     /**
-     * Paths crawlers are told to stay out of: the dashboard and the members' chat.
+     * Paths crawlers are told to stay out of: the dashboard, the members' chat
+     * and the language switcher (crawlers find each language through hreflang).
      *
      * @return list<string>
      */
     public static function disallowedPaths(): array
     {
-        return ['/admin', '/community/chat'];
+        return ['/admin', '/community/chat', Locales::SWITCH_PATH];
     }
 
     /**

@@ -8,8 +8,8 @@
         @if ($albums === [])
             <x-empty-state class="mt-6" :message="$pageCopy->text('pictures', 'empty')" />
         @else
-            <nav class="exhibition-views mt-12 flex flex-wrap items-center gap-x-8 gap-y-4" aria-label="View" data-rise>
-                <p class="t-label text-accent-text">{{ $total }} {{ \Illuminate\Support\Str::plural('photograph', $total) }} in {{ count($albums) }} {{ \Illuminate\Support\Str::plural('album', count($albums)) }}</p>
+            <nav class="exhibition-views mt-12 flex flex-wrap items-center gap-x-8 gap-y-4" aria-label="{{ __('View') }}" data-rise>
+                <p class="t-label text-accent-text">{{ trans_choice('{1} :count photograph in :albums|[2,*] :count photographs in :albums', $total, ['count' => app(\App\Services\LocaleService::class)->digits($total), 'albums' => trans_choice('{1} :count album|[2,*] :count albums', count($albums), ['count' => app(\App\Services\LocaleService::class)->digits(count($albums))])]) }}</p>
                 <ul class="flex flex-wrap gap-2">
                     @foreach ($views as $option)
                         <li><a href="{{ $option['url'] }}" class="filter-pill"{!! $option['active'] ? ' aria-current="true"' : '' !!}>{{ $option['label'] }}</a></li>
@@ -24,10 +24,10 @@
                         <section class="decade mt-20 first:mt-16" aria-labelledby="{{ $id }}">
                             <header class="decade__header">
                                 <h2 id="{{ $id }}" class="t-heading font-display" data-rise>{{ $group['label'] }}</h2>
-                                <p class="t-label text-accent-text" data-rise>{{ $group['count'] }} {{ \Illuminate\Support\Str::plural('photograph', $group['count']) }}</p>
+                                <p class="t-label text-accent-text" data-rise>{{ trans_choice('{1} :count photograph|[2,*] :count photographs', $group['count'], ['count' => app(\App\Services\LocaleService::class)->digits($group['count'])]) }}</p>
                             </header>
                             <hr class="rule-brass mt-6" data-rule>
-                            <ul class="wall mt-12" data-rise-group aria-label="Photographs from the {{ $group['label'] }}">
+                            <ul class="wall mt-12" data-rise-group aria-label="{{ __('Photographs from the :decade', ['decade' => $group['label']]) }}">
                                 @foreach ($group['photos'] as $hung)
                                     <li class="wall__item" style="--span: {{ $hung['span'] }}">
                                         <x-photo :media="$hung['photo']" :lightbox="true" :label="true" :lift="true" :show-caption="true" :sizes="$hung['sizes']" />
@@ -37,7 +37,7 @@
                         </section>
                     @endforeach
 
-                    <x-lightbox label="Through the decades" />
+                    <x-lightbox :label="__('Through the decades')" />
                 </div>
             @else
                 <ul class="exhibition mt-16" data-rise-group>
@@ -52,14 +52,14 @@
                                     @endif
                                 </a>
                                 <div class="exhibition__label">
-                                    <h2 class="exhibition__title">
+                                    <h2 class="exhibition__title" @contentLang($entry['album'])>
                                         <a href="{{ $entry['url'] }}" class="text-ink">{{ $entry['album']->title }}</a>
                                     </h2>
                                     <p class="exhibition__meta smallcaps">
-                                        @if ($entry['range'])<span>{{ $entry['range'] }}</span>{{ \App\Constants\DateFormats::META_SEPARATOR }}@endif<span>{{ $entry['count'] }} {{ \Illuminate\Support\Str::plural('photograph', $entry['count']) }}</span>
+                                        @if ($entry['range'])<span>{{ $entry['range'] }}</span>{{ \App\Constants\DateFormats::META_SEPARATOR }}@endif<span>{{ trans_choice('{1} :count photograph|[2,*] :count photographs', $entry['count'], ['count' => app(\App\Services\LocaleService::class)->digits($entry['count'])]) }}</span>
                                     </p>
                                     @if (filled($entry['album']->description))
-                                        <p class="t-body max-w-measure text-ink-muted">{{ $entry['album']->description }}</p>
+                                        <p class="t-body max-w-measure text-ink-muted" @contentLang($entry['album'], 'description')>{{ $entry['album']->description }}</p>
                                     @endif
                                 </div>
                             </article>

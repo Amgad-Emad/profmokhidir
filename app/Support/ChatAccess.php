@@ -23,7 +23,7 @@ final class ChatAccess
         $user->unsetRelation('roles');
 
         if (! $user->canAccessChat()) {
-            throw new AuthorizationException('The community chat is only open to approved members.');
+            throw new AuthorizationException(__('The community chat is only open to approved members.'));
         }
     }
 
@@ -38,7 +38,7 @@ final class ChatAccess
     public static function guardModerator(User $user): void
     {
         if (! self::canModerate($user)) {
-            throw new AuthorizationException('Only moderators may do this.');
+            throw new AuthorizationException(__('Only moderators may do this.'));
         }
     }
 }

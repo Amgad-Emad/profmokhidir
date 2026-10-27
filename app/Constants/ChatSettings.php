@@ -153,7 +153,7 @@ final class ChatSettings
             'hintHiddenAfterSends' => self::HINT_HIDDEN_AFTER_SENDS,
             'sentCountKey' => self::SENT_COUNT_STORAGE_KEY,
             'pageSize' => self::PAGE_SIZE,
-            'removedPlaceholder' => self::REMOVED_PLACEHOLDER,
+            'removedPlaceholder' => __(self::REMOVED_PLACEHOLDER),
             'groupWindowSeconds' => self::GROUP_WINDOW_SECONDS,
             'searchMinLength' => self::SEARCH_MIN_LENGTH,
             'messageParam' => self::MESSAGE_PARAM,

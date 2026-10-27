@@ -4,7 +4,7 @@ namespace Tests\Unit\Models;
 
 use App\Models\OtherItem;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 class OtherItemTest extends TestCase
 {

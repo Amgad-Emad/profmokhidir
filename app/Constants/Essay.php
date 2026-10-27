@@ -16,6 +16,9 @@ final class Essay
 
     public const string READING_TIME_SUFFIX = 'min read';
 
+    /** "8 min read" as a translatable count (Arabic has its own plural forms). */
+    public const string READING_TIME = ':count min read';
+
     /** Headings that enter the table of contents (h2 and h3 of the body). */
     public const array TOC_LEVELS = [2, 3];
 

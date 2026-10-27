@@ -16,7 +16,7 @@ class SeoTest extends TestCase
         $this->assertSame(160, Seo::DESCRIPTION_MAX_LENGTH);
         $this->assertSame('summary_large_image', Seo::TWITTER_CARD);
         $this->assertSame(['website', 'article', 'profile'], Seo::ogTypes());
-        $this->assertSame(['/admin', '/community/chat'], Seo::disallowedPaths());
+        $this->assertSame(['/admin', '/community/chat', '/language'], Seo::disallowedPaths());
         $this->assertSame('/sitemap.xml', Seo::SITEMAP_PATH);
         $this->assertSame('/robots.txt', Seo::ROBOTS_PATH);
         $this->assertSame('https://schema.org', Seo::SCHEMA_CONTEXT);

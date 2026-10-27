@@ -6,13 +6,13 @@
 --}}
 @use('App\Constants\Masthead')
 @if ($account === null)
-    <a href="{{ $signInUrl }}" class="site-account-signin link-draw t-label hidden sm:inline-flex" data-sign-in-link>{{ Masthead::SIGN_IN_SHORT }}</a>
+    <a href="{{ $signInUrl }}" class="site-account-signin link-draw t-label hidden sm:inline-flex" data-sign-in-link>{{ __(Masthead::SIGN_IN_SHORT) }}</a>
 @else
     <div class="site-account" x-data="{ open: false }" x-on:keydown.escape.stop="if (open) { open = false; $refs.button.focus() }" x-on:click.outside="open = false" data-account-menu>
         <button type="button" class="site-account__button" x-ref="button" x-on:click="open = !open" aria-expanded="false" x-bind:aria-expanded="open.toString()" aria-controls="{{ Masthead::ACCOUNT_MENU_ID }}">
             <span class="site-account__avatar" aria-hidden="true">{{ $account['initials'] }}</span>
             <span class="site-account__name">{{ $account['name'] }}</span>
-            <span class="sr-only">, {{ mb_strtolower(Masthead::ACCOUNT_MENU_LABEL) }}</span>
+            <span class="sr-only">{{ __(', account menu') }}</span>
             <x-icon name="chevron-down" class="site-account__chevron size-4 max-sm:hidden" />
         </button>
         <div id="{{ Masthead::ACCOUNT_MENU_ID }}" class="site-account__panel bg-surface-panel" x-show="open" x-cloak>
@@ -25,7 +25,7 @@
                     <li><a href="{{ $item['url'] }}" class="site-account__item" data-account-item="{{ $item['key'] }}"><x-icon :name="$item['icon']" class="size-4" />{{ $item['label'] }}</a></li>
                 @endforeach
                 <li class="site-account__theme">
-                    <span class="site-account__theme-label">{{ Masthead::ACCOUNT_MENU_THEME }}</span>
+                    <span class="site-account__theme-label">{{ __(Masthead::ACCOUNT_MENU_THEME) }}</span>
                     <x-theme.switch id="theme-switch-account-menu" />
                 </li>
                 <li><x-account.sign-out item-class="site-account__item" /></li>

@@ -43,7 +43,7 @@
 @endphp
 <x-form.field :field="$field" :class="$attributes->get('class')">
     <div class="form-control form-control--select" data-combobox
-         x-data="formCombobox({{ \Illuminate\Support\Js::from(['options' => $choices, 'value' => $current, 'noMatches' => FormControls::COMBOBOX_NO_MATCHES, 'results' => FormControls::COMBOBOX_RESULTS]) }})"
+         x-data="formCombobox({{ \Illuminate\Support\Js::from(['options' => $choices, 'value' => $current, 'noMatches' => __(FormControls::COMBOBOX_NO_MATCHES), 'results' => __(FormControls::COMBOBOX_RESULTS)]) }})"
          @if ($model) x-modelable="value" wire:model.live="{{ $model }}" @endif
          x-on:click.outside="close(false)" x-bind:data-filled="value ? 'true' : 'false'">
         <input class="form-control__input" {{ $searchAttributes }} x-ref="search" x-model="query"
@@ -62,14 +62,14 @@
                     <x-icon name="check" class="size-4" x-show="option.value === value" />
                 </li>
             </template>
-            <li class="form-listbox__empty" role="presentation" x-show="results.length === 0">{{ FormControls::COMBOBOX_NO_MATCHES }}</li>
+            <li class="form-listbox__empty" role="presentation" x-show="results.length === 0">{{ __(FormControls::COMBOBOX_NO_MATCHES) }}</li>
         </ul>
         <p class="sr-only" aria-live="polite" x-text="status"></p>
     </div>
     <noscript>
         <div class="form-control form-control--select mt-3">
             <select class="form-control__input" @if ($name) name="{{ $name }}" @endif aria-labelledby="{{ $field['id'] }}-label">
-                <option value="">{{ $placeholder ?? FormControls::SELECT_PLACEHOLDER }}</option>
+                <option value="">{{ $placeholder ?? __(FormControls::SELECT_PLACEHOLDER) }}</option>
                 @foreach ($options as $optionValue => $optionLabel)
                     <option value="{{ $optionValue }}" @selected($current === (string) $optionValue)>{{ $optionLabel }}</option>
                 @endforeach

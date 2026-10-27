@@ -27,10 +27,10 @@ class ImageUploadRequest extends ContentRequest
     public function messages(): array
     {
         return parent::messages() + [
-            self::FIELD.'.required' => 'Choose an image to upload.',
-            self::FIELD.'.image' => 'Choose an image file: JPEG, PNG or WebP.',
-            self::FIELD.'.mimes' => 'Use a JPEG, PNG or WebP image.',
-            self::FIELD.'.max' => 'Images can be at most '.Uploads::imageMaxLabel().'.',
+            self::FIELD.'.required' => __('Choose an image to upload.'),
+            self::FIELD.'.image' => __('Choose an image file: JPEG, PNG or WebP.'),
+            self::FIELD.'.mimes' => __('Use a JPEG, PNG or WebP image.'),
+            self::FIELD.'.max' => __('Images can be at most :size.', ['size' => Uploads::imageMaxLabel()]),
         ] + ImageDetailsRequest::detailMessages();
     }
 

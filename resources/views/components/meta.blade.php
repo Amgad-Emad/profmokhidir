@@ -7,7 +7,7 @@
     $parts = [];
     foreach ($items as $item) {
         if ($item instanceof \DateTimeInterface) {
-            $parts[] = '<time datetime="'.e($item->format(\App\Constants\DateFormats::MACHINE)).'">'.e($item->format(\App\Constants\DateFormats::LONG)).'</time>';
+            $parts[] = '<time datetime="'.e($item->format(\App\Constants\DateFormats::MACHINE)).'">'.e(\Illuminate\Support\Carbon::instance($item)->translatedFormat(\App\Constants\DateFormats::LONG)).'</time>';
         } elseif ((is_string($item) || is_numeric($item)) && trim((string) $item) !== '') {
             $parts[] = e(trim((string) $item));
         }

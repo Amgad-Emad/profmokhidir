@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Constants\AuditAction;
 use App\Constants\CommunityStatus;
+use App\Constants\Locales;
 use App\Constants\Roles;
 use App\Exceptions\UserManagementException;
 use App\Models\User;
@@ -48,6 +49,7 @@ class UserService
             'name' => trim($data['name']),
             'email' => mb_strtolower(trim($data['email'])),
             'password' => $data['password'],
+            ...(Locales::isValid($data['locale'] ?? null) ? [Locales::COLUMN => $data['locale']] : []),
         ]);
 
         $this->roles->assign($user, $role, $actor);
@@ -58,9 +60,10 @@ class UserService
     /**
      * Invite an administrator or editor: the account is created with an
      * unusable random password and an unverified email, and the person
-     * receives a set-password link. Using the link verifies the email.
+     * receives a set-password link (in the chosen language, else English).
+     * Using the link verifies the email.
      *
-     * @param  array{name: string, email: string, role: string}  $data
+     * @param  array{name: string, email: string, role: string, locale?: string|null}  $data
      */
     public function invite(array $data, ?User $actor = null): User
     {
@@ -71,6 +74,7 @@ class UserService
             'email' => $data['email'],
             'password' => Str::password(40),
             'role' => $data['role'],
+            'locale' => $data['locale'] ?? null,
         ], $actor);
 
         $this->audit->record($actor, AuditAction::USER_INVITED, $user, ['email' => $user->email, 'role' => $data['role']]);

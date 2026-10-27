@@ -39,12 +39,12 @@ class FileLink extends Component
 
         $mime = (string) $media->mime_type;
 
-        return $mime === '' ? 'File' : strtoupper((string) substr(strrchr($mime, '/') ?: $mime, 1));
+        return $mime === '' ? __('File') : strtoupper((string) substr(strrchr($mime, '/') ?: $mime, 1));
     }
 
     public function text(): string
     {
-        return $this->label.' · '.$this->type.' · '.$this->size;
+        return __($this->label).' · '.$this->type.' · '.$this->size;
     }
 
     public function render(): View|Closure|string

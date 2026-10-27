@@ -26,6 +26,6 @@ class AwardRequest extends ContentRequest
      */
     public function attributes(): array
     {
-        return ['source_url' => 'source link'];
+        return ['source_url' => __('source link')];
     }
 }

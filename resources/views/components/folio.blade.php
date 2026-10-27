@@ -5,7 +5,7 @@
 --}}
 @props(['section', 'position' => 'top', 'tone' => 'evergreen'])
 @php
-    $title = \App\Constants\BrandMark::TITLE;
+    $title = __(\App\Constants\BrandMark::TITLE);
     $bottom = $position === 'bottom';
 @endphp
 <div {{ $attributes->class(['folio', 'folio--'.($bottom ? 'bottom' : 'top'), 'folio--ivory' => $tone === 'ivory']) }} aria-hidden="true">

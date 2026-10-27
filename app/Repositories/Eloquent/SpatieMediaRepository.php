@@ -9,6 +9,7 @@ use App\Constants\ContentTypes;
 use App\Constants\MediaCollections;
 use App\Constants\MediaProperties;
 use App\Models\Album;
+use App\Models\Media as LocalizedMedia;
 use App\Repositories\Contracts\MediaRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -22,12 +23,12 @@ final class SpatieMediaRepository implements MediaRepositoryInterface
 {
     public function find(int $id): ?Media
     {
-        return Media::query()->find($id);
+        return LocalizedMedia::query()->find($id);
     }
 
     public function findOrFail(int $id): Media
     {
-        return Media::query()->findOrFail($id);
+        return LocalizedMedia::query()->findOrFail($id);
     }
 
     public function attach(HasMedia $model, string|UploadedFile $file, string $collection, array $properties = [], ?string $disk = null, bool $preserveOriginal = false): Media
@@ -160,7 +161,7 @@ final class SpatieMediaRepository implements MediaRepositoryInterface
      */
     private function imagesQuery(): Builder
     {
-        return Media::query()->whereIn('collection_name', MediaCollections::images());
+        return LocalizedMedia::query()->whereIn('collection_name', MediaCollections::images());
     }
 
     /**

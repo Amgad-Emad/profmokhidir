@@ -32,8 +32,8 @@ class CvEntryRequest extends ContentRequest
     public function messages(): array
     {
         return parent::messages() + [
-            'section.Illuminate\Validation\Rules\Enum' => 'Choose one of the CV sections.',
-            'end_year.gte' => 'Enter an end year no earlier than the start year.',
+            'section.Illuminate\Validation\Rules\Enum' => __('Choose one of the CV sections.'),
+            'end_year.gte' => __('Enter an end year no earlier than the start year.'),
         ];
     }
 
@@ -42,6 +42,6 @@ class CvEntryRequest extends ContentRequest
      */
     public function attributes(): array
     {
-        return ['role_description' => 'description', 'last_updated_at' => 'last updated'];
+        return ['role_description' => __('description'), 'last_updated_at' => __('last updated')];
     }
 }

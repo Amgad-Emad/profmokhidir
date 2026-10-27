@@ -51,7 +51,7 @@ class StaffRoleRequest extends FormRequest
             $labels[$role] = Roles::labels()[$role];
         }
 
-        $labels[self::NONE] = 'No dashboard access';
+        $labels[self::NONE] = __('No dashboard access');
 
         return $labels;
     }
@@ -62,7 +62,7 @@ class StaffRoleRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'role.in' => 'Choose administrator, editor or no dashboard access.',
+            'role.in' => __('Choose administrator, editor or no dashboard access.'),
         ];
     }
 }

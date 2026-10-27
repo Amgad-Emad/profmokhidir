@@ -14,6 +14,7 @@
  | The draft lives only in Alpine state: the shell is wire:ignore and the
  | component never re-renders on a poll, so nothing replaces what is typed.
  */
+import { t, locale, isRtl } from './i18n';
 import './theme';
 import { initForms, registerForms } from './forms';
 import lightbox from './lightbox';
@@ -94,10 +95,37 @@ function storage() {
     }
 }
 
-const timeFormat = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' });
-const dayFormat = new Intl.DateTimeFormat(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
-const dayFormatWithYear = new Intl.DateTimeFormat(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-const dateTimeFormat = new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+/*
+ | Dates and times in the page's language (<html lang>), always on the Gregorian calendar with
+ | Western digits, whatever the browser's own locale prefers. Built once, on first use.
+ */
+const CALENDAR = { calendar: 'gregory', numberingSystem: 'latn' };
+const formats = {};
+
+function format(name, options) {
+    if (!formats[name]) {
+        try {
+            formats[name] = new Intl.DateTimeFormat(locale(), { ...CALENDAR, ...options });
+        } catch {
+            formats[name] = new Intl.DateTimeFormat(undefined, options);
+        }
+    }
+    return formats[name];
+}
+
+const timeFormat = () => format('time', { hour: 'numeric', minute: '2-digit' });
+const dayFormat = () => format('day', { weekday: 'long', day: 'numeric', month: 'long' });
+const dayFormatWithYear = () => format('dayYear', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+const dateTimeFormat = () => format('dateTime', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+
+/** A count in running text, grouped for the page's language, with Western digits. */
+function number(value) {
+    try {
+        return Number(value).toLocaleString(locale(), { numberingSystem: 'latn' });
+    } catch {
+        return Number(value).toLocaleString();
+    }
+}
 
 function localDayKey(iso) {
     const d = new Date(iso);
@@ -108,10 +136,10 @@ function dayLabel(iso) {
     const key = localDayKey(iso);
     const today = localDayKey(new Date().toISOString());
     const yesterday = localDayKey(new Date(Date.now() - 86400000).toISOString());
-    if (key === today) return 'Today';
-    if (key === yesterday) return 'Yesterday';
+    if (key === today) return t('Today');
+    if (key === yesterday) return t('Yesterday');
     const date = new Date(iso);
-    return date.getFullYear() === new Date().getFullYear() ? dayFormat.format(date) : dayFormatWithYear.format(date);
+    return date.getFullYear() === new Date().getFullYear() ? dayFormat().format(date) : dayFormatWithYear().format(date);
 }
 
 /* ---------------------------------------------------------------- KaTeX */
@@ -338,7 +366,7 @@ document.addEventListener('alpine:init', () => {
         /** "200 characters left" from 1,800 characters, "12 characters over" past the limit. */
         get countText() {
             const left = this.remaining;
-            const n = Math.abs(left).toLocaleString();
+            const n = number(Math.abs(left));
             return (left < 0 ? this.config.copy.countOver : this.config.copy.countLeft).replace(':count', n);
         },
 
@@ -377,11 +405,13 @@ document.addEventListener('alpine:init', () => {
             if (focus) this.$nextTick(() => this.$root.querySelector(`[data-tab="${tab}"]`)?.focus());
         },
 
-        /** Arrow keys, Home and End move between the panel's tabs (automatic activation). */
+        /** Arrow keys, Home and End move between the panel's tabs (automatic activation); in Arabic the tabs run right to left. */
         onTabKeydown(event) {
             const tabs = this.config.tabs;
             const index = tabs.indexOf(this.panelTab);
-            const next = { ArrowRight: index + 1, ArrowLeft: index - 1, Home: 0, End: tabs.length - 1 }[event.key];
+            const forward = isRtl() ? 'ArrowLeft' : 'ArrowRight';
+            const back = isRtl() ? 'ArrowRight' : 'ArrowLeft';
+            const next = { [forward]: index + 1, [back]: index - 1, Home: 0, End: tabs.length - 1 }[event.key];
             if (next === undefined) return;
             event.preventDefault();
             this.selectTab(tabs[(next + tabs.length) % tabs.length], { focus: true });
@@ -505,11 +535,11 @@ document.addEventListener('alpine:init', () => {
         },
 
         formatTime(iso) {
-            return timeFormat.format(new Date(iso));
+            return timeFormat().format(new Date(iso));
         },
 
         formatDateTime(iso) {
-            return dateTimeFormat.format(new Date(iso));
+            return dateTimeFormat().format(new Date(iso));
         },
 
         permalink(id) {
@@ -606,7 +636,7 @@ document.addEventListener('alpine:init', () => {
                 await navigator.clipboard.writeText(link);
                 this.say(this.config.copy.linkCopied);
             } catch {
-                window.prompt('Copy this link', link);
+                window.prompt(t('Copy this link'), link);
             }
             this.closeActions(message);
         },
@@ -664,8 +694,9 @@ document.addEventListener('alpine:init', () => {
             }));
         },
 
-        /** Left and Right move between the visible buttons of a message's toolbar. */
+        /** Left and Right move between the visible buttons of a message's toolbar, in reading order (mirrored in Arabic). */
         toolbarStep(event, step) {
+            if (isRtl()) step = -step;
             const buttons = Array.from(event.currentTarget.querySelectorAll('button')).filter((b) => b.offsetParent !== null);
             const index = buttons.indexOf(document.activeElement);
             buttons[(index + step + buttons.length) % buttons.length]?.focus();
@@ -723,7 +754,7 @@ document.addEventListener('alpine:init', () => {
                     this.searchResults = result.messages || [];
                     this.searchStatus = this.searchResults.length === 0
                         ? this.config.copy.searchNone
-                        : `${this.searchResults.length} ${this.searchResults.length === 1 ? 'message' : 'messages'}`;
+                        : (this.searchResults.length === 1 ? t('1 message') : t(':count messages', { count: number(this.searchResults.length) }));
                 });
             } catch (error) {
                 this.handleFailure(error);
@@ -892,7 +923,7 @@ document.addEventListener('alpine:init', () => {
             const files = this.attachments.filter((a) => a.state === STATE_READY);
             if (body === '' && files.length === 0) return;
             if (body.length > this.config.bodyMaxLength) {
-                this.sendError = `Messages can be at most ${this.config.bodyMaxLength} characters.`;
+                this.sendError = t('Messages can be at most :max characters.', { max: number(this.config.bodyMaxLength) });
                 return;
             }
 
@@ -1202,7 +1233,7 @@ document.addEventListener('alpine:init', () => {
             if (!this.editing || this.editing.saving) return;
             const body = this.editing.body.trim();
             if (body === '') {
-                this.editing.error = 'A message cannot be empty.';
+                this.editing.error = t('A message cannot be empty.');
                 return;
             }
 
@@ -1225,10 +1256,10 @@ document.addEventListener('alpine:init', () => {
                     this.say(result.message);
                 } else {
                     this.handleResult(result, () => {});
-                    if (this.editing) this.editing.error = result?.message || 'The change could not be saved.';
+                    if (this.editing) this.editing.error = result?.message || t('The change could not be saved.');
                 }
             } catch (error) {
-                if (this.editing) this.editing.error = 'The change could not be saved. Check your connection and try again.';
+                if (this.editing) this.editing.error = t('The change could not be saved. Check your connection and try again.');
                 this.handleFailure(error);
             } finally {
                 if (this.editing) this.editing.saving = false;
@@ -1329,7 +1360,7 @@ document.addEventListener('alpine:init', () => {
             if (!this.reportTarget || this.reportSending) return;
             const reason = this.reportReason.trim();
             if (reason === '') {
-                this.reportError = 'Please say briefly why you are reporting this message.';
+                this.reportError = t('Please say briefly why you are reporting this message.');
                 return;
             }
 
@@ -1345,10 +1376,10 @@ document.addEventListener('alpine:init', () => {
                     this.reportError = result.message;
                 } else {
                     this.handleResult(result, () => {});
-                    this.reportError = result?.message || 'The report could not be sent.';
+                    this.reportError = result?.message || t('The report could not be sent.');
                 }
             } catch (error) {
-                this.reportError = 'The report could not be sent. Check your connection and try again.';
+                this.reportError = t('The report could not be sent. Check your connection and try again.');
                 this.handleFailure(error);
             } finally {
                 this.reportSending = false;

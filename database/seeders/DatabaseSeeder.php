@@ -6,7 +6,8 @@ use Illuminate\Database\Seeder;
 
 /**
  * Placeholder dataset for local development. Every text field is marked
- * "[Placeholder]" so nothing here is mistaken for approved content.
+ * "[Placeholder]" (in Arabic "[نص مؤقت]") so nothing here is mistaken for
+ * approved content.
  */
 class DatabaseSeeder extends Seeder
 {
@@ -30,6 +31,8 @@ class DatabaseSeeder extends Seeder
             CommentarySeeder::class,
             OtherItemSeeder::class,
             HomeQuoteSeeder::class,
+            // Arabic placeholder copy ("[نص مؤقت]") for every item above.
+            ArabicPlaceholderSeeder::class,
             TributeSeeder::class,
             ChatSeeder::class,
             ChatUploadSeeder::class,

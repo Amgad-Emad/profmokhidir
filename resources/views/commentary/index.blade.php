@@ -9,7 +9,7 @@
             <x-empty-state class="mt-6" :message="$pageCopy->text('commentary', 'empty')" />
         @else
             @if ($tags !== [])
-                <x-filter-pills class="mt-12 border-y border-rule py-8" label="Topics" :options="$tags" :all-url="$clearUrl" :all-active="$activeTag === null" :all-label="$pageCopy->text('commentary', 'all_topics')" data-rise />
+                <x-filter-pills class="mt-12 border-y border-rule py-8" :label="__('Topics')" :options="$tags" :all-url="$clearUrl" :all-active="$activeTag === null" :all-label="$pageCopy->text('commentary', 'all_topics')" data-rise />
             @endif
 
             @if ($commentaries->total() === 0)
@@ -24,14 +24,14 @@
                                 @endif
                             </div>
                             <article class="flex flex-col gap-3">
-                                <h2 class="font-display text-2xl font-light leading-snug text-ink sm:text-quote">
+                                <h2 class="font-display text-2xl font-light leading-snug text-ink sm:text-quote" @contentLang($commentary)>
                                     <a href="{{ route('commentary.show', $commentary->slug) }}" class="text-ink">{{ $commentary->title }}</a>
                                 </h2>
                                 @if (filled($commentary->summary))
-                                    <p class="t-body max-w-measure text-ink">{{ $commentary->summary }}</p>
+                                    <p class="t-body max-w-measure text-ink" @contentLang($commentary, 'summary')>{{ $commentary->summary }}</p>
                                 @endif
                                 @if (filled($commentary->tags))
-                                    <ul class="mt-2 flex flex-wrap gap-2" aria-label="Topics">
+                                    <ul class="mt-2 flex flex-wrap gap-2" aria-label="{{ __('Topics') }}">
                                         @foreach ($commentary->tags as $tag)
                                             <li><a href="{{ route('commentary', ['tag' => $tag]) }}" class="filter-pill min-h-9 px-3 text-sm">{{ $tag }}</a></li>
                                         @endforeach

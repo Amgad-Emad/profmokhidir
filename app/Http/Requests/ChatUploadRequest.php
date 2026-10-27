@@ -39,8 +39,8 @@ class ChatUploadRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'file.required' => 'Choose a file to attach.',
-            'file.file' => 'The file could not be uploaded. Try again.',
+            'file.required' => __('Choose a file to attach.'),
+            'file.file' => __('The file could not be uploaded. Try again.'),
         ];
     }
 }

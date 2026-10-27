@@ -6,6 +6,7 @@ use App\Constants\Disks;
 use App\Constants\MediaCollections;
 use App\Constants\TeachingAccess;
 use App\Constants\TeachingMaterialType;
+use App\Models\Concerns\HasTranslatableContent;
 use App\Models\Concerns\Publishable;
 use Database\Factories\TeachingMaterialFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -29,7 +30,21 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 class TeachingMaterial extends Model implements HasMedia
 {
     /** @use HasFactory<TeachingMaterialFactory> */
-    use HasFactory, InteractsWithMedia, Publishable, SoftDeletes;
+    use HasFactory, HasTranslatableContent, InteractsWithMedia, Publishable, SoftDeletes;
+
+    /**
+     * Language-specific columns (English and Arabic); the first is the primary one.
+     *
+     * @var list<string>
+     */
+    public array $translatable = ['title', 'course_description', 'description'];
+
+    /**
+     * Columns folded into the search column (App\Support\SearchText).
+     *
+     * @var list<string>
+     */
+    protected array $searchColumns = ['title', 'course', 'topic', 'description'];
 
     protected string $orderDateColumn = 'material_date';
 

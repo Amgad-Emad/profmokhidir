@@ -6,6 +6,6 @@
     </form>
     <form novalidate method="POST" action="{{ route('logout') }}" class="mt-6 text-center">
         @csrf
-        <button type="submit" class="link-hairline">Sign out</button>
+        <button type="submit" class="link-hairline">{{ __(AuthScreens::SIGN_OUT) }}</button>
     </form>
 </x-layouts.guest>

@@ -12,7 +12,7 @@
     $toggle = $themes->toggle($themes->current(request()));
     $id ??= 'theme-switch-'.uniqid();
 @endphp
-<form novalidate method="POST" action="{{ route(ThemeSettings::ROUTE) }}" {{ $attributes->class(['theme-toggle']) }} data-theme-toggle data-theme-label="{{ ThemeSettings::SWITCH_LABEL }}" data-theme-showing="{{ $toggle['theme'] }}">
+<form novalidate method="POST" action="{{ route(ThemeSettings::ROUTE) }}" {{ $attributes->class(['theme-toggle']) }} data-theme-toggle data-theme-label="{{ ThemeSettings::SWITCH_LABEL }}" data-theme-label-light="{{ \App\Constants\Theme::Dark->switchLabel() }}" data-theme-label-dark="{{ \App\Constants\Theme::Light->switchLabel() }}" data-theme-showing="{{ $toggle['theme'] }}">
     @csrf
     @method('PATCH')
     <button type="submit" id="{{ $id }}" name="{{ ThemeSettings::FIELD }}" value="{{ $toggle['next'] }}" class="theme-toggle__button" aria-label="{{ $toggle['label'] }}" aria-pressed="{{ $toggle['pressed'] }}" data-theme-toggle-button>

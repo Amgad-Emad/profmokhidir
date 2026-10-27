@@ -7,7 +7,7 @@
 @props(['field', 'label', 'options', 'current' => null])
 <div {{ $attributes->class(['filter-chips']) }} role="group" aria-label="{{ $label }}" data-filter="{{ $field }}">
     <span class="filter-chips__label t-label" aria-hidden="true">{{ $label }}</span>
-    <button type="button" class="filter-chip" wire:click="setFilter('{{ $field }}')" aria-pressed="{{ $current === null || $current === '' ? 'true' : 'false' }}">All</button>
+    <button type="button" class="filter-chip" wire:click="setFilter('{{ $field }}')" aria-pressed="{{ $current === null || $current === '' ? 'true' : 'false' }}">{{ __('All') }}</button>
     @foreach ($options as $value => $optionLabel)
         <button type="button" class="filter-chip" wire:click="setFilter('{{ $field }}', '{{ $value }}')" aria-pressed="{{ (string) $current === (string) $value ? 'true' : 'false' }}" data-filter-value="{{ $value }}">{{ $optionLabel }}</button>
     @endforeach

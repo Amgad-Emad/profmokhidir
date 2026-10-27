@@ -3,18 +3,18 @@
 @use('App\Constants\Search')
 <div id="{{ Masthead::SEARCH_ID }}" x-data="siteSearch" x-ref="panel" x-show="open" x-cloak :class="{ 'is-open': shown }" role="dialog" aria-modal="true" aria-labelledby="site-search-title" tabindex="-1" @search-open.window="show($event.detail?.opener)" @keydown.escape.stop="close()" @keydown.tab="trap($event)" @keydown.down.prevent="move(1)" @keydown.up.prevent="move(-1)" class="site-search glow-brass on-dark fixed inset-0 z-50 overflow-y-auto bg-surface text-ink">
     <div class="site-menu__bar mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 sm:px-6">
-        <p id="site-search-title" class="t-label text-accent-text">{{ Search::LABEL }}</p>
+        <p id="site-search-title" class="t-label text-accent-text">{{ __(Search::LABEL) }}</p>
         <button type="button" x-ref="close" class="site-menu-toggle" @click="close()">
-            <span class="t-label">{{ Search::CLOSE_LABEL }}</span>
+            <span class="t-label">{{ __(Search::CLOSE_LABEL) }}</span>
             <span class="site-menu-toggle__icon is-open" aria-hidden="true"><span></span><span></span></span>
         </button>
     </div>
     <div class="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
         <form novalidate x-ref="form" method="get" action="{{ $searchUrl }}" role="search" class="site-search__form" @submit="submit($event)">
-            <x-form.input type="search" :name="$searchParam" id="site-search-input" :label="Search::LABEL" hide-label :optional="false" size="display" class="form-style-underline"
-                          :placeholder="Search::PLACEHOLDER" autocomplete="off" spellcheck="false" :maxlength="Search::MAX_LENGTH"
+            <x-form.input type="search" :name="$searchParam" id="site-search-input" :label="__(Search::LABEL)" hide-label :optional="false" size="display" class="form-style-underline"
+                          :placeholder="__(Search::PLACEHOLDER)" autocomplete="off" spellcheck="false" :maxlength="Search::MAX_LENGTH"
                           :control="['x-ref' => 'input', 'x-model' => 'query', 'x-on:input.debounce.250ms' => 'lookup()', 'aria-controls' => 'site-search-results', 'aria-describedby' => 'site-search-hint']" />
-            <p id="site-search-hint" class="site-search__hint smallcaps">Enter for every result<span aria-hidden="true">{{ \App\Constants\DateFormats::META_SEPARATOR }}</span><span class="sr-only">, </span>Escape to close</p>
+            <p id="site-search-hint" class="site-search__hint smallcaps">{{ __('Enter for every result') }}<span aria-hidden="true">{{ \App\Constants\DateFormats::META_SEPARATOR }}</span><span class="sr-only">{{ __(', ') }}</span>{{ __('Escape to close') }}</p>
         </form>
 
         <p class="sr-only" role="status" aria-live="polite" aria-atomic="true" x-text="status"></p>

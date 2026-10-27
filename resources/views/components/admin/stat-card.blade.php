@@ -12,9 +12,9 @@
 <{{ $tag }}{!! $href ? ' href="'.e($href).'"' : '' !!} {{ $attributes->class(['stat-card flex flex-col gap-4 rounded-card border border-rule bg-surface-panel p-6 no-underline hover:no-underline', 'hover:border-focus focus-visible:border-focus' => $href]) }}>
     <span class="t-label text-accent-text">{{ $label }}</span>
     <span class="mt-auto flex items-end justify-between gap-3">
-        <span class="figures-lining font-display text-5xl font-light leading-none text-ink" data-count>{{ number_format($count) }}</span>
+        <span class="figures-lining font-display text-5xl font-light leading-none text-ink" data-count>@num(number_format($count))</span>
         @if ($tone)
-            <x-icon :name="$tone->icon()" class="mb-1 size-6 {{ $tone->textClass() }}" :label="$tone === \App\Constants\StatusTone::Bronze ? 'Needs attention' : 'Clear'" />
+            <x-icon :name="$tone->icon()" class="mb-1 size-6 {{ $tone->textClass() }}" :label="$tone === \App\Constants\StatusTone::Bronze ? __('Needs attention') : __('Clear')" />
         @endif
     </span>
     @if ($caption)

@@ -37,9 +37,9 @@ class TributeEditRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Enter the name to show on the tribute.',
-            'message.required' => 'Write the tribute text.',
-            'message.max' => 'Shorten the tribute to :max characters or fewer.',
+            'name.required' => __('Enter the name to show on the tribute.'),
+            'message.required' => __('Write the tribute text.'),
+            'message.max' => __('Shorten the tribute to :max characters or fewer.'),
         ];
     }
 
@@ -48,6 +48,6 @@ class TributeEditRequest extends FormRequest
      */
     public function attributes(): array
     {
-        return ['message' => 'tribute'];
+        return ['message' => __('tribute')];
     }
 }

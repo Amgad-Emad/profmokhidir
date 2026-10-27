@@ -5,6 +5,7 @@ use App\Constants\AdminUx;
 use App\Constants\Analytics;
 use App\Constants\ContentTypes;
 use App\Constants\ErrorPages;
+use App\Constants\Locales;
 use App\Constants\Pages;
 use App\Constants\Permissions;
 use App\Constants\RateLimits;
@@ -30,6 +31,7 @@ use App\Http\Controllers\CommentaryController;
 use App\Http\Controllers\CommunityController;
 use App\Http\Controllers\CvController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\OtherItemController;
 use App\Http\Controllers\PictureController;
 use App\Http\Controllers\PrivacyController;
@@ -76,59 +78,97 @@ use App\Livewire\Community\Chat\Room as ChatRoom;
 use App\Services\ChatAttachmentService;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', HomeController::class)->name('home');
-
-// Crawlers: the sitemap of published content and the robots rules (no static files, so both follow APP_URL).
-Route::get(Seo::SITEMAP_PATH, SitemapController::class)->name(Seo::SITEMAP_ROUTE);
-Route::get(Seo::ROBOTS_PATH, RobotsController::class)->name(Seo::ROBOTS_ROUTE);
-
-// Site-wide search: the plain page, and JSON for the header dialog (Accept: application/json).
-Route::get(Search::PATH, SearchController::class)->name(Search::ROUTE);
-
 // Sections with their own controller. Each keeps the route name from Sections::definitions();
 // detail routes nest under the same name (e.g. commentary.show).
 $sections = Sections::definitions();
 
-Route::get($sections[Sections::ABOUT]['path'], AboutController::class)->name($sections[Sections::ABOUT]['route']);
-Route::get($sections[Sections::CV]['path'], CvController::class)->name($sections[Sections::CV]['route']);
-Route::get($sections[Sections::PUBLICATIONS]['path'], PublicationController::class)->name($sections[Sections::PUBLICATIONS]['route']);
-Route::get($sections[Sections::AWARDS]['path'], AwardController::class)->name($sections[Sections::AWARDS]['route']);
+// Public pages, once per language: English at the plain addresses, Arabic under /ar with
+// route names prefixed "ar." (App\Constants\Locales). The `locale` action fixes each page's
+// language; route() keeps links in the current one (App\Support\LocalizedUrlGenerator).
+$publicRoutes = function () use ($sections): void {
+    Route::get('/', HomeController::class)->name('home');
 
-Route::get($sections[Sections::VIDEOS]['path'], [VideoController::class, 'index'])->name($sections[Sections::VIDEOS]['route']);
-Route::get($sections[Sections::VIDEOS]['path'].'/{slug}', [VideoController::class, 'show'])->name($sections[Sections::VIDEOS]['route'].'.show');
+    // Site-wide search: the plain page, and JSON for the header dialog (Accept: application/json).
+    Route::get(Search::PATH, SearchController::class)->name(Search::ROUTE);
 
-Route::get($sections[Sections::PICTURES]['path'], [PictureController::class, 'index'])->name($sections[Sections::PICTURES]['route']);
-Route::get($sections[Sections::PICTURES]['path'].'/{album}', [PictureController::class, 'show'])->name($sections[Sections::PICTURES]['route'].'.show');
+    // Sections with their own controller (detail routes nest under the section's name, e.g. commentary.show).
+    Route::get($sections[Sections::ABOUT]['path'], AboutController::class)->name($sections[Sections::ABOUT]['route']);
+    Route::get($sections[Sections::CV]['path'], CvController::class)->name($sections[Sections::CV]['route']);
+    Route::get($sections[Sections::PUBLICATIONS]['path'], PublicationController::class)->name($sections[Sections::PUBLICATIONS]['route']);
+    Route::get($sections[Sections::AWARDS]['path'], AwardController::class)->name($sections[Sections::AWARDS]['route']);
 
-Route::get($sections[Sections::TEACHING]['path'], [TeachingMaterialController::class, 'index'])->name($sections[Sections::TEACHING]['route']);
+    Route::get($sections[Sections::VIDEOS]['path'], [VideoController::class, 'index'])->name($sections[Sections::VIDEOS]['route']);
+    Route::get($sections[Sections::VIDEOS]['path'].'/{slug}', [VideoController::class, 'show'])->name($sections[Sections::VIDEOS]['route'].'.show');
+
+    Route::get($sections[Sections::PICTURES]['path'], [PictureController::class, 'index'])->name($sections[Sections::PICTURES]['route']);
+    Route::get($sections[Sections::PICTURES]['path'].'/{album}', [PictureController::class, 'show'])->name($sections[Sections::PICTURES]['route'].'.show');
+
+    Route::get($sections[Sections::TEACHING]['path'], [TeachingMaterialController::class, 'index'])->name($sections[Sections::TEACHING]['route']);
+
+    Route::get($sections[Sections::COMMENTARY]['path'], [CommentaryController::class, 'index'])->name($sections[Sections::COMMENTARY]['route']);
+    Route::get($sections[Sections::COMMENTARY]['path'].'/{slug}', [CommentaryController::class, 'show'])->name($sections[Sections::COMMENTARY]['route'].'.show');
+
+    Route::get($sections[Sections::OTHER]['path'], [OtherItemController::class, 'index'])->name($sections[Sections::OTHER]['route']);
+    Route::get($sections[Sections::OTHER]['path'].'/{slug}', [OtherItemController::class, 'show'])->name($sections[Sections::OTHER]['route'].'.show');
+
+    Route::get($sections[Sections::TRIBUTES]['path'], [TributeController::class, 'index'])->name($sections[Sections::TRIBUTES]['route']);
+    Route::get($sections[Sections::TRIBUTES]['path'].'/new', [TributeController::class, 'create'])->name($sections[Sections::TRIBUTES]['route'].'.create');
+    Route::post($sections[Sections::TRIBUTES]['path'].'/new', [TributeController::class, 'edit'])->name($sections[Sections::TRIBUTES]['route'].'.edit');
+    Route::post($sections[Sections::TRIBUTES]['path'].'/preview', [TributeController::class, 'preview'])->name($sections[Sections::TRIBUTES]['route'].'.preview');
+    Route::get($sections[Sections::TRIBUTES]['path'].'/preview', [TributeController::class, 'previewAgain'])->name($sections[Sections::TRIBUTES]['route'].'.preview.show');
+    Route::post($sections[Sections::TRIBUTES]['path'], [TributeController::class, 'store'])->name($sections[Sections::TRIBUTES]['route'].'.store');
+    Route::get($sections[Sections::TRIBUTES]['path'].'/thank-you', [TributeController::class, 'thanks'])->name($sections[Sections::TRIBUTES]['route'].'.thanks');
+    Route::get($sections[Sections::TRIBUTES]['path'].'/{tribute}/card', [TributeController::class, 'card'])
+        ->whereNumber('tribute')
+        ->name(TributeCards::ROUTE);
+
+    // Scientific Community: public page with the application form, then the members-only
+    // chat (Livewire). The chat routes check membership on every request, including
+    // Livewire updates (EnsureCommunityMember is also a persistent Livewire middleware).
+    Route::get($sections[Sections::COMMUNITY]['path'], [CommunityController::class, 'index'])->name($sections[Sections::COMMUNITY]['route']);
+    Route::post($sections[Sections::COMMUNITY]['path'].'/apply', [CommunityController::class, 'store'])
+        ->middleware('throttle:'.RateLimits::COMMUNITY_SIGNUP)
+        ->name($sections[Sections::COMMUNITY]['route'].'.apply');
+
+    // The old channel addresses (/community/chat/general and so on) move permanently to the one room.
+    Route::get($sections[Sections::COMMUNITY]['path'].'/chat/{channel}', ChatController::class)
+        ->where('channel', '[a-z0-9-]+')
+        ->name($sections[Sections::COMMUNITY]['route'].'.chat.legacy');
+
+    $built = [Sections::ABOUT, Sections::CV, Sections::PUBLICATIONS, Sections::AWARDS, Sections::VIDEOS, Sections::PICTURES, Sections::TEACHING, Sections::COMMENTARY, Sections::COMMUNITY, Sections::OTHER, Sections::TRIBUTES];
+
+    // One placeholder page per remaining public section, named after the section, until its
+    // own controller exists.
+    foreach (array_diff_key($sections, array_flip($built)) as $key => $section) {
+        Route::get($section['path'], SectionPlaceholderController::class)
+            ->defaults('section', $key)
+            ->name($section['route']);
+    }
+
+    // The privacy page that explains analytics (served only while analytics is on).
+    Route::get(Analytics::PRIVACY_PATH, PrivacyController::class)->name(Analytics::PRIVACY_ROUTE);
+};
+
+Route::group([Locales::ACTION_KEY => Locales::DEFAULT], $publicRoutes);
+
+foreach (Locales::prefixed() as $locale) {
+    Route::group(['prefix' => Locales::prefix($locale), 'as' => $locale.'.', Locales::ACTION_KEY => $locale], $publicRoutes);
+}
+
+// The language switcher: keeps the choice, then opens the same page in that language.
+Route::get(Locales::SWITCH_PATH.'/{locale}', LocaleController::class)
+    ->whereIn('locale', Locales::all())
+    ->name(Locales::SWITCH_ROUTE);
+
+// Crawlers: the sitemap of published content and the robots rules (no static files, so both follow APP_URL).
+Route::get(Seo::SITEMAP_PATH, [SitemapController::class, 'index'])->name(Seo::SITEMAP_ROUTE);
+Route::get(Seo::SITEMAP_LOCALE_PATH, [SitemapController::class, 'show'])->whereIn('locale', Locales::all())->name(Seo::SITEMAP_LOCALE_ROUTE);
+Route::get(Seo::ROBOTS_PATH, RobotsController::class)->name(Seo::ROBOTS_ROUTE);
+
+// Teaching files are the same in every language.
 Route::get($sections[Sections::TEACHING]['path'].'/{material}/download', [TeachingMaterialController::class, 'download'])
     ->whereNumber('material')
     ->name($sections[Sections::TEACHING]['route'].'.download');
-
-Route::get($sections[Sections::COMMENTARY]['path'], [CommentaryController::class, 'index'])->name($sections[Sections::COMMENTARY]['route']);
-Route::get($sections[Sections::COMMENTARY]['path'].'/{slug}', [CommentaryController::class, 'show'])->name($sections[Sections::COMMENTARY]['route'].'.show');
-
-Route::get($sections[Sections::OTHER]['path'], [OtherItemController::class, 'index'])->name($sections[Sections::OTHER]['route']);
-Route::get($sections[Sections::OTHER]['path'].'/{slug}', [OtherItemController::class, 'show'])->name($sections[Sections::OTHER]['route'].'.show');
-
-Route::get($sections[Sections::TRIBUTES]['path'], [TributeController::class, 'index'])->name($sections[Sections::TRIBUTES]['route']);
-Route::get($sections[Sections::TRIBUTES]['path'].'/new', [TributeController::class, 'create'])->name($sections[Sections::TRIBUTES]['route'].'.create');
-Route::post($sections[Sections::TRIBUTES]['path'].'/new', [TributeController::class, 'edit'])->name($sections[Sections::TRIBUTES]['route'].'.edit');
-Route::post($sections[Sections::TRIBUTES]['path'].'/preview', [TributeController::class, 'preview'])->name($sections[Sections::TRIBUTES]['route'].'.preview');
-Route::get($sections[Sections::TRIBUTES]['path'].'/preview', [TributeController::class, 'previewAgain'])->name($sections[Sections::TRIBUTES]['route'].'.preview.show');
-Route::post($sections[Sections::TRIBUTES]['path'], [TributeController::class, 'store'])->name($sections[Sections::TRIBUTES]['route'].'.store');
-Route::get($sections[Sections::TRIBUTES]['path'].'/thank-you', [TributeController::class, 'thanks'])->name($sections[Sections::TRIBUTES]['route'].'.thanks');
-Route::get($sections[Sections::TRIBUTES]['path'].'/{tribute}/card', [TributeController::class, 'card'])
-    ->whereNumber('tribute')
-    ->name(TributeCards::ROUTE);
-
-// Scientific Community: public page with the application form, then the members-only
-// chat (Livewire). The chat routes check membership on every request, including
-// Livewire updates (EnsureCommunityMember is also a persistent Livewire middleware).
-Route::get($sections[Sections::COMMUNITY]['path'], [CommunityController::class, 'index'])->name($sections[Sections::COMMUNITY]['route']);
-Route::post($sections[Sections::COMMUNITY]['path'].'/apply', [CommunityController::class, 'store'])
-    ->middleware('throttle:'.RateLimits::COMMUNITY_SIGNUP)
-    ->name($sections[Sections::COMMUNITY]['route'].'.apply');
 
 // One room: /community/chat. Attachments are staged in a temporary area first and
 // served only through signed links that check membership again.
@@ -150,27 +190,11 @@ Route::middleware(['auth', 'verified', EnsureCommunityMember::ALIAS])
             ->name('.attachments.show');
     });
 
-// The old channel addresses (/community/chat/general and so on) move permanently to the one room.
-Route::get($sections[Sections::COMMUNITY]['path'].'/chat/{channel}', ChatController::class)
-    ->where('channel', '[a-z0-9-]+')
-    ->name($sections[Sections::COMMUNITY]['route'].'.chat.legacy');
-
-$built = [Sections::ABOUT, Sections::CV, Sections::PUBLICATIONS, Sections::AWARDS, Sections::VIDEOS, Sections::PICTURES, Sections::TEACHING, Sections::COMMENTARY, Sections::COMMUNITY, Sections::OTHER, Sections::TRIBUTES];
-
-// One placeholder page per remaining public section, named after the section, until its
-// own controller exists.
-foreach (array_diff_key($sections, array_flip($built)) as $key => $section) {
-    Route::get($section['path'], SectionPlaceholderController::class)
-        ->defaults('section', $key)
-        ->name($section['route']);
-}
-
-// First-party analytics (off until approved): the beacon endpoint, and the privacy page
-// that explains it (served only while analytics is on).
+// First-party analytics (off until approved): the beacon endpoint. The privacy page that
+// explains it is a public page (above).
 Route::post(Analytics::COLLECT_PATH, AnalyticsCollectController::class)
     ->middleware('throttle:'.RateLimits::ANALYTICS_COLLECT)
     ->name(Analytics::COLLECT_ROUTE);
-Route::get(Analytics::PRIVACY_PATH, PrivacyController::class)->name(Analytics::PRIVACY_ROUTE);
 
 // Design-system review page. Served only in the local environment (404 elsewhere).
 Route::get('/styleguide', StyleguideController::class)

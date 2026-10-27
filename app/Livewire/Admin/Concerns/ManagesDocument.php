@@ -75,7 +75,7 @@ trait ManagesDocument
         return [
             'file' => $record === null ? null : $this->currentDocument($record),
             'fileAccept' => '.'.implode(',.', Uploads::DOCUMENT_EXTENSIONS),
-            'fileHint' => 'PDF, Word, PowerPoint or ZIP up to '.Uploads::documentMaxLabel(),
+            'fileHint' => __('PDF, Word, PowerPoint or ZIP up to :size', ['size' => Uploads::documentMaxLabel()]),
         ];
     }
 }

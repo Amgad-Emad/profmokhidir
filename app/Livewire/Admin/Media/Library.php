@@ -140,12 +140,7 @@ class Library extends Component
         $this->authorizeMedia($media);
 
         $this->editingId = $id;
-        $this->details = [];
-
-        foreach ([MediaProperties::ALT_TEXT, MediaProperties::CAPTION, MediaProperties::PLACE, MediaProperties::YEAR, MediaProperties::TREATMENT, MediaProperties::CREDIT, MediaProperties::PERMISSIONS_NOTE] as $key) {
-            $this->details[$key] = $media->getCustomProperty($key);
-        }
-
+        $this->details = $this->media()->details($media);
         $this->details[MediaProperties::TREATMENT] ??= MediaTreatment::Archive->value;
         $this->resetErrorBag();
     }
@@ -177,7 +172,7 @@ class Library extends Component
 
         $this->media()->updateProperties($media, $this->details, auth()->user());
         $this->cancelEdit();
-        $this->toast('Image details saved.');
+        $this->toast(__('Image details saved.'));
     }
 
     public function updatedUploads(): void
@@ -185,8 +180,8 @@ class Library extends Component
         try {
             $this->validate(
                 ['uploadAlbumId' => ['required', 'integer'], 'uploads' => ['array', 'max:20'], 'uploads.*' => Uploads::imageRules()],
-                ['uploadAlbumId.required' => 'Choose the album the images belong to.'] + $this->remap((new ImageUploadRequest)->messages(), ImageUploadRequest::FIELD, 'uploads.*'),
-                ['uploads.*' => 'image'],
+                ['uploadAlbumId.required' => __('Choose the album the images belong to.')] + $this->remap((new ImageUploadRequest)->messages(), ImageUploadRequest::FIELD, 'uploads.*'),
+                ['uploads.*' => __('image')],
             );
         } catch (ValidationException $exception) {
             // Livewire appends to array file properties; drop the rejected batch so the next choice starts clean.
@@ -198,7 +193,7 @@ class Library extends Component
         $album = app(AlbumService::class)->find((int) $this->uploadAlbumId);
 
         if ($album === null) {
-            $this->addError('uploadAlbumId', 'That album no longer exists.');
+            $this->addError('uploadAlbumId', __('That album no longer exists.'));
 
             return;
         }
@@ -214,7 +209,7 @@ class Library extends Component
         $this->uploads = [];
         $this->album = (string) $album->getKey();
         $this->show();
-        $this->toast(count($files) === 1 ? 'Image uploaded to '.$album->title.'. Open it to add alt text and a caption.' : count($files).' images uploaded to '.$album->title.'. Open each to add alt text and a caption.');
+        $this->toast(trans_choice('{1} Image uploaded to :album. Open it to add alt text and a caption.|[2,*] :count images uploaded to :album. Open each to add alt text and a caption.', count($files), ['album' => $album->title]));
     }
 
     public function delete(): void
@@ -233,7 +228,7 @@ class Library extends Component
             $this->cancelEdit();
         }
 
-        $this->toast('Image deleted.');
+        $this->toast(__('Image deleted.'));
     }
 
     public function render(): View
@@ -272,15 +267,15 @@ class Library extends Component
             'incompleteCount' => $this->media()->countIncompleteImages(),
             'missingAltCount' => $this->media()->countMissingAltText(),
             'showOptions' => [
-                self::SHOW_ALL => 'All images',
-                self::SHOW_MISSING_ALT => 'Missing alt text',
-                self::SHOW_INCOMPLETE => 'Missing details',
-                self::SHOW_UNUSED => 'Not used on the site',
+                self::SHOW_ALL => __('All images'),
+                self::SHOW_MISSING_ALT => __('Missing alt text'),
+                self::SHOW_INCOMPLETE => __('Missing details'),
+                self::SHOW_UNUSED => __('Not used on the site'),
             ],
             'filtered' => trim($this->search) !== '' || $this->collection !== '' || $this->treatment !== '' || $this->album !== '' || $this->showing() !== self::SHOW_ALL,
             'uploadAccept' => '.'.implode(',.', Uploads::IMAGE_EXTENSIONS),
-            'uploadHint' => 'JPEG, PNG or WebP up to '.Uploads::imageMaxLabel(),
-        ])->layout('components.layouts.admin', ['title' => AdminNavigation::get(AdminNavigation::MEDIA_LIBRARY)['label']]);
+            'uploadHint' => __('JPEG, PNG or WebP up to :size', ['size' => Uploads::imageMaxLabel()]),
+        ])->layout('components.layouts.admin', ['title' => __(AdminNavigation::get(AdminNavigation::MEDIA_LIBRARY)['label'])]);
     }
 
     /**
@@ -289,10 +284,10 @@ class Library extends Component
     private function collectionLabels(): array
     {
         return [
-            MediaCollections::PORTRAIT => 'Portrait',
-            MediaCollections::THUMBNAIL => 'Video posters',
-            MediaCollections::PHOTOS => 'Album photos',
-            MediaCollections::MEDIA => 'Other information',
+            MediaCollections::PORTRAIT => __('Portrait'),
+            MediaCollections::THUMBNAIL => __('Video posters'),
+            MediaCollections::PHOTOS => __('Album photos'),
+            MediaCollections::MEDIA => __('Other information'),
         ];
     }
 

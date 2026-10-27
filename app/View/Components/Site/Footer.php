@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\View\Components\Site;
 
 use App\Constants\Analytics;
+use App\Constants\Locales;
 use App\Constants\PageDefinitions\SiteBlocks;
 use App\Constants\Pages;
 use App\Constants\Taglines;
@@ -52,7 +53,8 @@ class Footer extends Component
 
     public function __construct(NavigationService $navigation, PageContentService $pages, Request $request, AnalyticsService $analytics)
     {
-        $route = $request->route()?->getName();
+        // An Arabic page's route is "ar.x"; the footer treats it as its English twin.
+        $route = Locales::baseRouteName($request->route()?->getName());
 
         if ($analytics->enabled()) {
             $this->privacyUrl = route(Analytics::PRIVACY_ROUTE, absolute: false);

@@ -5,9 +5,12 @@
  |
  |   - opens as a modal <dialog>: the page behind is inert, Escape closes
  |   - Tab / Shift+Tab wrap inside; focus returns to the opening link on close
- |   - Left / Right (and Home / End) move between photographs; swipe does the same
+ |   - Left / Right (and Home / End) move between photographs; swipe does the same. On a
+ |     right-to-left page the sequence runs from the right, so Left is next and Right is previous
  |   - photographs cross-fade only, never zoom; reduced motion swaps at once
  */
+
+import { isRtl, t } from './i18n';
 
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 const FADE_MS = 240;
@@ -125,7 +128,7 @@ export default function lightbox() {
         },
 
         counter() {
-            return this.items.length > 0 ? `${this.index + 1} of ${this.items.length}` : '';
+            return this.items.length > 0 ? t(':current of :total', { current: this.index + 1, total: this.items.length }) : '';
         },
 
         onKeydown(event) {
@@ -134,11 +137,11 @@ export default function lightbox() {
             switch (event.key) {
                 case 'ArrowRight':
                     event.preventDefault();
-                    this.next();
+                    isRtl() ? this.prev() : this.next();
                     break;
                 case 'ArrowLeft':
                     event.preventDefault();
-                    this.prev();
+                    isRtl() ? this.next() : this.prev();
                     break;
                 case 'Home':
                     event.preventDefault();
@@ -204,7 +207,9 @@ export default function lightbox() {
 
             if (Math.abs(dx) < SWIPE_MIN_PX || Math.abs(dx) < Math.abs(dy)) return;
 
-            dx < 0 ? this.next() : this.prev();
+            // Swiping towards the start of the reading direction brings the next photograph in.
+            const towardsStart = isRtl() ? dx > 0 : dx < 0;
+            towardsStart ? this.next() : this.prev();
         },
     };
 }

@@ -13,13 +13,13 @@
                 <div class="lecture-hall__label">
                     <div class="lecture-hall__text">
                         <p class="t-label text-accent-text">{{ $pageCopy->text('videos', 'featured_label') }}</p>
-                        <h2 id="featured-title" class="lecture-hall__title">
+                        <h2 id="featured-title" class="lecture-hall__title" @contentLang($featured)>
                             <a href="{{ route('videos.show', $featured->slug) }}" class="text-ink">{{ $featured->title }}</a>
                         </h2>
                         <x-video-label :video="$featured" />
                     </div>
                     @if (filled($featured->description))
-                        <p class="t-body max-w-measure text-ink-muted">{{ \Illuminate\Support\Str::limit(trim($featured->description), \App\Services\VideosPageService::DESCRIPTION_LIMIT) }}</p>
+                        <p class="t-body max-w-measure text-ink-muted" @contentLang($featured, 'description')>{{ \Illuminate\Support\Str::limit(trim($featured->description), \App\Services\VideosPageService::DESCRIPTION_LIMIT) }}</p>
                     @endif
                 </div>
             </article>
@@ -41,11 +41,11 @@
                                 </a>
                                 <div class="flex flex-col gap-2">
                                     <x-video-label :video="$video" />
-                                    <h3 class="font-display text-2xl font-light leading-snug text-ink">
+                                    <h3 class="font-display text-2xl font-light leading-snug text-ink" @contentLang($video)>
                                         <a href="{{ $url }}" class="text-ink">{{ $video->title }}</a>
                                     </h3>
                                     @if (filled($video->description))
-                                        <p class="t-body text-ink-muted">{{ \Illuminate\Support\Str::limit(trim($video->description), \App\Services\VideosPageService::DESCRIPTION_LIMIT) }}</p>
+                                        <p class="t-body text-ink-muted" @contentLang($video, 'description')>{{ \Illuminate\Support\Str::limit(trim($video->description), \App\Services\VideosPageService::DESCRIPTION_LIMIT) }}</p>
                                     @endif
                                 </div>
                             </article>

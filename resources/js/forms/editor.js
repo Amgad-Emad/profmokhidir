@@ -5,7 +5,11 @@
  | and its tooltips name the shortcut (⌘ on a Mac, Ctrl elsewhere). Links go through a small
  | dialog that checks the address. The value goes to the Livewire property (`model`) or to a
  | hidden input; the server sanitises the HTML again on save (App\Support\RichText).
+ | The text follows what is typed (dir="auto", or the component's `dir`), and on a right-to-left
+ | page the toolbar's arrow keys follow its visual order.
  */
+import { isRtl, t } from '../i18n';
+
 const MAC = /Mac|iPhone|iPad/.test(navigator.platform ?? navigator.userAgent);
 
 export default function formEditor(config = {}) {
@@ -24,7 +28,7 @@ export default function formEditor(config = {}) {
         words: 0,
 
         get wordsLabel() {
-            const [one, many] = config.words ?? [':count word', ':count words'];
+            const [one, many] = config.words ?? [t(':count word'), t(':count words')];
             return (this.words === 1 ? one : many).replace(':count', this.words);
         },
 
@@ -63,6 +67,7 @@ export default function formEditor(config = {}) {
                 editorProps: {
                     attributes: {
                         role: 'textbox',
+                        dir: config.dir || 'auto',
                         'aria-multiline': 'true',
                         'aria-labelledby': config.labelId,
                         ...(config.describedBy ? { 'aria-describedby': config.describedBy } : {}),
@@ -155,7 +160,10 @@ export default function formEditor(config = {}) {
             const index = tools.indexOf(document.activeElement);
             if (index < 0) return;
 
-            const next = { ArrowRight: index + 1, ArrowLeft: index - 1, Home: 0, End: tools.length - 1 }[event.key];
+            // The toolbar runs right to left on an Arabic page, so the arrows follow what is seen.
+            const forward = isRtl() ? 'ArrowLeft' : 'ArrowRight';
+            const back = isRtl() ? 'ArrowRight' : 'ArrowLeft';
+            const next = { [forward]: index + 1, [back]: index - 1, Home: 0, End: tools.length - 1 }[event.key];
             if (next === undefined) return;
 
             event.preventDefault();

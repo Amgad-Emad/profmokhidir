@@ -39,8 +39,8 @@ class SearchController extends Controller
             'results' => $results,
             'searchable' => $searchable,
             'sections' => $sections,
-            'title' => $results['query'] !== '' ? sprintf('%s: %s', Search::TITLE, $results['query']) : Search::TITLE,
-            'breadcrumbTitle' => Search::TITLE,
+            'title' => $results['query'] !== '' ? __('Search: :query', ['query' => $results['query']]) : __(Search::TITLE),
+            'breadcrumbTitle' => __(Search::TITLE),
             'canSeeMembersOnly' => $search->canSeeMembersOnly($request->user()),
         ]);
     }

@@ -16,14 +16,15 @@
     (App\Services\ThemeService) and <x-theme.head> settles the choice before the first paint. <x-analytics.script>
     adds the first-party analytics only while it is switched on (never in the admin, chat or guest layouts).
 --}}
-@props(['title' => null, 'description' => null, 'image' => null, 'canonical' => null, 'type' => null, 'schema' => null, 'noindex' => false, 'breadcrumbs' => null, 'breadcrumbTitle' => null, 'breadcrumbTone' => 'evergreen', 'hero' => false, 'page' => null])
+@props(['locales' => null, 'title' => null, 'description' => null, 'image' => null, 'canonical' => null, 'type' => null, 'schema' => null, 'noindex' => false, 'breadcrumbs' => null, 'breadcrumbTitle' => null, 'breadcrumbTone' => 'evergreen', 'hero' => false, 'page' => null])
 @inject('breadcrumbService', 'App\Services\BreadcrumbService')
 @inject('themes', 'App\Services\ThemeService')
 @inject('pageCopy', 'App\Services\PageContentService')
 @php
     $theme = $themes->current(request());
 
-    $page ??= \App\Constants\Pages::forRoute(request()->route()?->getName());
+    $routeName = \App\Constants\Locales::baseRouteName(request()->route()?->getName());
+    $page ??= \App\Constants\Pages::forRoute($routeName);
     $pageSeo = $page === null ? null : $pageCopy->seo($page);
     $siteShare = $pageCopy->seo(\App\Constants\Pages::NAVIGATION);
     $share = match (true) {
@@ -35,7 +36,7 @@
     $trail = match (true) {
         $breadcrumbs === false => [],
         is_array($breadcrumbs) => $breadcrumbs,
-        default => $breadcrumbService->trail(request()->route()?->getName(), $breadcrumbTitle ?? $title),
+        default => $breadcrumbService->trail($routeName, $breadcrumbTitle ?? $title),
     };
     $breadcrumbSchema = $breadcrumbService->schema($trail);
 
@@ -48,30 +49,32 @@
     }
 @endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" {{ $themes->htmlAttributes($theme) }}>
+<html lang="{{ \App\Constants\Locales::html(app()->getLocale()) }}" dir="{{ \App\Constants\Locales::dir(app()->getLocale()) }}" {{ $themes->htmlAttributes($theme) }}>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <x-seo :title="$pageSeo['title'] ?? $title" :description="$pageSeo['description'] ?? $description" :image="$share['image']" :image-alt="$share['alt']" :canonical="$canonical" :type="$type" :schema="$schema" :noindex="$noindex" />
+    <x-seo :title="$pageSeo['title'] ?? $title" :description="$pageSeo['description'] ?? $description" :image="$share['image']" :image-alt="$share['alt']" :canonical="$canonical" :type="$type" :schema="$schema" :noindex="$noindex" :locales="$locales" />
     <x-theme.head light="evergreen" dark="cypress" />
     <x-brand.favicons />
     <x-fonts />
+    <x-locale.script-strings :bundles="[\App\Constants\ScriptStrings::SITE]" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <x-analytics.script />
 </head>
 <body class="bg-surface text-ink">
     <x-duotone-filter />
-    <a href="#main" class="skip-link">Skip to content</a>
+    <a href="#main" class="skip-link">{{ __('Skip to content') }}</a>
     <x-site.preview-banner />
 
     <x-site.header :hero="$hero" />
+    <x-locale.suggestion />
 
     @if (session('status') === \App\Constants\AuthStatus::SIGNED_OUT)
         <div class="site-notice" x-data="{ shown: true }" x-show="shown" data-signed-out-notice>
             <x-alert :tone="\App\Constants\AuthStatus::tone(\App\Constants\AuthStatus::SIGNED_OUT)" class="site-notice__alert">
                 <span class="flex items-center justify-between gap-4">
                     {{ \App\Constants\AuthStatus::message(\App\Constants\AuthStatus::SIGNED_OUT) }}
-                    <x-button variant="icon" type="button" class="site-notice__close" x-on:click="shown = false"><x-icon name="close" class="size-4" label="Dismiss" /></x-button>
+                    <x-button variant="icon" type="button" class="site-notice__close" x-on:click="shown = false"><x-icon name="close" class="size-4" :label="__('Dismiss')" /></x-button>
                 </span>
             </x-alert>
         </div>

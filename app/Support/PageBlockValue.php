@@ -29,6 +29,163 @@ final class PageBlockValue
         };
     }
 
+    /** Words an Arabic image or search value holds (the rest is the English value's). */
+    public const array IMAGE_WORDS = ['alt_text', 'caption', 'place'];
+
+    public const array SEO_WORDS = ['title', 'description', 'alt_text'];
+
+    /**
+     * The Arabic tab's value for a block: its Arabic words only, '' where
+     * there are none, list items aligned with the English form's items (by
+     * key for fixed lists, by position otherwise).
+     *
+     * @param  mixed  $stored  the stored Arabic value (null: none)
+     * @param  mixed  $english  the English form value
+     */
+    public static function arabicForm(PageBlockDefinition $definition, mixed $stored, mixed $english): mixed
+    {
+        $stored = is_array($stored) || is_string($stored) ? $stored : null;
+
+        return match ($definition->type) {
+            PageBlockType::ShortText, PageBlockType::LongText => is_string($stored) ? $stored : '',
+            PageBlockType::Link => ['label' => is_array($stored) && is_string($stored['label'] ?? null) ? $stored['label'] : ''],
+            PageBlockType::Image => self::words(self::IMAGE_WORDS, $stored),
+            PageBlockType::Seo => self::words(self::SEO_WORDS, $stored),
+            PageBlockType::List => self::arabicItems($definition, is_array($stored) ? $stored : [], is_array($english) ? $english : []),
+        };
+    }
+
+    /**
+     * What is stored for the Arabic version of a block from its Arabic tab,
+     * or null when the tab is blank (Arabic pages then show the translated
+     * built-in copy, or the English words). Text is cleaned like the English;
+     * a list takes the English items' order and destinations, with each blank
+     * Arabic field filled from the English (translated where it is built-in copy).
+     *
+     * @param  mixed  $english  the normalised English value
+     */
+    public static function fromArabicForm(PageBlockDefinition $definition, mixed $form, mixed $english): mixed
+    {
+        $localized = $definition->localized();
+
+        switch ($definition->type) {
+            case PageBlockType::ShortText:
+                return self::text($form, $definition->max);
+
+            case PageBlockType::LongText:
+                if (! is_string($form)) {
+                    return null;
+                }
+
+                $html = $definition->inline ? RichText::inline($form) : RichText::sanitise($form);
+
+                return trim(html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5)) === '' ? null : $html;
+
+            case PageBlockType::Link:
+                $label = self::text(is_array($form) ? ($form['label'] ?? null) : null, $definition->max);
+
+                return $label === null ? null : ['label' => $label];
+
+            case PageBlockType::Image:
+            case PageBlockType::Seo:
+                $keys = $definition->type === PageBlockType::Image ? self::IMAGE_WORDS : self::SEO_WORDS;
+                $words = [];
+
+                foreach ($keys as $key) {
+                    $max = match ($key) {
+                        'title' => PageBlockDefinition::SEO_TITLE_MAX,
+                        'description' => PageBlockDefinition::SEO_DESCRIPTION_MAX,
+                        default => PageBlockDefinition::IMAGE_TEXT_MAX,
+                    };
+                    $text = self::text(is_array($form) ? ($form[$key] ?? null) : null, $max);
+
+                    if ($text !== null) {
+                        $words[$key] = $text;
+                    }
+                }
+
+                return $words === [] ? null : $words;
+
+            case PageBlockType::List:
+                if (! is_array($form) || ! self::hasWords($form) || ! is_array($english)) {
+                    return null;
+                }
+
+                $items = [];
+
+                foreach (array_values($english) as $index => $item) {
+                    $arabic = is_array($form[$index] ?? null) ? $form[$index] : [];
+
+                    foreach ($definition->editableFields() as $field => $spec) {
+                        if ($spec['kind'] === PageBlockDefinition::FIELD_TEXT) {
+                            $item[$field] = self::text($arabic[$field] ?? null, $spec['max']) ?? $definition->translate($item[$field] ?? '');
+                        }
+                    }
+
+                    $items[] = $item;
+                }
+
+                return self::normalise($localized, $items);
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  list<string>  $keys
+     * @return array<string, string>
+     */
+    private static function words(array $keys, mixed $stored): array
+    {
+        $words = [];
+
+        foreach ($keys as $key) {
+            $words[$key] = is_array($stored) && is_string($stored[$key] ?? null) ? $stored[$key] : '';
+        }
+
+        return $words;
+    }
+
+    /**
+     * @param  array<mixed>  $stored
+     * @param  array<mixed>  $english
+     * @return list<array<string, string>>
+     */
+    private static function arabicItems(PageBlockDefinition $definition, array $stored, array $english): array
+    {
+        $byKey = $definition->fixedItems ? array_column(array_filter($stored, 'is_array'), null, 'key') : [];
+        $items = [];
+
+        foreach (array_values($english) as $index => $item) {
+            $source = $definition->fixedItems ? ($byKey[$item['key'] ?? ''] ?? []) : ($stored[$index] ?? []);
+            $arabic = [];
+
+            foreach ($definition->editableFields() as $field => $spec) {
+                if ($spec['kind'] === PageBlockDefinition::FIELD_TEXT) {
+                    $arabic[$field] = is_array($source) && is_string($source[$field] ?? null) ? $source[$field] : '';
+                }
+            }
+
+            $items[] = $arabic;
+        }
+
+        return $items;
+    }
+
+    /**
+     * @param  array<mixed>  $value
+     */
+    private static function hasWords(array $value): bool
+    {
+        $found = false;
+
+        array_walk_recursive($value, function (mixed $item) use (&$found): void {
+            $found = $found || (is_string($item) && trim($item) !== '');
+        });
+
+        return $found;
+    }
+
     /**
      * Whether the value is the block's default (so the editor can mark changed blocks).
      */

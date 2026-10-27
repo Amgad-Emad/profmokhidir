@@ -1,5 +1,5 @@
 {{--
-    A side drawer: a modal dialog sliding in from the right edge (full width on phones), with its
+    A side drawer: a modal dialog sliding in from the end edge (the right, or the left in Arabic) (full width on phones), with its
     title, a Close button and the content. Shown while `show` is true; Escape, Close and the
     backdrop call `close` (a Livewire method). Focus is trapped while it is open.
 --}}
@@ -14,7 +14,7 @@
                         <p id="{{ $id }}-description" class="mt-1 text-sm font-normal text-ink-muted">{{ $description }}</p>
                     @endif
                 </div>
-                <x-button variant="icon" type="button" wire:click="{{ $close }}"><span class="sr-only">Close</span><x-icon name="close" /></x-button>
+                <x-button variant="icon" type="button" wire:click="{{ $close }}"><span class="sr-only">{{ __('Close') }}</span><x-icon name="close" /></x-button>
             </div>
             <div class="admin-drawer__body">{{ $slot }}</div>
         </div>

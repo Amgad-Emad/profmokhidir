@@ -9,9 +9,10 @@
     Renders an empty, hidden shell otherwise, which forms.js fills
     when a plain form is sent with fields the browser can already see are wrong.
 --}}
-@props(['bag' => 'default', 'targets' => [], 'except' => [], 'title' => \App\Constants\FormControls::ERROR_SUMMARY_TITLE, 'intro' => null, 'afterSave' => false, 'messages' => null])
+@props(['bag' => 'default', 'targets' => [], 'except' => [], 'title' => null, 'intro' => null, 'afterSave' => false, 'messages' => null])
 @inject('forms', 'App\Services\FormFieldService')
 @php
+    $title ??= __(\App\Constants\FormControls::ERROR_SUMMARY_TITLE);
     $errorBag = $messages !== null ? new \Illuminate\Support\MessageBag($messages) : ($errors ?? new \Illuminate\Support\ViewErrorBag)->getBag($bag);
     $keys = array_values(array_diff($errorBag->keys(), $except));
     $hasErrors = $keys !== [];

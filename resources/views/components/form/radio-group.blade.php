@@ -46,7 +46,7 @@
                     'wire:model.live' => $model,
                     'checked' => $selected !== null && $selected === (string) $optionValue,
                     'required' => $required && $model === null && $loop->first,
-                    'data-msg-missing' => $loop->first && $required && $model === null ? e(strtr(\App\Constants\FormControls::MESSAGE_CHOOSE, [':label' => \Illuminate\Support\Str::lower($label)])) : null,
+                    'data-msg-missing' => $loop->first && $required && $model === null ? e(__(\App\Constants\FormControls::MESSAGE_CHOOSE, ['label' => \Illuminate\Support\Str::lower($label)])) : null,
                     'aria-invalid' => $field['invalid'] ? 'true' : null,
                 ], fn ($v, $k) => $k === 'value' || ($v !== null && $v !== false && $v !== ''), ARRAY_FILTER_USE_BOTH));
             @endphp

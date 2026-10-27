@@ -82,7 +82,7 @@ class TributeFormTest extends TestCase
                 'data-step="preview"', '<span class="sr-only">Step 2 of 2</span>', 'Step II of II', '>Write</span>', 'aria-current="step">Preview</span>',
                 '<div class="leaf mt-12" data-rise data-preview>', '<article class="tribute-entry">',
                 '<span class="hang-quote">&ldquo;</span>He taught me to look twice before answering.&rdquo;</p>',
-                '<h2 class="tribute-entry__author smallcaps">Ahmed El-Sheikh</h2>', 't-label text-accent-text tribute-entry__meta">Student · Khartoum, Sudan',
+                '<h2 class="tribute-entry__author smallcaps" dir="auto">Ahmed El-Sheikh</h2>', 't-label text-accent-text tribute-entry__meta">Student · Khartoum, Sudan',
                 '<form novalidate method="POST" action="'.route('tributes.store').'"',
                 '<input type="hidden" name="name" value="Ahmed El-Sheikh">',
                 '<input type="hidden" name="relationship" value="student">',

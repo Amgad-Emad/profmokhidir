@@ -9,6 +9,7 @@ use App\Models\Album;
 use App\Models\Commentary;
 use App\Models\OtherItem;
 use App\Models\Video;
+use App\Services\CommentaryService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
@@ -29,7 +30,7 @@ class SitemapTest extends TestCase
         $linked = OtherItem::factory()->published()->create(['destination_url' => 'https://example.org', 'body' => null]);
         $draft = Commentary::factory()->draft()->create();
 
-        $response = $this->get(Seo::SITEMAP_PATH)
+        $response = $this->get('/sitemaps/en.xml')
             ->assertOk()
             ->assertHeader('Content-Type', Seo::XML_CONTENT_TYPE);
 
@@ -65,9 +66,9 @@ class SitemapTest extends TestCase
     {
         $commentary = Commentary::factory()->published()->create();
         $commentary->forceFill(['updated_at' => '2024-03-04 05:06:07'])->saveQuietly();
-        app(\App\Services\CommentaryService::class)->flushCache();
+        app(CommentaryService::class)->flushCache();
 
-        $this->get(route(Seo::SITEMAP_ROUTE))
+        $this->get(route(Seo::SITEMAP_LOCALE_ROUTE, ['locale' => 'en']))
             ->assertOk()
             ->assertSee('<loc>'.route('commentary.show', $commentary->slug).'</loc>', false)
             ->assertSee('<lastmod>2024-03-04T05:06:07+00:00</lastmod>', false);
@@ -76,7 +77,7 @@ class SitemapTest extends TestCase
     #[Test]
     public function the_sitemap_is_well_formed_with_no_content(): void
     {
-        $response = $this->get(route(Seo::SITEMAP_ROUTE))->assertOk();
+        $response = $this->get(route(Seo::SITEMAP_LOCALE_ROUTE, ['locale' => 'en']))->assertOk();
 
         $xml = simplexml_load_string($response->getContent());
         $this->assertNotFalse($xml);

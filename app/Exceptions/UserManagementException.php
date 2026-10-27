@@ -14,22 +14,22 @@ class UserManagementException extends RuntimeException
 {
     public static function cannotChangeOwnRole(): self
     {
-        return new self('You cannot change your own role. Ask another administrator.');
+        return new self(__('You cannot change your own role. Ask another administrator.'));
     }
 
     public static function cannotDeactivateSelf(): self
     {
-        return new self('You cannot deactivate your own account. Ask another administrator.');
+        return new self(__('You cannot deactivate your own account. Ask another administrator.'));
     }
 
     public static function lastActiveAdmin(): self
     {
-        return new self('This is the last active administrator. Make someone else an administrator first.');
+        return new self(__('This is the last active administrator. Make someone else an administrator first.'));
     }
 
     public static function invitationAlreadyAccepted(): self
     {
-        return new self('This person has already set up their account, so there is no invitation to resend.');
+        return new self(__('This person has already set up their account, so there is no invitation to resend.'));
     }
 
     public static function notStaffRole(string $role): self

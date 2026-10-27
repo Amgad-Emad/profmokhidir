@@ -7,7 +7,7 @@
     Alpine comes bundled with it. `crumb` names the record in the breadcrumb trail (defaults to
     the title). Frame data comes from App\Services\AdminShellService.
 --}}
-@props(['title' => 'Dashboard', 'eyebrow' => null, 'crumb' => null])
+@props(['title' => null, 'eyebrow' => null, 'crumb' => null])
 @inject('themes', 'App\Services\ThemeService')
 @inject('shell', 'App\Services\AdminShellService')
 @php
@@ -17,23 +17,25 @@
     $nav = $shell->sidebar($user, $route);
     $crumbs = $shell->breadcrumbs($route, $crumb ?? $title);
     $flash = session('admin.status');
+    $title ??= __('Dashboard');
 @endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" {{ $themes->htmlAttributes($theme) }}>
+<html lang="{{ \App\Constants\Locales::html(app()->getLocale()) }}" dir="{{ \App\Constants\Locales::dir(app()->getLocale()) }}" {{ $themes->htmlAttributes($theme) }}>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $title }} · Admin · {{ \App\Constants\Seo::SITE_NAME }}</title>
+    <title>{{ $title }} · {{ __('Admin') }} · {{ \App\Constants\Seo::SITE_NAME }}</title>
     <meta name="robots" content="{{ \App\Constants\Seo::ROBOTS_NOINDEX }}">
     <x-theme.head />
     <x-brand.favicons />
     <x-fonts />
+    <x-locale.script-strings :bundles="[\App\Constants\ScriptStrings::ADMIN]" />
     @vite(['resources/css/app.css', 'resources/js/admin.js'])
     @livewireStyles
 </head>
-<body class="admin-body min-h-screen bg-surface-sunken text-ink tabular-nums" data-placeholder-marker="{{ \App\Constants\Placeholders::MARKER }}" data-placeholder-flag="{{ \App\Constants\Placeholders::FLAG }}" data-placeholder-hint="{{ \App\Constants\Placeholders::FLAG_HINT }}">
+<body class="admin-body min-h-screen bg-surface-sunken text-ink tabular-nums" data-placeholder-marker="{{ \App\Constants\Placeholders::MARKER }}" data-placeholder-flag="{{ __(\App\Constants\Placeholders::FLAG) }}" data-placeholder-hint="{{ __(\App\Constants\Placeholders::FLAG_HINT) }}">
     <x-duotone-filter />
-    <a href="#main" class="skip-link">Skip to content</a>
+    <a href="#main" class="skip-link">{{ __('Skip to content') }}</a>
 
     <div class="admin-shell lg:flex lg:min-h-screen" x-data="adminShell" x-bind:data-collapsed="collapsed ? 'true' : 'false'" data-collapsed="false"
          x-on:keydown.escape.window="open = false">
@@ -41,10 +43,10 @@
         <div class="fixed inset-0 z-30 bg-surface-overlay lg:hidden" x-show="open" x-cloak x-on:click="open = false" aria-hidden="true"></div>
 
         <aside id="admin-sidebar"
-               class="admin-sidebar on-dark fixed inset-y-0 left-0 z-40 -translate-x-full bg-surface text-ink transition-transform duration-300 ease-out motion-reduce:transition-none lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:shrink-0"
-               x-bind:class="{ '-translate-x-full': !open, 'translate-x-0': open }"
+               class="admin-sidebar on-dark fixed inset-y-0 start-0 z-40 -translate-x-full rtl:translate-x-full bg-surface text-ink transition-transform duration-300 ease-out motion-reduce:transition-none lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 rtl:lg:translate-x-0 lg:shrink-0"
+               x-bind:class="{ '-translate-x-full rtl:translate-x-full': !open, 'translate-x-0': open }"
                x-trap.noscroll="open"
-               aria-label="Dashboard menu">
+               aria-label="{{ __('Dashboard menu') }}">
             <x-admin.sidebar :nav="$nav" :user="$user" />
         </aside>
 

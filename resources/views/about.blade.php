@@ -10,6 +10,9 @@
                 </x-slot:epigraph>
             @endif
         </x-chapter-opening>
+        @if ($profile !== null)
+            <x-locale.fallback-note :model="$profile" class="mt-6" />
+        @endif
 
         @if ($profile === null)
             <x-empty-state class="mt-6" :message="$pageCopy->text('about', 'empty')" />
@@ -20,19 +23,19 @@
                         <x-photo :media="$portrait" sizes="(min-width: 1280px) 22rem, (min-width: 1024px) 36vw, 100vw" loading="eager" :show-caption="true" class="max-w-md" />
                     @endif
                     <div class="mt-8 flex flex-col gap-2">
-                        <h2 class="font-display text-quote font-light leading-tight text-ink">@typeset($profile->name)</h2>
+                        <h2 @contentLang($profile, 'name') class="font-display text-quote font-light leading-tight text-ink">@typeset($profile->name)</h2>
                         @if (filled($profile->title))
-                            <p class="t-body text-ink">@typeset($profile->title)</p>
+                            <p @contentLang($profile, 'title') class="t-body text-ink">@typeset($profile->title)</p>
                         @endif
                         @if (filled($profile->affiliation))
-                            <p class="text-base font-normal text-ink-muted">@typeset($profile->affiliation)</p>
+                            <p @contentLang($profile, 'affiliation') class="text-base font-normal text-ink-muted">@typeset($profile->affiliation)</p>
                         @endif
                     </div>
                 </div>
 
                 <div class="sidenote-host flex flex-col gap-16" data-rise-group>
                     @if ($bio !== '')
-                        <x-drop-cap class="prose-bio">{!! $bio !!}</x-drop-cap>
+                        <div @contentLang($profile, 'full_bio')><x-drop-cap class="prose-bio">{!! $bio !!}</x-drop-cap></div>
                     @endif
 
                     @if ($expertise !== [] || $facts !== [])
@@ -42,7 +45,7 @@
                     @if ($expertise !== [])
                         <section aria-labelledby="expertise-title">
                             <h2 id="expertise-title" class="t-label text-accent-text">{{ $pageCopy->text('about', 'expertise_heading') }}</h2>
-                            <ul class="mt-5 flex flex-wrap gap-3">
+                            <ul @contentLang($profile, 'expertise') class="mt-5 flex flex-wrap gap-3">
                                 @foreach ($expertise as $tag)
                                     <li class="tag t-label rounded-full border border-rule px-4 py-2 text-accent-text">{{ $tag }}</li>
                                 @endforeach
@@ -53,7 +56,7 @@
                     @if ($facts !== [])
                         <section aria-labelledby="facts-title">
                             <h2 id="facts-title" class="t-label text-accent-text">{{ $pageCopy->text('about', 'facts_heading') }}</h2>
-                            <dl class="mt-5 grid gap-x-10 gap-y-6 border-t border-rule pt-6 sm:grid-cols-2">
+                            <dl @contentLang($profile, 'key_facts') class="mt-5 grid gap-x-10 gap-y-6 border-t border-rule pt-6 sm:grid-cols-2">
                                 @foreach ($facts as $fact)
                                     <div class="flex flex-col gap-1">
                                         <dt class="t-label text-accent-text">{{ $fact['label'] }}</dt>
@@ -86,7 +89,7 @@
                 </div>
             </div>
 
-            <nav class="mt-20" aria-label="Continue reading">
+            <nav class="mt-20" aria-label="{{ __('Continue reading') }}">
                 <hr class="rule-brass" data-rule>
                 <ul class="section-cards mt-10" data-rise-group>
                     @foreach ($links as $item)

@@ -34,7 +34,7 @@ class TeachingMaterialController extends Controller
         abort_if($material === null, 404);
 
         if ($material->isMembersOnly() && ! $request->hasValidSignature()) {
-            abort(403, 'This link has expired. Open the material again from the Teaching Materials page.');
+            abort(403, __('This link has expired. Open the material again from the Teaching Materials page.'));
         }
 
         $this->authorize('download', $material);

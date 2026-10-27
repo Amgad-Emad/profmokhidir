@@ -97,8 +97,9 @@ final class BrandAudit
     }
 
     /**
-     * Font families the stylesheet may name directly (the three brand fonts
-     * and the generic fallbacks that follow them in the theme tokens).
+     * Font families the stylesheet may name directly (the three brand fonts,
+     * the two Arabic faces and the generic fallbacks that follow them in the
+     * theme tokens).
      *
      * @return list<string>
      */
@@ -108,11 +109,27 @@ final class BrandAudit
             Typography::DISPLAY_FAMILY,
             Typography::SANS_FAMILY,
             Typography::MONO_FAMILY,
+            ...self::arabicFontFamilies(),
             'Cormorant', 'Georgia', 'Times New Roman', 'serif',
             'ui-sans-serif', 'system-ui', 'sans-serif',
             'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace',
         ];
     }
+
+    /**
+     * The documented Arabic exception (Typography::ARABIC_*): exactly these two
+     * families, named only in the :lang(ar) font stacks of LOCALE_FILE and
+     * requested only by Typography::ARABIC_STYLESHEET. Any other family fails.
+     *
+     * @return list<string>
+     */
+    public static function arabicFontFamilies(): array
+    {
+        return [Typography::ARABIC_DISPLAY_FAMILY, Typography::ARABIC_SANS_FAMILY];
+    }
+
+    /** The one stylesheet that may name the Arabic families (its :lang(ar) font stacks). */
+    public const string LOCALE_FILE = 'resources/css/locale.css';
 
     /**
      * Named keyframe animations that may exist (each unhurried, nothing bounces):

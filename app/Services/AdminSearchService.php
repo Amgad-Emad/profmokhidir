@@ -39,13 +39,13 @@ class AdminSearchService
             $matches = app($serviceClass)->search($term, [], AdminUx::PALETTE_RESULTS_PER_TYPE);
 
             foreach ($matches as $record) {
-                $label = $record->getAttribute('title') ?? $record->getAttribute('name') ?? $record->getAttribute('quote') ?? $definition['singular'];
+                $label = $record->getAttribute('title') ?? $record->getAttribute('name') ?? $record->getAttribute('quote') ?? __($definition['singular']);
                 $status = $record->getAttribute('status');
 
                 $results[] = [
-                    'group' => $definition['plural'],
+                    'group' => __($definition['plural']),
                     'label' => Str::limit((string) $label, 90),
-                    'hint' => $definition['singular'],
+                    'hint' => __($definition['singular']),
                     'url' => $type === ContentTypes::PROFILE
                         ? route(ContentTypes::editRoute($type))
                         : route(ContentTypes::editRoute($type), [ContentTypes::routeParameter($type) => $record->getKey()]),

@@ -26,7 +26,7 @@
     $dimensions = $portrait === null ? null : ResponsiveImage::dimensions($portrait);
 @endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" {{ $themes->htmlAttributes($theme) }}>
+<html lang="{{ \App\Constants\Locales::html(app()->getLocale()) }}" dir="{{ \App\Constants\Locales::dir(app()->getLocale()) }}" {{ $themes->htmlAttributes($theme) }}>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -35,11 +35,12 @@
     <x-theme.head />
     <x-brand.favicons />
     <x-fonts />
+    <x-locale.script-strings :bundles="[\App\Constants\ScriptStrings::SITE]" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="auth min-h-screen bg-surface text-ink" data-auth-screen="{{ $screen }}">
     <x-duotone-filter />
-    <a href="#main" class="skip-link">Skip to content</a>
+    <a href="#main" class="skip-link">{{ __('Skip to content') }}</a>
 
     <div class="auth__split">
         <aside class="auth__panel glow-brass on-dark" aria-label="{{ $page['label'] }}">
@@ -77,6 +78,7 @@
 
         <main id="main" class="auth__main">
             <div class="auth__tools">
+                <x-locale.switcher variant="toolbar" />
                 <x-theme.switch id="theme-switch-auth" />
             </div>
             <div class="auth__column form-style-underline" data-rise-group>

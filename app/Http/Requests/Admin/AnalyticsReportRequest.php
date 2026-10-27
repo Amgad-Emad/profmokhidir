@@ -43,7 +43,7 @@ class AnalyticsReportRequest extends FormRequest
      */
     public function attributes(): array
     {
-        return ['from' => 'first day', 'to' => 'last day'];
+        return ['from' => __('first day'), 'to' => __('last day')];
     }
 
     public function range(): AnalyticsRange

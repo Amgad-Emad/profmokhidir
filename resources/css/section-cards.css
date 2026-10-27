@@ -103,6 +103,11 @@
         display: inline-block;
     }
 
+    /* Points the way the text reads; `scale` composes with the hover nudge, which then moves it 4px to the left. */
+    .section-card__arrow:dir(rtl) {
+        scale: -1 1;
+    }
+
     @media (width >= 40rem) {
         .section-card {
             padding: 1.75rem;

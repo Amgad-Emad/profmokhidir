@@ -64,7 +64,7 @@ trait ManagesImages
             $this->validate(
                 ['newImages' => ['array', 'max:20'], 'newImages.*' => Uploads::imageRules()],
                 $this->prefixMessages((new ImageUploadRequest)->messages(), ImageUploadRequest::FIELD, 'newImages.*'),
-                ['newImages.*' => 'image'],
+                ['newImages.*' => __('image')],
             );
         } catch (ValidationException $exception) {
             // Livewire appends to array file properties; drop the rejected batch so the next choice starts clean.
@@ -87,7 +87,7 @@ trait ManagesImages
 
         $this->newImages = [];
         $this->loadImages();
-        $this->notify(count($files) === 1 ? 'Image uploaded. Add its details below.' : count($files).' images uploaded. Add their details below.');
+        $this->notify(trans_choice('{1} Image uploaded. Add its details below.|[2,*] :count images uploaded. Add their details below.', count($files)));
     }
 
     public function saveImage(int $id): void
@@ -148,10 +148,7 @@ trait ManagesImages
     {
         $details = [];
 
-        foreach ([MediaProperties::ALT_TEXT, MediaProperties::CAPTION, MediaProperties::PLACE, MediaProperties::YEAR, MediaProperties::TREATMENT, MediaProperties::CREDIT, MediaProperties::PERMISSIONS_NOTE] as $key) {
-            $details[$key] = $image->getCustomProperty($key);
-        }
-
+        $details = $this->mediaService()->details($image);
         $details[MediaProperties::TREATMENT] ??= $this->defaultTreatment()->value;
 
         return $details;
@@ -174,7 +171,7 @@ trait ManagesImages
             'media' => $media->keyBy(fn (Media $image): int => (int) $image->getKey()),
             'missing' => $missing,
             'imageAccept' => '.'.implode(',.', Uploads::IMAGE_EXTENSIONS),
-            'imageHint' => 'JPEG, PNG or WebP up to '.Uploads::imageMaxLabel(),
+            'imageHint' => __('JPEG, PNG or WebP up to :size', ['size' => Uploads::imageMaxLabel()]),
             'detailsRequired' => $record !== null && $this->imageDetailsRequired($record),
         ];
     }

@@ -5,7 +5,7 @@ namespace Tests\Unit\Constants;
 use App\Constants\Search;
 use App\Constants\Sections;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 class SearchTest extends TestCase
 {

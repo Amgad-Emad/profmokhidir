@@ -183,7 +183,7 @@ class Room extends Component
 
             $this->chat()->report($message, $this->viewer(), $reason);
 
-            return ['ok' => true, 'notice' => 'Thank you. An administrator will look at this message.'];
+            return ['ok' => true, 'notice' => __(ChatCopy::REPORT_THANKS)];
         });
     }
 
@@ -259,13 +259,13 @@ class Room extends Component
             $member = $this->community()->find($userId);
 
             if ($member === null) {
-                throw new InvalidArgumentException('That member could not be found.');
+                throw new InvalidArgumentException(__('That member could not be found.'));
             }
 
             $this->authorize('review', $member);
 
             if ($member->is($this->viewer())) {
-                throw new InvalidArgumentException('You cannot suspend yourself.');
+                throw new InvalidArgumentException(__('You cannot suspend yourself.'));
             }
 
             try {
@@ -276,7 +276,7 @@ class Room extends Component
 
             return [
                 'ok' => true,
-                'notice' => strtr(ChatCopy::MEMBER_SUSPENDED, [':name' => $member->name]),
+                'notice' => __(ChatCopy::MEMBER_SUSPENDED, ['name' => $member->name]),
                 'members' => $this->correspondence()->members($this->viewer()),
             ];
         });
@@ -324,7 +324,7 @@ class Room extends Component
             'conduct' => $this->communityCopy()->conductRules(),
             'hints' => ChatFormat::hints(),
             'canModerate' => ! $this->accessRevoked && $this->chat()->canModerate($this->viewer()),
-        ])->title(ChatSettings::ROOM_NAME.' · '.ChatCopy::TITLE);
+        ])->title(__(ChatSettings::ROOM_NAME).' · '.__(ChatCopy::TITLE));
     }
 
     /**
@@ -367,7 +367,7 @@ class Room extends Component
                 return $this->failure(self::ERROR_ACCESS, $this->communityCopy()->text('suspended'));
             }
 
-            return $this->failure(self::ERROR_ACCESS, $exception->getMessage() ?: 'You may not do that.');
+            return $this->failure(self::ERROR_ACCESS, $exception->getMessage() ?: __('You may not do that.'));
         } catch (ChatRateLimitException $exception) {
             return $this->failure(self::ERROR_RATE_LIMIT, $exception->getMessage(), ['retry_after' => $exception->retryAfter]);
         } catch (ChatMessageConflictException $exception) {

@@ -15,7 +15,7 @@ class ChatMessageConflictException extends RuntimeException
 
     public static function forVersion(int $expected): self
     {
-        $exception = new self(self::MESSAGE);
+        $exception = new self(__(self::MESSAGE));
         $exception->expectedVersion = $expected;
 
         return $exception;
