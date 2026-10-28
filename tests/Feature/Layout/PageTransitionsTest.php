@@ -57,7 +57,7 @@ class PageTransitionsTest extends TestCase
         $this->assertStringNotContainsString('scaleX', $buttons);
         // The solid pill follows the --fill token, which .on-dark remaps to ivory with evergreen ink.
         $this->assertMatchesRegularExpression('/--btn-primary-bg: var\(--fill\);\s*--btn-primary-ink: var\(--fill-ink\);/s', file_get_contents(resource_path('css/tokens.css')));
-        $this->assertMatchesRegularExpression('/\.on-dark \{[^}]*--fill: var\(--brand-ivory\);\s*--fill-ink: var\(--brand-evergreen\);/s', file_get_contents(resource_path('css/tokens.css')));
+        $this->assertMatchesRegularExpression('/\.on-dark \{[^}]*--fill: var\(--band-fill\);\s*--fill-ink: var\(--band-fill-ink\);/s', file_get_contents(resource_path('css/tokens.css')));
         $this->assertStringNotContainsString('linear-gradient', $app.$this->css, 'Underlines are pseudo-elements, not gradients');
     }
 
@@ -70,10 +70,11 @@ class PageTransitionsTest extends TestCase
         // --focus is bronze on ivory, brass on the light-theme band and in the dark theme, champagne on cypress.
         $tokens = file_get_contents(resource_path('css/tokens.css'));
         $this->assertStringContainsString('--focus: light-dark(var(--brand-bronze), var(--brand-brass));', $tokens);
-        $this->assertMatchesRegularExpression('/\.on-dark \{[^}]*--focus: light-dark\(var\(--brand-brass\), var\(--brand-champagne\)\);/s', $tokens);
+        $this->assertMatchesRegularExpression('/\.on-dark \{[^}]*--focus: var\(--band-accent\);/s', $tokens);
+        $this->assertStringContainsString('--band-accent: light-dark(var(--brand-brass), var(--brand-champagne));', $tokens);
         // Text fields (the search fields among them) draw no ring: their own line shows focus (tests/Unit/Design/FocusRulesTest).
         $forms = file_get_contents(resource_path('css/forms.css'));
         $this->assertStringNotContainsString('outline: 2px solid var(--focus)', $forms);
-        $this->assertStringContainsString('--form-line: var(--ink-strong);', $forms);
+        $this->assertStringContainsString('--form-line: var(--field-focus-line);', $forms);
     }
 }

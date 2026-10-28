@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             RolesAndPermissionsSeeder::class,
             UserSeeder::class,
             SettingSeeder::class,
+            ColourThemeSeeder::class,
             PageContentSeeder::class,
             ProfileSeeder::class,
             CvEntrySeeder::class,

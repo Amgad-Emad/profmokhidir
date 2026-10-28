@@ -6,20 +6,29 @@
     decides. The script steps in when the cookie is gone but localStorage still remembers a choice, and
     when either still holds the retired "system": it pins the theme the device resolves to and marks
     <html> so resources/js/theme.js saves it on the account. `light` and `dark` name the brand colour
-    of the browser chrome in each scheme.
+    of the browser chrome in each scheme; under a colour theme they follow its tokens.
+
+    Colour themes (Admin › Appearance): when a theme other than the brand is active, or an admin is
+    previewing a draft, its tokens are printed here as one small <style> block (cached by
+    App\Services\ColourThemeService, forgotten on every save) that outranks tokens.css.
 --}}
 @use('App\Constants\Theme')
 @use('App\Constants\ThemeSettings')
 @props(['light' => 'evergreen', 'dark' => 'evergreen'])
 @inject('themes', 'App\Services\ThemeService')
+@inject('colourThemes', 'App\Services\ColourThemeService')
 @php
     $theme = $themes->current(request());
-    $colours = $themes->themeColours($light, $dark);
+    $palette = $colourThemes->paletteFor(auth()->user());
+    $colours = $themes->chromeColours($palette, $light, $dark);
 @endphp
 <meta name="csrf-token" content="{{ csrf_token() }}">
 @foreach (['light', 'dark'] as $scheme)
     <meta name="{{ ThemeSettings::META_THEME_COLOR }}" content="{{ $theme !== null ? $colours[$theme->value] : $colours[$scheme] }}" media="(prefers-color-scheme: {{ $scheme }})" data-light="{{ $colours['light'] }}" data-dark="{{ $colours['dark'] }}">
 @endforeach
+@if ($palette['css'] !== null)
+    <style data-colour-theme="{{ $palette['id'] }}"@if ($palette['preview']) data-colour-theme-preview @endif>{!! $palette['css'] !!}</style>
+@endif
 <script data-theme-boot>
     (function () {
         var html = document.documentElement, key = @js(ThemeSettings::STORAGE_KEY), attribute = @js(ThemeSettings::ATTRIBUTE), name = @js(ThemeSettings::COOKIE);

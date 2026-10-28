@@ -4,7 +4,12 @@ namespace Tests\Unit\Design;
 
 use App\Constants\Brand;
 use App\Constants\BrandAudit;
+use App\Constants\Theme;
+use App\Constants\ThemePresets;
+use App\Constants\ThemeTokens;
 use App\Constants\Typography;
+use App\Services\ThemePaletteService;
+use App\Support\Colour;
 use Illuminate\Support\Facades\File;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -17,9 +22,15 @@ use Tests\TestCase;
  * :lang(ar) stacks only), no bounce or spin animations and no
  * gradient other than the brass glow; Hanken Grotesk never at weight 300,
  * grayscale smoothing only on large display type on dark, labels at 0.24em.
+ * Colours come from the active theme's tokens (Admin › Appearance): the
+ * default theme, "Evergreen & Ivory", is exactly the brand palette.
  */
 class BrandAuditTest extends TestCase
 {
+    use \Tests\Unit\Design\Concerns\ResolvesDesignTokens {
+        sources as tokenSources;
+    }
+
     /**
      * @return array<string, string> path => contents
      */
@@ -421,5 +432,65 @@ class BrandAuditTest extends TestCase
             $this->assertFileExists(base_path($file));
             $this->assertNotSame('', trim($reason));
         }
+    }
+
+    /**
+     * Admin › Appearance may switch to an alternative palette, but the default theme is the brand:
+     * its tokens are the brand values, they are what tokens.css declares, and they are built from
+     * the nine brand colours and the functional danger red only.
+     */
+    #[Test]
+    public function the_default_theme_still_equals_the_brand_values(): void
+    {
+        $this->loadTokens();
+        $this->assertSame(ThemePresets::BRAND, ThemePresets::slugs()[0], 'Evergreen & Ivory is the first and default template');
+
+        $brand = ThemePresets::get(ThemePresets::BRAND);
+        $resolved = app(ThemePaletteService::class)->resolve($brand['light'], $brand['dark']);
+        $allowed = array_map('strtolower', [...Brand::colours(), ...Brand::functionalColours(), ...Brand::permittedExtras()]);
+
+        foreach (Theme::cases() as $mode) {
+            $this->assertSame(ThemeTokens::defaults($mode), $resolved[$mode->value]);
+
+            foreach (ThemeTokens::keys() as $token) {
+                $context = ['theme' => $mode->value, 'layers' => [], 'raised' => false];
+                $this->assertSame($resolved[$mode->value][$token], Colour::hex($this->resolve($token, $context)), "{$mode->value} --{$token}");
+
+                foreach ($this->tokenSources($token, $context) as $hex) {
+                    $this->assertContains($hex, $allowed, "{$mode->value} --{$token} is built from {$hex}");
+                }
+            }
+        }
+
+        $this->assertSame(Colour::normalise(Brand::BRASS), ThemeTokens::defaults(Theme::Light)[ThemeTokens::MARK_RING], 'the mark ring is brass unless a theme sets it');
+    }
+
+    /**
+     * The email theme names no colour of its own: every one comes from the active theme's light mode.
+     */
+    #[Test]
+    public function the_email_theme_reads_its_colours_from_the_active_theme(): void
+    {
+        $mail = (string) file_get_contents(resource_path('views/vendor/mail/html/themes/default.blade.php'));
+
+        $this->assertDoesNotMatchRegularExpression('/#[0-9a-f]{3,8}\\b|\\b(?:rgba?|hsla?)\\(/i', $mail);
+        $this->assertStringContainsString('activePalette()', $mail);
+    }
+
+    /**
+     * Templates other than the brand are offered only as alternative palettes, and no template
+     * changes the mark's own colours (only its ring, within the palette's brass-like tones).
+     */
+    #[Test]
+    public function the_mark_keeps_its_brand_colours_under_every_theme(): void
+    {
+        foreach (ThemeTokens::fixed() as $token) {
+            $this->assertNotContains($token, ThemeTokens::keys(), "--{$token} must not be editable");
+        }
+
+        $mark = (string) file_get_contents(resource_path('views/components/brand/mark.blade.php'));
+        $this->assertStringContainsString('var(--mark-ring)', $mark);
+        $this->assertStringContainsString("'--mark-ink'", $mark);
+        $this->assertStringNotContainsString('--ink-strong', $mark);
     }
 }

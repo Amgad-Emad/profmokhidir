@@ -89,6 +89,23 @@ final class AuditAction
 
     public const string PAGE_UNPUBLISHED = 'page.unpublished';
 
+    /** Colour themes (Admin › Appearance): meta lists the tokens changed per mode, before and after. */
+    public const string THEME_CREATED = 'theme.created';
+
+    public const string THEME_SAVED = 'theme.saved';
+
+    public const string THEME_PUBLISHED = 'theme.published';
+
+    public const string THEME_RENAMED = 'theme.renamed';
+
+    public const string THEME_DELETED = 'theme.deleted';
+
+    public const string THEME_IMPORTED = 'theme.imported';
+
+    public const string THEME_EXPORTED = 'theme.exported';
+
+    public const string THEME_REVISION_RESTORED = 'theme.revision_restored';
+
     /**
      * @return list<string>
      */
@@ -104,6 +121,8 @@ final class AuditAction
             self::TRIBUTE_EDITED, self::TRIBUTE_FEATURED, self::TRIBUTE_UNFEATURED, self::TRIBUTE_REOPENED, self::MEDIA_UPLOADED, self::MEDIA_UPDATED, self::MEDIA_DELETED,
             self::CHAT_MESSAGE_DELETED, self::CHAT_MESSAGE_REPORTED, self::CHAT_REPORT_RESOLVED,
             self::CHAT_MESSAGE_PINNED, self::CHAT_MESSAGE_UNPINNED, self::ADMIN_LOGIN, self::PAGE_PUBLISHED, self::PAGE_UNPUBLISHED,
+            self::THEME_CREATED, self::THEME_SAVED, self::THEME_PUBLISHED, self::THEME_RENAMED, self::THEME_DELETED,
+            self::THEME_IMPORTED, self::THEME_EXPORTED, self::THEME_REVISION_RESTORED,
         ];
     }
 
@@ -154,6 +173,14 @@ final class AuditAction
             self::ADMIN_LOGIN => __('signed in'),
             self::PAGE_PUBLISHED => __('updated the wording of a page'),
             self::PAGE_UNPUBLISHED => __('returned a page to its original wording'),
+            self::THEME_CREATED => __('created a colour theme'),
+            self::THEME_SAVED => __('saved a colour theme draft'),
+            self::THEME_PUBLISHED => __('changed the site colours'),
+            self::THEME_RENAMED => __('renamed a colour theme'),
+            self::THEME_DELETED => __('deleted a colour theme'),
+            self::THEME_IMPORTED => __('imported a colour theme'),
+            self::THEME_EXPORTED => __('exported a colour theme'),
+            self::THEME_REVISION_RESTORED => __('restored an earlier version of a colour theme'),
         ];
     }
 

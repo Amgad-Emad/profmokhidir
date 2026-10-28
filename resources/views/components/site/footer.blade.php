@@ -1,4 +1,4 @@
-<footer class="site-footer on-dark bg-surface text-ink">
+<footer class="site-footer on-dark bg-surface-footer text-ink">
     <div class="mx-auto max-w-7xl px-4 pb-10 pt-20 sm:px-6">
         <div class="grid gap-14 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-24">
             <div class="flex flex-col items-start gap-10">

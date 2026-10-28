@@ -3,9 +3,13 @@
     language of the email sets the text alignment and the font stack: Arabic emails read
     right to left in an Arabic-capable stack, English ones keep the brand's sans. No web
     fonts are loaded in email; the stack falls back to what the reader has.
+    Colours come from the active colour theme's light mode, so the accent of every email follows it.
 --}}
 @php
     $rtl = \App\Constants\Locales::isRtl(app()->getLocale());
+    // Colours: the light mode of the active colour theme (Admin › Appearance; the brand by default), never raw values.
+    $c = app(\App\Services\ColourThemeService::class)->activePalette()['light'];
+    $flat = fn (string $token): string => \App\Support\Colour::over($c[$token], $c['surface']);
     $align = $rtl ? 'right' : 'left';
     $fonts = $rtl
         ? "'IBM Plex Sans Arabic', 'Hanken Grotesk', Arial, sans-serif"
@@ -22,8 +26,8 @@ body *:not(html):not(style):not(br):not(tr):not(code) {
 
 body {
     -webkit-text-size-adjust: none;
-    background-color: #ffffff;
-    color: #52525b;
+    background-color: {{ $c['surface'] }};
+    color: {{ $flat('ink-muted') }};
     direction: {{ $rtl ? 'rtl' : 'ltr' }};
     height: 100%;
     line-height: 1.4;
@@ -41,7 +45,7 @@ blockquote {
 }
 
 a {
-    color: #18181b;
+    color: {{ $c['accent-text'] }};
 }
 
 a img {
@@ -51,7 +55,7 @@ a img {
 /* Typography */
 
 h1 {
-    color: #18181b;
+    color: {{ $c['ink-strong'] }};
     font-size: 18px;
     font-weight: bold;
     margin-top: 0;
@@ -93,7 +97,7 @@ img {
     -premailer-cellpadding: 0;
     -premailer-cellspacing: 0;
     -premailer-width: 100%;
-    background-color: #fafafa;
+    background-color: {{ $c['surface-sunken'] }};
     margin: 0;
     padding: 0;
     width: 100%;
@@ -116,7 +120,7 @@ img {
 }
 
 .header a {
-    color: #18181b;
+    color: {{ $c['ink-strong'] }};
     font-size: 19px;
     font-weight: bold;
     text-decoration: none;
@@ -138,9 +142,9 @@ img {
     -premailer-cellpadding: 0;
     -premailer-cellspacing: 0;
     -premailer-width: 100%;
-    background-color: #fafafa;
-    border-bottom: 1px solid #fafafa;
-    border-top: 1px solid #fafafa;
+    background-color: {{ $c['surface-sunken'] }};
+    border-bottom: 1px solid {{ $c['surface-sunken'] }};
+    border-top: 1px solid {{ $c['surface-sunken'] }};
     margin: 0;
     padding: 0;
     width: 100%;
@@ -150,11 +154,11 @@ img {
     -premailer-cellpadding: 0;
     -premailer-cellspacing: 0;
     -premailer-width: 570px;
-    background-color: #ffffff;
-    border-color: #e4e4e7;
+    background-color: {{ $c['surface'] }};
+    border-color: {{ $flat('rule') }};
     border-radius: 4px;
     border-width: 1px;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid {{ $flat('rule') }};
     margin: 0 auto;
     padding: 0;
     width: 570px;
@@ -167,7 +171,7 @@ img {
 /* Subcopy */
 
 .subcopy {
-    border-top: 1px solid #e4e4e7;
+    border-top: 1px solid {{ $flat('rule') }};
     margin-top: 25px;
     padding-top: 25px;
 }
@@ -189,13 +193,13 @@ img {
 }
 
 .footer p {
-    color: #a1a1aa;
+    color: {{ $flat('ink-quiet') }};
     font-size: 12px;
     text-align: center;
 }
 
 .footer a {
-    color: #a1a1aa;
+    color: {{ $flat('ink-quiet') }};
     text-decoration: underline;
 }
 
@@ -210,13 +214,13 @@ img {
 }
 
 .table th {
-    border-bottom: 1px solid #e4e4e7;
+    border-bottom: 1px solid {{ $flat('rule') }};
     margin: 0;
     padding-bottom: 8px;
 }
 
 .table td {
-    color: #52525b;
+    color: {{ $flat('ink-muted') }};
     font-size: 15px;
     line-height: 18px;
     margin: 0;
@@ -244,7 +248,7 @@ img {
 .button {
     -webkit-text-size-adjust: none;
     border-radius: 4px;
-    color: #fff;
+    color: {{ $c['fill-ink'] }};
     display: inline-block;
     overflow: hidden;
     text-decoration: none;
@@ -252,46 +256,46 @@ img {
 
 .button-blue,
 .button-primary {
-    background-color: #18181b;
-    border-bottom: 8px solid #18181b;
-    border-left: 18px solid #18181b;
-    border-right: 18px solid #18181b;
-    border-top: 8px solid #18181b;
+    background-color: {{ $c['ink-strong'] }};
+    border-bottom: 8px solid {{ $c['fill'] }};
+    border-left: 18px solid {{ $c['fill'] }};
+    border-right: 18px solid {{ $c['fill'] }};
+    border-top: 8px solid {{ $c['fill'] }};
 }
 
 .button-green,
 .button-success {
-    background-color: #16a34a;
-    border-bottom: 8px solid #16a34a;
-    border-left: 18px solid #16a34a;
-    border-right: 18px solid #16a34a;
-    border-top: 8px solid #16a34a;
+    background-color: {{ $c['success-tone'] }};
+    border-bottom: 8px solid {{ $c['success-tone'] }};
+    border-left: 18px solid {{ $c['success-tone'] }};
+    border-right: 18px solid {{ $c['success-tone'] }};
+    border-top: 8px solid {{ $c['success-tone'] }};
 }
 
 .button-red,
 .button-error {
-    background-color: #dc2626;
-    border-bottom: 8px solid #dc2626;
-    border-left: 18px solid #dc2626;
-    border-right: 18px solid #dc2626;
-    border-top: 8px solid #dc2626;
+    background-color: {{ $c['danger-surface'] }};
+    border-bottom: 8px solid {{ $c['danger-surface'] }};
+    border-left: 18px solid {{ $c['danger-surface'] }};
+    border-right: 18px solid {{ $c['danger-surface'] }};
+    border-top: 8px solid {{ $c['danger-surface'] }};
 }
 
 /* Panels */
 
 .panel {
-    border-left: #18181b solid 4px;
+    border-left: {{ $c['accent-line'] }} solid 4px;
     margin: 21px 0;
 }
 
 .panel-content {
-    background-color: #fafafa;
-    color: #52525b;
+    background-color: {{ $c['surface-sunken'] }};
+    color: {{ $flat('ink-muted') }};
     padding: 16px;
 }
 
 .panel-content p {
-    color: #52525b;
+    color: {{ $flat('ink-muted') }};
 }
 
 .panel-item {

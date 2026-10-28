@@ -72,6 +72,8 @@ final class AdminNavigation
 
     public const string SITE_SETTINGS = 'site-settings';
 
+    public const string APPEARANCE = 'appearance';
+
     public const string ACCOUNT = 'account';
 
     /**
@@ -119,6 +121,7 @@ final class AdminNavigation
             self::ANALYTICS => self::item('Analytics', self::GROUP_AUDIENCE, 'analytics', Analytics::ADMIN_PATH, Permissions::VIEW_ANALYTICS),
             self::USERS => self::item('Users & roles', self::GROUP_SETTINGS, 'users.index', 'users', Permissions::MANAGE_USERS),
             self::SITE_SETTINGS => self::item('Site settings', self::GROUP_SETTINGS, 'settings.site', 'settings', Permissions::MANAGE_SETTINGS),
+            self::APPEARANCE => self::item('Appearance', self::GROUP_SETTINGS, 'settings.appearance', Appearance::PATH, Permissions::MANAGE_APPEARANCE),
             self::ACCOUNT => self::item('Your account', self::GROUP_SETTINGS, self::ACCOUNT_ROUTE, '/account', Permissions::ACCESS_ADMIN),
         ];
     }
@@ -176,7 +179,7 @@ final class AdminNavigation
         return [
             self::PAGES, self::PROFILE, self::CV, self::PUBLICATIONS, self::AWARDS, self::COMMENTARY, self::TEACHING, self::OTHER, self::HOME_QUOTES,
             self::VIDEOS, self::ALBUMS, self::MEDIA_LIBRARY, self::TRIBUTES,
-            self::APPLICATIONS, self::MEMBERS, self::CHAT_REPORTS, self::ANALYTICS, self::USERS, self::SITE_SETTINGS,
+            self::APPLICATIONS, self::MEMBERS, self::CHAT_REPORTS, self::ANALYTICS, self::USERS, self::SITE_SETTINGS, self::APPEARANCE,
         ];
     }
 

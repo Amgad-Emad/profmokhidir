@@ -1,6 +1,12 @@
 /*
  | Design tokens: the only file that names a brand colour.
  |
+ | Colours come from the active theme's tokens (Admin › Appearance). The theme tokens
+ | (App\Constants\ThemeTokens) are declared here at their brand values, the default
+ | "Evergreen & Ivory" theme; an active alternative theme redeclares them in a <style>
+ | block in <head>. The regions below (.on-dark, .glow-brass, raised surfaces) read
+ | theme tokens only, so a theme reaches the header, the footer, the hero and the cards.
+ |
  | The nine brand colours (App\Constants\Brand) are declared once as --brand-* and
  | never used directly anywhere else: the brand audit (tests/Unit/Design/BrandAuditTest)
  | fails on a hex value, a --brand-* reference or a raw colour class outside this file.
@@ -45,59 +51,70 @@
 
     color-scheme: light dark;
 
-    /* ---- Band roles: what an always-dark region is made of in each theme. */
-    --band-surface: light-dark(var(--brand-evergreen), var(--brand-cypress));
-    --band-surface-raised: light-dark(var(--brand-cypress), var(--brand-evergreen));
-    --band-glass: light-dark(
-        color-mix(in srgb, var(--brand-evergreen) 88%, transparent),
-        color-mix(in srgb, var(--brand-cypress) 80%, transparent)
-    );
+    /*
+     | Theme tokens (App\Constants\ThemeTokens): the brand values of the "Evergreen & Ivory" theme. An active
+     | theme from Admin › Appearance redeclares every one of them on :root:root in a <style> block in <head>
+     | (App\Services\ThemePaletteService::css); nothing below this block names a brand colour except the mark.
+     */
 
-    /* ---- Surfaces. */
+    /* ---- Basic colours. */
     --surface: light-dark(var(--brand-ivory), var(--brand-evergreen));
     --surface-raised: light-dark(var(--brand-linen), var(--brand-cypress));
+    --primary: var(--brand-evergreen);
+    --accent-line: var(--brand-brass);
+    --ink: light-dark(var(--brand-evergreen), var(--brand-champagne));
+    --danger: light-dark(var(--functional-danger-light), var(--functional-danger-dark));
+
+    /* ---- Font colours. Muted carries descriptions and hints, so it holds 7:1 on the page in both themes (ThemeContrastTest); quiet is for marginal text only (4.5:1). */
+    --ink-strong: light-dark(var(--brand-evergreen), var(--brand-ivory));
+    --ink-body: light-dark(var(--brand-evergreen), var(--brand-champagne));
+    --ink-muted: light-dark(color-mix(in srgb, var(--brand-ash) 70%, var(--brand-evergreen)), var(--brand-stone));
+    --ink-quiet: light-dark(var(--brand-ash), color-mix(in srgb, var(--brand-stone) 88%, transparent));
+    --accent-text: light-dark(var(--brand-bronze), var(--brand-brass));
+    --link: light-dark(var(--brand-evergreen), var(--brand-champagne));
+    --link-hover: light-dark(var(--brand-evergreen), var(--brand-ivory));
+    --placeholder: light-dark(var(--brand-ash), color-mix(in srgb, var(--brand-stone) 88%, transparent));
+    --ink-on-band: var(--brand-champagne);
+    --ink-on-band-strong: var(--brand-ivory);
+    --accent-ink: var(--brand-evergreen);
+    --danger-ink: light-dark(var(--brand-ivory), var(--brand-evergreen));
+    --selection: light-dark(var(--brand-linen), var(--brand-cypress));
+    --selection-ink: light-dark(var(--brand-evergreen), var(--brand-ivory));
+
+    /* ---- Surfaces. */
     --surface-panel: light-dark(var(--brand-ivory), var(--brand-cypress));
     --surface-sunken: light-dark(var(--brand-linen), var(--brand-evergreen));
-    --surface-field: light-dark(var(--brand-ivory), color-mix(in srgb, var(--brand-ivory) 6%, transparent));
-    --surface-band: var(--band-surface);
-    --surface-hero: var(--brand-evergreen);
-    --surface-glass: var(--band-glass);
     --surface-overlay: light-dark(
         color-mix(in srgb, var(--brand-evergreen) 60%, transparent),
         color-mix(in srgb, var(--brand-evergreen) 78%, transparent)
     );
     --surface-scrim: color-mix(in srgb, var(--brand-evergreen) 70%, transparent);
 
-    /* ---- Ink. */
-    --ink: light-dark(var(--brand-evergreen), var(--brand-champagne));
-    --ink-strong: light-dark(var(--brand-evergreen), var(--brand-ivory));
-    /* Muted carries descriptions and hints, so it holds 7:1 on the page in both themes (ThemeContrastTest); quiet is for marginal text only (4.5:1). */
-    --ink-muted: light-dark(color-mix(in srgb, var(--brand-ash) 70%, var(--brand-evergreen)), var(--brand-stone));
-    --ink-quiet: light-dark(var(--brand-ash), color-mix(in srgb, var(--brand-stone) 88%, transparent));
-    --ink-on-band: var(--brand-champagne);
-    --ink-on-band-strong: var(--brand-ivory);
-    --ink-on-hero: var(--brand-champagne);
-
-    /* ---- Solid fills (the one solid pill, the current filter pill, pressed toolbar buttons). */
-    --fill: light-dark(var(--brand-evergreen), var(--brand-ivory));
-    --fill-ink: light-dark(var(--brand-ivory), var(--brand-evergreen));
-    --fill-hover: light-dark(var(--brand-cypress), var(--brand-linen));
-    /* The solid button's hover and press: evergreen deepens a little, ivory takes a linen tint; the ink never changes. */
-    --fill-deep: light-dark(color-mix(in srgb, var(--brand-evergreen) 78%, #000000), color-mix(in srgb, var(--brand-ivory) 45%, var(--brand-linen)));
-    --fill-pressed: light-dark(color-mix(in srgb, var(--brand-evergreen) 62%, #000000), var(--brand-linen));
-
-    /* ---- Rules and accents. */
+    /* ---- Borders, rules and focus. */
     --rule: light-dark(var(--brand-stone), color-mix(in srgb, var(--brand-brass) 35%, transparent));
     --rule-strong: light-dark(var(--brand-ash), var(--brand-brass));
-    --accent-line: var(--brand-brass);
-    --accent-text: light-dark(var(--brand-bronze), var(--brand-brass));
-    --accent-glow: color-mix(in srgb, var(--brand-brass) 22%, transparent);
     --focus: light-dark(var(--brand-bronze), var(--brand-brass));
-    --selection: light-dark(var(--brand-linen), var(--brand-cypress));
-    --selection-ink: light-dark(var(--brand-evergreen), var(--brand-ivory));
+
+    /* ---- Cards and inputs; what raised surfaces swap in (see .card below). */
+    --card-surface: light-dark(var(--brand-linen), var(--brand-cypress));
+    --card-border: light-dark(var(--brand-stone), color-mix(in srgb, var(--brand-brass) 35%, transparent));
+    --accent-text-on-raised: light-dark(var(--brand-bronze), var(--brand-champagne));
+    --focus-on-raised: light-dark(var(--brand-bronze), var(--brand-champagne));
+    --rule-strong-on-raised: light-dark(var(--brand-ash), color-mix(in srgb, var(--brand-champagne) 66%, transparent));
+    --surface-field: light-dark(var(--brand-ivory), color-mix(in srgb, var(--brand-ivory) 6%, transparent));
+    --surface-field-on-raised: light-dark(var(--brand-ivory), var(--brand-evergreen));
+    --field-border: light-dark(var(--brand-ash), var(--brand-brass));
+    --field-focus-line: light-dark(var(--brand-evergreen), var(--brand-ivory));
+
+    /* ---- Solid fills (the one solid pill, the current filter pill, pressed toolbar buttons). The hover and press:
+       evergreen deepens a little, ivory takes a linen tint; the ink never changes. */
+    --fill: light-dark(var(--brand-evergreen), var(--brand-ivory));
+    --fill-ink: light-dark(var(--brand-ivory), var(--brand-evergreen));
+    --fill-deep: light-dark(color-mix(in srgb, var(--brand-evergreen) 78%, #000000), color-mix(in srgb, var(--brand-ivory) 45%, var(--brand-linen)));
+    --fill-pressed: light-dark(color-mix(in srgb, var(--brand-evergreen) 62%, #000000), var(--brand-linen));
+    --fill-hover: light-dark(var(--brand-cypress), var(--brand-linen));
 
     /* ---- Danger (destructive actions and errors; meaning never rests on colour alone: each carries an icon or a word). */
-    --danger: light-dark(var(--functional-danger-light), var(--functional-danger-dark));
     --danger-surface: light-dark(var(--functional-danger-light), var(--functional-danger-dark));
     --danger-surface-hover: light-dark(
         color-mix(in srgb, var(--functional-danger-light) 84%, var(--brand-evergreen)),
@@ -107,32 +124,76 @@
         color-mix(in srgb, var(--functional-danger-light) 70%, var(--brand-evergreen)),
         color-mix(in srgb, var(--functional-danger-dark) 62%, var(--brand-ivory))
     );
-    --danger-ink: light-dark(var(--brand-ivory), var(--brand-evergreen));
-    --danger-wash: color-mix(in srgb, var(--danger) 6%, transparent);
 
-    /* ---- Analytics (admin): the line is evergreen in light and champagne in dark, the comparison brass;
-       the map is shaded in tints of the line colour over a quiet land colour. */
-    --chart-line: light-dark(var(--brand-evergreen), var(--brand-champagne));
-    --chart-compare: var(--brand-brass);
-    --chart-grid: light-dark(var(--brand-stone), color-mix(in srgb, var(--brand-brass) 25%, transparent));
-    --chart-label: light-dark(var(--brand-ash), color-mix(in srgb, var(--brand-stone) 88%, transparent));
-    --map-land: light-dark(var(--brand-linen), color-mix(in srgb, var(--brand-ivory) 7%, transparent));
-    --map-edge: light-dark(var(--brand-ivory), var(--brand-cypress));
+    /* ---- Bands: what an always-dark region (.on-dark) is made of in each theme. */
+    --band-surface: light-dark(var(--brand-evergreen), var(--brand-cypress));
+    --band-glass: light-dark(
+        color-mix(in srgb, var(--brand-evergreen) 88%, transparent),
+        color-mix(in srgb, var(--brand-cypress) 80%, transparent)
+    );
+    --footer-surface: light-dark(var(--brand-evergreen), var(--brand-cypress));
+    --band-surface-raised: light-dark(var(--brand-cypress), var(--brand-evergreen));
+    --band-accent: light-dark(var(--brand-brass), var(--brand-champagne));
+    --band-accent-on-raised: light-dark(var(--brand-champagne), var(--brand-brass));
+    --band-rule: color-mix(in srgb, var(--brand-brass) 35%, transparent);
+    --band-rule-strong: light-dark(var(--brand-brass), color-mix(in srgb, var(--brand-champagne) 66%, transparent));
+    --band-rule-strong-on-raised: light-dark(color-mix(in srgb, var(--brand-champagne) 66%, transparent), var(--brand-brass));
+    --band-field: light-dark(color-mix(in srgb, var(--brand-ivory) 6%, transparent), var(--brand-evergreen));
+    --band-field-on-raised: light-dark(var(--brand-evergreen), color-mix(in srgb, var(--brand-ivory) 6%, transparent));
+    --band-fill: var(--brand-ivory);
+    --band-fill-ink: var(--brand-evergreen);
+    --band-fill-deep: color-mix(in srgb, var(--brand-ivory) 45%, var(--brand-linen));
+    --band-fill-pressed: var(--brand-linen);
+    --band-fill-hover: var(--brand-linen);
+    --band-selection: var(--brand-champagne);
+    --band-selection-ink: var(--brand-evergreen);
+    --band-danger: var(--functional-danger-dark);
+    --band-danger-ink: var(--brand-evergreen);
+    --band-danger-hover: color-mix(in srgb, var(--functional-danger-dark) 78%, var(--brand-ivory));
+    --band-danger-pressed: color-mix(in srgb, var(--functional-danger-dark) 62%, var(--brand-ivory));
+
+    /* ---- The home page opening (.glow-brass): the Primary colour with the glow in both themes. */
+    --ink-on-hero: var(--brand-champagne);
+    --hero-accent: var(--brand-brass);
+    --hero-surface-raised: var(--brand-cypress);
+    --hero-accent-on-raised: var(--brand-champagne);
+
+    /* ---- Community chat. */
+    --chat-own: light-dark(var(--brand-linen), var(--brand-cypress));
+    --chat-unread: var(--brand-brass);
 
     /* ---- Status tones (meaning never rests on colour alone: each tone carries an icon). */
     --pending-tone: light-dark(var(--brand-bronze), var(--brand-brass));
     --success-tone: light-dark(var(--brand-cypress), var(--brand-champagne));
     --neutral-tone: light-dark(var(--brand-ash), color-mix(in srgb, var(--brand-stone) 80%, transparent));
 
-    /* ---- The mark below 32px: a solid disc, evergreen with ivory letters, inverted on dark. */
+    /* ---- Analytics (admin): the line is evergreen in light and champagne in dark, the comparison brass (lifted
+       towards champagne in dark so it holds 3:1 on cypress); the map is shaded in tints of the line colour. */
+    --chart-line: light-dark(var(--brand-evergreen), var(--brand-champagne));
+    --chart-compare: light-dark(var(--brand-brass), color-mix(in srgb, var(--brand-brass) 70%, var(--brand-champagne)));
+    --chart-grid: light-dark(var(--brand-stone), color-mix(in srgb, var(--brand-brass) 25%, transparent));
+    --chart-label: light-dark(var(--brand-ash), color-mix(in srgb, var(--brand-stone) 88%, transparent));
+    --map-land: light-dark(var(--brand-linen), color-mix(in srgb, var(--brand-ivory) 7%, transparent));
+    --map-edge: light-dark(var(--brand-ivory), var(--brand-cypress));
+
+    /* ---- Glow, photographs and the mark ring (the duotone's ends also feed <x-duotone-filter>). */
+    --accent-glow: color-mix(in srgb, var(--brand-brass) 22%, transparent);
+    --duotone-shadow: var(--brand-evergreen);
+    --duotone-highlight: var(--brand-ivory);
+    --mark-ring: var(--brand-brass);
+
+    /* ---- Aliases of the theme tokens (ThemeTokens::aliases). */
+    --surface-band: var(--band-surface);
+    --surface-hero: var(--primary);
+    --surface-glass: var(--band-glass);
+    --danger-wash: color-mix(in srgb, var(--danger) 6%, transparent);
+
+    /* ---- The MK mark keeps its brand colours in every theme (ThemeTokens::fixed); only its ring follows the theme.
+       Below 32px it is a solid disc, evergreen with ivory letters, inverted on dark. */
     --mark-disc: light-dark(var(--brand-evergreen), var(--brand-ivory));
     --mark-disc-ink: light-dark(var(--brand-ivory), var(--brand-evergreen));
-
-    /* ---- What raised surfaces swap in (see .card below). */
-    --accent-text-on-raised: light-dark(var(--brand-bronze), var(--brand-champagne));
-    --focus-on-raised: light-dark(var(--brand-bronze), var(--brand-champagne));
-    --rule-strong-on-raised: light-dark(var(--brand-ash), color-mix(in srgb, var(--brand-champagne) 66%, transparent));
-    --surface-field-on-raised: light-dark(var(--brand-ivory), var(--brand-evergreen));
+    --mark-ink: light-dark(var(--brand-evergreen), var(--brand-ivory));
+    --mark-ink-on-band: var(--brand-ivory);
 }
 
 :root[data-theme='light'] {
@@ -143,61 +204,71 @@
     color-scheme: dark;
 }
 
-/* A region that is dark in both themes. */
+/* A region that is dark in both themes: every token remaps to the band tokens. */
 .on-dark {
     --surface: var(--band-surface);
     --surface-raised: var(--band-surface-raised);
     --surface-panel: var(--band-surface-raised);
     --surface-sunken: var(--band-surface);
-    --surface-field: light-dark(color-mix(in srgb, var(--brand-ivory) 6%, transparent), var(--brand-evergreen));
-    --ink: var(--brand-champagne);
-    --ink-strong: var(--brand-ivory);
-    --ink-muted: color-mix(in srgb, var(--brand-champagne) 92%, transparent);
-    --ink-quiet: color-mix(in srgb, var(--brand-champagne) 84%, transparent);
-    --fill: var(--brand-ivory);
-    --fill-ink: var(--brand-evergreen);
-    --fill-hover: var(--brand-linen);
-    --fill-deep: color-mix(in srgb, var(--brand-ivory) 45%, var(--brand-linen));
-    --fill-pressed: var(--brand-linen);
-    --rule: color-mix(in srgb, var(--brand-brass) 35%, transparent);
-    --rule-strong: light-dark(var(--brand-brass), color-mix(in srgb, var(--brand-champagne) 66%, transparent));
-    --accent-text: light-dark(var(--brand-brass), var(--brand-champagne));
-    --focus: light-dark(var(--brand-brass), var(--brand-champagne));
-    --selection: var(--brand-champagne);
-    --selection-ink: var(--brand-evergreen);
-    --danger: var(--functional-danger-dark);
-    --danger-surface: var(--functional-danger-dark);
-    --danger-surface-hover: color-mix(in srgb, var(--functional-danger-dark) 78%, var(--brand-ivory));
-    --danger-surface-pressed: color-mix(in srgb, var(--functional-danger-dark) 62%, var(--brand-ivory));
-    --danger-ink: var(--brand-evergreen);
-    --pending-tone: light-dark(var(--brand-brass), var(--brand-champagne));
-    --success-tone: var(--brand-champagne);
-    --neutral-tone: color-mix(in srgb, var(--brand-champagne) 80%, transparent);
-    --accent-text-on-raised: light-dark(var(--brand-champagne), var(--brand-brass));
-    --focus-on-raised: light-dark(var(--brand-champagne), var(--brand-brass));
-    --rule-strong-on-raised: light-dark(color-mix(in srgb, var(--brand-champagne) 66%, transparent), var(--brand-brass));
-    --surface-field-on-raised: light-dark(var(--brand-evergreen), color-mix(in srgb, var(--brand-ivory) 6%, transparent));
+    --surface-field: var(--band-field);
+    --ink: var(--ink-on-band);
+    --ink-strong: var(--ink-on-band-strong);
+    --ink-body: var(--ink-on-band);
+    --ink-muted: color-mix(in srgb, var(--ink-on-band) 92%, transparent);
+    --ink-quiet: color-mix(in srgb, var(--ink-on-band) 84%, transparent);
+    --link: var(--ink-on-band);
+    --link-hover: var(--ink-on-band-strong);
+    --placeholder: color-mix(in srgb, var(--ink-on-band) 84%, transparent);
+    --fill: var(--band-fill);
+    --fill-ink: var(--band-fill-ink);
+    --fill-hover: var(--band-fill-hover);
+    --fill-deep: var(--band-fill-deep);
+    --fill-pressed: var(--band-fill-pressed);
+    --rule: var(--band-rule);
+    --rule-strong: var(--band-rule-strong);
+    --accent-text: var(--band-accent);
+    --focus: var(--band-accent);
+    --selection: var(--band-selection);
+    --selection-ink: var(--band-selection-ink);
+    --danger: var(--band-danger);
+    --danger-surface: var(--band-danger);
+    --danger-surface-hover: var(--band-danger-hover);
+    --danger-surface-pressed: var(--band-danger-pressed);
+    --danger-ink: var(--band-danger-ink);
+    --pending-tone: var(--band-accent);
+    --success-tone: var(--ink-on-band);
+    --neutral-tone: color-mix(in srgb, var(--ink-on-band) 80%, transparent);
+    --accent-text-on-raised: var(--band-accent-on-raised);
+    --focus-on-raised: var(--band-accent-on-raised);
+    --rule-strong-on-raised: var(--band-rule-strong-on-raised);
+    --surface-field-on-raised: var(--band-field-on-raised);
+    --card-surface: var(--band-surface-raised);
+    --card-border: var(--band-rule);
+    --field-border: var(--band-rule-strong);
+    --field-focus-line: var(--ink-on-band-strong);
 }
 
-/* The hero and the error page: evergreen with the brass glow in both themes. */
+/* The hero and the error page: the Primary colour with the glow in both themes. */
 .glow-brass {
-    --surface: var(--brand-evergreen);
-    --surface-raised: var(--brand-cypress);
-    --surface-panel: var(--brand-cypress);
-    --surface-sunken: var(--brand-evergreen);
-    --accent-text: var(--brand-brass);
-    --focus: var(--brand-brass);
-    --rule-strong: var(--brand-brass);
-    --danger: var(--functional-danger-dark);
-    --danger-surface: var(--functional-danger-dark);
-    --danger-surface-hover: color-mix(in srgb, var(--functional-danger-dark) 78%, var(--brand-ivory));
-    --danger-surface-pressed: color-mix(in srgb, var(--functional-danger-dark) 62%, var(--brand-ivory));
-    --danger-ink: var(--brand-evergreen);
-    --pending-tone: var(--brand-brass);
-    --accent-text-on-raised: var(--brand-champagne);
-    --focus-on-raised: var(--brand-champagne);
-    --rule-strong-on-raised: color-mix(in srgb, var(--brand-champagne) 66%, transparent);
-    --surface-field-on-raised: var(--brand-evergreen);
+    --surface: var(--primary);
+    --surface-raised: var(--hero-surface-raised);
+    --surface-panel: var(--hero-surface-raised);
+    --surface-sunken: var(--primary);
+    --accent-text: var(--hero-accent);
+    --focus: var(--hero-accent);
+    --rule-strong: var(--hero-accent);
+    --danger: var(--band-danger);
+    --danger-surface: var(--band-danger);
+    --danger-surface-hover: var(--band-danger-hover);
+    --danger-surface-pressed: var(--band-danger-pressed);
+    --danger-ink: var(--band-danger-ink);
+    --pending-tone: var(--hero-accent);
+    --accent-text-on-raised: var(--hero-accent-on-raised);
+    --focus-on-raised: var(--hero-accent-on-raised);
+    --rule-strong-on-raised: color-mix(in srgb, var(--hero-accent-on-raised) 66%, transparent);
+    --surface-field-on-raised: var(--primary);
+    --card-surface: var(--hero-surface-raised);
+    --field-border: var(--hero-accent);
 }
 
 /* Raised surfaces (and the admin panels drawn on them in admin.css): brass cannot carry a label, a focus ring or a strong rule on cypress, and a field sinks to evergreen. */
@@ -236,6 +307,7 @@
     --focus: var(--focus-on-raised);
     --rule-strong: var(--rule-strong-on-raised);
     --surface-field: var(--surface-field-on-raised);
+    --field-border: var(--rule-strong-on-raised);
 }
 
 /*
@@ -446,6 +518,9 @@
     --color-fill: var(--fill);
     --color-fill-ink: var(--fill-ink);
     --color-fill-hover: var(--fill-hover);
+    --color-surface-footer: var(--footer-surface);
+    --color-link: var(--link);
+    --color-ink-body: var(--ink-body);
     --color-rule: var(--rule);
     --color-rule-strong: var(--rule-strong);
     --color-accent-line: var(--accent-line);

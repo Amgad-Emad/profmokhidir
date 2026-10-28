@@ -59,4 +59,14 @@ final class ThemeSettings
 
     /** Name of the meta tag that tints the browser chrome. */
     public const string META_THEME_COLOR = 'theme-color';
+
+    /**
+     * The colour a layout names for the browser chrome => the theme token it takes under the
+     * active colour theme (App\Constants\ThemeTokens): the masthead's colour in each mode.
+     */
+    public const array CHROME_TOKENS = [
+        'evergreen' => 'primary',
+        'cypress' => 'band-surface',
+        'ivory' => 'surface',
+    ];
 }

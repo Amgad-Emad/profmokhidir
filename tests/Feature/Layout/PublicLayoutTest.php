@@ -62,7 +62,7 @@ class PublicLayoutTest extends TestCase
         preg_match('/<footer.*<\/footer>/s', $this->html, $footer);
         $footer = $footer[0];
 
-        $this->assertStringContainsString('bg-surface text-ink', $footer);
+        $this->assertStringContainsString('bg-surface-footer text-ink', $footer);
         $this->assertStringContainsString('data-variant="stacked"', $footer);
         $this->assertStringContainsString('<p class="t-quote max-w-xl">'.Footer::CLOSING_LINE.'</p>', $footer);
         $this->assertStringContainsString('<p class="t-label text-accent-text">'.Footer::DOMAIN.'</p>', $footer);

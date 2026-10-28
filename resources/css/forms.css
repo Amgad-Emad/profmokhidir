@@ -256,7 +256,7 @@
 
     /* ------------------------------------------------------------ the control frame */
     .form-control {
-        --form-rule: var(--rule-strong); /* the frame's sides (box style) */
+        --form-rule: var(--field-border); /* the frame's sides (box style) */
         --form-line: var(--form-rule); /* its foot: the field's own line */
         --form-line-extra: 0px; /* the second pixel of the focused line */
         --form-surface: var(--surface-field);
@@ -296,7 +296,7 @@
     }
 
     .form-control__input::placeholder {
-        color: var(--ink-quiet);
+        color: var(--placeholder);
         opacity: 1;
     }
 
@@ -375,7 +375,7 @@
     /* focus (mouse, touch or keyboard alike): the line turns to the strong ink at 2px over a faint tint */
     .form-control:focus-within,
     .form-control[data-demo-state='focus'] {
-        --form-line: var(--ink-strong);
+        --form-line: var(--field-focus-line);
         --form-line-extra: 1px;
         background-color: color-mix(in srgb, var(--ink) 5%, var(--form-surface));
     }

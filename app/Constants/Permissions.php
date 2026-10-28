@@ -29,6 +29,9 @@ final class Permissions
 
     public const string VIEW_ANALYTICS = 'view analytics';
 
+    /** Admin › Appearance: the site's colour themes (admins only). */
+    public const string MANAGE_APPEARANCE = 'manage appearance';
+
     /**
      * @return list<string>
      */
@@ -44,6 +47,7 @@ final class Permissions
             self::MANAGE_SETTINGS,
             self::ACCESS_CHAT,
             self::VIEW_ANALYTICS,
+            self::MANAGE_APPEARANCE,
         ];
     }
 

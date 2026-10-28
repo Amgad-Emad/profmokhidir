@@ -125,6 +125,7 @@ final class AdminUx
             AdminNavigation::ANALYTICS => 'chart',
             AdminNavigation::USERS => 'shield',
             AdminNavigation::SITE_SETTINGS => 'settings',
+            AdminNavigation::APPEARANCE => 'palette',
             AdminNavigation::ACCOUNT => 'user',
         ];
     }

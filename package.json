@@ -22,7 +22,8 @@
         "showcase": "npm --prefix tools/showcase install --silent --no-audit --no-fund && node tools/showcase/build.mjs",
         "showcase:capture": "npm --prefix tools/showcase install --silent --no-audit --no-fund && node tools/showcase/capture.mjs",
         "qa:arabic": "node tests/qa/arabic.mjs",
-        "perf:arabic": "PERF_PAGES=/ar PERF_OUT=storage/app/lighthouse-arabic node tests/perf/lighthouse.mjs"
+        "perf:arabic": "PERF_PAGES=/ar PERF_OUT=storage/app/lighthouse-arabic node tests/perf/lighthouse.mjs",
+        "qa:appearance": "node tests/qa/appearance.mjs"
     },
     "devDependencies": {
         "@axe-core/playwright": "^4.11.1",

@@ -30,7 +30,8 @@ const OUT = process.env.SMOKE_OUT ?? 'storage/qa';
 const WIDTHS = (process.env.SMOKE_WIDTHS ?? '360,768,1440').split(',').map(Number);
 const HEIGHTS = { 360: 740, 390: 844, 768: 1024, 1440: 900 };
 const THEMES = (process.env.SMOKE_THEMES ?? 'light,dark').split(',').filter((t) => ['light', 'dark'].includes(t));
-/* Page surfaces per theme: ivory (or the admin's linen) in light, evergreen in dark. */
+/* Page surfaces per theme: ivory (or the admin's linen) in light, evergreen in dark; under an alternative colour
+   theme (Admin › Appearance) the page's own --surface and --surface-raised from its <style data-colour-theme>. */
 const SURFACES = { light: ['rgb(243, 241, 234)', 'rgb(231, 229, 220)'], dark: ['rgb(19, 34, 28)'] };
 const SESSIONS = [
     ['editor', ['/admin', '/account'], process.env.SMOKE_EDITOR_EMAIL, process.env.SMOKE_EDITOR_PASSWORD],
@@ -186,8 +187,14 @@ async function smoke(browser, path, width, storageState = null) {
         surface: getComputedStyle(document.body).backgroundColor,
         attribute: document.documentElement.getAttribute('data-theme'),
         meta: [...document.querySelectorAll('meta[name="theme-color"]')].map((m) => m.content),
+        palette: document.querySelector('style[data-colour-theme]')?.textContent ?? '',
     }));
-    const expected = SURFACES[THEME];
+    const fromPalette = ['surface', 'surface-raised'].map((token) => {
+        const m = scheme.palette.match(new RegExp(`--${token}:(?:light-dark\\((#[0-9a-f]{6}),(#[0-9a-f]{6})\\)|(#[0-9a-f]{6}))[;}]`));
+        const hex = m ? (m[3] ?? (THEME === 'dark' ? m[2] : m[1])) : null;
+        return hex ? `rgb(${parseInt(hex.slice(1, 3), 16)}, ${parseInt(hex.slice(3, 5), 16)}, ${parseInt(hex.slice(5, 7), 16)})` : null;
+    }).filter(Boolean);
+    const expected = fromPalette.length ? fromPalette : SURFACES[THEME];
     const themeOk = expected.includes(scheme.surface);
     report(path, width, `${THEME} theme applied`, themeOk && scheme.meta.length === 2, themeOk ? [] : [`body ${scheme.surface}, expected ${expected.join(' or ')} (data-theme=${scheme.attribute})`]);
 

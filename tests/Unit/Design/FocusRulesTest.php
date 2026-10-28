@@ -64,7 +64,7 @@ class FocusRulesTest extends TestCase
         $forms = $this->css('forms.css');
 
         $this->assertStringContainsString('transition:'."\n".'            border-color '.FormControls::FOCUS_LINE_MS.'ms', $forms);
-        $this->assertMatchesRegularExpression('/\.form-control:focus-within,\s*\.form-control\[data-demo-state=\'focus\'\] \{\s*--form-line: var\(--ink-strong\);\s*--form-line-extra: 1px;\s*background-color: color-mix\(in srgb, var\(--ink\) 5%, var\(--form-surface\)\);/', $forms);
+        $this->assertMatchesRegularExpression('/\.form-control:focus-within,\s*\.form-control\[data-demo-state=\'focus\'\] \{\s*--form-line: var\(--field-focus-line\);\s*--form-line-extra: 1px;\s*background-color: color-mix\(in srgb, var\(--ink\) 5%, var\(--form-surface\)\);/', $forms);
         $this->assertStringContainsString('box-shadow: inset 0 calc(var(--form-line-extra) * -1) 0 var(--form-line);', $forms, 'the second pixel sits along the foot only');
 
         foreach ($this->focusRules($forms) as $selector => $body) {

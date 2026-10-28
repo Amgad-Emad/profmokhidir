@@ -22,6 +22,7 @@
 @import './chat.css';
 @import './theme.css';
 @import './admin.css';
+@import './appearance.css';
 @import './analytics.css';
 @import './locale.css';
 
@@ -82,7 +83,7 @@
     }
 
     body {
-        @apply min-h-screen bg-surface text-ink;
+        @apply min-h-screen bg-surface text-ink-body;
         font-size: 1.0625rem; /* 17px on phones */
         line-height: var(--text-body--line-height);
     }
@@ -258,8 +259,8 @@
     /* Cards: 4px radius, the raised surface (or the panel surface), a hairline rule. */
     .card {
         border-radius: var(--radius-card);
-        border: 1px solid var(--rule);
-        background-color: var(--surface-raised);
+        border: 1px solid var(--card-border);
+        background-color: var(--card-surface);
         color: var(--ink);
         @apply p-6 sm:p-8;
     }
@@ -306,6 +307,18 @@
     /* Archive photos: the brand duotone via the SVG filter in <x-duotone-filter />. */
     .photo-archive {
         filter: url('#duotone-archive');
+        background-color: var(--duotone-shadow);
+    }
+
+    /* The theme may give the dark mode its own duotone (<x-duotone-filter> draws one filter per mode). */
+    :root[data-theme='dark'] .photo-archive {
+        filter: url('#duotone-archive-dark');
+    }
+
+    @media (prefers-color-scheme: dark) {
+        :root:not([data-theme='light']) .photo-archive {
+            filter: url('#duotone-archive-dark');
+        }
     }
 
     /* Short brass rule (empty states, small openers). */
@@ -566,7 +579,16 @@
         font-weight: 400;
         font-size: 1.0625rem; /* 17px on phones */
         line-height: 1.6;
-        color: var(--ink);
+        color: var(--ink-body);
+    }
+
+    /* Links in running text take the link colours of the theme (Admin › Appearance). */
+    .prose-bio a {
+        color: var(--link);
+    }
+
+    .prose-bio a:hover {
+        color: var(--link-hover);
     }
 
     @media (width >= 40rem) {

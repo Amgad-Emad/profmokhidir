@@ -14,6 +14,9 @@ final class CacheKeys
 
     public const string PROFILE = 'public.profile';
 
+    /** The active colour theme, resolved (both modes and the <head> CSS); forgotten whenever a theme is saved. */
+    public const string ACTIVE_THEME = 'appearance.active_theme';
+
     public const string CV_ENTRIES = 'public.cv_entries';
 
     public const string PUBLICATIONS = 'public.publications';

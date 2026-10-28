@@ -27,7 +27,8 @@ Rules for every content type: render only populated fields; consistent heading, 
 Roles: admin (everything, including users and community approvals), editor (content and tribute moderation), member (approved community user), pending/rejected applicants (no chat access). Enforce chat access on every request, server side.
 
 ## Brand (follow exactly)
-Colours, as Tailwind theme tokens, and no others:
+Colours come from the active theme's tokens (Admin › Appearance, App\Constants\ThemeTokens, declared in resources/css/tokens.css). The brand palette below is the default theme, "Evergreen & Ivory", and the recommended one; the other suggested templates are alternative palettes that move away from these guidelines. Never use a raw colour or a brand colour directly: always a semantic token, so every theme reaches it. A new colour need is a new token in ThemeTokens (with its brand default, derivation and contrast pairs), never a hard-coded value. The MK mark keeps its brand colours under every theme; only its ring may follow a theme's "Mark ring" token.
+The brand palette (the default theme), as Tailwind theme tokens, and no others:
 - evergreen #13221C (primary, ~40% of surfaces)
 - ivory #F3F1EA (primary, ~45%)
 - cypress #2F4A3E (support, ~10%)

@@ -17,6 +17,7 @@ use App\Repositories\Contracts\ChatMessageRepositoryInterface;
 use App\Repositories\Contracts\ChatReadRepositoryInterface;
 use App\Repositories\Contracts\ChatReportRepositoryInterface;
 use App\Repositories\Contracts\ChatUploadRepositoryInterface;
+use App\Repositories\Contracts\ColourThemeRepositoryInterface;
 use App\Repositories\Contracts\CommentaryRepositoryInterface;
 use App\Repositories\Contracts\CvEntryRepositoryInterface;
 use App\Repositories\Contracts\HomeQuoteRepositoryInterface;
@@ -57,6 +58,7 @@ use App\Repositories\Eloquent\EloquentProfileRepository;
 use App\Repositories\Eloquent\EloquentPublicationRepository;
 use App\Repositories\Eloquent\EloquentRevisionRepository;
 use App\Repositories\Eloquent\EloquentSearchRepository;
+use App\Repositories\Eloquent\EloquentColourThemeRepository;
 use App\Repositories\Eloquent\EloquentSettingRepository;
 use App\Repositories\Eloquent\EloquentTeachingMaterialRepository;
 use App\Repositories\Eloquent\EloquentTributeRepository;
@@ -104,6 +106,7 @@ class RepositoryServiceProvider extends ServiceProvider
         AnalyticsEventRepositoryInterface::class => EloquentAnalyticsEventRepository::class,
         AnalyticsSaltRepositoryInterface::class => EloquentAnalyticsSaltRepository::class,
         AnalyticsRollupRepositoryInterface::class => EloquentAnalyticsRollupRepository::class,
+        ColourThemeRepositoryInterface::class => EloquentColourThemeRepository::class,
     ];
 
     /**

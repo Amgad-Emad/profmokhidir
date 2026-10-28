@@ -1,6 +1,7 @@
 <?php
 
 use App\Constants\AdminNavigation;
+use App\Constants\Appearance;
 use App\Constants\AdminUx;
 use App\Constants\Analytics;
 use App\Constants\ContentTypes;
@@ -42,6 +43,7 @@ use App\Http\Controllers\SectionPlaceholderController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\StyleguideController;
 use App\Http\Controllers\TeachingMaterialController;
+use App\Http\Controllers\AppearancePreviewController;
 use App\Http\Controllers\ThemeController;
 use App\Http\Controllers\TributeController;
 use App\Http\Controllers\VideoController;
@@ -67,6 +69,7 @@ use App\Livewire\Admin\Pages\Index as PageIndex;
 use App\Livewire\Admin\Profile\EditProfile;
 use App\Livewire\Admin\Publications\Form as PublicationForm;
 use App\Livewire\Admin\Publications\Index as PublicationIndex;
+use App\Livewire\Admin\Settings\Appearance as AppearanceSettings;
 use App\Livewire\Admin\Settings\SiteSettings;
 use App\Livewire\Admin\TeachingMaterials\Form as TeachingMaterialForm;
 use App\Livewire\Admin\TeachingMaterials\Index as TeachingMaterialIndex;
@@ -204,6 +207,13 @@ Route::get('/styleguide', StyleguideController::class)
 // The colour theme (System, Light, Dark): kept on the account when signed in, in a cookie otherwise.
 Route::patch(ThemeSettings::PATH, [ThemeController::class, 'update'])->name(ThemeSettings::ROUTE);
 
+// Admin › Appearance: a signed link shows a theme's draft on the live site to the admin who opened it.
+Route::get(Appearance::PREVIEW_END_PATH, [AppearancePreviewController::class, 'end'])->name(Appearance::PREVIEW_END_ROUTE);
+Route::get(Appearance::PREVIEW_PATH, [AppearancePreviewController::class, 'show'])
+    ->middleware(['auth', 'verified', 'signed', 'permission:'.Permissions::MANAGE_APPEARANCE])
+    ->whereNumber('theme')
+    ->name(Appearance::PREVIEW_ROUTE);
+
 // Signed-in users (any role) manage their own name, email, password and two-factor here.
 Route::get('/account', [AccountController::class, 'show'])
     ->middleware(['auth', 'verified'])
@@ -302,4 +312,7 @@ Route::middleware(['auth', 'verified', 'role:'.implode('|', Roles::staff())])
         Route::get(AdminNavigation::get(AdminNavigation::SITE_SETTINGS)['path'], SiteSettings::class)
             ->middleware('permission:'.Permissions::MANAGE_SETTINGS)
             ->name(substr(AdminNavigation::routeFor(AdminNavigation::SITE_SETTINGS), strlen(AdminNavigation::ROUTE_PREFIX)));
+        Route::get(AdminNavigation::get(AdminNavigation::APPEARANCE)['path'], AppearanceSettings::class)
+            ->middleware('permission:'.Permissions::MANAGE_APPEARANCE)
+            ->name(substr(AdminNavigation::routeFor(AdminNavigation::APPEARANCE), strlen(AdminNavigation::ROUTE_PREFIX)));
     });

@@ -276,7 +276,7 @@
         content: '';
         flex: 1;
         height: 1px;
-        background-color: var(--accent-line);
+        background-color: var(--chat-unread);
     }
 
     /* A run: one author's consecutive messages under one header. */
@@ -309,7 +309,7 @@
     }
 
     .chat-run.is-mine {
-        background-color: var(--surface-raised);
+        background-color: var(--chat-own);
     }
 
     .chat-run__head {

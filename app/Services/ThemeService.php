@@ -94,6 +94,26 @@ class ThemeService
     }
 
     /**
+     * The browser chrome colour for each scheme under a colour theme (Admin › Appearance):
+     * the layout's brand names map to theme tokens (ThemeSettings::CHROME_TOKENS), resolved
+     * in that scheme; translucent values are never used, the brand colour stands in.
+     *
+     * @param  array{light: array<string, string>, dark: array<string, string>}  $palette
+     * @return array{light: string, dark: string}
+     */
+    public function chromeColours(array $palette, string $light = 'evergreen', string $dark = 'evergreen'): array
+    {
+        $brand = $this->themeColours($light, $dark);
+        $pick = static function (string $name, string $scheme) use ($palette, $brand): string {
+            $value = $palette[$scheme][ThemeSettings::CHROME_TOKENS[$name] ?? ''] ?? null;
+
+            return is_string($value) && strlen($value) === 7 ? strtoupper($value) : $brand[$scheme];
+        };
+
+        return ['light' => $pick($light, 'light'), 'dark' => $pick($dark, 'dark')];
+    }
+
+    /**
      * The toggle as the server can print it. With no choice yet the server cannot see the
      * device setting, so it assumes the light theme and resources/js/theme.js corrects the
      * label, aria-pressed and the submitted value as soon as it starts.
