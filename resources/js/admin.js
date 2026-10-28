@@ -11,6 +11,7 @@ import { pagePreview } from './admin/page-preview';
 import { appearanceEditor, appearancePreview } from './admin/appearance';
 import { watchPlaceholders } from './admin/placeholders';
 import { initShortcuts } from './admin/shortcuts';
+import { listToolbar, listPopover } from './admin/list-toolbar';
 
 initForms();
 initShortcuts();
@@ -29,6 +30,8 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('pagePreview', pagePreview);
     Alpine.data('appearanceEditor', appearanceEditor);
     Alpine.data('appearancePreview', appearancePreview);
+    Alpine.data('listToolbar', listToolbar);
+    Alpine.data('listPopover', listPopover);
 
     /*
      | Drag-and-drop reordering of table rows (native HTML5 drag events). Rows are

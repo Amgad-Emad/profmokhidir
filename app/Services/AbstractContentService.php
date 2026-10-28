@@ -68,6 +68,23 @@ abstract class AbstractContentService
     }
 
     /**
+     * @param  array<string, mixed>  $filters
+     */
+    public function count(?string $term = null, array $filters = []): int
+    {
+        return $this->repository->count($term, $filters);
+    }
+
+    /**
+     * @param  array<string, mixed>  $filters
+     * @return array<string, int>
+     */
+    public function countBy(string $column, ?string $term = null, array $filters = []): array
+    {
+        return $this->repository->countBy($column, $term, $filters);
+    }
+
+    /**
      * @return list<string>
      */
     public function sortableColumns(): array

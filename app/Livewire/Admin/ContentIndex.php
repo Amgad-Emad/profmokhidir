@@ -9,28 +9,32 @@ use App\Constants\ConfirmDialog;
 use App\Constants\ContentStatus;
 use App\Constants\ContentTypes;
 use App\Constants\DateFormats;
+use App\Constants\ListToolbar;
 use App\Constants\Locales;
 use App\Constants\StatusTone;
 use App\Exceptions\ImagesNotReadyException;
+use App\Livewire\Admin\Concerns\BulkPublishesContent;
 use App\Livewire\Admin\Concerns\ConfirmsActions;
 use App\Livewire\Admin\Concerns\NotifiesEditors;
+use App\Livewire\Admin\Concerns\WithListToolbar;
 use App\Models\Concerns\HasTranslatableContent;
 use App\Repositories\Contracts\ContentRepositoryInterface;
 use App\Services\AbstractContentService;
+use App\Support\ListToolbar\ListFilter;
+use App\Support\ListToolbar\ListSort;
+use App\Support\ListToolbar\ListView;
 use BackedEnum;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Str;
-use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 /**
- * The index table every content type shares: search, filters, sortable
- * columns, drag-and-drop reordering (with move up/down buttons as the keyboard
+ * The index table every content type shares: the list toolbar (views with
+ * counts, search, filters, sort, density; WithListToolbar), sortable columns, drag-and-drop reordering (with move up/down buttons as the keyboard
  * alternative), publish/unpublish (one or a ticked selection), trash with Undo
  * (no dialog: the trash is reversible) and a Trash view to
  * restore from or delete permanently (irreversible, so it asks first in the
@@ -38,41 +42,32 @@ use Livewire\WithPagination;
  */
 abstract class ContentIndex extends Component
 {
-    use AuthorizesRequests, ConfirmsActions, NotifiesEditors, WithPagination;
+    use AuthorizesRequests, BulkPublishesContent, ConfirmsActions, NotifiesEditors, WithPagination;
+    use WithListToolbar {
+        WithListToolbar::listViewCount as baseListViewCount;
+    }
 
     /** The confirmation that guards a permanent delete from the trash. */
     public const string ACTION_PURGE = 'purge';
 
-    public const string VIEW_ACTIVE = 'active';
+    /** The trash view (ListToolbar::VIEW_TRASH), kept under its old name. */
+    public const string VIEW_TRASH = ListToolbar::VIEW_TRASH;
 
-    public const string VIEW_TRASH = 'trash';
+    public const string VIEW_DRAFTS = 'drafts';
+
+    public const string VIEW_PUBLISHED = 'published';
+
+    public const string VIEW_NEEDS_ARABIC = 'needs-arabic';
+
+    public const string VIEW_PLACEHOLDER = 'placeholder';
 
     public const int PER_PAGE = 20;
-
-    #[Url(as: 'q', except: '')]
-    public string $search = '';
-
-    /** @var array<string, string> */
-    #[Url(except: [])]
-    public array $filters = [];
-
-    #[Url(except: '')]
-    public string $sort = '';
-
-    #[Url(except: 'asc')]
-    public string $direction = ContentRepositoryInterface::SORT_ASC;
-
-    #[Url(except: 'active')]
-    public string $view = self::VIEW_ACTIVE;
 
     /** Ids ticked for a bulk action (on any page). @var list<int> */
     public array $selected = [];
 
-    /** Columns whose first click sorts newest first. */
-    public const array NEWEST_FIRST = ['updated_at', 'published_at'];
-
-    /** Filters with more options than this are a select rather than chips. */
-    public const int MAX_CHIPS = 8;
+    /** Columns whose first click (or Sort choice) sorts newest first. */
+    public const array NEWEST_FIRST = ['updated_at', 'published_at', 'year', 'date', 'material_date', 'start_year'];
 
     /** ContentTypes key of the type this screen manages. */
     abstract protected function type(): string;
@@ -91,11 +86,21 @@ abstract class ContentIndex extends Component
     abstract protected function columns(): array;
 
     /**
-     * Filter field => [label, value => label options]. Status is added for every type.
+     * The type's own filters, between Status and Language (Type, Year, Featured...).
      *
-     * @return array<string, array{label: string, options: array<string, string>}>
+     * @return list<ListFilter>
      */
-    protected function filterOptions(): array
+    protected function contentFilters(): array
+    {
+        return [];
+    }
+
+    /**
+     * The type's own views, after Placeholder text and before Trash.
+     *
+     * @return list<ListView>
+     */
+    protected function contentViews(): array
     {
         return [];
     }
@@ -103,33 +108,89 @@ abstract class ContentIndex extends Component
     public function mount(): void
     {
         $this->authorize('viewAny', ContentTypes::get($this->type())['model']);
+    }
 
-        if (! in_array($this->view, [self::VIEW_ACTIVE, self::VIEW_TRASH], true)) {
-            $this->view = self::VIEW_ACTIVE;
-        }
-
-        if ($this->sort !== '' && ! in_array($this->sort, $this->service()->sortableColumns(), true)) {
-            $this->sort = '';
-        }
-
-        $this->filters = array_intersect_key($this->filters, array_flip($this->allowedFilters()));
+    protected function listScreen(): string
+    {
+        return ContentTypes::get($this->type())['nav'];
     }
 
     /**
-     * Filter keys this screen accepts: the type's columns and the pseudo
-     * filters (sample text; needs Arabic for types written in both languages).
+     * Status, the type's own filters, Language (types written in both
+     * languages) and Sample text (in the sheet, the views and the chips only).
      *
-     * @return list<string>
+     * @return list<ListFilter>
      */
-    protected function allowedFilters(): array
+    protected function listFilters(): array
     {
-        $filters = [...$this->service()->filterColumns(), ContentRepositoryInterface::FILTER_PLACEHOLDER];
+        return array_values(array_filter([
+            ListFilter::single('status', __('Status'), ContentStatus::labels()),
+            ...$this->contentFilters(),
+            $this->translates() ? ListFilter::flag(ContentRepositoryInterface::FILTER_NEEDS_TRANSLATION, __('Language'), __('Needs Arabic translation'), __('Needs Arabic')) : null,
+            ListFilter::flag(ContentRepositoryInterface::FILTER_PLACEHOLDER, __('Sample text'), __('Still holds sample text'), __('Sample text'), toolbar: false),
+        ]));
+    }
 
-        if ($this->translates()) {
-            $filters[] = ContentRepositoryInterface::FILTER_NEEDS_TRANSLATION;
+    /**
+     * @return list<ListView>
+     */
+    protected function listViews(): array
+    {
+        return array_values(array_filter([
+            new ListView(ListToolbar::VIEW_ALL, __('All')),
+            new ListView(self::VIEW_DRAFTS, __('Drafts'), ['status' => ContentStatus::Draft->value]),
+            new ListView(self::VIEW_PUBLISHED, __('Published'), ['status' => ContentStatus::Published->value]),
+            $this->translates() ? new ListView(self::VIEW_NEEDS_ARABIC, __('Needs Arabic'), [ContentRepositoryInterface::FILTER_NEEDS_TRANSLATION => ListToolbar::FLAG_ON]) : null,
+            new ListView(self::VIEW_PLACEHOLDER, __('list-toolbar.placeholder_view'), [ContentRepositoryInterface::FILTER_PLACEHOLDER => ListToolbar::FLAG_ON]),
+            ...$this->contentViews(),
+            new ListView(self::VIEW_TRASH, __('Trash'), trash: true),
+        ]));
+    }
+
+    /**
+     * Display order, recently updated, then one choice per sortable column.
+     *
+     * @return list<ListSort>
+     */
+    protected function listSorts(): array
+    {
+        $sorts = [
+            new ListSort('', ListToolbar::SORT_ASC, __('Display order')),
+            new ListSort('updated_at', ListToolbar::SORT_DESC, __('Recently updated')),
+        ];
+        $sortable = $this->service()->sortableColumns();
+
+        foreach ($this->columns() as $column => $label) {
+            if ($column === 'status' || ! in_array($column, $sortable, true)) {
+                continue;
+            }
+
+            $sorts[] = in_array($column, self::NEWEST_FIRST, true)
+                ? new ListSort($column, ListToolbar::SORT_DESC, __(':column, newest first', ['column' => __($label)]))
+                : new ListSort($column, ListToolbar::SORT_ASC, __(':column, A to Z', ['column' => __($label)]));
         }
 
-        return $filters;
+        return $sorts;
+    }
+
+    protected function listSortColumns(): array
+    {
+        return $this->service()->sortableColumns();
+    }
+
+    protected function listCount(array $criteria, string $search): int
+    {
+        return $this->service()->count($search, $criteria);
+    }
+
+    protected function listGroupedCounts(string $key, array $criteria, string $search): ?array
+    {
+        return in_array($key, $this->service()->filterColumns(), true) ? $this->service()->countBy($key, $search, $criteria) : null;
+    }
+
+    protected function listViewCount(ListView $view): int
+    {
+        return $view->trash ? $this->service()->countTrashed() : $this->baseListViewCount($view);
     }
 
     /**
@@ -159,78 +220,35 @@ abstract class ContentIndex extends Component
     }
 
     /**
-     * A filter chip: set one filter to a value, or clear it with null.
+     * A column heading: sort by it, or turn its direction round.
      */
-    public function setFilter(string $field, ?string $value = null): void
-    {
-        if (! in_array($field, $this->allowedFilters(), true)) {
-            return;
-        }
-
-        if ($value === null || $value === '') {
-            unset($this->filters[$field]);
-        } else {
-            $this->filters[$field] = $value;
-        }
-
-        $this->selected = [];
-        $this->resetPage();
-    }
-
-    public function clearFilters(): void
-    {
-        $this->filters = [];
-        $this->search = '';
-        $this->selected = [];
-        $this->resetPage();
-    }
-
-    public function updatedSearch(): void
-    {
-        $this->resetPage();
-    }
-
-    public function updatedFilters(): void
-    {
-        $this->resetPage();
-    }
-
     public function sortBy(string $column): void
     {
         if (! in_array($column, $this->service()->sortableColumns(), true)) {
             return;
         }
 
-        if ($this->sort === $column) {
-            $this->direction = $this->direction === ContentRepositoryInterface::SORT_ASC
-                ? ContentRepositoryInterface::SORT_DESC
-                : ContentRepositoryInterface::SORT_ASC;
-        } else {
-            $this->sort = $column;
+        $direction = $this->sort === $column
+            ? ($this->direction === ListToolbar::SORT_ASC ? ListToolbar::SORT_DESC : ListToolbar::SORT_ASC)
             // Dates read best newest first; names and titles from A.
-            $this->direction = in_array($column, self::NEWEST_FIRST, true) ? ContentRepositoryInterface::SORT_DESC : ContentRepositoryInterface::SORT_ASC;
-        }
+            : (in_array($column, self::NEWEST_FIRST, true) ? ListToolbar::SORT_DESC : ListToolbar::SORT_ASC);
 
-        $this->resetPage();
+        $this->applySort($column, $direction);
     }
 
     public function clearSort(): void
     {
-        $this->sort = '';
-        $this->direction = ContentRepositoryInterface::SORT_ASC;
+        $this->applySort('');
     }
 
     public function showActive(): void
     {
-        $this->cancelConfirmation();
-        $this->view = self::VIEW_ACTIVE;
-        $this->resetPage();
+        $this->applyView(ListToolbar::VIEW_ALL);
     }
 
     public function showTrash(): void
     {
-        $this->view = self::VIEW_TRASH;
-        $this->resetPage();
+        $this->applyView(self::VIEW_TRASH);
     }
 
     public function publish(int $id): void
@@ -267,106 +285,6 @@ abstract class ContentIndex extends Component
         $this->service()->delete($model, auth()->user());
         $this->selected = array_values(array_diff($this->selected, [$id]));
         $this->toast(__(':type moved to the trash.', ['type' => __($this->singular())]), AdminUx::TOAST_SUCCESS, $this->undoWith('restoreMany', [[$id]]));
-    }
-
-    /**
-     * @param  list<int|string>  $ids
-     */
-    public function selectPage(array $ids): void
-    {
-        $this->selected = array_values(array_unique([...$this->selected, ...array_map('intval', $ids)]));
-    }
-
-    public function clearSelection(): void
-    {
-        $this->selected = [];
-    }
-
-    public function bulkPublish(): void
-    {
-        $published = 0;
-        $refused = [];
-
-        foreach ($this->selectedRecords() as $model) {
-            if ($model->getAttribute('status') === ContentStatus::Published) {
-                continue;
-            }
-
-            $this->authorize('publish', $model);
-
-            try {
-                $this->service()->publish($model, auth()->user());
-                $published++;
-            } catch (ImagesNotReadyException) {
-                $refused[] = $this->cell($model, array_key_first($this->columns()))['text'];
-            }
-        }
-
-        $this->selected = [];
-
-        if ($refused !== []) {
-            $this->toast(__(':count published. Not published yet, because images still need details: :titles.', ['count' => $published, 'titles' => implode(__(', '), $refused)]), AdminUx::TOAST_ERROR);
-
-            return;
-        }
-
-        $this->toast(trans_choice('{1} :count :singular published.|[0,*] :count :plural published.', $published, ['singular' => mb_strtolower(__($this->singular())), 'plural' => mb_strtolower(__(ContentTypes::get($this->type())['plural']))]));
-    }
-
-    public function bulkUnpublish(): void
-    {
-        $count = 0;
-
-        foreach ($this->selectedRecords() as $model) {
-            if ($model->getAttribute('status') !== ContentStatus::Published) {
-                continue;
-            }
-
-            $this->authorize('publish', $model);
-            $this->service()->unpublish($model, auth()->user());
-            $count++;
-        }
-
-        $this->selected = [];
-        $this->toast(__(':count moved back to draft.', ['count' => $count]));
-    }
-
-    public function bulkTrash(): void
-    {
-        $ids = [];
-
-        foreach ($this->selectedRecords() as $model) {
-            $this->authorize('delete', $model);
-            $this->service()->delete($model, auth()->user());
-            $ids[] = (int) $model->getKey();
-        }
-
-        $this->selected = [];
-        $this->toast(__(':count moved to the trash.', ['count' => count($ids)]), AdminUx::TOAST_SUCCESS, $this->undoWith('restoreMany', [$ids]));
-    }
-
-    /**
-     * Undo of a move to the trash (one record or a bulk selection).
-     *
-     * @param  list<int|string>  $ids
-     */
-    public function restoreMany(array $ids): void
-    {
-        $this->authorize('create', ContentTypes::get($this->type())['model']);
-
-        foreach ($ids as $id) {
-            $this->service()->restore((int) $id, auth()->user());
-        }
-
-        $this->toast(count($ids) === 1 ? __(':type restored.', ['type' => __($this->singular())]) : __(':count restored.', ['count' => count($ids)]));
-    }
-
-    /**
-     * @return Collection<int, Model>
-     */
-    protected function selectedRecords(): Collection
-    {
-        return $this->service()->findMany(array_map('intval', $this->selected));
     }
 
     public function restore(int $id): void
@@ -433,40 +351,35 @@ abstract class ContentIndex extends Component
      */
     public function canReorder(): bool
     {
-        return $this->view === self::VIEW_ACTIVE
+        return ! $this->onTrash()
             && $this->sort === ''
-            && trim($this->search) === ''
-            && array_filter($this->filters, fn ($value): bool => $value !== null && $value !== '') === [];
+            && ! $this->listFiltered();
     }
 
     public function render(): View
     {
         $type = ContentTypes::get($this->type());
+        $trash = $this->onTrash();
 
-        $items = $this->view === self::VIEW_TRASH
+        $items = $trash
             ? $this->service()->trashed($this->search, self::PER_PAGE)
-            : $this->service()->search($this->search, $this->filters, self::PER_PAGE, $this->sort ?: null, $this->direction);
+            : $this->service()->search($this->search, $this->listCriteria(), self::PER_PAGE, $this->sort ?: null, $this->direction);
 
         return view('livewire.admin.content.index', [
             'type' => $type,
             'typeKey' => $this->type(),
             'columns' => $this->columns(),
             'sortable' => $this->service()->sortableColumns(),
-            'filterOptions' => $this->filterOptions() + [
-                'status' => ['label' => __('Status'), 'options' => ContentStatus::labels()],
-            ],
             'items' => $items,
-            'trashedCount' => $this->service()->countTrashed(),
+            'trash' => $trash,
+            'toolbar' => $this->listToolbar($items->total()),
             'canReorder' => $this->canReorder(),
             'createUrl' => route(ContentTypes::createRoute($this->type())),
             'editRoute' => ContentTypes::editRoute($this->type()),
             'routeParameter' => ContentTypes::routeParameter($this->type()),
             'singular' => $this->singular(),
             'emptyText' => ContentTypes::emptyText($this->type()),
-            'hasFilters' => trim($this->search) !== '' || array_filter($this->filters, fn ($value): bool => $value !== null && $value !== '') !== [],
-            'placeholderFilter' => ContentRepositoryInterface::FILTER_PLACEHOLDER,
-            'translationFilter' => $this->translates() ? ContentRepositoryInterface::FILTER_NEEDS_TRANSLATION : null,
-            'maxChips' => self::MAX_CHIPS,
+            'hasFilters' => $this->listFiltered(),
             'purging' => $this->purgeDialog(),
         ])->layout('components.layouts.admin', ['title' => __($type['plural'])]);
     }
@@ -520,7 +433,7 @@ abstract class ContentIndex extends Component
      */
     protected function purgeDialog(): ?array
     {
-        if (! $this->isConfirming(self::ACTION_PURGE) || $this->view !== self::VIEW_TRASH) {
+        if (! $this->isConfirming(self::ACTION_PURGE) || ! $this->onTrash()) {
             return null;
         }
 

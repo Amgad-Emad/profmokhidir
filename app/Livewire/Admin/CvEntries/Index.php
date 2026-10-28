@@ -9,6 +9,7 @@ use App\Constants\CvSection;
 use App\Livewire\Admin\ContentIndex;
 use App\Services\AbstractContentService;
 use App\Services\CvEntryService;
+use App\Support\ListToolbar\ListFilter;
 
 class Index extends ContentIndex
 {
@@ -27,8 +28,8 @@ class Index extends ContentIndex
         return ['title' => 'Title', 'section' => 'Section', 'organisation' => 'Organisation', 'start_year' => 'From', 'status' => 'Status'];
     }
 
-    protected function filterOptions(): array
+    protected function contentFilters(): array
     {
-        return ['section' => ['label' => 'Section', 'options' => CvSection::labels()]];
+        return [ListFilter::multi('section', __('Section'), CvSection::labels())];
     }
 }

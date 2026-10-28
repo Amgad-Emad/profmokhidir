@@ -4,7 +4,13 @@
     <x-admin.page-header :eyebrow="__('Content')" :title="__('Pages')" :intro="__('The fixed words and images of each public page: headings, introductions, buttons, empty-page lines, the community rules, the error pages, the header and footer, and how each page appears in search and when shared. Records such as publications and tributes have their own screens.')" />
     <x-admin.flash />
 
-    <div class="admin-table-wrap mt-10">
+    <x-admin.list-toolbar :toolbar="$toolbar" :items="__('pages')" :placeholder="__('Search pages')" />
+
+    <x-admin.list-results :density="$toolbar['density']">
+    @if ($rows->isEmpty())
+        <x-admin.list-empty :title="__('Pages')" text="" :filtered="true" />
+    @else
+    <div class="admin-table-wrap">
         <table class="admin-table w-full text-start text-sm" data-pages-table>
             <caption class="sr-only">{{ __('Pages') }}</caption>
             <thead>
@@ -19,8 +25,8 @@
                 @foreach ($rows as $row)
                     <tr wire:key="page-{{ $row['page']->key }}" data-page-row="{{ $row['page']->key }}">
                         <td>
-                            <a href="{{ $row['editUrl'] }}" class="font-medium text-ink">{{ __($row['definition']['title']) }}</a>
-                            <p class="mt-1 max-w-xl font-normal text-ink-muted">{{ __($row['definition']['summary']) }}</p>
+                            <a href="{{ $row['editUrl'] }}" class="font-medium text-ink">{{ $row['title'] }}</a>
+                            <p class="mt-1 max-w-xl font-normal text-ink-muted">{{ $row['summary'] }}</p>
                         </td>
                         <td>
                             <div class="flex flex-wrap gap-2">
@@ -46,4 +52,6 @@
             </tbody>
         </table>
     </div>
+    @endif
+    </x-admin.list-results>
 </div>

@@ -54,6 +54,46 @@ class EloquentChatReportRepository extends BaseEloquentRepository implements Cha
         return $report->refresh();
     }
 
+    public function filter(?string $term, array $criteria, int $perPage = 20, bool $oldestFirst = false): LengthAwarePaginator
+    {
+        return $this->withRelations($this->filtered($term, $criteria))
+            ->orderBy('id', $oldestFirst ? 'asc' : 'desc')
+            ->paginate($perPage)
+            ->withQueryString();
+    }
+
+    public function countFiltered(?string $term, array $criteria): int
+    {
+        return $this->filtered($term, $criteria)->count();
+    }
+
+    /**
+     * @param  array<string, string|list<string>>  $criteria
+     * @return Builder<ChatReport>
+     */
+    private function filtered(?string $term, array $criteria): Builder
+    {
+        $term = trim((string) $term);
+        $state = $criteria[self::FILTER_STATE] ?? null;
+        $channels = array_values(array_map('intval', array_filter((array) ($criteria[self::FILTER_CHANNEL] ?? []), 'is_numeric')));
+        $message = $criteria[self::FILTER_MESSAGE] ?? null;
+
+        return $this->query()
+            ->when($term !== '', function (Builder $query) use ($term): void {
+                $like = '%'.addcslashes($term, '%_\\').'%';
+                $query->where(function (Builder $query) use ($like): void {
+                    $query->where('reason', 'like', $like)
+                        ->orWhereHas('message', fn (Builder $message) => $message->withTrashed()->where('body', 'like', $like))
+                        ->orWhereHas('reporter', fn (Builder $reporter) => $reporter->where('name', 'like', $like));
+                });
+            })
+            ->when($state === self::STATE_OPEN, fn (Builder $query) => $query->open())
+            ->when($state === self::STATE_RESOLVED, fn (Builder $query) => $query->whereNotNull('resolved_at'))
+            ->when($channels !== [], fn (Builder $query) => $query->whereHas('message', fn (Builder $message) => $message->withTrashed()->whereIn('channel_id', $channels)))
+            ->when($message === self::MESSAGE_REMOVED, fn (Builder $query) => $query->where(fn (Builder $query) => $query->doesntHave('message')->orWhereHas('message', fn (Builder $message) => $message->onlyTrashed())))
+            ->when($message === self::MESSAGE_VISIBLE, fn (Builder $query) => $query->whereHas('message'));
+    }
+
     public function markResolvedForMessage(int $messageId, int $resolvedBy): int
     {
         return $this->query()->open()->where('message_id', $messageId)->update([

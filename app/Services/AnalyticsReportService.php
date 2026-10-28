@@ -102,6 +102,17 @@ class AnalyticsReportService
     }
 
     /**
+     * Every page read between two days, most engaging first (the analytics
+     * page's list, which searches, filters and sorts them itself).
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function pageRows(CarbonImmutable $from, CarbonImmutable $to): array
+    {
+        return $this->pages($this->gather($from, $to)['pages']);
+    }
+
+    /**
      * The dashboard's Audience section: the last 30 days against the 30 before, the top pages and countries.
      *
      * @return array<string, mixed>

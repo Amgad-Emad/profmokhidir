@@ -36,6 +36,9 @@ interface MediaRepositoryInterface
     /** Filter key for searchImages(): album id. */
     public const string FILTER_ALBUM = 'album';
 
+    /** Columns searchImages() sorts by. */
+    public const array SORT_COLUMNS = ['created_at', 'file_name'];
+
     public function find(int $id): ?Media;
 
     public function findOrFail(int $id): Media;
@@ -95,12 +98,20 @@ interface MediaRepositoryInterface
     /**
      * Every image across the site (the image collections), newest first, for
      * the media library. The term matches file name, alt text and caption;
-     * filters use the FILTER_* keys.
+     * filters use the FILTER_* keys (a collection list matches any of them).
+     * `sortBy` is one of SORT_COLUMNS (null: newest first).
      *
      * @param  array<string, mixed>  $filters
      * @return LengthAwarePaginator<int, Media>
      */
-    public function searchImages(?string $term = null, array $filters = [], int $perPage = 24): LengthAwarePaginator;
+    public function searchImages(?string $term = null, array $filters = [], int $perPage = 24, ?string $sortBy = null, string $sortDirection = 'desc'): LengthAwarePaginator;
+
+    /**
+     * How many images searchImages() would find.
+     *
+     * @param  array<string, mixed>  $filters
+     */
+    public function countImages(?string $term = null, array $filters = []): int;
 
     /**
      * Number of images still missing one of the properties required for publishing.

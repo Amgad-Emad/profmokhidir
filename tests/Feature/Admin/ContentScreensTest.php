@@ -46,7 +46,7 @@ class ContentScreensTest extends TestCase
         $this->actingAs($editor)->get(route(ContentTypes::indexRoute($type)))
             ->assertOk()
             ->assertSee($definition['plural'])
-            ->assertSee('data-tab="trash"', false)
+            ->assertSee('data-view="trash"', false)
             ->assertSee(route(ContentTypes::editRoute($type), [$parameter => $record->getKey()]), false)
             ->assertSee('View on site');
 
@@ -79,7 +79,7 @@ class ContentScreensTest extends TestCase
 
         $this->actingAs($editor)->get(route(ContentTypes::indexRoute(ContentTypes::PROFILE)))->assertOk()->assertSee('About & profile')->assertSee('Portrait');
         $this->actingAs($editor)->get(route(AdminNavigation::routeFor(AdminNavigation::MEDIA_LIBRARY)))->assertOk()->assertSee('Media library')->assertSee('Upload photos');
-        $this->actingAs($editor)->get(route(AdminNavigation::routeFor(AdminNavigation::TRIBUTES)))->assertOk()->assertSee('Review tributes')->assertSee('data-tab="pending"', false);
+        $this->actingAs($editor)->get(route(AdminNavigation::routeFor(AdminNavigation::TRIBUTES)))->assertOk()->assertSee('Review tributes')->assertSee('data-view="pending"', false);
     }
 
     #[Test]

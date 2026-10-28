@@ -278,6 +278,7 @@
  */
 .admin-table.analytics-table tbody th {
     padding: 0.875rem 1rem;
+    text-align: start;
     font-size: inherit;
     font-weight: 400;
     letter-spacing: normal;

@@ -5,32 +5,32 @@
 
     <x-admin.flash />
 
-    <div class="mt-10 flex flex-wrap items-center gap-2 border-b border-rule" role="tablist" aria-label="{{ __('Tribute status') }}">
-        @foreach ($tabs as $value => $tabInfo)
-            <button type="button" role="tab" wire:click="showTab('{{ $value }}')" aria-selected="{{ $tab === $value ? 'true' : 'false' }}" class="admin-tab inline-flex items-center gap-2" data-tab="{{ $value }}">
-                <x-icon :name="$tabInfo['tone']->icon()" class="size-4" />{{ $tabInfo['label'] }}<span class="text-sm text-ink-muted">@num($tabInfo['count'])</span>
-            </button>
-        @endforeach
-    </div>
-
-    @if ($tributes->isEmpty())
-        <x-empty-state :message="match ($current) { TributeStatus::Pending => __('Nothing is waiting for review.'), TributeStatus::Approved => __('No tributes have been approved yet.'), TributeStatus::Rejected => __('No tributes have been rejected.') }" />
-    @else
-        {{-- Bulk actions --}}
-        <div class="mt-6 flex flex-wrap items-center gap-4 text-sm" data-bulk>
-            <x-form.checkbox id="select-all" wire:click="toggleAll" :checked="$pageIds !== [] && array_diff($pageIds, $selected) === []">{{ __('Select all on this page') }}</x-form.checkbox>
-            <span class="font-normal text-ink-muted">{{ __(':count selected', ['count' => app(\App\Services\LocaleService::class)->digits(count($selected))]) }}</span>
+    <x-admin.list-toolbar :toolbar="$toolbar" :items="__('tributes')" :placeholder="__('Search names, places and words')" :selected="count($selected)">
+        <x-slot:bulk>
             @if ($current !== TributeStatus::Approved)
-                <x-button variant="quiet" size="sm" type="button" wire:click="approveSelected" :disabled="$selected === []" data-bulk-approve>{{ __('Approve selected') }}</x-button>
+                <x-button variant="quiet" size="sm" type="button" wire:click="approveSelected" wire:loading.attr="disabled" data-bulk-approve>{{ __('Approve') }}</x-button>
             @endif
             @if ($current !== TributeStatus::Rejected)
-                <x-button variant="danger" size="sm" type="button" wire:click="rejectSelected" :disabled="$selected === []" data-bulk-reject>{{ __('Decline selected') }}</x-button>
+                <x-button variant="danger" size="sm" type="button" wire:click="rejectSelected" wire:loading.attr="disabled" data-bulk-reject>{{ __('Decline') }}</x-button>
             @endif
+        </x-slot:bulk>
+    </x-admin.list-toolbar>
+
+    <x-admin.list-results :density="$toolbar['density']">
+    @if ($tributes->isEmpty())
+        @if ($filtered)
+            <x-admin.list-empty :title="__('No tributes yet')" text="" :filtered="true" />
+        @else
+            <x-empty-state :message="match ($current) { TributeStatus::Pending => __('Nothing is waiting for review.'), TributeStatus::Approved => __('No tributes have been approved yet.'), TributeStatus::Rejected => __('No tributes have been rejected.'), default => __('No tributes have been left yet.') }" />
+        @endif
+    @else
+        <div class="mb-4 text-sm" data-bulk>
+            <x-form.checkbox id="select-all" wire:click="toggleAll" :checked="$pageIds !== [] && array_diff($pageIds, $selected) === []">{{ __('Select all on this page') }}</x-form.checkbox>
         </div>
 
-        <ul class="mt-4 space-y-4" data-tributes>
+        <ul class="list-cards" data-tributes>
             @foreach ($tributes as $tribute)
-                <li wire:key="tribute-{{ $tribute->getKey() }}" class="rounded-card border border-rule bg-surface-panel p-5" data-tribute="{{ $tribute->getKey() }}">
+                <li wire:key="tribute-{{ $tribute->getKey() }}" class="list-card rounded-card border border-rule bg-surface-panel p-5" data-tribute="{{ $tribute->getKey() }}">
                     <div class="flex flex-col gap-4 sm:flex-row sm:items-start">
                         <x-form.checkbox model="selected" live :id="'select-tribute-'.$tribute->getKey()" :value="(string) $tribute->getKey()" class="shrink-0"><span class="sr-only">{{ __('Select tribute from :name', ['name' => $tribute->name]) }}</span></x-form.checkbox>
                         <div class="min-w-0 flex-1">
@@ -89,5 +89,6 @@
         </ul>
         {{ $tributes->links('components.admin.pagination') }}
     @endif
+    </x-admin.list-results>
 
 </div>

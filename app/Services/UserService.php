@@ -355,6 +355,26 @@ class UserService
         return $this->users->search($term, $role, $status, $perPage);
     }
 
+    /**
+     * An admin list of accounts (Users & roles, the community screen): search and
+     * UserRepositoryInterface::FILTER_* criteria.
+     *
+     * @param  array<string, string|list<string>>  $criteria
+     * @return LengthAwarePaginator<int, User>
+     */
+    public function filter(?string $term, array $criteria, int $perPage = 15, ?string $sortBy = null, string $sortDirection = 'asc'): LengthAwarePaginator
+    {
+        return $this->users->filter($term, $criteria, $perPage, $sortBy, $sortDirection);
+    }
+
+    /**
+     * @param  array<string, string|list<string>>  $criteria
+     */
+    public function countFiltered(?string $term, array $criteria): int
+    {
+        return $this->users->countFiltered($term, $criteria);
+    }
+
     private function sendInvitation(User $user): void
     {
         $token = $this->passwords->broker()->createToken($user);

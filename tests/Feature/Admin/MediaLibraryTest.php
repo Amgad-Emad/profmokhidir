@@ -57,15 +57,15 @@ class MediaLibraryTest extends TestCase
             ->call('edit', $portrait->getKey())
             ->assertSee(route('admin.content.profile'), false)
             ->call('cancelEdit')
-            ->set('incomplete', true)
+            ->call('toggleFilter', 'incomplete', '1')
             ->assertDontSee('Harvest time')
             ->assertSee('Profile · Prof')
-            ->set('incomplete', false)
+            ->call('removeFilter', 'incomplete')
             ->set('search', 'gezira')
             ->assertSee('Harvest time')
             ->assertDontSee('Profile · Prof')
             ->set('search', '')
-            ->set('collection', 'portrait')
+            ->set('filters.collection', 'portrait')
             ->assertDontSee('Harvest time')
             ->assertSee('Profile · Prof');
     }

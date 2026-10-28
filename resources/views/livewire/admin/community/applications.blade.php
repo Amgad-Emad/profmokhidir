@@ -7,25 +7,25 @@
 
     <div class="mt-8"><x-admin.flash /></div>
 
-    <div class="flex flex-wrap items-center gap-2 border-b border-rule" role="tablist" aria-label="{{ __('Community status') }}">
-        @foreach ($tabs as $value => $tabInfo)
-            <button type="button" role="tab" wire:click="showTab('{{ $value }}')" aria-selected="{{ $tab === $value ? 'true' : 'false' }}" class="admin-tab inline-flex items-center gap-2" data-tab="{{ $value }}">
-                <x-icon :name="$tabInfo['tone']->icon()" class="size-4" />{{ $tabInfo['label'] }}<span class="font-mono text-sm text-ink-muted">@num($tabInfo['count'])</span>
-            </button>
-        @endforeach
-    </div>
+    <x-admin.list-toolbar :toolbar="$toolbar" :items="__('applicants and members')" :placeholder="__('Search names and emails')" />
 
+    <x-admin.list-results :density="$toolbar['density']">
     @if ($users->isEmpty())
-        <x-empty-state :message="match ($current) {
-            CommunityStatus::Pending => __('No applications are waiting for review.'),
-            CommunityStatus::Approved => __('There are no members yet.'),
-            CommunityStatus::Suspended => __('No members are suspended.'),
-            default => __('No applications have been rejected.'),
-        }" />
+        @if ($filtered)
+            <x-admin.list-empty :title="__('No applications yet')" text="" :filtered="true" />
+        @else
+            <x-empty-state :message="match ($current) {
+                CommunityStatus::Pending => __('No applications are waiting for review.'),
+                CommunityStatus::Approved => __('There are no members yet.'),
+                CommunityStatus::Suspended => __('No members are suspended.'),
+                CommunityStatus::Rejected => __('No applications have been rejected.'),
+                default => __('Nobody has applied yet.'),
+            }" />
+        @endif
     @else
-        <ul class="mt-6 space-y-4" data-applications>
+        <ul class="list-cards" data-applications>
             @foreach ($users as $user)
-                <li wire:key="user-{{ $user->getKey() }}" class="rounded-card border border-rule bg-surface-panel p-5" data-user="{{ $user->getKey() }}">
+                <li wire:key="user-{{ $user->getKey() }}" class="list-card rounded-card border border-rule bg-surface-panel p-5" data-user="{{ $user->getKey() }}">
                     <div class="flex flex-col gap-4 lg:flex-row lg:items-start">
                         <div class="min-w-0 flex-1">
                             <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -90,6 +90,7 @@
         </ul>
         {{ $users->links('components.admin.pagination') }}
     @endif
+    </x-admin.list-results>
 
     @if ($deciding !== null && $dialog !== null)
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-surface-overlay p-4" x-data x-trap.noscroll.inert="true" x-on:keydown.escape.window="$wire.cancelDecision()" data-decision-dialog="{{ $decidingAction }}">

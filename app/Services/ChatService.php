@@ -575,6 +575,25 @@ class ChatService
         return $this->reports->paginateByState($open, $perPage);
     }
 
+    /**
+     * The chat reports list: search and ChatReportRepositoryInterface::FILTER_* criteria.
+     *
+     * @param  array<string, string|list<string>>  $criteria
+     * @return LengthAwarePaginator<int, ChatReport>
+     */
+    public function filterReports(?string $term, array $criteria, int $perPage = 20, bool $oldestFirst = false): LengthAwarePaginator
+    {
+        return $this->reports->filter($term, $criteria, $perPage, $oldestFirst);
+    }
+
+    /**
+     * @param  array<string, string|list<string>>  $criteria
+     */
+    public function countReports(?string $term, array $criteria): int
+    {
+        return $this->reports->countFiltered($term, $criteria);
+    }
+
     // -- Access -------------------------------------------------------------
 
     public function canModerate(User $user): bool

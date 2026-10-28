@@ -35,8 +35,9 @@ class TributeModerationTest extends TestCase
         Tribute::factory()->rejected()->create(['name' => 'Rejected Person', 'email' => null]);
 
         Livewire::actingAs($this->editor)->test(Moderate::class)
-            ->assertSet('tab', 'pending')
-            ->assertSee('data-tab="pending"', false)
+            ->assertSet('tab', '')
+            ->assertSet('filters', ['status' => 'pending'])
+            ->assertSeeInOrder(['aria-selected="true"', 'data-view="pending"'], false)
             ->assertSee('Pending Person')
             ->assertSee('pending@example.com')
             ->assertDontSee('Approved Person')
@@ -92,7 +93,7 @@ class TributeModerationTest extends TestCase
         $tributes = Tribute::factory()->count(3)->pending()->create();
 
         Livewire::actingAs($this->editor)->test(Moderate::class)
-            ->assertSee('0 selected')
+            ->assertDontSee('data-bulk-bar', false)
             ->call('toggleAll')
             ->assertSee('3 selected')
             ->call('toggleAll')

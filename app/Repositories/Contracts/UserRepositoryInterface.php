@@ -15,6 +15,24 @@ use Illuminate\Database\Eloquent\Collection;
  */
 interface UserRepositoryInterface extends BaseRepositoryInterface
 {
+    public const string FILTER_ROLE = 'role';
+
+    public const string FILTER_ACCOUNT = 'account';
+
+    public const string FILTER_COMMUNITY = 'community';
+
+    public const string FILTER_TWO_FACTOR = 'two_factor';
+
+    public const string FILTER_EMAIL = 'email';
+
+    /** Values of FILTER_TWO_FACTOR and FILTER_EMAIL. */
+    public const string YES = 'on';
+
+    public const string NO = 'off';
+
+    /** Columns filter() sorts by besides the name. */
+    public const array SORT_COLUMNS = ['name', 'created_at', 'reviewed_at'];
+
     public function findByEmail(string $email): ?User;
 
     /**
@@ -55,6 +73,22 @@ interface UserRepositoryInterface extends BaseRepositoryInterface
      * @return LengthAwarePaginator<int, User>
      */
     public function search(?string $term = null, ?string $role = null, ?CommunityStatus $status = null, int $perPage = 15): LengthAwarePaginator;
+
+    /**
+     * Users for an admin list: name or email search, then any of these
+     * criteria (FILTER_* keys; lists match any of their values): roles,
+     * AccountState, CommunityStatus, two-factor on or off, email verified or not.
+     * Sorted by name unless `sortBy` is one of SORT_COLUMNS.
+     *
+     * @param  array<string, string|list<string>>  $criteria
+     * @return LengthAwarePaginator<int, User>
+     */
+    public function filter(?string $term, array $criteria, int $perPage = 15, ?string $sortBy = null, string $sortDirection = 'asc'): LengthAwarePaginator;
+
+    /**
+     * @param  array<string, string|list<string>>  $criteria
+     */
+    public function countFiltered(?string $term, array $criteria): int;
 
     /**
      * Users holding the given Spatie role.

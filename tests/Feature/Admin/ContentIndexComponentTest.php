@@ -103,7 +103,7 @@ class ContentIndexComponentTest extends TestCase
                 && $params['undo']['args'] === [[$award->getKey()]]
                 && $params['seconds'] === AdminUx::UNDO_SECONDS)
             ->assertDontSee('Gold medal')
-            ->assertSee('Trash<span class="ms-2 text-sm text-ink-muted">1</span>', false);
+            ->assertSee('Trash<span class="list-toolbar__view-count">1</span>', false);
 
         $this->assertNotNull($award->fresh()->deleted_at);
 
@@ -115,7 +115,7 @@ class ContentIndexComponentTest extends TestCase
 
         $component->call('trash', $award->getKey())
             ->call('showTrash')
-            ->assertSet('view', 'trash')
+            ->assertSet('tab', 'trash')
             ->assertSee('Gold medal')
             ->assertSee('data-restore', false)
             ->call('restoreMany', [$award->getKey()])
@@ -141,7 +141,7 @@ class ContentIndexComponentTest extends TestCase
             ->assertDontSee('data-bulk-bar', false)
             ->set('selected', [$a->getKey(), $b->getKey()])
             ->assertSee('data-bulk-bar', false)
-            ->assertSee('2</span> selected', false)
+            ->assertSee('2 selected')
             ->call('bulkPublish')
             ->assertSet('selected', [])
             ->assertSee('2 awards published.');
@@ -175,7 +175,7 @@ class ContentIndexComponentTest extends TestCase
         Award::factory()->draft()->create(['name' => '[Placeholder] Silver medal']);
 
         Livewire::actingAs($this->editor)->test(AwardIndex::class)
-            ->assertSee('aria-pressed="true"', false)
+            ->assertSeeInOrder(['aria-selected="true"', 'data-view="all"'], false)
             ->call('setFilter', 'status', ContentStatus::Draft->value)
             ->assertSet('filters', ['status' => 'draft'])
             ->assertDontSee('Gold medal')->assertSee('Silver medal')
@@ -186,8 +186,8 @@ class ContentIndexComponentTest extends TestCase
             ->call('setFilter', 'password', 'x')
             ->assertSet('filters', [ContentRepositoryInterface::FILTER_PLACEHOLDER => '1'])
             ->set('search', 'nothing like this')
-            ->assertSee('Nothing matches')
-            ->assertSee('Clear search and filters')
+            ->assertSee('No items match these filters')
+            ->assertSee('Clear filters')
             ->call('clearFilters')
             ->assertSet('filters', [])
             ->assertSet('search', '')

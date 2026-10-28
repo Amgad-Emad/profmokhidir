@@ -16,19 +16,17 @@
 
     <p class="text-sm font-normal text-ink-muted" data-active-admins>{!! __('Active administrators: :count. The last one can never be demoted or deactivated.', ['count' => '<span class="font-mono text-ink">'.e($activeAdmins).'</span>']) !!}</p>
 
-    <form novalidate class="form-row mt-6" wire:submit.prevent role="search" aria-label="{{ __('Search users') }}">
-        <x-form.input type="search" model="search" id="search" live :label="__('Search')" :optional="false" loading="search" class="form-col--half" :placeholder="__('Name or email')" autocomplete="off" />
-        <x-form.select model="role" id="filter-role" class="form-col--quarter" live :label="__('Role')" :optional="false" :placeholder="__('All roles')" :options="$roleOptions" data-filter="role" />
-        <x-form.select model="status" id="filter-status" class="form-col--quarter" live :label="__('Community status')" :optional="false" :placeholder="__('Any')" :options="$statusOptions" data-filter="status" />
-    </form>
+    <x-admin.list-toolbar :toolbar="$toolbar" :items="__('users')" :placeholder="__('Search names and emails')" />
 
+    <x-admin.list-results :density="$toolbar['density']">
     @if ($users->isEmpty())
-        <x-empty-state :message="trim($search) !== '' || $role !== '' || $status !== '' ? __('Nobody matches your search.') : __('There are no accounts yet. Invite the first staff member.')" />
-        @if (trim($search) !== '' || $role !== '' || $status !== '')
-            <p class="mt-4 text-sm"><x-button variant="quiet" size="sm" type="button" wire:click="clearFilters">{{ __('Clear the search and filters') }}</x-button></p>
+        @if ($toolbar['filtered'])
+            <x-admin.list-empty :title="__('No accounts yet')" text="" :filtered="true" />
+        @else
+            <x-empty-state :message="__('There are no accounts yet. Invite the first staff member.')" />
         @endif
     @else
-        <div class="relative mt-6 overflow-x-auto rounded-card border border-rule bg-surface-panel">
+        <div class="admin-table-wrap">
             <table class="admin-table w-full text-start text-sm" data-users>
                 <caption class="sr-only">{{ __('Users') }}</caption>
                 <thead>
@@ -108,6 +106,7 @@
         </div>
         {{ $users->links('components.admin.pagination') }}
     @endif
+    </x-admin.list-results>
 
     {{-- Invite dialog --}}
     @if ($inviting)

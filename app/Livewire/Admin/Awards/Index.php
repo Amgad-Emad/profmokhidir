@@ -8,6 +8,7 @@ use App\Constants\ContentTypes;
 use App\Livewire\Admin\ContentIndex;
 use App\Services\AbstractContentService;
 use App\Services\AwardService;
+use App\Support\ListToolbar\ListFilter;
 
 class Index extends ContentIndex
 {
@@ -26,9 +27,9 @@ class Index extends ContentIndex
         return ['name' => 'Name', 'organisation' => 'Organisation', 'year' => 'Year', 'status' => 'Status'];
     }
 
-    protected function filterOptions(): array
+    protected function contentFilters(): array
     {
-        return ['year' => ['label' => 'Year', 'options' => $this->years()]];
+        return [ListFilter::multi('year', __('Year'), $this->years())];
     }
 
     /**

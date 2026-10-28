@@ -14,29 +14,13 @@
         </div>
     </section>
 
-    {{-- Show, search and filters --}}
-    <div class="list-tools mt-10">
-        <div class="filter-chips" role="group" aria-label="{{ __('Show') }}" data-filter="show">
-            <span class="filter-chips__label t-label" aria-hidden="true">{{ __('Show') }}</span>
-            @foreach ($showOptions as $value => $label)
-                <button type="button" class="filter-chip" wire:click="show('{{ $value }}')" aria-pressed="{{ $this->showing() === $value ? 'true' : 'false' }}" data-show="{{ $value === '' ? 'all' : $value }}">
-                    {{ $label }}
-                    @if ($value === Library::SHOW_MISSING_ALT && $missingAltCount > 0)<span class="admin-count admin-count--quiet">@num($missingAltCount)</span>@endif
-                    @if ($value === Library::SHOW_INCOMPLETE && $incompleteCount > 0)<span class="admin-count admin-count--quiet">@num($incompleteCount)</span>@endif
-                </button>
-            @endforeach
-        </div>
-        <form novalidate class="form-row" wire:submit.prevent role="search" aria-label="{{ __('Search images') }}">
-            <x-form.input type="search" model="search" id="search" live :label="__('Search')" :optional="false" loading="search" class="form-col--half" :placeholder="__('File name, alt text, caption or place')" autocomplete="off" data-shortcut="search" />
-            <x-form.select model="album" id="filter-album" class="form-col--quarter" live :label="__('Album')" :optional="false" :placeholder="__('All albums')" :options="$albums" data-filter="album" />
-            <x-form.select model="collection" id="filter-collection" class="form-col--quarter" live :label="__('Used as')" :optional="false" :placeholder="__('Anything')" :options="$collections" />
-        </form>
-    </div>
+    <x-admin.list-toolbar :toolbar="$toolbar" :items="__('images')" :placeholder="__('File name, alt text, caption or place')" />
 
+    <x-admin.list-results :density="$toolbar['density']">
     @if ($images->isEmpty())
-        <x-admin.list-empty class="mt-8" :title="__('No photographs yet')" :text="__('Photographs uploaded here are filed in albums for the Pictures page. Portraits and video posters appear here too.')" :filtered="$filtered" />
+        <x-admin.list-empty :title="__('No photographs yet')" :text="__('Photographs uploaded here are filed in albums for the Pictures page. Portraits and video posters appear here too.')" :filtered="$filtered" />
     @else
-        <ul class="library-grid mt-8" data-library>
+        <ul class="library-grid" data-library>
             @foreach ($images as $image)
                 @php
                     $id = (int) $image->getKey();
@@ -68,6 +52,7 @@
         </ul>
         {{ $images->links('components.admin.pagination') }}
     @endif
+    </x-admin.list-results>
 
     {{-- Details drawer --}}
     <x-admin.drawer :show="$editing !== null" :title="__('Image details')" close="cancelEdit" id="details" :description="$editing ? $editing->file_name.' · '.\App\Support\FileSize::format((int) $editing->size) : null">

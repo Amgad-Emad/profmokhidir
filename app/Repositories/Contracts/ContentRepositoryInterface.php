@@ -31,13 +31,31 @@ interface ContentRepositoryInterface extends BaseRepositoryInterface
 
     /**
      * Admin listing: optional free-text term over the type's search columns,
-     * optional exact-match column filters (e.g. status, type, year), sorted by
+     * optional exact-match column filters (e.g. status, type, year; a list
+     * matches any of its values), sorted by
      * one of sortableColumns() or, with no sort, in display order.
      *
      * @param  array<string, mixed>  $filters
      * @return LengthAwarePaginator<int, TModel>
      */
     public function search(?string $term = null, array $filters = [], int $perPage = 20, ?string $sortBy = null, string $sortDirection = self::SORT_ASC): LengthAwarePaginator;
+
+    /**
+     * How many records search() would find for the term and filters (a filter
+     * value may be a list: any of them matches).
+     *
+     * @param  array<string, mixed>  $filters
+     */
+    public function count(?string $term = null, array $filters = []): int;
+
+    /**
+     * Records per value of one filter column, with the term and the other
+     * filters applied (the counts beside a filter's options).
+     *
+     * @param  array<string, mixed>  $filters
+     * @return array<string, int> value => count
+     */
+    public function countBy(string $column, ?string $term = null, array $filters = []): array;
 
     /**
      * Columns search() accepts as sort keys.

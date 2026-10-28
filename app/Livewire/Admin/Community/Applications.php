@@ -6,27 +6,33 @@ namespace App\Livewire\Admin\Community;
 
 use App\Constants\AdminNavigation;
 use App\Constants\CommunityStatus;
-use App\Constants\StatusTone;
+use App\Constants\ListToolbar;
 use App\Exceptions\CommunityApplicationException;
 use App\Http\Requests\Admin\CommunityReviewRequest;
 use App\Livewire\Admin\Concerns\NotifiesEditors;
+use App\Livewire\Admin\Concerns\WithListToolbar;
 use App\Models\User;
+use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Services\CommunityService;
+use App\Support\ListToolbar\ListFilter;
+use App\Support\ListToolbar\ListSort;
+use App\Support\ListToolbar\ListView;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Validator;
-use Livewire\Attributes\Url;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 /**
- * The community approval queue and member list: Pending, Approved
- * (members), Suspended and Rejected tabs. Every decision takes an optional
+ * The community approval queue and member list under the list toolbar:
+ * Pending, Members, Suspended, Rejected and All views; search; Status and
+ * Email filters. Every decision takes an optional
  * note that is emailed to the person and kept in the audit log.
  */
 class Applications extends Component
 {
-    use AuthorizesRequests, NotifiesEditors, WithPagination;
+    use AuthorizesRequests, NotifiesEditors, WithListToolbar, WithPagination;
 
     public const string ACTION_APPROVE = 'approve';
 
@@ -40,8 +46,9 @@ class Applications extends Component
 
     public const int PER_PAGE = 15;
 
-    #[Url(except: 'pending')]
-    public string $tab = CommunityStatus::Pending->value;
+    /** Opened as Members (the same screen, starting on the members). */
+    #[Locked]
+    public bool $membersPage = false;
 
     /** The user a decision is being confirmed for, and which decision. */
     public ?int $decidingId = null;
@@ -53,14 +60,61 @@ class Applications extends Component
     public function mount(): void
     {
         $this->authorize('viewAny', User::class);
+        $this->membersPage = request()->routeIs(AdminNavigation::routeFor(AdminNavigation::MEMBERS));
+    }
 
-        if (request()->routeIs(AdminNavigation::routeFor(AdminNavigation::MEMBERS)) && ! request()->has('tab')) {
-            $this->tab = CommunityStatus::Approved->value;
+    protected function listScreen(): string
+    {
+        return $this->membersPage ? AdminNavigation::MEMBERS : AdminNavigation::APPLICATIONS;
+    }
+
+    protected function listFilters(): array
+    {
+        $statuses = [];
+
+        foreach (self::tabs() as $value) {
+            $statuses[$value] = CommunityStatus::from($value)->label();
         }
 
-        if (! in_array($this->tab, self::tabs(), true)) {
-            $this->tab = CommunityStatus::Pending->value;
+        return [
+            ListFilter::single(UserRepositoryInterface::FILTER_COMMUNITY, __('Status'), $statuses),
+            ListFilter::single(UserRepositoryInterface::FILTER_EMAIL, __('Email'), [UserRepositoryInterface::YES => __('Email verified'), UserRepositoryInterface::NO => __('Email unverified')]),
+        ];
+    }
+
+    /**
+     * One view per status (Approved reads "Members"), then all applicants and members.
+     */
+    protected function listViews(): array
+    {
+        $views = [];
+
+        foreach (self::tabs() as $value) {
+            $status = CommunityStatus::from($value);
+            $views[] = new ListView($value, $status === CommunityStatus::Approved ? __('Members') : $status->label(), [UserRepositoryInterface::FILTER_COMMUNITY => $value]);
         }
+
+        return [...$views, new ListView(ListToolbar::VIEW_ALL, __('All'))];
+    }
+
+    protected function listDefaultView(): string
+    {
+        return $this->membersPage ? CommunityStatus::Approved->value : CommunityStatus::Pending->value;
+    }
+
+    protected function listSorts(): array
+    {
+        return [
+            new ListSort('', ListToolbar::SORT_DESC, __('Newest first')),
+            new ListSort('created_at', ListToolbar::SORT_ASC, __('Oldest first')),
+            new ListSort('name', ListToolbar::SORT_ASC, __('Name, A to Z')),
+            new ListSort('reviewed_at', ListToolbar::SORT_DESC, __('Recently reviewed')),
+        ];
+    }
+
+    protected function listCount(array $criteria, string $search): int
+    {
+        return $this->service()->countFiltered($search, $criteria);
     }
 
     /**
@@ -77,14 +131,6 @@ class Applications extends Component
     public static function actions(): array
     {
         return [self::ACTION_APPROVE, self::ACTION_REJECT, self::ACTION_SUSPEND, self::ACTION_REINSTATE, self::ACTION_REMOVE];
-    }
-
-    public function showTab(string $tab): void
-    {
-        if (in_array($tab, self::tabs(), true)) {
-            $this->tab = $tab;
-            $this->resetPage();
-        }
     }
 
     public function decide(string $action, int $id): void
@@ -165,23 +211,14 @@ class Applications extends Component
 
     public function render(): View
     {
-        $tabs = [];
-
-        foreach (self::tabs() as $value) {
-            $status = CommunityStatus::from($value);
-            $tabs[$value] = [
-                'label' => $status === CommunityStatus::Approved ? __('Members') : $status->label(),
-                'count' => $this->service()->countByStatus($status),
-                'tone' => StatusTone::forCommunity($status),
-            ];
-        }
-
-        $isMembersPage = request()->routeIs(AdminNavigation::routeFor(AdminNavigation::MEMBERS));
+        $users = $this->service()->filter($this->search, $this->listCriteria(), self::PER_PAGE, $this->sort ?: null, $this->sort === '' ? ListToolbar::SORT_DESC : $this->direction);
+        $isMembersPage = $this->membersPage;
 
         return view('livewire.admin.community.applications', [
-            'users' => $this->service()->paginate($this->tab, self::PER_PAGE),
-            'tabs' => $tabs,
-            'current' => CommunityStatus::from($this->tab),
+            'users' => $users,
+            'toolbar' => $this->listToolbar($users->total()),
+            'current' => CommunityStatus::tryFrom((string) ($this->filters[UserRepositoryInterface::FILTER_COMMUNITY] ?? '')),
+            'filtered' => $this->listFiltered() && $this->activeView() === '',
             'deciding' => $this->decidingId === null ? null : $this->service()->find($this->decidingId),
             'dialog' => $this->dialogCopy(),
         ])->layout('components.layouts.admin', [

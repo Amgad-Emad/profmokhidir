@@ -6,33 +6,38 @@ namespace App\Livewire\Admin\Tributes;
 
 use App\Constants\AdminNavigation;
 use App\Constants\AdminUx;
-use App\Constants\StatusTone;
+use App\Constants\ListToolbar;
+use App\Constants\TributeRelationship;
 use App\Constants\TributeStatus;
 use App\Http\Requests\Admin\TributeEditRequest;
 use App\Livewire\Admin\Concerns\NotifiesEditors;
+use App\Livewire\Admin\Concerns\WithListToolbar;
 use App\Models\Tribute;
 use App\Services\LocaleService;
 use App\Services\TributeService;
+use App\Support\ListToolbar\ListFilter;
+use App\Support\ListToolbar\ListSort;
+use App\Support\ListToolbar\ListView;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 /**
- * Tribute moderation: Pending, Approved and Rejected tabs; approve, reject,
+ * Tribute moderation: the list toolbar (Pending, Approved, Rejected, Featured
+ * and All views; search; Status, Relationship and Featured filters); approve, reject,
  * feature one approved tribute as the frontispiece of the book, fix typos (the
  * original stays in the audit log) and bulk actions. The visitor's email is
  * shown here, to moderators only, and nowhere else.
  */
 class Moderate extends Component
 {
-    use AuthorizesRequests, NotifiesEditors, WithPagination;
+    use AuthorizesRequests, NotifiesEditors, WithListToolbar, WithPagination;
 
     public const int PER_PAGE = 20;
 
-    #[Url(except: 'pending')]
-    public string $tab = 'pending';
+    public const string VIEW_FEATURED = 'featured';
 
     /** @var list<int> */
     public array $selected = [];
@@ -45,19 +50,63 @@ class Moderate extends Component
     public function mount(): void
     {
         $this->authorize('viewAny', Tribute::class);
-
-        if (! TributeStatus::isValid($this->tab)) {
-            $this->tab = TributeStatus::Pending->value;
-        }
     }
 
-    public function showTab(string $tab): void
+    protected function listScreen(): string
     {
-        if (TributeStatus::isValid($tab)) {
-            $this->tab = $tab;
-            $this->selected = [];
-            $this->resetPage();
+        return AdminNavigation::TRIBUTES;
+    }
+
+    protected function listFilters(): array
+    {
+        return [
+            ListFilter::single('status', __('Status'), TributeStatus::labels()),
+            ListFilter::multi('relationship', __('Relationship'), TributeRelationship::labels()),
+            ListFilter::flag('is_featured', __('Featured'), __('Featured in the book'), __('Featured')),
+        ];
+    }
+
+    /**
+     * Pending first (the default), then each decision, the featured tribute and everything.
+     */
+    protected function listViews(): array
+    {
+        $views = [];
+
+        foreach (TributeStatus::cases() as $status) {
+            $views[] = new ListView($status->value, $status->label(), ['status' => $status->value]);
         }
+
+        return [...$views, new ListView(self::VIEW_FEATURED, __('Featured'), ['is_featured' => ListToolbar::FLAG_ON]), new ListView(ListToolbar::VIEW_ALL, __('All'))];
+    }
+
+    protected function listDefaultView(): string
+    {
+        return TributeStatus::Pending->value;
+    }
+
+    protected function listSorts(): array
+    {
+        return [
+            new ListSort('', ListToolbar::SORT_DESC, __('Newest first')),
+            new ListSort('created_at', ListToolbar::SORT_ASC, __('Oldest first')),
+            new ListSort('name', ListToolbar::SORT_ASC, __('Name, A to Z')),
+        ];
+    }
+
+    protected function listCount(array $criteria, string $search): int
+    {
+        return $this->service()->count($search, $criteria);
+    }
+
+    protected function listGroupedCounts(string $key, array $criteria, string $search): ?array
+    {
+        return in_array($key, ['status', 'relationship'], true) ? $this->service()->countBy($key, $search, $criteria) : null;
+    }
+
+    public function clearSelection(): void
+    {
+        $this->selected = [];
     }
 
     public function approve(int $id): void
@@ -193,17 +242,14 @@ class Moderate extends Component
 
     public function render(): View
     {
-        $tributes = $this->service()->paginateByStatus($this->tab, self::PER_PAGE);
-        $tabs = [];
-
-        foreach (TributeStatus::cases() as $status) {
-            $tabs[$status->value] = ['label' => $status->label(), 'count' => $this->service()->countByStatus($status), 'tone' => StatusTone::forTribute($status)];
-        }
+        $tributes = $this->tributes();
+        $status = TributeStatus::tryFrom((string) ($this->filters['status'] ?? ''));
 
         return view('livewire.admin.tributes.moderate', [
             'tributes' => $tributes,
-            'tabs' => $tabs,
-            'current' => TributeStatus::from($this->tab),
+            'toolbar' => $this->listToolbar($tributes->total()),
+            'current' => $status,
+            'filtered' => $this->listFiltered() && $this->activeView() === '',
             'editing' => $this->editingId === null ? null : $this->service()->find($this->editingId),
             'pageIds' => $tributes->getCollection()->map(fn (Tribute $tribute): int => (int) $tribute->getKey())->all(),
         ])->layout('components.layouts.admin', ['title' => AdminNavigation::get(AdminNavigation::TRIBUTES)['label']]);
@@ -211,10 +257,20 @@ class Moderate extends Component
 
     public function toggleAll(): void
     {
-        $pageIds = $this->service()->paginateByStatus($this->tab, self::PER_PAGE)->getCollection()
+        $pageIds = $this->tributes()->getCollection()
             ->map(fn (Tribute $tribute): int => (int) $tribute->getKey())->all();
 
         $this->selected = array_diff($pageIds, $this->selected) === [] ? [] : $pageIds;
+    }
+
+    /**
+     * The page of tributes for the search, filters and sort (newest first unless sorted).
+     *
+     * @return LengthAwarePaginator<int, Tribute>
+     */
+    private function tributes(): LengthAwarePaginator
+    {
+        return $this->service()->search($this->search, $this->listCriteria(), self::PER_PAGE, $this->sort ?: 'created_at', $this->sort === '' ? ListToolbar::SORT_DESC : $this->direction);
     }
 
     private function forget(int $id): void

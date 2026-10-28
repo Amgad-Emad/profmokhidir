@@ -4,34 +4,40 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin\Users;
 
+use App\Constants\AccountState;
 use App\Constants\AdminNavigation;
 use App\Constants\CommunityStatus;
+use App\Constants\ListToolbar;
 use App\Constants\Locales;
 use App\Constants\Roles;
 use App\Exceptions\UserManagementException;
 use App\Http\Requests\Admin\StaffInviteRequest;
 use App\Http\Requests\Admin\StaffRoleRequest;
 use App\Livewire\Admin\Concerns\NotifiesEditors;
+use App\Livewire\Admin\Concerns\WithListToolbar;
 use App\Models\User;
+use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Services\RoleService;
 use App\Services\UserService;
+use App\Support\ListToolbar\ListFilter;
+use App\Support\ListToolbar\ListSort;
+use App\Support\ListToolbar\ListView;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Validator;
 use InvalidArgumentException;
-use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 /**
- * Users & roles (admin only): every staff and community account with search
- * and filters, staff invitations by set-password email, role changes,
+ * Users & roles (admin only): every staff and community account under the
+ * list toolbar (views, search; Role, Status, Community and Two-factor filters), staff invitations by set-password email, role changes,
  * deactivation and reactivation. Every change goes through UserService, which
  * audits it and protects the last active administrator.
  */
 class Index extends Component
 {
-    use AuthorizesRequests, NotifiesEditors, WithPagination;
+    use AuthorizesRequests, NotifiesEditors, WithListToolbar, WithPagination;
 
     public const int PER_PAGE = 15;
 
@@ -41,14 +47,15 @@ class Index extends Component
 
     public const string ACTION_RESEND = 'resend';
 
-    #[Url(except: '')]
-    public string $search = '';
+    public const string VIEW_STAFF = 'staff';
 
-    #[Url(except: '')]
-    public string $role = '';
+    public const string VIEW_MEMBERS = 'members';
 
-    #[Url(except: '')]
-    public string $status = '';
+    public const string VIEW_INVITED = 'invited';
+
+    public const string VIEW_DEACTIVATED = 'deactivated';
+
+    public const string VIEW_NO_TWO_FACTOR = 'no-two-factor';
 
     public bool $inviting = false;
 
@@ -66,14 +73,47 @@ class Index extends Component
     public function mount(): void
     {
         $this->authorize('invite', User::class);
+    }
 
-        if ($this->role !== '' && ! Roles::isValid($this->role)) {
-            $this->role = '';
-        }
+    protected function listScreen(): string
+    {
+        return AdminNavigation::USERS;
+    }
 
-        if ($this->status !== '' && ! in_array($this->status, CommunityStatus::values(), true)) {
-            $this->status = '';
-        }
+    protected function listFilters(): array
+    {
+        return [
+            ListFilter::multi(UserRepositoryInterface::FILTER_ROLE, __('Role'), Roles::labels()),
+            ListFilter::multi(UserRepositoryInterface::FILTER_ACCOUNT, __('Status'), AccountState::labels()),
+            ListFilter::multi(UserRepositoryInterface::FILTER_COMMUNITY, __('Community'), CommunityStatus::labels()),
+            ListFilter::single(UserRepositoryInterface::FILTER_TWO_FACTOR, __('Two-factor'), [UserRepositoryInterface::YES => __('Two-factor on'), UserRepositoryInterface::NO => __('Two-factor off')]),
+        ];
+    }
+
+    protected function listViews(): array
+    {
+        return [
+            new ListView(ListToolbar::VIEW_ALL, __('All')),
+            new ListView(self::VIEW_STAFF, __('Staff'), [UserRepositoryInterface::FILTER_ROLE => implode(ListToolbar::VALUE_SEPARATOR, Roles::staff())]),
+            new ListView(self::VIEW_MEMBERS, __('Members'), [UserRepositoryInterface::FILTER_COMMUNITY => CommunityStatus::Approved->value]),
+            new ListView(self::VIEW_INVITED, __('Invitations pending'), [UserRepositoryInterface::FILTER_ACCOUNT => AccountState::Invited->value]),
+            new ListView(self::VIEW_NO_TWO_FACTOR, __('Staff without two-factor'), [UserRepositoryInterface::FILTER_ROLE => implode(ListToolbar::VALUE_SEPARATOR, Roles::staff()), UserRepositoryInterface::FILTER_TWO_FACTOR => UserRepositoryInterface::NO]),
+            new ListView(self::VIEW_DEACTIVATED, __('Deactivated'), [UserRepositoryInterface::FILTER_ACCOUNT => AccountState::Deactivated->value]),
+        ];
+    }
+
+    protected function listSorts(): array
+    {
+        return [
+            new ListSort('', ListToolbar::SORT_ASC, __('Name, A to Z')),
+            new ListSort('name', ListToolbar::SORT_DESC, __('Name, Z to A')),
+            new ListSort('created_at', ListToolbar::SORT_DESC, __('Newest accounts first')),
+        ];
+    }
+
+    protected function listCount(array $criteria, string $search): int
+    {
+        return $this->users()->countFiltered($search, $criteria);
     }
 
     /**
@@ -82,27 +122,6 @@ class Index extends Component
     public static function actions(): array
     {
         return [self::ACTION_DEACTIVATE, self::ACTION_REACTIVATE, self::ACTION_RESEND];
-    }
-
-    public function updatedSearch(): void
-    {
-        $this->resetPage();
-    }
-
-    public function updatedRole(): void
-    {
-        $this->resetPage();
-    }
-
-    public function updatedStatus(): void
-    {
-        $this->resetPage();
-    }
-
-    public function clearFilters(): void
-    {
-        $this->reset('search', 'role', 'status');
-        $this->resetPage();
     }
 
     // Invitations -----------------------------------------------------------
@@ -252,12 +271,7 @@ class Index extends Component
 
     public function render(): View
     {
-        $users = $this->users()->search(
-            $this->search,
-            $this->role === '' ? null : $this->role,
-            $this->status === '' ? null : CommunityStatus::from($this->status),
-            self::PER_PAGE,
-        );
+        $users = $this->users()->filter($this->search, $this->listCriteria(), self::PER_PAGE, $this->sort ?: null, $this->direction);
 
         $rows = [];
 
@@ -272,8 +286,7 @@ class Index extends Component
         return view('livewire.admin.users.index', [
             'users' => $users,
             'rows' => $rows,
-            'roleOptions' => Roles::labels(),
-            'statusOptions' => CommunityStatus::labels(),
+            'toolbar' => $this->listToolbar($users->total()),
             'staffRoleOptions' => StaffRoleRequest::labels(),
             'localeOptions' => array_combine(Locales::all(), array_map(Locales::native(...), Locales::all())),
             'activeAdmins' => $this->users()->countActiveAdmins(),

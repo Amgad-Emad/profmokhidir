@@ -69,15 +69,15 @@ class UsersScreenTest extends TestCase
             ->set('search', 'edna')
             ->assertSee('Edna Editor')->assertDontSee('Amina Member')
             ->set('search', '')
-            ->set('role', Roles::MEMBER)
+            ->call('toggleFilter', 'role', Roles::MEMBER)
             ->assertSee('Amina Member')->assertDontSee('Edna Editor')
-            ->set('role', '')
-            ->set('status', CommunityStatus::Pending->value)
+            ->call('removeFilter', 'role')
+            ->set('filters.community', CommunityStatus::Pending->value)
             ->assertSee('Omar Applicant')->assertDontSee('Amina Member')
             ->set('search', 'nobody')
-            ->assertSee('Nobody matches your search.')
+            ->assertSee('No items match these filters')
             ->call('clearFilters')
-            ->assertSet('search', '')->assertSet('role', '')->assertSet('status', '')
+            ->assertSet('search', '')->assertSet('filters', [])
             ->assertSee('Edna Editor');
     }
 

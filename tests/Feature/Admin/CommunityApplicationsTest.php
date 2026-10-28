@@ -44,7 +44,7 @@ class CommunityApplicationsTest extends TestCase
         $this->assertSame(url('/admin/community'), route(AdminNavigation::routeFor(AdminNavigation::APPLICATIONS)));
 
         $this->actingAs($this->admin)->get(route(AdminNavigation::routeFor(AdminNavigation::APPLICATIONS)))->assertOk()
-            ->assertSee('data-tab="pending"', false)
+            ->assertSee('data-view="pending"', false)
             ->assertSee('Fatima El-Tayeb')
             ->assertSee('fatima@example.com')
             ->assertSee('University of Khartoum')
@@ -55,7 +55,7 @@ class CommunityApplicationsTest extends TestCase
 
         // The members page is the same screen opened on the Members tab.
         $this->actingAs($this->admin)->get(route(AdminNavigation::routeFor(AdminNavigation::MEMBERS)))->assertOk()
-            ->assertSee('aria-selected="true" class="admin-tab inline-flex items-center gap-2" data-tab="approved"', false)
+            ->assertSeeInOrder(['aria-selected="true"', 'data-view="approved"'], false)
             ->assertSee('There are no members yet.');
     }
 

@@ -21,6 +21,7 @@ use App\Repositories\Contracts\ColourThemeRepositoryInterface;
 use App\Repositories\Contracts\CommentaryRepositoryInterface;
 use App\Repositories\Contracts\CvEntryRepositoryInterface;
 use App\Repositories\Contracts\HomeQuoteRepositoryInterface;
+use App\Repositories\Contracts\ListPreferenceRepositoryInterface;
 use App\Repositories\Contracts\MediaRepositoryInterface;
 use App\Repositories\Contracts\OtherItemRepositoryInterface;
 use App\Repositories\Contracts\PageRepositoryInterface;
@@ -49,16 +50,17 @@ use App\Repositories\Eloquent\EloquentChatMessageRepository;
 use App\Repositories\Eloquent\EloquentChatReadRepository;
 use App\Repositories\Eloquent\EloquentChatReportRepository;
 use App\Repositories\Eloquent\EloquentChatUploadRepository;
+use App\Repositories\Eloquent\EloquentColourThemeRepository;
 use App\Repositories\Eloquent\EloquentCommentaryRepository;
 use App\Repositories\Eloquent\EloquentCvEntryRepository;
 use App\Repositories\Eloquent\EloquentHomeQuoteRepository;
+use App\Repositories\Eloquent\EloquentListPreferenceRepository;
 use App\Repositories\Eloquent\EloquentOtherItemRepository;
 use App\Repositories\Eloquent\EloquentPageRepository;
 use App\Repositories\Eloquent\EloquentProfileRepository;
 use App\Repositories\Eloquent\EloquentPublicationRepository;
 use App\Repositories\Eloquent\EloquentRevisionRepository;
 use App\Repositories\Eloquent\EloquentSearchRepository;
-use App\Repositories\Eloquent\EloquentColourThemeRepository;
 use App\Repositories\Eloquent\EloquentSettingRepository;
 use App\Repositories\Eloquent\EloquentTeachingMaterialRepository;
 use App\Repositories\Eloquent\EloquentTributeRepository;
@@ -107,6 +109,7 @@ class RepositoryServiceProvider extends ServiceProvider
         AnalyticsSaltRepositoryInterface::class => EloquentAnalyticsSaltRepository::class,
         AnalyticsRollupRepositoryInterface::class => EloquentAnalyticsRollupRepository::class,
         ColourThemeRepositoryInterface::class => EloquentColourThemeRepository::class,
+        ListPreferenceRepositoryInterface::class => EloquentListPreferenceRepository::class,
     ];
 
     /**

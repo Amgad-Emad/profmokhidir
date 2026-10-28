@@ -10,6 +10,7 @@ use App\Constants\TeachingMaterialType;
 use App\Livewire\Admin\ContentIndex;
 use App\Services\AbstractContentService;
 use App\Services\TeachingMaterialService;
+use App\Support\ListToolbar\ListFilter;
 use Illuminate\Support\Str;
 
 class Index extends ContentIndex
@@ -29,9 +30,13 @@ class Index extends ContentIndex
         return ['title' => 'Title', 'course' => 'Course', 'type' => 'Type', 'access' => 'Access', 'material_date' => 'Date', 'status' => 'Status'];
     }
 
-    protected function filterOptions(): array
+    protected function contentFilters(): array
     {
-        return ['type' => ['label' => 'Type', 'options' => TeachingMaterialType::labels()], 'access' => ['label' => 'Access', 'options' => TeachingAccess::labels()], 'course' => ['label' => 'Course', 'options' => $this->options('course')]];
+        return [
+            ListFilter::multi('type', __('Type'), TeachingMaterialType::labels()),
+            ListFilter::single('access', __('Access'), TeachingAccess::labels()),
+            ListFilter::multi('course', __('Course'), $this->options('course')),
+        ];
     }
 
     /**

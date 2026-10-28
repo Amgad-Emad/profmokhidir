@@ -87,6 +87,30 @@ abstract class BaseContentRepository extends BaseEloquentRepository implements C
         return $query->paginate($perPage)->withQueryString();
     }
 
+    public function count(?string $term = null, array $filters = []): int
+    {
+        return $this->filtered($this->query(), $term, $filters)->count();
+    }
+
+    public function countBy(string $column, ?string $term = null, array $filters = []): array
+    {
+        if (! in_array($column, $this->filterColumns, true)) {
+            throw new InvalidArgumentException(sprintf('%s has no "%s" filter.', $this->model::class, $column));
+        }
+
+        unset($filters[$column]);
+        $wrapped = $this->model->qualifyColumn($column);
+
+        return $this->filtered($this->query(), $term, $filters)
+            ->toBase()
+            ->select($wrapped.' as value')
+            ->selectRaw('COUNT(*) as aggregate')
+            ->groupBy($wrapped)
+            ->pluck('aggregate', 'value')
+            ->mapWithKeys(fn ($count, $value): array => [(string) $value => (int) $count])
+            ->all();
+    }
+
     public function sortableColumns(): array
     {
         return array_values(array_unique(array_merge(
@@ -272,7 +296,13 @@ abstract class BaseContentRepository extends BaseEloquentRepository implements C
             ->when($this->translates() && (bool) ($filters[self::FILTER_NEEDS_TRANSLATION] ?? false), fn (Builder $query) => $query->needingTranslation(Locales::AR))
             ->when($filters !== [], function (Builder $query) use ($filters): void {
                 foreach ($filters as $column => $value) {
-                    if ($value === null || $value === '' || ! in_array($column, $this->filterColumns, true)) {
+                    if ($value === null || $value === '' || $value === [] || ! in_array($column, $this->filterColumns, true)) {
+                        continue;
+                    }
+
+                    if (is_array($value)) {
+                        $query->whereIn($column, array_map(fn ($item) => $item instanceof \BackedEnum ? $item->value : $item, $value));
+
                         continue;
                     }
 

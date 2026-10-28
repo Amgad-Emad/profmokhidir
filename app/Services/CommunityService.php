@@ -241,6 +241,38 @@ class CommunityService
         return $this->users->paginateByCommunityStatus($statusEnum, $perPage);
     }
 
+    /**
+     * Applicants and members for the community screen: search and
+     * UserRepositoryInterface::FILTER_* criteria, limited to accounts that have
+     * applied (any status but None) unless a community status is chosen.
+     *
+     * @param  array<string, string|list<string>>  $criteria
+     * @return LengthAwarePaginator<int, User>
+     */
+    public function filter(?string $term, array $criteria, int $perPage = 15, ?string $sortBy = null, string $sortDirection = 'desc'): LengthAwarePaginator
+    {
+        return $this->users->filter($term, $this->applied($criteria), $perPage, $sortBy ?? 'created_at', $sortDirection);
+    }
+
+    /**
+     * @param  array<string, string|list<string>>  $criteria
+     */
+    public function countFiltered(?string $term, array $criteria): int
+    {
+        return $this->users->countFiltered($term, $this->applied($criteria));
+    }
+
+    /**
+     * @param  array<string, string|list<string>>  $criteria
+     * @return array<string, string|list<string>>
+     */
+    private function applied(array $criteria): array
+    {
+        $criteria[UserRepositoryInterface::FILTER_COMMUNITY] ??= array_values(array_diff(CommunityStatus::values(), [CommunityStatus::None->value]));
+
+        return $criteria;
+    }
+
     private function grantMembership(User $user, User $actor): void
     {
         if ($user->hasRole(Roles::APPLICANT)) {

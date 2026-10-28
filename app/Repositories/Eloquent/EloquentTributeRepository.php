@@ -19,7 +19,9 @@ class EloquentTributeRepository extends BaseContentRepository implements Tribute
 {
     protected array $searchColumns = ['name', 'message', 'location'];
 
-    protected array $filterColumns = ['status', 'relationship'];
+    protected array $filterColumns = ['status', 'relationship', 'is_featured'];
+
+    protected array $sortableColumns = ['name', 'created_at'];
 
     public function __construct(Tribute $tribute)
     {

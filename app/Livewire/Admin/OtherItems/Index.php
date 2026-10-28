@@ -8,6 +8,7 @@ use App\Constants\ContentTypes;
 use App\Livewire\Admin\ContentIndex;
 use App\Services\AbstractContentService;
 use App\Services\OtherItemService;
+use App\Support\ListToolbar\ListFilter;
 use Illuminate\Support\Str;
 
 class Index extends ContentIndex
@@ -27,9 +28,12 @@ class Index extends ContentIndex
         return ['title' => 'Title', 'category' => 'Category', 'item_type' => 'Type', 'date' => 'Date', 'status' => 'Status'];
     }
 
-    protected function filterOptions(): array
+    protected function contentFilters(): array
     {
-        return ['category' => ['label' => 'Category', 'options' => $this->options('category')], 'item_type' => ['label' => 'Type', 'options' => $this->options('item_type')]];
+        return [
+            ListFilter::multi('category', __('Category'), $this->options('category')),
+            ListFilter::multi('item_type', __('Type'), $this->options('item_type')),
+        ];
     }
 
     /**

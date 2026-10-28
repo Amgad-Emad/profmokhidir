@@ -1,10 +1,10 @@
 {{--
     A single-line field (text, email, url, tel, number, search). Plain forms pass `name`
     (the old() value and the error bag follow it); Livewire forms pass `model`, bound with
-    wire:model.live.blur (or `live` for search boxes, debounced). `required` prints "Required" in
+    wire:model.live.blur (or `live` for search boxes, debounced 400ms, or `live` = the debounce in ms). `required` prints "Required" in
     the hint line, otherwise "Optional" (`:optional="false"` for filters and search boxes).
     `class` goes on the field; every other attribute lands on the <input>. A trailing button
-    (clear, show) goes in the `action` slot; `loading` names a Livewire target that puts the
+    (clear, show) goes in the `action` slot, a leading icon in the `leading` slot; `loading` names a Livewire target that puts the
     control in its loading state while it runs; `frame` adds attributes to the frame itself. With a
     Livewire `model`, `value` only seeds the character counter (Livewire fills the field).
 --}}
@@ -37,7 +37,7 @@
 @inject('forms', 'App\Services\FormFieldService')
 @php
     $field = $forms->describe(['error' => $error, 
-        'name' => $name, 'model' => $model, 'wire' => $live ? 'live.debounce.400ms' : 'live.blur',
+        'name' => $name, 'model' => $model, 'wire' => $live ? 'live.debounce.'.(is_int($live) ? $live : 400).'ms' : 'live.blur',
         'id' => $id, 'label' => $label, 'hint' => $hint, 'required' => $required,
         'optional' => $optional, 'bag' => $bag, 'maxlength' => $maxlength, 'counter' => $counter,
     ], $errors ?? null);
@@ -53,6 +53,7 @@
 @endphp
 <x-form.field :field="$field" :hide-label="$hideLabel" :class="$attributes->get('class')" :counter-text="$field['counter'] ? __(\App\Constants\FormControls::COUNTER_FORMAT, ['count' => (string) mb_strlen((string) ($model === null ? $current : $value)), 'max' => (string) $maxlength]) : null">
     <div @class($frameClasses) {{ $frameAttributes }} @if ($loading) wire:loading.attr="data-loading" wire:target="{{ $loading }}" @endif>
+        {{ $leading ?? '' }}
         @if ($prefix)
             <span class="form-control__affix" aria-hidden="true">{{ $prefix }}</span>
         @endif

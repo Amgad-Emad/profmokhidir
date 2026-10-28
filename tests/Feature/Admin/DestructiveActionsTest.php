@@ -144,6 +144,7 @@ class DestructiveActionsTest extends TestCase
         $tribute = Tribute::factory()->pending()->create(['name' => 'Salma']);
         Livewire::actingAs($this->editor)->test(Moderate::class)
             ->assertSee('class="'.self::OUTLINE.'" wire:click="decline('.$tribute->getKey().')" data-reject', false)
+            ->set('selected', [$tribute->getKey()])
             ->assertSee('class="'.self::OUTLINE.'" wire:click="rejectSelected"', false);
     }
 

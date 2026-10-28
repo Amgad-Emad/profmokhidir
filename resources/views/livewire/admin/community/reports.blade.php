@@ -6,22 +6,20 @@
 
     <div class="mt-8"><x-admin.flash /></div>
 
-    <div class="flex flex-wrap items-center gap-2 border-b border-rule" role="tablist" aria-label="{{ __('Report state') }}">
-        <button type="button" role="tab" wire:click="showTab('{{ Reports::TAB_OPEN }}')" aria-selected="{{ $tab === Reports::TAB_OPEN ? 'true' : 'false' }}" class="admin-tab inline-flex items-center gap-2" data-tab="open">
-            <x-icon name="clock" class="size-4" />{{ __('Open') }}<span class="font-mono text-sm text-ink-muted">@num($openCount)</span>
-        </button>
-        <button type="button" role="tab" wire:click="showTab('{{ Reports::TAB_RESOLVED }}')" aria-selected="{{ $tab === Reports::TAB_RESOLVED ? 'true' : 'false' }}" class="admin-tab inline-flex items-center gap-2" data-tab="resolved">
-            <x-icon name="check" class="size-4" />{{ __('Resolved') }}
-        </button>
-    </div>
+    <x-admin.list-toolbar :toolbar="$toolbar" :items="__('reports')" :placeholder="__('Search reasons, messages and names')" />
 
+    <x-admin.list-results :density="$toolbar['density']">
     @if ($reports->isEmpty())
-        <x-empty-state :message="$tab === Reports::TAB_OPEN ? __('No reports are waiting.') : __('No reports have been resolved yet.')" />
+        @if ($filtered)
+            <x-admin.list-empty :title="__('No reports yet')" text="" :filtered="true" />
+        @else
+            <x-empty-state :message="match ($state) { Reports::TAB_OPEN => __('No reports are waiting.'), Reports::TAB_RESOLVED => __('No reports have been resolved yet.'), default => __('Nothing has been reported.') }" />
+        @endif
     @else
-        <ul class="mt-6 space-y-4" data-reports>
+        <ul class="list-cards" data-reports>
             @foreach ($reports as $report)
                 @php $message = $report->message; @endphp
-                <li wire:key="report-{{ $report->getKey() }}" class="rounded-card border border-rule bg-surface-panel p-5" data-report="{{ $report->getKey() }}">
+                <li wire:key="report-{{ $report->getKey() }}" class="list-card rounded-card border border-rule bg-surface-panel p-5" data-report="{{ $report->getKey() }}">
                     <div class="flex flex-col gap-4 lg:flex-row lg:items-start">
                         <div class="min-w-0 flex-1">
                             <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm">
@@ -75,6 +73,7 @@
         </ul>
         {{ $reports->links('components.admin.pagination') }}
     @endif
+    </x-admin.list-results>
 
     <x-admin.confirm-dialog :show="$this->isConfirming(Reports::ACTION_DELETE)" danger :title="__('Remove this message permanently?')" action="deleteMessage" :confirm-label="__('Remove message')">
         {{ __('Members will see ":placeholder" in its place, its attached files are deleted, and every report about it will be resolved.', ['placeholder' => __(\App\Constants\ChatSettings::REMOVED_PLACEHOLDER)]) }} {{ __(\App\Constants\ConfirmDialog::IRREVERSIBLE) }}

@@ -187,9 +187,17 @@ class MediaService
      * @param  array<string, mixed>  $filters  keyed by MediaRepositoryInterface::FILTER_*
      * @return LengthAwarePaginator<int, Media>
      */
-    public function library(?string $term = null, array $filters = [], int $perPage = 24): LengthAwarePaginator
+    public function library(?string $term = null, array $filters = [], int $perPage = 24, ?string $sortBy = null, string $sortDirection = 'desc'): LengthAwarePaginator
     {
-        return $this->media->searchImages($term, $filters, $perPage);
+        return $this->media->searchImages($term, $filters, $perPage, $sortBy, $sortDirection);
+    }
+
+    /**
+     * @param  array<string, mixed>  $filters  keyed by MediaRepositoryInterface::FILTER_*
+     */
+    public function countLibrary(?string $term = null, array $filters = []): int
+    {
+        return $this->media->countImages($term, $filters);
     }
 
     public function countIncompleteImages(): int

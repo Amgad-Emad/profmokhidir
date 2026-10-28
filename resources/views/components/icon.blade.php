@@ -124,6 +124,18 @@
     @case('chevron-down')
         <path d="M6 9.5l6 6 6-6" />
         @break
+    @case('sliders')
+        <path d="M4 7h9" /><path d="M17 7h3" /><circle cx="15" cy="7" r="2" /><path d="M4 17h3" /><path d="M11 17h9" /><circle cx="9" cy="17" r="2" />
+        @break
+    @case('sort')
+        <path d="M8 5v14" /><path d="M5 8l3-3 3 3" /><path d="M16 19V5" /><path d="M13 16l3 3 3-3" />
+        @break
+    @case('rows')
+        <path d="M4 6.5h16" /><path d="M4 12h16" /><path d="M4 17.5h16" />
+        @break
+    @case('rows-compact')
+        <path d="M4 5h16" /><path d="M4 9.5h16" /><path d="M4 14h16" /><path d="M4 18.5h16" />
+        @break
     @case('plus')
         <path d="M12 5v14" /><path d="M5 12h14" />
         @break

@@ -116,9 +116,31 @@ final class SpatieMediaRepository implements MediaRepositoryInterface
         return $model->media()->count();
     }
 
-    public function searchImages(?string $term = null, array $filters = [], int $perPage = 24): LengthAwarePaginator
+    public function searchImages(?string $term = null, array $filters = [], int $perPage = 24, ?string $sortBy = null, string $sortDirection = 'desc'): LengthAwarePaginator
+    {
+        $direction = $sortDirection === 'asc' ? 'asc' : 'desc';
+        $column = in_array($sortBy, self::SORT_COLUMNS, true) ? $sortBy : 'created_at';
+
+        return $this->filteredImages($term, $filters)
+            ->orderBy($column, $column === 'created_at' && $sortBy === null ? 'desc' : $direction)
+            ->orderBy('id', $column === 'created_at' && $sortBy === null ? 'desc' : $direction)
+            ->paginate($perPage)
+            ->withQueryString();
+    }
+
+    public function countImages(?string $term = null, array $filters = []): int
+    {
+        return $this->filteredImages($term, $filters)->count();
+    }
+
+    /**
+     * @param  array<string, mixed>  $filters
+     * @return Builder<Media>
+     */
+    private function filteredImages(?string $term, array $filters): Builder
     {
         $term = trim((string) $term);
+        $collections = array_values(array_filter((array) ($filters[self::FILTER_COLLECTION] ?? []), 'filled'));
 
         return $this->imagesQuery()
             ->when($term !== '', function (Builder $query) use ($term): void {
@@ -133,17 +155,13 @@ final class SpatieMediaRepository implements MediaRepositoryInterface
                     }
                 });
             })
-            ->when(filled($filters[self::FILTER_COLLECTION] ?? null), fn (Builder $query) => $query->where('collection_name', $filters[self::FILTER_COLLECTION]))
+            ->when($collections !== [], fn (Builder $query) => $query->whereIn('collection_name', $collections))
             ->when(filled($filters[self::FILTER_TREATMENT] ?? null), fn (Builder $query) => $query->where('custom_properties->'.MediaProperties::TREATMENT, $filters[self::FILTER_TREATMENT]))
             ->when(filled($filters[self::FILTER_MODEL] ?? null), fn (Builder $query) => $query->where('model_type', $filters[self::FILTER_MODEL]))
             ->when((bool) ($filters[self::FILTER_INCOMPLETE] ?? false), fn (Builder $query) => $this->whereIncomplete($query))
             ->when((bool) ($filters[self::FILTER_MISSING_ALT] ?? false), fn (Builder $query) => $this->whereMissing($query, MediaProperties::ALT_TEXT))
             ->when((bool) ($filters[self::FILTER_UNUSED] ?? false), fn (Builder $query) => $this->whereUnused($query))
-            ->when(filled($filters[self::FILTER_ALBUM] ?? null), fn (Builder $query) => $query->where('model_type', (new Album)->getMorphClass())->where('model_id', (int) $filters[self::FILTER_ALBUM]))
-            ->orderByDesc('created_at')
-            ->orderByDesc('id')
-            ->paginate($perPage)
-            ->withQueryString();
+            ->when(filled($filters[self::FILTER_ALBUM] ?? null), fn (Builder $query) => $query->where('model_type', (new Album)->getMorphClass())->where('model_id', (int) $filters[self::FILTER_ALBUM]));
     }
 
     public function countIncompleteImages(): int
