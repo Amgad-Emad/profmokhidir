@@ -1,0 +1,975 @@
+/*
+ | The shared admin data table (resources/views/components/admin/data-table.blade.php,
+ | resources/js/admin/data-table.js). Compact rows (56px comfortable, 44px compact) with thin rule
+ | dividers on the raised surface, a sticky header and sticky selection and primary columns, a soft
+ | edge shadow while columns overflow, row actions that show on hover or focus, skeleton rows while
+ | loading, and cards under 768px. Logical properties throughout, so Arabic mirrors on its own.
+ */
+@layer components {
+    .data-table {
+        --dt-row: 3.5rem;
+        --dt-pad-block: 0.4375rem;
+        --dt-pad-inline: 0.875rem;
+        --dt-lead: 3rem;
+        --dt-bg: var(--surface-panel);
+        --dt-hover: color-mix(in srgb, var(--ink) 4%, var(--surface-panel));
+        --dt-selected: color-mix(in srgb, var(--ink) 7%, var(--surface-panel));
+        --dt-shadow: color-mix(in srgb, var(--ink) 22%, transparent);
+        position: relative;
+    }
+
+    .list-results[data-density='compact'] .data-table {
+        --dt-row: 2.75rem;
+        --dt-pad-block: 0.125rem;
+    }
+
+    .data-table[data-reordering] {
+        --dt-lead: 6.5rem;
+    }
+
+    /* ------------------------------------------------------------ frame and scrolling */
+    .data-table__frame {
+        position: relative;
+        border-radius: var(--radius-card);
+        background-color: var(--dt-bg);
+        box-shadow: 0 0 0 1px var(--rule);
+    }
+
+    /* The soft edge shadow at the end while more columns wait there (a shadow, not a gradient). */
+    .data-table__frame::after {
+        content: '';
+        position: absolute;
+        inset-block: 0;
+        inset-inline-end: 0;
+        width: 1rem;
+        pointer-events: none;
+        border-start-end-radius: var(--radius-card);
+        border-end-end-radius: var(--radius-card);
+        opacity: 0;
+        transition: opacity 200ms ease;
+        box-shadow: inset -0.875rem 0 0.75rem -0.75rem var(--dt-shadow);
+    }
+
+    .data-table__frame:dir(rtl)::after {
+        box-shadow: inset 0.875rem 0 0.75rem -0.75rem var(--dt-shadow);
+    }
+
+    .data-table[data-more-end] .data-table__frame::after {
+        opacity: 1;
+    }
+
+    /* Positioned, so screen-reader-only text in the cells scrolls with it instead of widening the page. */
+    .data-table__scroll {
+        position: relative;
+        overflow: auto;
+        max-height: calc(100dvh - 7rem);
+        border-radius: var(--radius-card);
+        overscroll-behavior-inline: contain;
+    }
+
+    .data-table__scroll:focus-visible {
+        outline: 2px solid var(--focus-on-raised);
+        outline-offset: 2px;
+    }
+
+    .data-table__table {
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 0.9375rem;
+        font-variant-numeric: lining-nums tabular-nums;
+        text-align: start;
+    }
+
+    .data-table__col-lead {
+        width: var(--dt-lead);
+    }
+
+    .data-table__col-actions {
+        width: 3.25rem;
+    }
+
+    /* ------------------------------------------------------------ header */
+    .data-table__table thead th {
+        position: sticky;
+        inset-block-start: 0;
+        z-index: 2;
+        height: 2.75rem;
+        padding: 0 var(--dt-pad-inline);
+        background-color: var(--dt-bg);
+        border-block-end: 1px solid var(--rule);
+        color: var(--ink-muted);
+        font-size: 0.75rem;
+        font-weight: 500;
+        letter-spacing: 0.24em;
+        text-transform: uppercase;
+        text-align: start;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .data-table__table thead th.is-end {
+        text-align: end;
+    }
+
+    .data-table__sort {
+        display: inline-flex;
+        max-width: 100%;
+        align-items: center;
+        gap: 0.375rem;
+        min-height: 2.75rem;
+        color: inherit;
+        letter-spacing: inherit;
+        text-transform: inherit;
+        font-weight: inherit;
+    }
+
+    /* End-aligned headings keep their words over the figures: the arrow goes before them. */
+    th.is-end .data-table__sort {
+        flex-direction: row-reverse;
+    }
+
+    .data-table__sort > span:first-child {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .data-table__sort:hover {
+        color: var(--ink);
+    }
+
+    .data-table__sort-icon {
+        opacity: 0;
+        transition: opacity 150ms ease;
+    }
+
+    .data-table__sort:hover .data-table__sort-icon,
+    .data-table__sort:focus-visible .data-table__sort-icon,
+    .data-table__sort-icon.is-active {
+        opacity: 1;
+    }
+
+    th[aria-sort] .data-table__sort {
+        color: var(--ink);
+    }
+
+    /* ------------------------------------------------------------ rows and cells */
+    .data-table__rows > tr > td,
+    .data-table__skeleton > tr > td {
+        height: var(--dt-row);
+        padding: var(--dt-pad-block) var(--dt-pad-inline);
+        vertical-align: middle;
+        background-color: var(--dt-bg);
+        border-block-end: 1px solid var(--rule);
+        font-weight: 400;
+        color: var(--ink);
+    }
+
+    .data-table__rows > tr:last-child > td {
+        border-block-end: 0;
+    }
+
+    .data-table__row:hover > td {
+        background-color: var(--dt-hover);
+    }
+
+    .data-table__row.has-link {
+        cursor: pointer;
+    }
+
+    .data-table__row.is-selected > td {
+        background-color: var(--dt-selected);
+    }
+
+    .data-table__row.is-dragging > td {
+        opacity: 0.5;
+    }
+
+    .data-table__cell {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: start;
+    }
+
+    .data-table__cell.is-end {
+        text-align: end;
+    }
+
+    .data-table__cell.is-muted,
+    .data-table__cell[data-cell-type='relative'],
+    .data-table__cell[data-cell-type='date'] {
+        color: var(--ink-muted);
+    }
+
+    .data-table__clip {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .data-table__muted {
+        color: var(--ink-muted);
+    }
+
+    /* The checkbox (or Reorder handle) and the primary cell stick to the start edge. */
+    .data-table__lead {
+        position: sticky;
+        inset-inline-start: 0;
+        z-index: 1;
+        width: var(--dt-lead);
+        padding-inline: 0.875rem 0 !important;
+    }
+
+    thead .data-table__lead {
+        z-index: 3;
+    }
+
+    .data-table__primary {
+        position: sticky;
+        inset-inline-start: 0;
+        z-index: 1;
+    }
+
+    thead .data-table__primary {
+        z-index: 3;
+    }
+
+    .data-table__lead + .data-table__primary {
+        inset-inline-start: var(--dt-lead);
+    }
+
+    .data-table[data-more-start] td.data-table__primary,
+    .data-table[data-more-start] th.data-table__primary {
+        box-shadow: 0.75rem 0 0.75rem -0.75rem var(--dt-shadow);
+    }
+
+    .data-table[data-more-start] td.data-table__primary:dir(rtl),
+    .data-table[data-more-start] th.data-table__primary:dir(rtl) {
+        box-shadow: -0.75rem 0 0.75rem -0.75rem var(--dt-shadow);
+    }
+
+    .data-table__primary-inner {
+        display: flex;
+        min-width: 0;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .data-table__thumb {
+        width: 2.5rem;
+        height: 2.5rem;
+        flex-shrink: 0;
+        border-radius: var(--radius-card);
+        object-fit: cover;
+        background-color: var(--surface-sunken);
+        box-shadow: 0 0 0 1px var(--rule);
+    }
+
+    .data-table__text {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .data-table__title-line {
+        display: flex;
+        min-width: 0;
+        align-items: center;
+        gap: 0.5rem;
+        line-height: 1.25;
+    }
+
+    .data-table__title {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-weight: 500;
+        color: var(--ink);
+        text-decoration: none;
+    }
+
+    a.data-table__title:hover {
+        text-decoration: underline;
+        text-decoration-color: var(--accent-line);
+        text-underline-offset: 0.2em;
+    }
+
+    .data-table__supporting {
+        margin-block-start: 0.125rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        line-height: 1.25;
+        color: var(--ink-muted);
+    }
+
+    .list-results[data-density='compact'] .data-table__supporting {
+        margin-block-start: 0;
+    }
+
+    /* Secondary badges in the primary cell ("Needs Arabic", "Placeholder text"). */
+    .data-table__badge {
+        flex-shrink: 0;
+        padding: 0.0625rem 0.5rem;
+        border: 1px solid var(--rule-strong-on-raised);
+        border-radius: 9999px;
+        color: var(--ink-muted);
+        font-size: 0.75rem;
+        font-weight: 500;
+        line-height: 1.2;
+        white-space: nowrap;
+    }
+
+    .data-table__badge--bronze {
+        border-color: var(--pending-tone);
+        color: var(--pending-tone);
+    }
+
+    .data-table__badge--cypress {
+        border-color: var(--success-tone);
+        color: var(--success-tone);
+    }
+
+    .data-table__disclose {
+        display: inline-flex;
+        width: 2rem;
+        height: 2rem;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        border-radius: 9999px;
+        color: var(--ink-muted);
+    }
+
+    .data-table__disclose:hover {
+        color: var(--ink);
+        background-color: var(--dt-selected);
+    }
+
+    .data-table__disclose[aria-expanded='true'] svg {
+        transform: rotate(180deg);
+    }
+
+    .data-table__detail > td {
+        padding: 0 var(--dt-pad-inline) 1rem;
+        background-color: var(--dt-bg);
+        border-block-end: 1px solid var(--rule);
+    }
+
+    .data-table__detail-body {
+        max-width: 48rem;
+        margin-inline-start: calc(var(--dt-lead) - var(--dt-pad-inline));
+        white-space: normal;
+    }
+
+    /* ------------------------------------------------------------ status */
+    .status-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4375rem;
+        padding: 0.125rem 0.625rem 0.125rem 0.5rem;
+        border: 1px solid var(--rule);
+        border-radius: 9999px;
+        color: var(--ink);
+        font-size: 0.75rem;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        line-height: 1.5;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .status-chip__dot {
+        width: 0.5rem;
+        height: 0.5rem;
+        flex-shrink: 0;
+        border-radius: 9999px;
+        background-color: currentColor;
+    }
+
+    .status-chip--cypress .status-chip__dot {
+        background-color: var(--success-tone);
+    }
+
+    .status-chip--bronze .status-chip__dot {
+        background-color: var(--pending-tone);
+    }
+
+    .status-chip--ash .status-chip__dot {
+        background-color: transparent;
+        box-shadow: inset 0 0 0 1.5px var(--neutral-tone);
+    }
+
+    .status-chip--danger {
+        border-color: var(--danger);
+        color: var(--danger);
+    }
+
+    .data-table__cell[data-cell-type='status'] {
+        padding-inline: 0.5rem;
+    }
+
+    .data-table__status-cell {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .data-table__chips {
+        display: inline-flex;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+
+    /* The quick publish switch beside a status: on is published. */
+    .data-table__switch {
+        position: relative;
+        width: 1.75rem;
+        height: 1rem;
+        flex-shrink: 0;
+        border: 1px solid var(--rule-strong-on-raised);
+        border-radius: 9999px;
+        background-color: transparent;
+        opacity: 0;
+        transition: opacity 150ms ease;
+    }
+
+    .data-table__switch::after {
+        content: '';
+        position: absolute;
+        inset-block-start: 0.125rem;
+        inset-inline-start: 0.125rem;
+        width: 0.625rem;
+        height: 0.625rem;
+        border-radius: 9999px;
+        background-color: var(--ink-muted);
+        transition: inset-inline-start 150ms ease;
+    }
+
+    .data-table__switch[aria-checked='true'] {
+        border-color: var(--success-tone);
+        background-color: var(--success-tone);
+    }
+
+    .data-table__switch[aria-checked='true']::after {
+        inset-inline-start: 0.875rem;
+        background-color: var(--dt-bg);
+    }
+
+    .data-table__row:hover .data-table__switch,
+    .data-table__row:focus-within .data-table__switch {
+        opacity: 1;
+    }
+
+    /* ------------------------------------------------------------ row actions */
+    .data-table__actions {
+        position: relative;
+        overflow: visible;
+        padding-inline: 0 0.375rem !important;
+        text-align: end;
+    }
+
+    .data-table__row-end {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    /* Icon buttons laid over the end of the row on hover or focus. */
+    .data-table__row-actions {
+        position: absolute;
+        inset-block: 0;
+        inset-inline-end: 2.875rem;
+        display: flex;
+        align-items: center;
+        gap: 0.125rem;
+        padding-inline: 0.5rem 0.25rem;
+        background-color: inherit;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 120ms ease;
+    }
+
+    .data-table__row:hover .data-table__row-actions,
+    .data-table__row:focus-within .data-table__row-actions {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .data-table__row:hover > .data-table__actions .data-table__row-actions {
+        background-color: var(--dt-hover);
+    }
+
+    .data-table__row.is-selected > .data-table__actions .data-table__row-actions {
+        background-color: var(--dt-selected);
+    }
+
+    .data-table__action {
+        display: inline-flex;
+        width: 2.25rem;
+        height: 2.25rem;
+        align-items: center;
+        justify-content: center;
+        border-radius: 9999px;
+        color: var(--ink);
+    }
+
+    .data-table__action:hover {
+        background-color: var(--dt-selected);
+    }
+
+    .data-table__action.is-danger {
+        color: var(--danger);
+    }
+
+    .data-table__action:disabled {
+        opacity: 0.4;
+    }
+
+    .data-table__menu .row-menu__button {
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+
+    @media (hover: hover) {
+        .data-table__menu {
+            opacity: 0;
+            transition: opacity 120ms ease;
+        }
+
+        .data-table__row:hover .data-table__menu,
+        .data-table__row:focus-within .data-table__menu,
+        .data-table__menu:has([aria-expanded='true']) {
+            opacity: 1;
+        }
+
+        .data-table .row-menu__item--touch {
+            display: none;
+        }
+    }
+
+    /* Touch screens: no hover, so the "…" menu is always shown and holds every action. */
+    @media (hover: none) {
+        .data-table__row-actions {
+            display: none;
+        }
+
+        .data-table__switch {
+            opacity: 1;
+        }
+    }
+
+    /* ------------------------------------------------------------ reorder */
+    .data-table__handle {
+        white-space: nowrap;
+    }
+
+    .data-table__handle > * {
+        vertical-align: middle;
+    }
+
+    .data-table__grip {
+        display: inline-flex;
+        cursor: grab;
+        color: var(--ink-muted);
+    }
+
+    .data-table__move {
+        display: inline-flex;
+        width: 2rem;
+        height: 2rem;
+        align-items: center;
+        justify-content: center;
+        border-radius: 9999px;
+        color: var(--ink);
+    }
+
+    .data-table__move:hover {
+        background-color: var(--dt-selected);
+    }
+
+    .data-table[data-reordering] .data-table__row {
+        cursor: grab;
+    }
+
+    /* ------------------------------------------------------------ notices */
+    .data-table__notice {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem 1rem;
+        margin-block-end: 0.75rem;
+        padding: 0.5rem 0.75rem 0.5rem 1rem;
+        border-radius: var(--radius-card);
+        background-color: var(--surface-sunken);
+        box-shadow: 0 0 0 1px var(--rule);
+        font-size: 0.9375rem;
+    }
+
+    .data-table__notice-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    /* ------------------------------------------------------------ loading */
+    .data-table__skeleton {
+        display: none;
+    }
+
+    .data-table.is-loading .data-table__rows {
+        display: none;
+    }
+
+    .data-table.is-loading .data-table__skeleton {
+        display: table-row-group;
+    }
+
+    .data-table__bone {
+        display: inline-block;
+        width: 60%;
+        height: 0.75rem;
+        border-radius: 9999px;
+        background-color: var(--surface-sunken);
+        vertical-align: middle;
+    }
+
+    .data-table__bone--wide {
+        width: 80%;
+    }
+
+    .data-table__bone--box {
+        width: 1.125rem;
+        height: 1.125rem;
+        border-radius: 2px;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        .data-table__bone {
+            animation: skeleton-breathe 2400ms ease-in-out infinite alternate;
+        }
+    }
+
+    /* ------------------------------------------------------------ footer */
+    .data-table__footer {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.75rem 1.5rem;
+        margin-block-start: 1rem;
+        font-size: 0.9375rem;
+        color: var(--ink-muted);
+    }
+
+    .data-table__range {
+        font-variant-numeric: lining-nums tabular-nums;
+    }
+
+    .data-table__per-page {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .data-table__select {
+        height: 2.25rem;
+        padding-inline: 0.75rem 2rem;
+        border: 1px solid var(--rule-strong);
+        border-radius: 9999px;
+        background-color: var(--surface-field);
+        color: var(--ink);
+        font-size: 0.9375rem;
+    }
+
+    .data-table__pages {
+        margin-inline-start: auto;
+    }
+
+    .data-table__pages ul {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .data-table__page {
+        display: inline-flex;
+        min-width: 2.25rem;
+        height: 2.25rem;
+        align-items: center;
+        justify-content: center;
+        padding-inline: 0.5rem;
+        border-radius: 9999px;
+        color: var(--ink);
+        font-variant-numeric: lining-nums tabular-nums;
+    }
+
+    button.data-table__page:hover:not(:disabled) {
+        background-color: var(--surface-sunken);
+    }
+
+    .data-table__page[aria-current='page'] {
+        box-shadow: inset 0 0 0 1px var(--ink);
+        font-weight: 500;
+    }
+
+    .data-table__page:disabled {
+        opacity: 0.35;
+    }
+
+    .data-table__next-icon {
+        transform: scaleX(-1);
+    }
+
+    .data-table__gap {
+        padding-inline: 0.25rem;
+    }
+
+    /* ------------------------------------------------------------ priorities */
+    @media (width < 64rem) {
+        .data-table [data-priority='3'] {
+            display: none;
+        }
+    }
+
+    /* ------------------------------------------------------------ cards under 768px */
+    @media (width < 48rem) {
+        .data-table__frame {
+            background-color: transparent;
+            box-shadow: none;
+        }
+
+        .data-table__frame::after {
+            display: none;
+        }
+
+        .data-table__scroll {
+            overflow: visible;
+            max-height: none;
+        }
+
+        .data-table__table,
+        .data-table__table tbody {
+            display: block;
+            min-width: 0 !important;
+        }
+
+        .data-table__table colgroup,
+        .data-table__table thead {
+            display: none;
+        }
+
+        .data-table__table tbody.data-table__skeleton {
+            display: none;
+        }
+
+        .data-table.is-loading .data-table__table tbody.data-table__rows {
+            display: none;
+        }
+
+        .data-table.is-loading .data-table__table tbody.data-table__skeleton {
+            display: block;
+        }
+
+        .data-table__rows > tr,
+        .data-table__skeleton > tr {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 0.25rem 0.75rem;
+            margin-block-end: 0.5rem;
+            padding: 0.75rem 0.5rem 0.75rem 0.75rem;
+            border-radius: var(--radius-card);
+            background-color: var(--dt-bg);
+            box-shadow: 0 0 0 1px var(--rule);
+        }
+
+        .data-table__rows > tr > td,
+        .data-table__skeleton > tr > td {
+            display: block;
+            height: auto;
+            padding: 0;
+            border: 0;
+            background-color: transparent !important;
+            box-shadow: none !important;
+        }
+
+        .data-table__rows > tr:hover,
+        .data-table__rows > tr.is-selected {
+            background-color: var(--dt-selected);
+        }
+
+        .data-table__lead,
+        .data-table__primary {
+            position: static;
+            width: auto;
+            padding: 0 !important;
+        }
+
+        .data-table__rows > tr > .data-table__lead {
+            grid-row: 1;
+            grid-column: 1;
+        }
+
+        .data-table__rows > tr > .data-table__primary {
+            grid-row: 1;
+            grid-column: 2;
+        }
+
+        .data-table__rows > tr:not(:has(.data-table__lead)) > .data-table__primary {
+            grid-column: 1 / 3;
+        }
+
+        .data-table__rows > tr > .data-table__actions {
+            grid-row: 1;
+            grid-column: 3;
+        }
+
+        .data-table__rows > tr > .data-table__cell {
+            grid-column: 2 / 4;
+            text-align: start;
+            white-space: normal;
+        }
+
+        .data-table__rows > tr:not(:has(.data-table__lead)) > .data-table__cell {
+            grid-column: 1 / 4;
+        }
+
+        .data-table__rows > tr > .data-table__cell:not([data-priority='1']) {
+            display: none;
+        }
+
+        .data-table__rows > tr > .data-table__cell[data-priority='1'] {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .data-table__rows > tr > .data-table__cell[data-priority='1']:not([data-cell-type='status'])::before {
+            content: attr(data-label);
+            color: var(--ink-muted);
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.24em;
+            text-transform: uppercase;
+        }
+
+        .data-table__rows > tr > .data-table__cell:empty {
+            display: none;
+        }
+
+        .data-table__row-actions {
+            display: none;
+        }
+
+        .data-table__menu {
+            opacity: 1 !important;
+        }
+
+        .data-table .row-menu__item--touch {
+            display: flex !important;
+        }
+
+        .data-table__switch {
+            opacity: 1;
+        }
+
+        .data-table__supporting {
+            white-space: normal;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .data-table__detail {
+            display: block;
+            margin-block: -0.5rem 0.5rem;
+        }
+
+        .data-table__detail[hidden] {
+            display: none;
+        }
+
+        .data-table__detail > td {
+            display: block;
+            padding: 0.75rem;
+            border: 0;
+            border-radius: 0 0 var(--radius-card) var(--radius-card);
+        }
+
+        .data-table__detail-body {
+            margin-inline-start: 0;
+        }
+
+        .data-table__pages {
+            margin-inline-start: 0;
+        }
+    }
+
+    /* ------------------------------------------------------------ toolbar controls */
+    /* Reorder mode on: the toolbar's toggle is drawn pressed. */
+    .list-toolbar .list-toolbar__toggle[aria-pressed='true'] {
+        box-shadow: inset 0 0 0 1px var(--ink);
+    }
+
+    /* Two more icon buttons share the band with the filters: the search gives up a little room. */
+    @container list-toolbar (min-width: 40rem) {
+        .list-toolbar:has([data-reorder-toggle]) .list-toolbar__search {
+            min-width: 10rem;
+        }
+    }
+
+    /* The Columns menu sits beside the result count; phones show cards, which have no columns to choose. */
+    .list-toolbar [data-columns] {
+        margin-inline-start: auto;
+    }
+
+    .list-toolbar [data-columns] + .list-toolbar__result {
+        margin-inline-start: 0;
+    }
+
+    @container list-toolbar (max-width: 40rem) {
+        .list-toolbar [data-columns] {
+            display: none;
+        }
+    }
+
+    .list-toolbar__segmented {
+        display: inline-flex;
+        gap: 0.125rem;
+    }
+
+    .list-toolbar__segmented [aria-pressed='true'] {
+        box-shadow: inset 0 0 0 1px var(--ink);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .data-table *,
+        .data-table__frame::after {
+            transition: none !important;
+        }
+    }
+
+    /* ------------------------------------------------------------ Arabic */
+    .data-table__table thead th:lang(ar),
+    .data-table .status-chip:lang(ar),
+    .data-table__cell:lang(ar)[data-priority='1']::before {
+        letter-spacing: 0;
+        text-transform: none;
+    }
+
+    .data-table__table thead th:lang(ar),
+    .data-table .status-chip:lang(ar) {
+        font-size: 0.875rem;
+    }
+
+    .status-chip:lang(ar) {
+        letter-spacing: 0;
+        text-transform: none;
+        font-size: 0.875rem;
+    }
+}

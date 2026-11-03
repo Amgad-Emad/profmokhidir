@@ -277,6 +277,8 @@
 .bg-surface-panel,
 .admin-topbar,
 .admin-table-wrap,
+.data-table__frame,
+.data-table__rows > tr,
 .admin-dialog,
 .confirm-dialog,
 .admin-drawer,

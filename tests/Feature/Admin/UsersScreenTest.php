@@ -155,8 +155,8 @@ class UsersScreenTest extends TestCase
 
         // The signed-in admin's own row has no actions and the component refuses.
         $this->actingAs($this->admin)->get(route(AdminNavigation::routeFor(AdminNavigation::USERS)))
-            ->assertDontSee('of Root Admin</span>', false)
-            ->assertSee('of Second Admin</span>', false);
+            ->assertDontSee('Change role: Root Admin</span>', false)
+            ->assertSee('Change role: Second Admin</span>', false);
 
         Livewire::actingAs($this->admin)->test(Index::class)->call('editRole', $this->admin->id)->assertForbidden();
         Livewire::actingAs($this->admin)->test(Index::class)->call('confirm', Index::ACTION_DEACTIVATE, $this->admin->id)->assertForbidden();
@@ -216,8 +216,8 @@ class UsersScreenTest extends TestCase
 
         $this->actingAs($this->admin)->get(route(AdminNavigation::routeFor(AdminNavigation::USERS)))
             ->assertSee('data-user="'.$invited->id.'"', false)
-            ->assertSee('to Invited Person</span>', false)
-            ->assertDontSee('to Active Person</span>', false);
+            ->assertSee('wire:click="confirm(\''.Index::ACTION_RESEND.'\', '.$invited->id.')" data-resend', false)
+            ->assertDontSee('wire:click="confirm(\''.Index::ACTION_RESEND.'\', '.$active->id.')"', false);
 
         Livewire::actingAs($this->admin)->test(Index::class)
             ->call('confirm', Index::ACTION_RESEND, $invited->id)

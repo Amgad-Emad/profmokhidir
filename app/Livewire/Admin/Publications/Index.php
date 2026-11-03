@@ -10,8 +10,10 @@ use App\Constants\PublicationType;
 use App\Livewire\Admin\ContentIndex;
 use App\Services\AbstractContentService;
 use App\Services\PublicationService;
+use App\Support\DataTable\Column;
 use App\Support\ListToolbar\ListFilter;
 use App\Support\ListToolbar\ListView;
+use Illuminate\Database\Eloquent\Model;
 
 class Index extends ContentIndex
 {
@@ -25,9 +27,20 @@ class Index extends ContentIndex
         return app(PublicationService::class);
     }
 
-    protected function columns(): array
+    protected function dataTableColumns(): array
     {
-        return ['title' => 'Title', 'type' => 'Type', 'year' => 'Year', 'authors' => 'Authors', 'status' => 'Status'];
+        return [
+            Column::primary('title', __('Title'), sortable: true),
+            Column::text('authors', __('Authors'), width: '12rem', visible: false),
+            Column::text('type', __('Type'), sortable: true, width: '10rem'),
+            Column::number('year', __('Year'), sortable: true, width: '5.5rem'),
+            ...$this->closingColumns(),
+        ];
+    }
+
+    protected function supporting(Model $item): array
+    {
+        return [$item->authors, $item->venue_publisher];
     }
 
     protected function contentFilters(): array

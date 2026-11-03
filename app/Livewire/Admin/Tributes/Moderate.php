@@ -6,21 +6,32 @@ namespace App\Livewire\Admin\Tributes;
 
 use App\Constants\AdminNavigation;
 use App\Constants\AdminUx;
+use App\Constants\DataTable;
+use App\Constants\DataTableColumnType;
 use App\Constants\ListToolbar;
+use App\Constants\StatusTone;
 use App\Constants\TributeRelationship;
 use App\Constants\TributeStatus;
 use App\Http\Requests\Admin\TributeEditRequest;
 use App\Livewire\Admin\Concerns\NotifiesEditors;
+use App\Livewire\Admin\Concerns\WithDataTable;
 use App\Livewire\Admin\Concerns\WithListToolbar;
 use App\Models\Tribute;
+use App\Services\DataTableService;
 use App\Services\LocaleService;
 use App\Services\TributeService;
+use App\Support\DataTable\Cell;
+use App\Support\DataTable\Column;
+use App\Support\DataTable\Row;
+use App\Support\DataTable\RowAction;
 use App\Support\ListToolbar\ListFilter;
 use App\Support\ListToolbar\ListSort;
 use App\Support\ListToolbar\ListView;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\HtmlString;
+use Illuminate\Support\ViewErrorBag;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -33,9 +44,9 @@ use Livewire\WithPagination;
  */
 class Moderate extends Component
 {
-    use AuthorizesRequests, NotifiesEditors, WithListToolbar, WithPagination;
+    use AuthorizesRequests, NotifiesEditors, WithDataTable, WithListToolbar, WithPagination;
 
-    public const int PER_PAGE = 20;
+    public const int PER_PAGE = DataTable::DEFAULT_PAGE_SIZE;
 
     public const string VIEW_FEATURED = 'featured';
 
@@ -104,9 +115,23 @@ class Moderate extends Component
         return in_array($key, ['status', 'relationship'], true) ? $this->service()->countBy($key, $search, $criteria) : null;
     }
 
-    public function clearSelection(): void
+    /**
+     * Name with relationship and place, the email (moderators only), when it
+     * came in and its status; the words open under the row.
+     */
+    protected function dataTableColumns(): array
     {
-        $this->selected = [];
+        return [
+            Column::primary('name', __('Name'), sortable: true),
+            new Column('email', __('Email'), DataTableColumnType::Mono, width: '13rem', priority: DataTable::PRIORITY_DESKTOP),
+            Column::relative('created_at', __('Received')),
+            Column::status('status', __('Status')),
+        ];
+    }
+
+    protected function dataTableMatchingIds(): array
+    {
+        return $this->service()->search($this->search, $this->listCriteria(), DataTable::MAX_SELECT_ALL)->getCollection()->modelKeys();
     }
 
     public function approve(int $id): void
@@ -247,12 +272,63 @@ class Moderate extends Component
 
         return view('livewire.admin.tributes.moderate', [
             'tributes' => $tributes,
+            'table' => $this->dataTable($tributes, $tributes->getCollection()->map(fn (Tribute $tribute): Row => $this->row($tribute))->all(), [
+                'caption' => __('Tributes'),
+                'id' => 'tributes-table',
+            ]),
             'toolbar' => $this->listToolbar($tributes->total()),
             'current' => $status,
             'filtered' => $this->listFiltered() && $this->activeView() === '',
             'editing' => $this->editingId === null ? null : $this->service()->find($this->editingId),
             'pageIds' => $tributes->getCollection()->map(fn (Tribute $tribute): int => (int) $tribute->getKey())->all(),
         ])->layout('components.layouts.admin', ['title' => AdminNavigation::get(AdminNavigation::TRIBUTES)['label']]);
+    }
+
+    /**
+     * One tribute as a table row: Approve and Decline at hand, Feature and Fix
+     * typos in the menu, and the words (or the typo form) under the row.
+     */
+    private function row(Tribute $tribute): Row
+    {
+        $id = (int) $tribute->getKey();
+        $editing = $this->editingId === $id;
+        $tables = app(DataTableService::class);
+        $approved = $tribute->isApproved();
+
+        return new Row(
+            id: $id,
+            title: $tribute->name,
+            supporting: [$tribute->relationship->label(), $tribute->location],
+            badges: $tribute->isFeatured() ? [['label' => __('Featured'), 'tone' => StatusTone::Cypress, 'hook' => 'data-featured-badge']] : [],
+            cells: [
+                'email' => new Cell(text: $tribute->email ?: __('No email given'), muted: ! $tribute->email),
+                'created_at' => $tables->relative($tribute->created_at),
+                'status' => Cell::status($tribute->status->label(), StatusTone::forTribute($tribute->status)),
+            ],
+            actions: array_values(array_filter([
+                ! $approved ? RowAction::wire(__('Approve'), 'check', 'approve', [$id], inline: true, hook: 'data-approve') : null,
+                $tribute->status !== TributeStatus::Rejected ? RowAction::wire(__('Decline'), 'close', 'decline', [$id], inline: true, danger: true, hook: 'data-reject') : null,
+                $approved && $tribute->isFeatured() ? RowAction::wire(__('Remove from featured'), 'minus', 'unfeature', [$id], hook: 'data-unfeature') : null,
+                $approved && ! $tribute->isFeatured() ? RowAction::wire(__('Feature on the page'), 'check', 'feature', [$id], hook: 'data-feature') : null,
+                ! $editing ? RowAction::wire(__('Fix typos'), 'feather', 'startEditing', [$id], hook: 'data-edit') : null,
+            ])),
+            detail: new HtmlString($this->detail($tribute, $editing)),
+            open: $editing,
+            detailLabel: __('Read the tribute'),
+            attributes: ['data-tribute' => $id],
+        );
+    }
+
+    /**
+     * The words under a row, rendered now (anonymous form components read the errors shared with every view).
+     */
+    private function detail(Tribute $tribute, bool $editing): string
+    {
+        if ($editing) {
+            view()->share('errors', (new ViewErrorBag)->put('default', $this->getErrorBag()));
+        }
+
+        return view('livewire.admin.tributes.partials.detail', ['tribute' => $tribute, 'editing' => $editing])->render();
     }
 
     public function toggleAll(): void
@@ -270,7 +346,7 @@ class Moderate extends Component
      */
     private function tributes(): LengthAwarePaginator
     {
-        return $this->service()->search($this->search, $this->listCriteria(), self::PER_PAGE, $this->sort ?: 'created_at', $this->sort === '' ? ListToolbar::SORT_DESC : $this->direction);
+        return $this->service()->search($this->search, $this->listCriteria(), $this->perPage, $this->sort ?: 'created_at', $this->sort === '' ? ListToolbar::SORT_DESC : $this->direction);
     }
 
     private function forget(int $id): void

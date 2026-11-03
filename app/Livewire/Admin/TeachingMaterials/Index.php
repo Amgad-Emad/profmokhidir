@@ -5,12 +5,17 @@ declare(strict_types=1);
 namespace App\Livewire\Admin\TeachingMaterials;
 
 use App\Constants\ContentTypes;
+use App\Constants\MediaCollections;
 use App\Constants\TeachingAccess;
 use App\Constants\TeachingMaterialType;
 use App\Livewire\Admin\ContentIndex;
 use App\Services\AbstractContentService;
+use App\Services\MediaService;
 use App\Services\TeachingMaterialService;
+use App\Support\DataTable\Column;
+use App\Support\FileSize;
 use App\Support\ListToolbar\ListFilter;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class Index extends ContentIndex
@@ -25,9 +30,23 @@ class Index extends ContentIndex
         return app(TeachingMaterialService::class);
     }
 
-    protected function columns(): array
+    protected function dataTableColumns(): array
     {
-        return ['title' => 'Title', 'course' => 'Course', 'type' => 'Type', 'access' => 'Access', 'material_date' => 'Date', 'status' => 'Status'];
+        return [
+            Column::primary('title', __('Title'), sortable: true),
+            Column::text('course', __('Course'), sortable: true, width: '10rem', visible: false),
+            Column::text('type', __('Type'), sortable: true, width: '9rem', visible: false),
+            Column::text('access', __('Access'), sortable: true, width: '7.5rem'),
+            Column::date('material_date', __('Date')),
+            ...$this->closingColumns(),
+        ];
+    }
+
+    protected function supporting(Model $item): array
+    {
+        $file = app(MediaService::class)->first($item, MediaCollections::FILE);
+
+        return [$item->course, $item->type?->label(), $file ? FileSize::format((int) $file->size) : null];
     }
 
     protected function contentFilters(): array

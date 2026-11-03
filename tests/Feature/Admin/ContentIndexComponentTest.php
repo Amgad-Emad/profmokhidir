@@ -48,7 +48,8 @@ class ContentIndexComponentTest extends TestCase
             ->assertSee('data-filter="status"', false)
             ->set('search', 'medal')
             ->assertSee('Gold medal')->assertSee('Silver medal')->assertDontSee('Bronze cup')
-            ->assertSee('Clear the search, filters and sorting')
+            // Reordering needs the full list: no Reorder toggle while searching.
+            ->assertDontSee('data-reorder-toggle', false)
             ->set('search', '')
             ->set('filters.status', ContentStatus::Published->value)
             ->assertSee('Gold medal')->assertDontSee('Silver medal')->assertSee('Bronze cup')
@@ -67,6 +68,9 @@ class ContentIndexComponentTest extends TestCase
             ->assertSet('sort', 'name')
             ->call('clearSort')
             ->assertSet('sort', '')
+            ->assertDontSee('data-move="up"', false)
+            ->call('startReordering')
+            ->assertSet('reordering', true)
             ->assertSee('data-move="up"', false)
             ->assertSee('data-move="down"', false);
     }
@@ -202,13 +206,16 @@ class ContentIndexComponentTest extends TestCase
         $c = Award::factory()->sortOrder(3)->create(['name' => 'C']);
 
         $component = Livewire::actingAs($this->editor)->test(AwardIndex::class)
+            ->assertDontSee('draggable="true"', false)
+            ->call('startReordering')
             ->assertSee('draggable="true"', false)
             ->call('moveDown', $a->getKey())
             ->assertSeeInOrder(['>B<', '>A<', '>C<'])
             ->call('moveUp', $c->getKey())
             ->assertSeeInOrder(['>B<', '>C<', '>A<'])
-            ->call('reorder', [$a->getKey(), $b->getKey(), $c->getKey()])
+            ->call('saveOrder', [$a->getKey(), $b->getKey(), $c->getKey()])
             ->assertSee('Order saved.')
+            ->assertSet('reordering', false)
             ->assertSeeInOrder(['>A<', '>B<', '>C<']);
 
         $this->assertSame(['A', 'B', 'C'], Award::query()->ordered()->pluck('name')->all());

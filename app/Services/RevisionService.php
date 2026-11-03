@@ -6,9 +6,13 @@ namespace App\Services;
 
 use App\Constants\AdminUx;
 use App\Constants\RevisionKind;
+use App\Constants\StatusTone;
 use App\Models\Revision;
 use App\Models\User;
 use App\Repositories\Contracts\RevisionRepositoryInterface;
+use App\Support\DataTable\Column;
+use App\Support\DataTable\Row;
+use App\Support\DataTable\RowAction;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
@@ -47,6 +51,33 @@ class RevisionService
     public function history(Model $record, int $limit = AdminUx::REVISIONS_SHOWN): Collection
     {
         return $this->revisions->forRecord($record, $limit);
+    }
+
+    /**
+     * The version history as an admin data table: each save with who made it
+     * and when, newest first, and "Load this version" on every earlier one.
+     *
+     * @param  Collection<int, Revision>  $revisions
+     * @return array<string, mixed>
+     */
+    public function table(Collection $revisions): array
+    {
+        $tables = app(DataTableService::class);
+        $rows = $revisions->values()->map(fn (Revision $revision, int $index): Row => new Row(
+            id: (int) $revision->getKey(),
+            title: $revision->kind->label(),
+            supporting: [$revision->user?->name],
+            badges: $index === 0 ? [['label' => __('latest'), 'tone' => StatusTone::Cypress]] : [],
+            cells: ['created_at' => $tables->relative($revision->created_at)],
+            actions: $index === 0 ? [] : [RowAction::wire(__('Load this version'), 'history', 'restoreRevision', [(int) $revision->getKey()], inline: true, data: ['data-restore-revision' => (int) $revision->getKey()])],
+            selectable: false,
+            attributes: ['data-revision' => (int) $revision->getKey()],
+        ))->all();
+
+        return $tables->describe([
+            Column::primary('kind', __('Version')),
+            Column::relative('created_at', __('Saved'), sortable: false, width: '10rem'),
+        ], [], $rows, null, ['caption' => __('Version history'), 'id' => 'revisions-table']);
     }
 
     public function count(Model $record): int

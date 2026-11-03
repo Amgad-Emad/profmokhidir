@@ -8,6 +8,8 @@ use App\Constants\ContentTypes;
 use App\Livewire\Admin\ContentIndex;
 use App\Services\AbstractContentService;
 use App\Services\CommentaryService;
+use App\Support\DataTable\Column;
+use Illuminate\Database\Eloquent\Model;
 
 class Index extends ContentIndex
 {
@@ -21,8 +23,18 @@ class Index extends ContentIndex
         return app(CommentaryService::class);
     }
 
-    protected function columns(): array
+    protected function dataTableColumns(): array
     {
-        return ['title' => 'Title', 'date' => 'Date', 'byline' => 'Byline', 'status' => 'Status'];
+        return [
+            Column::primary('title', __('Title'), sortable: true),
+            Column::text('byline', __('Byline'), width: '10rem', visible: false),
+            Column::date('date', __('Date')),
+            ...$this->closingColumns(),
+        ];
+    }
+
+    protected function supporting(Model $item): array
+    {
+        return [$item->byline, is_array($item->tags) ? implode(__(', '), $item->tags) : null];
     }
 }

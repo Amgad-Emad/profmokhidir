@@ -14,9 +14,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * One user's last-used view of one admin list (`screen` is its
  * AdminNavigation key): `state` holds the search, filters, sort and tab as they
- * stood in the address; `density` the row spacing chosen there.
+ * stood in the address; `density` the row spacing chosen there; `columns` the data table's
+ * columns the user showed or hid (key => bool) and `per_page` its page size.
  */
-#[Fillable(['user_id', 'screen', 'state', 'density'])]
+#[Fillable(['user_id', 'screen', 'state', 'density', 'columns', 'per_page'])]
 class ListPreference extends Model
 {
     /** @use HasFactory<ListPreferenceFactory> */
@@ -30,6 +31,8 @@ class ListPreference extends Model
         return [
             'state' => 'array',
             'density' => ListDensity::class,
+            'columns' => 'array',
+            'per_page' => 'integer',
         ];
     }
 

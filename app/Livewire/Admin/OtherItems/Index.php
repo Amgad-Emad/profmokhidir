@@ -8,7 +8,9 @@ use App\Constants\ContentTypes;
 use App\Livewire\Admin\ContentIndex;
 use App\Services\AbstractContentService;
 use App\Services\OtherItemService;
+use App\Support\DataTable\Column;
 use App\Support\ListToolbar\ListFilter;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class Index extends ContentIndex
@@ -23,9 +25,20 @@ class Index extends ContentIndex
         return app(OtherItemService::class);
     }
 
-    protected function columns(): array
+    protected function dataTableColumns(): array
     {
-        return ['title' => 'Title', 'category' => 'Category', 'item_type' => 'Type', 'date' => 'Date', 'status' => 'Status'];
+        return [
+            Column::primary('title', __('Title'), sortable: true),
+            Column::text('category', __('Category'), sortable: true, width: '10rem', visible: false),
+            Column::text('item_type', __('Type'), width: '9rem', visible: false),
+            Column::date('date', __('Date')),
+            ...$this->closingColumns(),
+        ];
+    }
+
+    protected function supporting(Model $item): array
+    {
+        return [$item->category, $item->item_type instanceof \BackedEnum && method_exists($item->item_type, 'label') ? $item->item_type->label() : (string) $item->item_type];
     }
 
     protected function contentFilters(): array

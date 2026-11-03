@@ -8,7 +8,8 @@
     and "Showing 7 of 24". When the band is narrow the filter buttons fold into one "Filters (2)"
     button (also whenever the set filters' longer labels no longer fit on the line) opening a sheet (a side sheet, or a bottom sheet on phones that also holds sort and
     density) with Apply. `toolbar` is the screen's listToolbar($shown); `items` the plural noun
-    ("publications"); `selected` the ticked rows; the `bulk` slot holds the bulk actions.
+    ("publications"); `selected` the ticked rows; the `bulk` slot holds the bulk actions; `table` the
+    screen's dataTable() description, which adds the Reorder toggle and, beside the count, the Columns menu.
 --}}
 @props([
     'toolbar',
@@ -18,6 +19,7 @@
     'createLabel' => null,
     'selected' => 0,
     'results' => 'list-results',
+    'table' => null,
 ])
 @php
     $digits = app(\App\Services\LocaleService::class);
@@ -79,6 +81,10 @@
             @endif
 
             <div class="list-toolbar__end">
+                @isset($tools){{ $tools }}@endisset
+                @if ($table !== null && ! $toolbar['trash'])
+                    @include('admin.data-table.controls', ['table' => $table])
+                @endif
                 @if ($hasSorts)
                     @include('admin.list-toolbar.sort', ['sorts' => $toolbar['sorts'], 'label' => $toolbar['sortLabel'], 'active' => $toolbar['sortActive']])
                 @endif
@@ -109,6 +115,9 @@
         @endif
         @if ($toolbar['filtered'])
             <x-button variant="quiet" size="sm" type="button" class="list-toolbar__clear-all" wire:click="clearFilters" data-clear-filters>{{ __('Clear all') }}</x-button>
+        @endif
+        @if ($table !== null && ! $toolbar['trash'] && $table['menuColumns'] !== [])
+            @include('admin.data-table.columns', ['table' => $table])
         @endif
         <p class="list-toolbar__result" aria-live="polite" data-result-count>{{ __('Showing :shown of :total', ['shown' => $digits->digits($toolbar['shown']), 'total' => $digits->digits($toolbar['total'])]) }}</p>
     </div>

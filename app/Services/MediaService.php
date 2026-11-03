@@ -8,6 +8,7 @@ use App\Constants\Archive;
 use App\Constants\AuditAction;
 use App\Constants\ContentTypes;
 use App\Constants\Locales;
+use App\Constants\MediaConversions;
 use App\Constants\MediaProperties;
 use App\Constants\MediaTreatment;
 use App\Models\Media as LocalizedMedia;
@@ -103,6 +104,29 @@ class MediaService
     public function first(HasMedia $model, string $collection): ?Media
     {
         return $this->media->first($model, $collection);
+    }
+
+    /**
+     * A small image of a collection's first file for an admin table (the 480px
+     * WebP once generated, else the original), or null when it holds no image.
+     */
+    public function thumbnailUrl(HasMedia $model, string $collection): ?string
+    {
+        $media = $this->first($model, $collection);
+
+        if ($media === null || ! str_starts_with((string) $media->mime_type, 'image/')) {
+            return null;
+        }
+
+        return $media->hasGeneratedConversion(MediaConversions::SMALL) ? $media->getUrl(MediaConversions::SMALL) : $media->getUrl();
+    }
+
+    /**
+     * Copy every file of one record onto another (a duplicate).
+     */
+    public function copyAll(HasMedia $from, HasMedia $to): int
+    {
+        return $this->media->copyAll($from, $to);
     }
 
     public function find(int $id): ?Media

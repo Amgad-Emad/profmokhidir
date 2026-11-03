@@ -13,24 +13,11 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * The bulk actions of a content index (ContentIndex), shown in the list
- * toolbar's bulk bar while rows are ticked: tick a page, Publish, Unpublish and
+ * toolbar's bulk bar while rows are ticked (WithDataTable ticks them): Publish, Unpublish and
  * Move to trash (undoable from the toast for AdminUx::UNDO_SECONDS).
  */
 trait BulkPublishesContent
 {
-    /**
-     * @param  list<int|string>  $ids
-     */
-    public function selectPage(array $ids): void
-    {
-        $this->selected = array_values(array_unique([...$this->selected, ...array_map('intval', $ids)]));
-    }
-
-    public function clearSelection(): void
-    {
-        $this->selected = [];
-    }
-
     public function bulkPublish(): void
     {
         $published = 0;
@@ -47,7 +34,7 @@ trait BulkPublishesContent
                 $this->service()->publish($model, auth()->user());
                 $published++;
             } catch (ImagesNotReadyException) {
-                $refused[] = $this->cell($model, array_key_first($this->columns()))['text'];
+                $refused[] = $this->recordTitle($model);
             }
         }
 

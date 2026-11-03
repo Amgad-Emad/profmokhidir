@@ -204,5 +204,23 @@
         @break
     @default
         <circle cx="12" cy="12" r="8.25" />
+    @case('copy')
+        <rect x="8.5" y="8.5" width="11" height="11" rx="1.5" /><path d="M15.5 8.5V6a1.5 1.5 0 0 0-1.5-1.5H6A1.5 1.5 0 0 0 4.5 6v8A1.5 1.5 0 0 0 6 15.5h2.5" />
+        @break
+    @case('columns')
+        <rect x="4" y="5" width="16" height="14" rx="1.5" /><path d="M9.5 5v14" /><path d="M14.5 5v14" />
+        @break
+    @case('grip')
+        <path d="M9 7h.01" /><path d="M15 7h.01" /><path d="M9 12h.01" /><path d="M15 12h.01" /><path d="M9 17h.01" /><path d="M15 17h.01" />
+        @break
+    @case('arrow-up')
+        <path d="M12 19V5" /><path d="M6 11l6-6 6 6" />
+        @break
+    @case('arrow-down')
+        <path d="M12 5v14" /><path d="M6 13l6 6 6-6" />
+        @break
+    @case('list')
+        <path d="M9 7h11" /><path d="M9 12h11" /><path d="M9 17h11" /><path d="M4.5 7h.01" /><path d="M4.5 12h.01" /><path d="M4.5 17h.01" />
+        @break
 @endswitch
 </svg>

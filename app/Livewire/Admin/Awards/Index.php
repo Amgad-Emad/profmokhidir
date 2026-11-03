@@ -8,7 +8,9 @@ use App\Constants\ContentTypes;
 use App\Livewire\Admin\ContentIndex;
 use App\Services\AbstractContentService;
 use App\Services\AwardService;
+use App\Support\DataTable\Column;
 use App\Support\ListToolbar\ListFilter;
+use Illuminate\Database\Eloquent\Model;
 
 class Index extends ContentIndex
 {
@@ -22,9 +24,19 @@ class Index extends ContentIndex
         return app(AwardService::class);
     }
 
-    protected function columns(): array
+    protected function dataTableColumns(): array
     {
-        return ['name' => 'Name', 'organisation' => 'Organisation', 'year' => 'Year', 'status' => 'Status'];
+        return [
+            Column::primary('name', __('Name'), sortable: true),
+            Column::text('organisation', __('Organisation'), sortable: true, width: '12rem', visible: false),
+            Column::number('year', __('Year'), sortable: true, width: '5.5rem'),
+            ...$this->closingColumns(),
+        ];
+    }
+
+    protected function supporting(Model $item): array
+    {
+        return [$item->organisation];
     }
 
     protected function contentFilters(): array

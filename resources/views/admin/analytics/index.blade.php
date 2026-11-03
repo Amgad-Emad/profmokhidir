@@ -75,29 +75,7 @@
         </div>
         <details class="mt-6" data-chart-table>
             <summary class="cursor-pointer text-sm font-medium text-ink">{{ __('Show the figures as a table') }}</summary>
-            <div class="relative mt-4 max-h-96 overflow-auto rounded-card border border-rule" tabindex="0" role="region" aria-label="{{ __('Visitors over time, as a table') }}">
-                <table class="admin-table analytics-table w-full text-start text-sm">
-                    <caption class="sr-only">{{ $period['days'] > Analytics::DAILY_CHART_MAX_DAYS ? __('Unique visitors per month') : __('Unique visitors per day') }}</caption>
-                    <thead>
-                        <tr>
-                            <th scope="col">{{ $period['days'] > Analytics::DAILY_CHART_MAX_DAYS ? __('Month') : __('Day') }}</th>
-                            <th scope="col" class="text-end">{{ __('Visitors') }}</th>
-                            <th scope="col" class="text-end">{{ ucfirst($period['comparison']) }}</th>
-                            <th scope="col" class="text-end">{{ __('Page views') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($series as $point)
-                            <tr>
-                                <th scope="row">{{ $point['label'] }}</th>
-                                <td class="text-end">{{ number_format($point['visitors']) }}</td>
-                                <td class="text-end">{{ number_format($point['previous']) }}</td>
-                                <td class="text-end">{{ number_format($point['pageviews']) }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+            <x-admin.data-table class="mt-4" :table="$visitorsTable" data-visitors-table />
         </details>
     </section>
 

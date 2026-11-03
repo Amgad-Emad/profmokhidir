@@ -7,16 +7,21 @@ namespace App\Services;
 use App\Constants\Analytics;
 use App\Constants\AnalyticsDimension;
 use App\Constants\AnalyticsRange;
+use App\Constants\DataTable as DataTableConstants;
 use App\Constants\DateFormats;
 use App\Constants\DeviceType;
 use App\Repositories\Contracts\AnalyticsEventRepositoryInterface;
 use App\Repositories\Contracts\AnalyticsRollupRepositoryInterface;
 use App\Support\Countries;
+use App\Support\DataTable\Cell;
+use App\Support\DataTable\Column;
+use App\Support\DataTable\Row;
 use App\Support\Duration;
 use App\Support\UserAgent;
 use App\Support\WorldMap;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 /**
  * The figures of the analytics report (/admin/analytics), the dashboard's
@@ -67,6 +72,42 @@ class AnalyticsReportService
                 default => $days === 1 ? __('the day before') : __('the previous :count days', ['count' => app(LocaleService::class)->digits($days)]),
             },
         ];
+    }
+
+    /**
+     * The chart's figures as an admin data table (x-admin.data-table): the day or
+     * month, then visitors, the comparison period and page views at the end edge.
+     *
+     * @param  list<array{label: string, visitors: int, previous: int, pageviews: int}>  $series
+     * @param  array{days: int, comparison: string}  $period
+     * @return array<string, mixed>
+     */
+    public function visitorsTable(array $series, array $period): array
+    {
+        $monthly = $period['days'] > Analytics::DAILY_CHART_MAX_DAYS;
+        $digits = app(LocaleService::class);
+        $columns = [
+            Column::primary('label', $monthly ? __('Month') : __('Day')),
+            Column::number('visitors', __('Visitors'), priority: DataTableConstants::PRIORITY_ESSENTIAL),
+            Column::number('previous', Str::ucfirst($period['comparison']), width: '9rem'),
+            Column::number('pageviews', __('Page views'), width: '8rem'),
+        ];
+        $rows = array_map(fn (array $point, int $index): Row => new Row(
+            id: $index + 1,
+            title: (string) $point['label'],
+            cells: [
+                'visitors' => new Cell(text: $digits->digits(number_format($point['visitors']))),
+                'previous' => new Cell(text: $digits->digits(number_format($point['previous']))),
+                'pageviews' => new Cell(text: $digits->digits(number_format($point['pageviews']))),
+            ],
+            selectable: false,
+        ), $series, array_keys($series));
+
+        return app(DataTableService::class)->describe($columns, [], $rows, null, [
+            'caption' => $monthly ? __('Unique visitors per month') : __('Unique visitors per day'),
+            'hasActions' => false,
+            'id' => 'visitors-table',
+        ]);
     }
 
     /**

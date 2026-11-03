@@ -149,6 +149,6 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     {
         $role = $this->primaryRole();
 
-        return $role === null ? 'User' : (Roles::labels()[$role] ?? $role);
+        return $role === null ? __('User') : (Roles::labels()[$role] ?? $role);
     }
 }

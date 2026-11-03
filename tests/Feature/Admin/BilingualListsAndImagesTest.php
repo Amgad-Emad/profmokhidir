@@ -71,7 +71,8 @@ class BilingualListsAndImagesTest extends TestCase
             ->assertOk()
             ->assertSee('lang="ar" dir="rtl"', false)
             ->assertSee(__('Needs Arabic translation', [], Locales::AR))
-            ->assertSee(__('Arabic missing', [], Locales::AR));
+            ->assertSee(__('Needs Arabic', [], Locales::AR))
+            ->assertSee('data-needs-arabic', false);
     }
 
     #[Test]

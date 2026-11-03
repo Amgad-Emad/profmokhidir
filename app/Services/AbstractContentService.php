@@ -18,6 +18,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Spatie\MediaLibrary\HasMedia;
 
 /**
  * Shared behaviour for draft/published content: CRUD, publish/unpublish,
@@ -28,6 +29,9 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
  */
 abstract class AbstractContentService
 {
+    /** Columns a duplicate never takes from its original (it gets its own). */
+    private const array NOT_DUPLICATED = ['slug', 'status', 'published_at', 'sort_order', 'is_featured', 'search_text'];
+
     /**
      * @param  ContentRepositoryInterface<TModel>  $repository
      */
@@ -225,6 +229,61 @@ abstract class AbstractContentService
         $this->flushCache();
 
         return $model;
+    }
+
+    /**
+     * A draft copy of a record: its words in every language (the title marked
+     * as a copy), its other details and its files, at the end of the display
+     * order with a fresh address. The copy is audited as created.
+     *
+     * @param  TModel  $model
+     * @return TModel
+     */
+    public function duplicate(Model $model, ?User $actor = null): Model
+    {
+        $copy = $this->create($this->duplicateData($model), $actor);
+
+        if ($model instanceof HasMedia && $copy instanceof HasMedia) {
+            app(MediaService::class)->copyAll($model, $copy);
+        }
+
+        return $copy;
+    }
+
+    /**
+     * The fillable details of a record for its copy (translatable ones as locale maps).
+     *
+     * @param  TModel  $model
+     * @return array<string, mixed>
+     */
+    protected function duplicateData(Model $model): array
+    {
+        $data = [];
+        $translatable = method_exists($model, 'isTranslatableAttribute');
+
+        foreach ($model->getFillable() as $key) {
+            if (in_array($key, self::NOT_DUPLICATED, true) || ! array_key_exists($key, $model->getAttributes())) {
+                continue;
+            }
+
+            $data[$key] = $translatable && $model->isTranslatableAttribute($key) ? $model->getTranslations($key) : $model->getAttribute($key);
+        }
+
+        foreach (['title', 'name', 'quote'] as $label) {
+            if (! isset($data[$label])) {
+                continue;
+            }
+
+            $data[$label] = is_array($data[$label])
+                ? collect($data[$label])->map(fn (mixed $value, string $locale): mixed => is_string($value) && $value !== '' ? __(':title (copy)', ['title' => $value], $locale) : $value)->all()
+                : __(':title (copy)', ['title' => (string) $data[$label]], Locales::DEFAULT);
+
+            break;
+        }
+
+        $data['status'] = ContentStatus::Draft;
+
+        return $data;
     }
 
     /**

@@ -13,6 +13,12 @@ final class DateFormats
     /** "12 March 2021": full dates in metadata lines and bylines. */
     public const string LONG = 'j F Y';
 
+    /** "12 Mar 2021": content dates in admin tables (the date of a material). */
+    public const string SHORT = 'j M Y';
+
+    /** "12 March 2021, 14:05": the exact moment behind a relative date ("3 hours ago"). */
+    public const string LONG_TIME = 'j F Y, H:i';
+
     /** "March 2021": when only the month matters. */
     public const string MONTH_YEAR = 'F Y';
 

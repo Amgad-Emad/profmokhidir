@@ -1,6 +1,4 @@
-@use('App\Constants\CommunityStatus')
 @use('App\Constants\Roles')
-@use('App\Constants\StatusTone')
 @use('App\Livewire\Admin\Users\Index')
 <div>
     <x-admin.page-header :eyebrow="__('Settings')" :title="__('Users & roles')" :intro="__('Staff accounts and community users. Invite administrators and editors by email; they choose their own password from the link and administrators set up two-factor authentication on first sign-in.')">
@@ -16,96 +14,18 @@
 
     <p class="text-sm font-normal text-ink-muted" data-active-admins>{!! __('Active administrators: :count. The last one can never be demoted or deactivated.', ['count' => '<span class="font-mono text-ink">'.e($activeAdmins).'</span>']) !!}</p>
 
-    <x-admin.list-toolbar :toolbar="$toolbar" :items="__('users')" :placeholder="__('Search names and emails')" />
+    <x-admin.list-toolbar :toolbar="$toolbar" :items="__('users')" :placeholder="__('Search names and emails')" :table="$table" />
 
     <x-admin.list-results :density="$toolbar['density']">
-    @if ($users->isEmpty())
-        @if ($toolbar['filtered'])
-            <x-admin.list-empty :title="__('No accounts yet')" text="" :filtered="true" />
-        @else
-            <x-empty-state :message="__('There are no accounts yet. Invite the first staff member.')" />
-        @endif
-    @else
-        <div class="admin-table-wrap">
-            <table class="admin-table w-full text-start text-sm" data-users>
-                <caption class="sr-only">{{ __('Users') }}</caption>
-                <thead>
-                    <tr>
-                        <th scope="col">{{ __('Name') }}</th>
-                        <th scope="col">{{ __('Roles') }}</th>
-                        <th scope="col">{{ __('Community') }}</th>
-                        <th scope="col">{{ __('Account') }}</th>
-                        <th scope="col" class="text-end">{{ __('Actions') }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($users as $user)
-                        @php
-                            $row = $rows[$user->getKey()];
-                            $isSelf = auth()->id() === $user->getKey();
-                            $isStaff = $row['staffRole'] !== null;
-                        @endphp
-                        <tr wire:key="user-{{ $user->getKey() }}" data-user="{{ $user->getKey() }}">
-                            <td class="font-medium text-ink">
-                                {{ $user->name }}@if ($isSelf) <span class="ms-1 font-normal text-ink-muted">{{ __('(you)') }}</span>@endif
-                                <span class="mt-1 block font-mono text-sm font-medium text-ink-muted" dir="ltr">{{ $user->email }}</span>
-                                @if (\App\Constants\Locales::isValid($user->locale))
-                                    <span class="mt-1 block text-sm font-normal text-ink-muted" data-user-locale="{{ $user->locale }}"><span class="sr-only">{{ __('Language') }}: </span><span lang="{{ \App\Constants\Locales::html($user->locale) }}">{{ \App\Constants\Locales::native($user->locale) }}</span></span>
-                                @endif
-                            </td>
-                            <td>
-                                @if ($row['roles'] === [])
-                                    <span class="font-normal text-ink-muted">{{ __('None') }}</span>
-                                @else
-                                    <span class="flex flex-wrap gap-1.5">
-                                        @foreach ($row['roles'] as $roleName)
-                                            <x-admin.status-badge :tone="in_array($roleName, Roles::staff(), true) ? StatusTone::Cypress : StatusTone::Ash" :label="Roles::labels()[$roleName] ?? $roleName" />
-                                        @endforeach
-                                    </span>
-                                @endif
-                            </td>
-                            <td>
-                                @if ($user->community_status === CommunityStatus::None)
-                                    <span class="font-normal text-ink-muted">{{ $user->community_status->label() }}</span>
-                                @else
-                                    <x-admin.status-badge :tone="StatusTone::forCommunity($user->community_status)" :label="$user->community_status->label()" />
-                                @endif
-                            </td>
-                            <td>
-                                @if (! $user->isActive())
-                                    <x-admin.status-badge :tone="StatusTone::Ash" :label="__('Deactivated')" />
-                                @elseif ($row['pendingInvite'])
-                                    <x-admin.status-badge :tone="StatusTone::Bronze" :label="__('Invitation pending')" />
-                                @elseif ($user->email_verified_at === null)
-                                    <x-admin.status-badge :tone="StatusTone::Bronze" :label="__('Email unverified')" />
-                                @else
-                                    <x-admin.status-badge :tone="StatusTone::Cypress" :label="__('Active')" />
-                                @endif
-                            </td>
-                            <td class="text-end">
-                                @unless ($isSelf)
-                                    <div class="flex flex-wrap items-center justify-end gap-x-4 gap-y-2">
-                                        <x-button variant="quiet" size="sm" type="button" wire:click="editRole({{ $user->getKey() }})" data-change-role>{{ __('Change role') }}<span class="sr-only"> {{ __('of :name', ['name' => $user->name]) }}</span></x-button>
-                                        @if ($row['pendingInvite'] && $user->isActive())
-                                            <x-button variant="quiet" size="sm" type="button" wire:click="confirm('{{ Index::ACTION_RESEND }}', {{ $user->getKey() }})" data-resend>{{ __('Resend invite') }}<span class="sr-only"> {{ __('to :name', ['name' => $user->name]) }}</span></x-button>
-                                        @endif
-                                        @if ($isStaff || ! $user->isActive())
-                                            @if ($user->isActive())
-                                                <x-button variant="danger" size="sm" type="button" wire:click="confirm('{{ Index::ACTION_DEACTIVATE }}', {{ $user->getKey() }})" data-deactivate>{{ __('Deactivate') }}<span class="sr-only"> {{ $user->name }}</span></x-button>
-                                            @else
-                                                <x-button variant="quiet" size="sm" type="button" wire:click="confirm('{{ Index::ACTION_REACTIVATE }}', {{ $user->getKey() }})" data-reactivate>{{ __('Reactivate') }}<span class="sr-only"> {{ $user->name }}</span></x-button>
-                                            @endif
-                                        @endif
-                                    </div>
-                                @endunless
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-        {{ $users->links('components.admin.pagination') }}
-    @endif
+        <x-admin.data-table :table="$table" data-users>
+            <x-slot:empty>
+                @if ($toolbar['filtered'])
+                    <x-admin.list-empty :title="__('No accounts yet')" text="" :filtered="true" />
+                @else
+                    <x-empty-state :message="__('There are no accounts yet. Invite the first staff member.')" />
+                @endif
+            </x-slot:empty>
+        </x-admin.data-table>
     </x-admin.list-results>
 
     {{-- Invite dialog --}}

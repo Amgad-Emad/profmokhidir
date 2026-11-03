@@ -37,6 +37,25 @@ class EloquentListPreferenceRepository implements ListPreferenceRepositoryInterf
         return $preference;
     }
 
+    public function saveTable(User $user, string $screen, ?array $columns, ?int $perPage = null): ListPreference
+    {
+        $preference = $this->find($user, $screen) ?? $this->model->newInstance(['user_id' => $user->getKey(), 'screen' => $screen]);
+
+        if ($columns !== null) {
+            $preference->columns = $columns;
+        }
+
+        if ($perPage !== null) {
+            $preference->per_page = $perPage;
+        }
+
+        if ($preference->isDirty() || ! $preference->exists) {
+            $preference->save();
+        }
+
+        return $preference;
+    }
+
     public function forget(User $user, string $screen): void
     {
         $this->model->newQuery()->where('user_id', $user->getKey())->where('screen', $screen)->delete();

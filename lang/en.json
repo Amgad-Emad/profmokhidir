@@ -2438,5 +2438,18 @@
     "pages": "pages",
     "reports": "reports",
     "tributes": "tributes",
-    "users": "users"
+    "users": "users",
+    "{0} No photos|{1} :count photo|[2,*] :count photos": "{0} No photos|{1} :count photo|[2,*] :count photos",
+    "Message by": "Message by",
+    "Reported": "Reported",
+    "Show the message": "Show the message",
+    ":type duplicated. This is the copy, saved as a draft.": ":type duplicated. This is the copy, saved as a draft.",
+    "Published: :item": "Published: :item",
+    "Size": "Size",
+    "Uploaded": "Uploaded",
+    "Received": "Received",
+    "Read the tribute": "Read the tribute",
+    "Joined": "Joined",
+    ":title (copy)": ":title (copy)",
+    "User": "User"
 }

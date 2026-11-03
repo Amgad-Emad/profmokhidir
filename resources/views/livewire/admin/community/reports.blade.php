@@ -1,78 +1,21 @@
-@use('App\Constants\DateFormats')
-@use('App\Constants\StatusTone')
 @use('App\Livewire\Admin\Community\Reports')
 <div>
     <x-admin.page-header :eyebrow="__('Community')" :title="__('Chat reports')" :intro="__('Messages members have reported. Resolve a report, remove the message, or suspend its author; each action is recorded in the audit log.')" />
 
     <div class="mt-8"><x-admin.flash /></div>
 
-    <x-admin.list-toolbar :toolbar="$toolbar" :items="__('reports')" :placeholder="__('Search reasons, messages and names')" />
+    <x-admin.list-toolbar :toolbar="$toolbar" :items="__('reports')" :placeholder="__('Search reasons, messages and names')" :table="$table" />
 
     <x-admin.list-results :density="$toolbar['density']">
-    @if ($reports->isEmpty())
-        @if ($filtered)
-            <x-admin.list-empty :title="__('No reports yet')" text="" :filtered="true" />
-        @else
-            <x-empty-state :message="match ($state) { Reports::TAB_OPEN => __('No reports are waiting.'), Reports::TAB_RESOLVED => __('No reports have been resolved yet.'), default => __('Nothing has been reported.') }" />
-        @endif
-    @else
-        <ul class="list-cards" data-reports>
-            @foreach ($reports as $report)
-                @php $message = $report->message; @endphp
-                <li wire:key="report-{{ $report->getKey() }}" class="list-card rounded-card border border-rule bg-surface-panel p-5" data-report="{{ $report->getKey() }}">
-                    <div class="flex flex-col gap-4 lg:flex-row lg:items-start">
-                        <div class="min-w-0 flex-1">
-                            <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm">
-                                <p class="font-medium text-ink">{{ __('Reported by :name', ['name' => $report->reporter?->name ?? __('a former member')]) }}</p>
-                                <time datetime="{{ $report->created_at->toIso8601String() }}" class="font-normal text-ink-muted">{{ $report->created_at->translatedFormat(DateFormats::LONG) }}</time>
-                                @if ($message?->channel)
-                                    <span class="font-normal text-ink-muted">{{ __('in :channel', ['channel' => $message->channel->name]) }}</span>
-                                @endif
-                            </div>
-                            <p class="mt-2 text-base font-normal text-ink" dir="auto" data-reason>{{ $report->reason ?: __('No reason given.') }}</p>
-
-                            <div class="mt-4 rounded-card border border-rule bg-surface-sunken p-4">
-                                <p class="t-label text-accent-text">{{ __('Message by :name', ['name' => $message?->user?->name ?? __('a former member')]) }}</p>
-                                @if ($message === null || $message->trashed())
-                                    <p class="mt-2 font-display text-lg font-light italic text-ink-muted">{{ __(\App\Constants\ChatSettings::REMOVED_PLACEHOLDER) }}</p>
-                                @else
-                                    <p class="mt-2 whitespace-pre-wrap text-base font-normal text-ink" dir="auto" data-message>{{ $message->body }}</p>
-                                    {{-- A report covers the message's files too: each opens through the same signed, access-checked link members use. --}}
-                                    @php $files = \App\Support\ChatAttachmentData::collection($message); @endphp
-                                    @if ($files !== [])
-                                        <ul class="mt-3 space-y-1 text-sm" aria-label="{{ __(\App\Constants\ChatCopy::ATTACHMENTS_LABEL) }}" data-report-attachments>
-                                            @foreach ($files as $file)
-                                                <li class="flex flex-wrap items-baseline gap-x-2">
-                                                    <a href="{{ $file['url'] }}" class="text-ink underline decoration-accent-line underline-offset-4" target="_blank" rel="noopener" dir="auto">{{ $file['name'] }}</a>
-                                                    <span class="font-normal text-ink-muted">{{ $file['type'] }} · {{ $file['size_label'] }}@if ($file['alt'] !== '') · “{{ $file['alt'] }}”@endif</span>
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    @endif
-                                @endif
-                            </div>
-                            @if ($report->isResolved())
-                                <p class="mt-3 text-sm font-normal text-ink-muted">{{ __('Resolved') }} <x-date :date="$report->resolved_at" />@if ($report->resolver) {{ __('by :name', ['name' => $report->resolver->name]) }}@endif</p>
-                            @endif
-                        </div>
-                        <div class="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 text-sm lg:flex-col lg:items-end">
-                            <x-admin.status-badge :tone="$report->isResolved() ? StatusTone::Cypress : StatusTone::Bronze" :label="$report->isResolved() ? __('Resolved') : __('Open')" />
-                            @if (! $report->isResolved())
-                                <x-button variant="quiet" size="sm" type="button" wire:click="resolve({{ $report->getKey() }})" data-resolve>{{ __('Resolve') }}</x-button>
-                                @if ($message !== null && ! $message->trashed())
-                                    <x-button variant="danger" size="sm" type="button" wire:click="confirm('{{ Reports::ACTION_DELETE }}', {{ $report->getKey() }})" data-delete-message><x-icon name="trash" class="size-4" />{{ __('Remove message') }}</x-button>
-                                @endif
-                                @if ($message?->user !== null && $message->user->community_status->canChat())
-                                    <x-button variant="danger" size="sm" type="button" wire:click="confirm('{{ Reports::ACTION_SUSPEND }}', {{ $report->getKey() }})" data-suspend-author>{{ __('Suspend author') }}</x-button>
-                                @endif
-                            @endif
-                        </div>
-                    </div>
-                </li>
-            @endforeach
-        </ul>
-        {{ $reports->links('components.admin.pagination') }}
-    @endif
+        <x-admin.data-table :table="$table" data-reports>
+            <x-slot:empty>
+                @if ($filtered)
+                    <x-admin.list-empty :title="__('No reports yet')" text="" :filtered="true" />
+                @else
+                    <x-empty-state :message="match ($state) { Reports::TAB_OPEN => __('No reports are waiting.'), Reports::TAB_RESOLVED => __('No reports have been resolved yet.'), default => __('Nothing has been reported.') }" />
+                @endif
+            </x-slot:empty>
+        </x-admin.data-table>
     </x-admin.list-results>
 
     <x-admin.confirm-dialog :show="$this->isConfirming(Reports::ACTION_DELETE)" danger :title="__('Remove this message permanently?')" action="deleteMessage" :confirm-label="__('Remove message')">

@@ -8,18 +8,26 @@ use App\Constants\AdminUx;
 use App\Constants\ConfirmDialog;
 use App\Constants\ContentStatus;
 use App\Constants\ContentTypes;
-use App\Constants\DateFormats;
+use App\Constants\DataTable;
+use App\Constants\DataTableColumnType;
 use App\Constants\ListToolbar;
 use App\Constants\Locales;
+use App\Constants\Placeholders;
 use App\Constants\StatusTone;
 use App\Exceptions\ImagesNotReadyException;
 use App\Livewire\Admin\Concerns\BulkPublishesContent;
 use App\Livewire\Admin\Concerns\ConfirmsActions;
 use App\Livewire\Admin\Concerns\NotifiesEditors;
+use App\Livewire\Admin\Concerns\WithDataTable;
 use App\Livewire\Admin\Concerns\WithListToolbar;
 use App\Models\Concerns\HasTranslatableContent;
 use App\Repositories\Contracts\ContentRepositoryInterface;
 use App\Services\AbstractContentService;
+use App\Services\DataTableService;
+use App\Support\DataTable\Cell;
+use App\Support\DataTable\Column;
+use App\Support\DataTable\Row;
+use App\Support\DataTable\RowAction;
 use App\Support\ListToolbar\ListFilter;
 use App\Support\ListToolbar\ListSort;
 use App\Support\ListToolbar\ListView;
@@ -33,16 +41,18 @@ use Livewire\Component;
 use Livewire\WithPagination;
 
 /**
- * The index table every content type shares: the list toolbar (views with
- * counts, search, filters, sort, density; WithListToolbar), sortable columns, drag-and-drop reordering (with move up/down buttons as the keyboard
- * alternative), publish/unpublish (one or a ticked selection), trash with Undo
- * (no dialog: the trash is reversible) and a Trash view to
- * restore from or delete permanently (irreversible, so it asks first in the
- * danger confirmation dialog). Subclasses name the type, its service and its columns.
+ * The index every content type shares: the list toolbar (views with counts,
+ * search, filters, sort, density; WithListToolbar) over the shared data table
+ * (WithDataTable): a primary cell with the title and a supporting line, sortable
+ * columns, the Columns menu, a quick publish switch with Undo, row actions
+ * (Edit, View on site, Duplicate, Move to trash with Undo), selection with bulk
+ * actions, and a Reorder mode for the display order. The Trash view restores or
+ * deletes permanently (irreversible, so it asks first in the danger dialog).
+ * Subclasses name the type, its service, its columns and its supporting line.
  */
 abstract class ContentIndex extends Component
 {
-    use AuthorizesRequests, BulkPublishesContent, ConfirmsActions, NotifiesEditors, WithPagination;
+    use AuthorizesRequests, BulkPublishesContent, ConfirmsActions, NotifiesEditors, WithDataTable, WithPagination;
     use WithListToolbar {
         WithListToolbar::listViewCount as baseListViewCount;
     }
@@ -61,12 +71,12 @@ abstract class ContentIndex extends Component
 
     public const string VIEW_PLACEHOLDER = 'placeholder';
 
-    public const int PER_PAGE = 20;
+    public const int PER_PAGE = DataTable::DEFAULT_PAGE_SIZE;
 
     /** Ids ticked for a bulk action (on any page). @var list<int> */
     public array $selected = [];
 
-    /** Columns whose first click (or Sort choice) sorts newest first. */
+    /** Sort choices that start with the newest or largest. */
     public const array NEWEST_FIRST = ['updated_at', 'published_at', 'year', 'date', 'material_date', 'start_year'];
 
     /** ContentTypes key of the type this screen manages. */
@@ -78,12 +88,22 @@ abstract class ContentIndex extends Component
     abstract protected function service(): AbstractContentService;
 
     /**
-     * Column key => label, in table order. A column is sortable when the
-     * repository lists it; the first column links to the edit screen.
+     * The muted second line of the primary cell (course · type · file size).
      *
-     * @return array<string, string>
+     * @return list<string|null>
      */
-    abstract protected function columns(): array;
+    protected function supporting(Model $item): array
+    {
+        return [];
+    }
+
+    /**
+     * A 40px image for the primary cell (an album's cover, a video's poster), or null.
+     */
+    protected function thumbnail(Model $item): ?string
+    {
+        return null;
+    }
 
     /**
      * The type's own filters, between Status and Language (Type, Year, Featured...).
@@ -160,14 +180,14 @@ abstract class ContentIndex extends Component
         ];
         $sortable = $this->service()->sortableColumns();
 
-        foreach ($this->columns() as $column => $label) {
-            if ($column === 'status' || ! in_array($column, $sortable, true)) {
+        foreach ($this->dataTableColumns() as $column) {
+            if ($column->type === DataTableColumnType::Status || $column->key === 'updated_at' || ! in_array($column->key, $sortable, true)) {
                 continue;
             }
 
-            $sorts[] = in_array($column, self::NEWEST_FIRST, true)
-                ? new ListSort($column, ListToolbar::SORT_DESC, __(':column, newest first', ['column' => __($label)]))
-                : new ListSort($column, ListToolbar::SORT_ASC, __(':column, A to Z', ['column' => __($label)]));
+            $sorts[] = in_array($column->key, self::NEWEST_FIRST, true)
+                ? new ListSort($column->key, ListToolbar::SORT_DESC, __(':column, newest first', ['column' => $column->label]))
+                : new ListSort($column->key, ListToolbar::SORT_ASC, __(':column, A to Z', ['column' => $column->label]));
         }
 
         return $sorts;
@@ -194,6 +214,44 @@ abstract class ContentIndex extends Component
     }
 
     /**
+     * The Status and Updated columns every type ends with ("Deleted" in the trash).
+     *
+     * @return list<Column>
+     */
+    protected function closingColumns(): array
+    {
+        return [
+            Column::status('status', __('Status')),
+            Column::relative('updated_at', $this->onTrash() ? __('Deleted') : __('Updated'), sortable: ! $this->onTrash()),
+        ];
+    }
+
+    protected function sortsNewestFirst(Column $column): bool
+    {
+        return in_array($column->key, self::NEWEST_FIRST, true);
+    }
+
+    protected function dataTableMatchingIds(): array
+    {
+        return $this->service()->search($this->search, $this->listCriteria(), DataTable::MAX_SELECT_ALL)->getCollection()->modelKeys();
+    }
+
+    protected function dataTableReorderable(): bool
+    {
+        return auth()->user()?->can('reorder', ContentTypes::get($this->type())['model']) ?? false;
+    }
+
+    protected function dataTableCanReorder(): bool
+    {
+        return $this->canReorder();
+    }
+
+    protected function dataTableSaveOrder(array $orderedIds): void
+    {
+        $this->reorder($orderedIds);
+    }
+
+    /**
      * Whether the type is written in English and Arabic.
      */
     protected function translates(): bool
@@ -217,23 +275,6 @@ abstract class ContentIndex extends Component
             fn (string $column): string => __(Str::ucfirst(str_replace('_', ' ', $column))),
             $item->missingTranslations(Locales::AR),
         );
-    }
-
-    /**
-     * A column heading: sort by it, or turn its direction round.
-     */
-    public function sortBy(string $column): void
-    {
-        if (! in_array($column, $this->service()->sortableColumns(), true)) {
-            return;
-        }
-
-        $direction = $this->sort === $column
-            ? ($this->direction === ListToolbar::SORT_ASC ? ListToolbar::SORT_DESC : ListToolbar::SORT_ASC)
-            // Dates read best newest first; names and titles from A.
-            : (in_array($column, self::NEWEST_FIRST, true) ? ListToolbar::SORT_DESC : ListToolbar::SORT_ASC);
-
-        $this->applySort($column, $direction);
     }
 
     public function clearSort(): void
@@ -271,6 +312,45 @@ abstract class ContentIndex extends Component
 
         $this->service()->unpublish($model, auth()->user());
         $this->notify(__(':type moved back to draft.', ['type' => __($this->singular())]));
+    }
+
+    /**
+     * The status cell's switch: publish a draft or take a published record back
+     * to draft at once, with Undo in the toast (the same switch the other way).
+     */
+    public function togglePublished(int $id): void
+    {
+        $model = $this->service()->findOrFail($id);
+        $this->authorize('publish', $model);
+        $undo = $this->undoWith('togglePublished', [$id]);
+
+        if ($model->getAttribute('status') === ContentStatus::Published) {
+            $this->service()->unpublish($model, auth()->user());
+            $this->toast(__(':type moved back to draft.', ['type' => __($this->singular())]), AdminUx::TOAST_SUCCESS, $undo);
+
+            return;
+        }
+
+        try {
+            $this->service()->publish($model, auth()->user());
+            $this->toast(__(':type published.', ['type' => __($this->singular())]), AdminUx::TOAST_SUCCESS, $undo);
+        } catch (ImagesNotReadyException $exception) {
+            $this->addError('publish', $exception->getMessage());
+        }
+    }
+
+    /**
+     * A draft copy of a record (its words, details and files), then its edit screen.
+     */
+    public function duplicate(int $id): void
+    {
+        $model = $this->service()->findOrFail($id);
+        $this->authorize('create', $model::class);
+
+        $copy = $this->service()->duplicate($model, auth()->user());
+        session()->flash('admin.status', __(':type duplicated. This is the copy, saved as a draft.', ['type' => __($this->singular())]));
+
+        $this->redirectRoute(ContentTypes::editRoute($this->type()), [ContentTypes::routeParameter($this->type()) => $copy->getKey()]);
     }
 
     /**
@@ -330,7 +410,7 @@ abstract class ContentIndex extends Component
     }
 
     /**
-     * Drag-and-drop result: the ids of the rows on this page in their new order.
+     * The new order of the rows on this page (Reorder mode's Save).
      *
      * @param  list<int|string>  $orderedIds
      */
@@ -362,55 +442,145 @@ abstract class ContentIndex extends Component
         $trash = $this->onTrash();
 
         $items = $trash
-            ? $this->service()->trashed($this->search, self::PER_PAGE)
-            : $this->service()->search($this->search, $this->listCriteria(), self::PER_PAGE, $this->sort ?: null, $this->direction);
+            ? $this->service()->trashed($this->search, $this->perPage)
+            : $this->service()->search($this->search, $this->listCriteria(), $this->perPage, $this->sort ?: null, $this->direction);
+
+        $plural = __($type['plural']);
 
         return view('livewire.admin.content.index', [
             'type' => $type,
-            'typeKey' => $this->type(),
-            'columns' => $this->columns(),
-            'sortable' => $this->service()->sortableColumns(),
             'items' => $items,
             'trash' => $trash,
             'toolbar' => $this->listToolbar($items->total()),
-            'canReorder' => $this->canReorder(),
+            'table' => $this->dataTable($items, $items->getCollection()->map(fn (Model $item): Row => $this->row($item, $trash))->all(), [
+                'caption' => $trash ? __(':items in the trash', ['items' => $plural]) : $plural,
+                'selectable' => ! $trash,
+                'id' => 'content-table',
+            ]),
             'createUrl' => route(ContentTypes::createRoute($this->type())),
-            'editRoute' => ContentTypes::editRoute($this->type()),
-            'routeParameter' => ContentTypes::routeParameter($this->type()),
             'singular' => $this->singular(),
             'emptyText' => ContentTypes::emptyText($this->type()),
             'hasFilters' => $this->listFiltered(),
             'purging' => $this->purgeDialog(),
-        ])->layout('components.layouts.admin', ['title' => __($type['plural'])]);
+        ])->layout('components.layouts.admin', ['title' => $plural]);
     }
 
     /**
-     * Display value of one cell. Enums show their label, dates the long
-     * format, statuses a badge (handled in the view), everything else as text.
-     *
-     * @return array{text: string, tone?: StatusTone}
+     * One record as a table row: the title linked to its edit screen (when the
+     * user may edit it), badges for missing Arabic and sample text, the type's
+     * own cells, and the actions the user is allowed.
      */
-    public function cell(Model $item, string $column): array
+    protected function row(Model $item, bool $trash): Row
     {
-        $value = $item->getAttribute($column);
+        $user = auth()->user();
+        $id = (int) $item->getKey();
+        $title = $this->recordTitle($item);
+        $editUrl = ! $trash && $user?->can('update', $item) ? route(ContentTypes::editRoute($this->type()), [ContentTypes::routeParameter($this->type()) => $id]) : null;
+        $badges = [];
+
+        $missing = $trash ? [] : $this->missingArabic($item);
+
+        if ($missing !== []) {
+            $badges[] = ['label' => __('Needs Arabic'), 'tone' => StatusTone::Bronze, 'hook' => 'data-needs-arabic', 'title' => __('Not yet in Arabic: :fields', ['fields' => implode(__(', '), $missing)])];
+        }
+
+        if (Placeholders::contains($item->getAttributes())) {
+            $badges[] = ['label' => __('list-toolbar.placeholder_view'), 'tone' => StatusTone::Ash, 'hook' => 'data-placeholder-badge'];
+        }
+
+        $cells = [];
+
+        foreach ($this->dataTableColumns() as $column) {
+            if (! $column->isPrimary()) {
+                $cells[$column->key] = $this->cellFor($item, $column, $trash);
+            }
+        }
+
+        return new Row(
+            id: $id,
+            title: $title,
+            url: $editUrl,
+            supporting: $this->supporting($item),
+            thumbnail: $this->thumbnail($item),
+            badges: $badges,
+            cells: $cells,
+            actions: $trash ? $this->trashActions($item) : $this->actions($item, $editUrl),
+        );
+    }
+
+    /**
+     * @return list<RowAction>
+     */
+    protected function actions(Model $item, ?string $editUrl): array
+    {
+        $user = auth()->user();
+        $id = (int) $item->getKey();
+        $publicUrl = $this->publicUrl($item);
+        $published = $item->getAttribute('status') === ContentStatus::Published;
+
+        return array_values(array_filter([
+            $editUrl ? RowAction::link(__('Edit'), 'pencil', $editUrl, inline: true, hook: 'data-edit') : null,
+            $publicUrl ? RowAction::link(__('View on site'), 'external', $publicUrl, inline: true, newTab: true, hook: 'data-view-on-site') : null,
+            $user?->can('create', $item::class) ? RowAction::wire(__('Duplicate'), 'copy', 'duplicate', [$id], inline: true, hook: 'data-duplicate') : null,
+            $user?->can('publish', $item) ? ($published
+                ? RowAction::wire(__('Unpublish'), 'minus', 'unpublish', [$id], hook: 'data-unpublish-row')
+                : RowAction::wire(__('Publish'), 'check', 'publish', [$id], hook: 'data-publish-row')) : null,
+            $user?->can('delete', $item) ? RowAction::wire(__('Move to trash'), 'trash', 'trash', [$id], inline: true, danger: true, hook: 'data-delete') : null,
+        ]));
+    }
+
+    /**
+     * @return list<RowAction>
+     */
+    protected function trashActions(Model $item): array
+    {
+        $user = auth()->user();
+        $id = (int) $item->getKey();
+
+        return array_values(array_filter([
+            $user?->can('create', $item::class) ? RowAction::wire(__('Restore'), 'undo', 'restoreMany', [[$id]], inline: true, hook: 'data-restore') : null,
+            $user?->can('forceDelete', $item) ? RowAction::wire(__(ConfirmDialog::PURGE_LABEL), 'trash', 'confirm', [self::ACTION_PURGE, $id], inline: true, danger: true, hook: 'data-purge') : null,
+        ]));
+    }
+
+    /**
+     * What one column shows for a record: status with the publish switch,
+     * relative moments, short dates, enum labels and plain text.
+     */
+    protected function cellFor(Model $item, Column $column, bool $trash = false): Cell
+    {
+        $tables = app(DataTableService::class);
+        $value = $column->key === 'updated_at' && $trash ? $item->getAttribute('deleted_at') : $item->getAttribute($column->key);
 
         if ($value instanceof ContentStatus) {
-            return ['text' => $value->label(), 'tone' => StatusTone::forContent($value)];
+            $toggle = ! $trash && auth()->user()?->can('publish', $item)
+                ? ['call' => RowAction::call('togglePublished', [(int) $item->getKey()]), 'on' => $value === ContentStatus::Published, 'label' => __('Published: :item', ['item' => $this->recordTitle($item)])]
+                : null;
+
+            return Cell::status($value->label(), StatusTone::forContent($value), $toggle);
         }
 
-        if ($value instanceof BackedEnum) {
-            return ['text' => method_exists($value, 'label') ? $value->label() : (string) $value->value];
-        }
+        return match ($column->type) {
+            DataTableColumnType::Relative => $tables->relative($value instanceof CarbonInterface ? $value : null),
+            DataTableColumnType::Date => $tables->date($value instanceof BackedEnum ? $value->value : $value),
+            default => Cell::text(match (true) {
+                $value instanceof BackedEnum => method_exists($value, 'label') ? $value->label() : (string) $value->value,
+                is_array($value) => implode(__(', '), array_map('strval', $value)),
+                default => $value === null ? '' : (string) $value,
+            }),
+        };
+    }
 
-        if ($value instanceof CarbonInterface) {
-            return ['text' => $value->translatedFormat(DateFormats::LONG)];
-        }
+    /**
+     * The record's title in the current language (sample-text markers left out: the row shows a badge).
+     */
+    public function recordTitle(Model $item): string
+    {
+        $primary = collect($this->dataTableColumns())->first(fn (Column $column): bool => $column->isPrimary());
+        $title = (string) $item->getAttribute($primary?->key ?? 'title');
+        $clean = trim(str_replace([Placeholders::MARKER, Placeholders::MARKER_AR], '', $title));
 
-        if (is_array($value)) {
-            return ['text' => implode(', ', array_map('strval', $value))];
-        }
-
-        return ['text' => $value === null ? '' : (string) $value];
+        return $clean === '' ? $title : $clean;
     }
 
     public function publicUrl(Model $item): ?string
@@ -445,7 +615,7 @@ abstract class ContentIndex extends Component
 
         return [
             'title' => ConfirmDialog::purgeTitle($this->singular()),
-            'body' => ConfirmDialog::purgeBody($this->cell($model, array_key_first($this->columns()))['text']),
+            'body' => ConfirmDialog::purgeBody($this->recordTitle($model)),
             'confirm' => __(ConfirmDialog::PURGE_LABEL),
         ];
     }

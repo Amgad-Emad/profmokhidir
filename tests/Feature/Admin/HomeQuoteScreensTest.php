@@ -82,6 +82,7 @@ class HomeQuoteScreensTest extends TestCase
 
         Livewire::actingAs($this->editor)->test(HomeQuoteIndex::class)
             ->assertSeeInOrder(['Alpha line', 'Beta line'])
+            ->call('startReordering')
             ->assertSee('draggable="true"', false)
             ->call('reorder', [$b->getKey(), $a->getKey()])
             ->assertSee('Order saved.')

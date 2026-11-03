@@ -40,10 +40,11 @@ class ListFilterCountsTest extends TestCase
     public function content_counts_match_search_and_lists_match_any_value(): void
     {
         $publications = $this->app->make(PublicationRepositoryInterface::class);
-        Publication::factory()->published()->create(['title' => 'Soil survey', 'type' => PublicationType::Book, 'year' => 1990]);
-        Publication::factory()->draft()->create(['title' => 'Soil chemistry', 'type' => PublicationType::Report, 'year' => 1990]);
-        Publication::factory()->published()->create(['title' => 'Wheat yields', 'type' => PublicationType::JournalArticle, 'year' => 2001]);
-        Publication::factory()->published()->create(['title' => 'Old soil notes', 'type' => PublicationType::Book, 'year' => 1975])->delete();
+        // A fixed topic: the factory's random "Soil fertility" would match the search for "soil".
+        Publication::factory()->published()->create(['title' => 'Soil survey', 'topic' => 'Agronomy', 'type' => PublicationType::Book, 'year' => 1990]);
+        Publication::factory()->draft()->create(['title' => 'Soil chemistry', 'topic' => 'Agronomy', 'type' => PublicationType::Report, 'year' => 1990]);
+        Publication::factory()->published()->create(['title' => 'Wheat yields', 'topic' => 'Agronomy', 'type' => PublicationType::JournalArticle, 'year' => 2001]);
+        Publication::factory()->published()->create(['title' => 'Old soil notes', 'topic' => 'Agronomy', 'type' => PublicationType::Book, 'year' => 1975])->delete();
 
         $this->assertSame(3, $publications->count());
         $this->assertSame(2, $publications->count('soil'));

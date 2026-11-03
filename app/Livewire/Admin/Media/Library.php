@@ -7,20 +7,31 @@ namespace App\Livewire\Admin\Media;
 use App\Constants\AdminNavigation;
 use App\Constants\ContentStatus;
 use App\Constants\ContentTypes;
+use App\Constants\DataTable;
 use App\Constants\ListToolbar;
+use App\Constants\Locales;
 use App\Constants\MediaCollections;
+use App\Constants\MediaConversions;
 use App\Constants\MediaProperties;
 use App\Constants\MediaTreatment;
+use App\Constants\StatusTone;
 use App\Constants\Uploads;
 use App\Http\Requests\Admin\ImageDetailsRequest;
 use App\Http\Requests\Admin\ImageUploadRequest;
 use App\Livewire\Admin\Concerns\ConfirmsActions;
 use App\Livewire\Admin\Concerns\NotifiesEditors;
+use App\Livewire\Admin\Concerns\WithDataTable;
 use App\Livewire\Admin\Concerns\WithListToolbar;
 use App\Models\Album;
 use App\Repositories\Contracts\MediaRepositoryInterface;
 use App\Services\AlbumService;
+use App\Services\DataTableService;
 use App\Services\MediaService;
+use App\Support\DataTable\Cell;
+use App\Support\DataTable\Column;
+use App\Support\DataTable\Row;
+use App\Support\DataTable\RowAction;
+use App\Support\FileSize;
 use App\Support\ListToolbar\ListFilter;
 use App\Support\ListToolbar\ListSort;
 use App\Support\ListToolbar\ListView;
@@ -28,6 +39,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
@@ -41,11 +53,15 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  */
 class Library extends Component
 {
-    use AuthorizesRequests, ConfirmsActions, NotifiesEditors, WithFileUploads, WithListToolbar, WithPagination;
+    use AuthorizesRequests, ConfirmsActions, NotifiesEditors, WithDataTable, WithFileUploads, WithListToolbar, WithPagination;
 
     public const string ACTION_DELETE = 'delete';
 
-    public const int PER_PAGE = 24;
+    public const int PER_PAGE = DataTable::DEFAULT_PAGE_SIZE;
+
+    /** Tiles (the default) or the table. */
+    #[Url(except: DataTable::LAYOUT_GRID)]
+    public string $layout = DataTable::LAYOUT_GRID;
 
     public const string SHOW_ALL = ListToolbar::VIEW_ALL;
 
@@ -218,13 +234,65 @@ class Library extends Component
         $this->toast(__('Image deleted.'));
     }
 
+    public function setLayout(string $layout): void
+    {
+        $this->layout = $layout === DataTable::LAYOUT_LIST ? DataTable::LAYOUT_LIST : DataTable::LAYOUT_GRID;
+    }
+
+    /**
+     * The table of the list layout: the image with its caption and where it is
+     * used, whether its details are complete, its size and when it came in.
+     */
+    protected function dataTableColumns(): array
+    {
+        return [
+            Column::primary('file_name', __('Image'), sortable: true),
+            Column::badges('details', __('Details'), width: '10rem', priority: DataTable::PRIORITY_ESSENTIAL),
+            Column::number('size', __('Size'), width: '6rem', priority: DataTable::PRIORITY_DESKTOP),
+            Column::relative('created_at', __('Uploaded')),
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $usage
+     * @param  list<string>  $missing
+     */
+    private function row(Media $image, array $usage, array $missing): Row
+    {
+        $id = (int) $image->getKey();
+        $alt = $image->getTranslatedProperty(MediaProperties::ALT_TEXT, Locales::DEFAULT);
+        $details = match (true) {
+            blank($alt) => ['label' => __('Needs alt text'), 'tone' => StatusTone::Bronze],
+            $missing !== [] => ['label' => __('Needs details'), 'tone' => StatusTone::Bronze],
+            default => ['label' => __('Ready'), 'tone' => StatusTone::Cypress],
+        };
+
+        return new Row(
+            id: $id,
+            title: $image->getCustomProperty(MediaProperties::CAPTION) ?: $image->file_name,
+            supporting: [$usage['type_label'].DataTable::SEPARATOR.$usage['label'].($usage['trashed'] ? ' '.__('(in trash)') : ''), $image->file_name],
+            thumbnail: $image->hasGeneratedConversion(MediaConversions::SMALL) ? $image->getUrl(MediaConversions::SMALL) : $image->getUrl(),
+            badges: $image->needsTranslation() ? [['label' => __('Needs Arabic'), 'tone' => StatusTone::Bronze, 'hook' => 'data-needs-arabic']] : [],
+            cells: [
+                'details' => Cell::badges([$details]),
+                'size' => Cell::text(FileSize::format((int) $image->size)),
+                'created_at' => app(DataTableService::class)->relative($image->created_at),
+            ],
+            actions: [
+                RowAction::wire(__('Image details'), 'pencil', 'edit', [$id], inline: true, hook: 'data-edit-image'),
+                RowAction::wire(__('Delete image'), 'trash', 'confirm', [self::ACTION_DELETE, $id], danger: true, hook: 'data-delete-image'),
+            ],
+            attributes: ['data-media' => $id],
+        );
+    }
+
     public function render(): View
     {
         if ($this->uploadAlbumId === null && isset($this->filters[MediaRepositoryInterface::FILTER_ALBUM])) {
             $this->uploadAlbumId = (int) $this->filters[MediaRepositoryInterface::FILTER_ALBUM];
         }
 
-        $images = $this->media()->library($this->search, $this->listCriteria(), self::PER_PAGE, $this->sort ?: null, $this->direction);
+        $images = $this->media()->library($this->search, $this->listCriteria(), $this->perPage, $this->sort ?: null, $this->direction);
         $usages = [];
         $missing = [];
 
@@ -237,6 +305,11 @@ class Library extends Component
 
         return view('livewire.admin.media.library', [
             'images' => $images,
+            'listLayout' => $this->layout === DataTable::LAYOUT_LIST,
+            'table' => $this->dataTable($images, $images->getCollection()->map(fn (Media $image): Row => $this->row($image, $usages[(int) $image->getKey()], $missing[(int) $image->getKey()]))->all(), [
+                'caption' => __('Media library'),
+                'id' => 'media-table',
+            ]),
             'usages' => $usages,
             'missing' => $missing,
             'editing' => $this->editingId === null ? null : $this->media()->find($this->editingId),

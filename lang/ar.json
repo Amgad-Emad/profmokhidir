@@ -2438,5 +2438,18 @@
     "pages": "الصفحات",
     "reports": "البلاغات",
     "tributes": "كلمات الوفاء",
-    "users": "المستخدمين"
+    "users": "المستخدمين",
+    "{0} No photos|{1} :count photo|[2,*] :count photos": "{0} لا صور|{1} صورة واحدة|{2} صورتان|[3,10] :count صور|[11,*] :count صورة",
+    "Message by": "كاتب الرسالة",
+    "Reported": "تاريخ الإبلاغ",
+    "Show the message": "إظهار الرسالة",
+    ":type duplicated. This is the copy, saved as a draft.": "تم نسخ :type. هذه هي النسخة، وقد حُفظت مسودة.",
+    "Published: :item": "منشور: :item",
+    "Size": "الحجم",
+    "Uploaded": "تاريخ الرفع",
+    "Received": "تاريخ الوصول",
+    "Read the tribute": "قراءة التحية",
+    "Joined": "تاريخ الانضمام",
+    ":title (copy)": ":title (نسخة)",
+    "User": "مستخدم"
 }

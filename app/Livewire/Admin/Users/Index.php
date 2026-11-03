@@ -7,18 +7,26 @@ namespace App\Livewire\Admin\Users;
 use App\Constants\AccountState;
 use App\Constants\AdminNavigation;
 use App\Constants\CommunityStatus;
+use App\Constants\DataTable;
 use App\Constants\ListToolbar;
 use App\Constants\Locales;
 use App\Constants\Roles;
+use App\Constants\StatusTone;
 use App\Exceptions\UserManagementException;
 use App\Http\Requests\Admin\StaffInviteRequest;
 use App\Http\Requests\Admin\StaffRoleRequest;
 use App\Livewire\Admin\Concerns\NotifiesEditors;
+use App\Livewire\Admin\Concerns\WithDataTable;
 use App\Livewire\Admin\Concerns\WithListToolbar;
 use App\Models\User;
 use App\Repositories\Contracts\UserRepositoryInterface;
+use App\Services\DataTableService;
 use App\Services\RoleService;
 use App\Services\UserService;
+use App\Support\DataTable\Cell;
+use App\Support\DataTable\Column;
+use App\Support\DataTable\Row;
+use App\Support\DataTable\RowAction;
 use App\Support\ListToolbar\ListFilter;
 use App\Support\ListToolbar\ListSort;
 use App\Support\ListToolbar\ListView;
@@ -37,9 +45,9 @@ use Livewire\WithPagination;
  */
 class Index extends Component
 {
-    use AuthorizesRequests, NotifiesEditors, WithListToolbar, WithPagination;
+    use AuthorizesRequests, NotifiesEditors, WithDataTable, WithListToolbar, WithPagination;
 
-    public const int PER_PAGE = 15;
+    public const int PER_PAGE = DataTable::DEFAULT_PAGE_SIZE;
 
     public const string ACTION_DEACTIVATE = 'deactivate';
 
@@ -271,21 +279,14 @@ class Index extends Component
 
     public function render(): View
     {
-        $users = $this->users()->filter($this->search, $this->listCriteria(), self::PER_PAGE, $this->sort ?: null, $this->direction);
-
-        $rows = [];
-
-        foreach ($users as $user) {
-            $rows[(int) $user->getKey()] = [
-                'roles' => $this->roles()->rolesOf($user),
-                'staffRole' => $this->users()->staffRoleOf($user),
-                'pendingInvite' => $this->users()->hasPendingInvitation($user),
-            ];
-        }
+        $users = $this->users()->filter($this->search, $this->listCriteria(), $this->perPage, $this->sort ?: null, $this->direction);
 
         return view('livewire.admin.users.index', [
             'users' => $users,
-            'rows' => $rows,
+            'table' => $this->dataTable($users, $users->getCollection()->map(fn (User $user): Row => $this->row($user))->all(), [
+                'caption' => __('Users'),
+                'id' => 'users-table',
+            ]),
             'toolbar' => $this->listToolbar($users->total()),
             'staffRoleOptions' => StaffRoleRequest::labels(),
             'localeOptions' => array_combine(Locales::all(), array_map(Locales::native(...), Locales::all())),
@@ -294,6 +295,68 @@ class Index extends Component
             'confirming' => $this->confirmingId === null ? null : $this->users()->find($this->confirmingId),
             'dialog' => $this->dialogCopy(),
         ])->layout('components.layouts.admin', ['title' => AdminNavigation::get(AdminNavigation::USERS)['label']]);
+    }
+
+    /**
+     * Name with email and language, roles, community membership and account
+     * state; when the account was made, on request.
+     */
+    protected function dataTableColumns(): array
+    {
+        return [
+            Column::primary('name', __('Name'), sortable: true),
+            Column::badges('roles', __('Roles'), width: '10rem', priority: DataTable::PRIORITY_TABLET),
+            Column::badges('community', __('Community'), width: '9rem', priority: DataTable::PRIORITY_DESKTOP),
+            Column::status('account', __('Account')),
+            Column::relative('created_at', __('Joined'), visible: false),
+        ];
+    }
+
+    /**
+     * One account as a table row: Change role and Deactivate at hand, Resend
+     * invite and Reactivate in the menu; nothing for the signed-in user's own row.
+     */
+    private function row(User $user): Row
+    {
+        $id = (int) $user->getKey();
+        $isSelf = auth()->id() === $id;
+        $roles = $this->roles()->rolesOf($user);
+        $isStaff = $this->users()->staffRoleOf($user) !== null;
+        $pendingInvite = $this->users()->hasPendingInvitation($user);
+        $account = match (true) {
+            ! $user->isActive() => [__('Deactivated'), StatusTone::Ash],
+            $pendingInvite => [__('Invitation pending'), StatusTone::Bronze],
+            $user->email_verified_at === null => [__('Email unverified'), StatusTone::Bronze],
+            default => [__('Active'), StatusTone::Cypress],
+        };
+        $actor = auth()->user();
+        $can = fn (string $ability): bool => ! $isSelf && ($actor?->can($ability, $user) ?? false);
+
+        return new Row(
+            id: $id,
+            title: $user->name,
+            supporting: [$user->email],
+            badges: array_values(array_filter([
+                $isSelf ? ['label' => __('(you)'), 'tone' => StatusTone::Ash] : null,
+                // The language the account works in, named in that language.
+                Locales::isValid($user->locale) ? ['label' => Locales::native($user->locale), 'tone' => StatusTone::Ash, 'lang' => Locales::html($user->locale), 'title' => __('Language'), 'data' => ['data-user-locale' => $user->locale]] : null,
+            ])),
+            cells: [
+                'roles' => Cell::badges(array_map(fn (string $role): array => ['label' => Roles::labels()[$role] ?? $role, 'tone' => in_array($role, Roles::staff(), true) ? StatusTone::Cypress : StatusTone::Ash], $roles), __('None')),
+                'community' => $user->community_status === CommunityStatus::None
+                    ? Cell::text($user->community_status->label(), muted: true)
+                    : Cell::badges([['label' => $user->community_status->label(), 'tone' => StatusTone::forCommunity($user->community_status)]]),
+                'account' => Cell::status($account[0], $account[1]),
+                'created_at' => app(DataTableService::class)->relative($user->created_at),
+            ],
+            actions: array_values(array_filter([
+                $can('assignRole') ? RowAction::wire(__('Change role'), 'users', 'editRole', [$id], inline: true, hook: 'data-change-role') : null,
+                $pendingInvite && $user->isActive() && $can($this->ability(self::ACTION_RESEND)) ? RowAction::wire(__('Resend invite'), 'send', 'confirm', [self::ACTION_RESEND, $id], hook: 'data-resend') : null,
+                $isStaff && $user->isActive() && $can($this->ability(self::ACTION_DEACTIVATE)) ? RowAction::wire(__('Deactivate'), 'lock', 'confirm', [self::ACTION_DEACTIVATE, $id], inline: true, danger: true, hook: 'data-deactivate') : null,
+                ! $user->isActive() && $can($this->ability(self::ACTION_REACTIVATE)) ? RowAction::wire(__('Reactivate'), 'undo', 'confirm', [self::ACTION_REACTIVATE, $id], inline: true, hook: 'data-reactivate') : null,
+            ])),
+            attributes: ['data-user' => $id],
+        );
     }
 
     /**

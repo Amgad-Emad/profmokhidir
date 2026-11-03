@@ -2,13 +2,16 @@
 
 namespace Tests\Feature\Locale;
 
+use Illuminate\Support\Facades\File;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 /**
  * Every interface string has its Arabic: a key in lang/en.json without one in
  * lang/ar.json fails, as does an Arabic string that loses a :placeholder or
- * a group file (validation, auth...) missing a key in Arabic.
+ * a group file (validation, auth...) missing a key in Arabic. The admin's own
+ * views, components and services are scanned too: every string they pass to
+ * __() needs its Arabic, and no English may be written straight into markup.
  */
 class TranslationKeyParityTest extends TestCase
 {
@@ -75,6 +78,120 @@ class TranslationKeyParityTest extends TestCase
             $missing = array_diff(array_keys($this->flatten(require $file)), array_keys($this->flatten(require $arabicFile)));
             $this->assertSame([], array_values($missing), 'Missing in lang/ar/'.basename($file));
         }
+    }
+
+    /** Where the admin's interface strings live: its Blade views and its Livewire components and services. */
+    private const array ADMIN_SOURCES = [
+        'resources/views/admin',
+        'resources/views/components/admin',
+        'resources/views/livewire/admin',
+        'app/Livewire/Admin',
+    ];
+
+    /** Admin services whose strings reach the screen (row labels, table captions). */
+    private const array ADMIN_SERVICES = [
+        'app/Services/DataTableService.php',
+        'app/Services/RevisionService.php',
+        'app/Services/AdminShellService.php',
+        'app/Services/ListToolbarService.php',
+    ];
+
+    #[Test]
+    public function every_string_the_admin_translates_has_an_arabic_translation(): void
+    {
+        $arabic = $this->translations('ar');
+        $missing = [];
+
+        foreach ($this->adminFiles() as $file) {
+            preg_match_all("/(?:__|trans_choice)\\(\\s*'((?:[^'\\\\]|\\\\.)+)'/", (string) file_get_contents($file), $matches);
+
+            foreach ($matches[1] as $key) {
+                $key = stripslashes($key);
+
+                if (preg_match('/^[a-z0-9-]+\.[a-z0-9_.]+$/', $key) === 1) {
+                    if (trans($key, [], 'ar') === $key) {
+                        $missing[] = $key.' ('.$this->relative($file).')';
+                    }
+
+                    continue;
+                }
+
+                if (! array_key_exists($key, $arabic)) {
+                    $missing[] = $key.' ('.$this->relative($file).')';
+                }
+            }
+        }
+
+        $this->assertSame([], array_values(array_unique($missing)), 'Admin strings without an Arabic translation');
+    }
+
+    /**
+     * Words written straight into admin markup (between tags or in a label,
+     * title, placeholder or alt attribute) never reach the translator, so they
+     * stay English on Arabic pages. Every such word goes through __().
+     */
+    #[Test]
+    public function admin_views_have_no_hardcoded_english(): void
+    {
+        $found = [];
+
+        foreach ($this->adminFiles() as $file) {
+            if (! str_ends_with($file, '.blade.php')) {
+                continue;
+            }
+
+            $source = (string) file_get_contents($file);
+            // Leave out Blade comments, PHP blocks, echoes, directives with their arguments, scripts and SVG.
+            $markup = preg_replace([
+                '/\{\{--.*?--\}\}/s',
+                '/@php\b.*?@endphp/s',
+                '/<script\b.*?<\/script>/s',
+                '/<svg\b.*?<\/svg>/s',
+                '/\{!!.*?!!\}/s',
+                '/\{\{.*?\}\}/s',
+                '/@[a-zA-Z]+\s*(\((?:[^()]++|(?1))*\))?/',
+            ], ' ', $source);
+
+            preg_match_all('/>([^<>]*)</', $markup, $texts);
+            preg_match_all('/\s(?:aria-label|title|placeholder|alt|label)="([^"]*)"/', $markup, $attributes);
+
+            foreach ([...$texts[1], ...$attributes[1]] as $text) {
+                $text = trim(html_entity_decode($text));
+
+                // A word of two or more Latin letters, outside technical tokens (formats, code, sample addresses and DOIs).
+                if (preg_match('/[A-Za-z]{2,}/', $text) === 1 && ! in_array($text, self::NOT_WORDS, true) && preg_match('/^[\w.-]+\(|=>|\$|::|^https?:\/\/|^\d/', $text) !== 1) {
+                    $found[] = $this->relative($file).': '.$text;
+                }
+            }
+        }
+
+        $this->assertSame([], $found, 'Hard-coded English in the admin views; wrap it in __()');
+    }
+
+    /** Text that is the same in every language (formats, keys and a language's own name), allowed in markup as it is. */
+    private const array NOT_WORDS = ['CSV', 'MK', 'PDF', 'JPEG', 'PNG', 'WebP', 'HEIC', 'DOI', 'URL', 'Ctrl', 'Esc', 'Tab', 'Enter', 'Shift', 'Alt', '⌘', 'English'];
+
+    /**
+     * @return list<string>
+     */
+    private function adminFiles(): array
+    {
+        $files = array_map(base_path(...), self::ADMIN_SERVICES);
+
+        foreach (self::ADMIN_SOURCES as $directory) {
+            foreach (File::allFiles(base_path($directory)) as $file) {
+                if (in_array($file->getExtension(), ['php'], true)) {
+                    $files[] = $file->getPathname();
+                }
+            }
+        }
+
+        return array_values(array_filter($files, 'is_file'));
+    }
+
+    private function relative(string $file): string
+    {
+        return ltrim(str_replace(base_path(), '', $file), '/');
     }
 
     /**

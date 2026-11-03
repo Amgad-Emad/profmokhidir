@@ -26,8 +26,11 @@ class AnalyticsController extends Controller
 
         $period = $this->reports->period($request->range(), $request->validated('from'), $request->validated('to'));
 
+        $report = $this->reports->report($period, $request->section());
+
         return view('admin.analytics.index', [
-            ...$this->reports->report($period, $request->section()),
+            ...$report,
+            'visitorsTable' => $this->reports->visitorsTable($report['series'], $report['period']),
             'query' => array_filter($request->validated(), fn (mixed $value): bool => $value !== null && $value !== ''),
         ]);
     }

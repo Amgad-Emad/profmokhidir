@@ -14,11 +14,24 @@
         </div>
     </section>
 
-    <x-admin.list-toolbar :toolbar="$toolbar" :items="__('images')" :placeholder="__('File name, alt text, caption or place')" />
+    <x-admin.list-toolbar :toolbar="$toolbar" :items="__('images')" :placeholder="__('File name, alt text, caption or place')" :table="$listLayout ? $table : null">
+        <x-slot:tools>
+            <div class="list-toolbar__segmented" role="group" aria-label="{{ __('data-table.layout') }}" data-layout-toggle>
+                <x-button variant="icon" size="toolbar" type="button" wire:click="setLayout('grid')" aria-pressed="{{ $listLayout ? 'false' : 'true' }}" data-layout="grid" data-toolbar-control="layout-grid">
+                    <x-icon name="grid" class="size-5" /><span class="sr-only">{{ __('data-table.grid') }}</span>
+                </x-button>
+                <x-button variant="icon" size="toolbar" type="button" wire:click="setLayout('list')" aria-pressed="{{ $listLayout ? 'true' : 'false' }}" data-layout="list" data-toolbar-control="layout-list">
+                    <x-icon name="list" class="size-5" /><span class="sr-only">{{ __('data-table.list') }}</span>
+                </x-button>
+            </div>
+        </x-slot:tools>
+    </x-admin.list-toolbar>
 
     <x-admin.list-results :density="$toolbar['density']">
     @if ($images->isEmpty())
         <x-admin.list-empty :title="__('No photographs yet')" :text="__('Photographs uploaded here are filed in albums for the Pictures page. Portraits and video posters appear here too.')" :filtered="$filtered" />
+    @elseif ($listLayout)
+        <x-admin.data-table :table="$table" data-library-table />
     @else
         <ul class="library-grid" data-library>
             @foreach ($images as $image)

@@ -55,10 +55,12 @@ class DestructiveActionsTest extends TestCase
     {
         $publication = Publication::factory()->create(['title' => 'Soil and water']);
 
-        $html = Livewire::actingAs($this->editor)->test(PublicationIndex::class)
-            ->assertSee('row-menu__item row-menu__item--danger" data-delete', false)
-            ->set('selected', [$publication->getKey()])
-            ->html();
+        $test = Livewire::actingAs($this->editor)->test(PublicationIndex::class);
+        // The row's own action: a danger icon button (and the same in the menu, for touch screens).
+        $this->assertMatchesRegularExpression('/<button type="button" class="data-table__action is-danger" title="Move to trash" wire:click="trash\('.$publication->getKey().'\)" data-delete="data-delete">\s*<svg/', $test->html());
+        $test->assertSee('row-menu__item row-menu__item--danger row-menu__item--touch" wire:click="trash('.$publication->getKey().')"', false);
+
+        $html = $test->set('selected', [$publication->getKey()])->html();
 
         $this->assertMatchesRegularExpression('/<button type="button" class="'.self::OUTLINE.'" wire:click="bulkTrash"[^>]*data-bulk="trash">\s*<svg[^>]*>.*?<\/svg>.*?Move to trash<\/button>/s', $html);
 
@@ -76,7 +78,7 @@ class DestructiveActionsTest extends TestCase
 
         $component = Livewire::actingAs($this->editor)->test(PublicationIndex::class)
             ->call('showTrash')
-            ->assertSee('class="'.self::OUTLINE.'" wire:click="confirm(\''.ContentIndex::ACTION_PURGE.'\', '.$publication->getKey().')" data-purge', false)
+            ->assertSee('class="data-table__action is-danger" title="'.ConfirmDialog::PURGE_LABEL.'" wire:click="confirm(\''.ContentIndex::ACTION_PURGE.'\', '.$publication->getKey().')" data-purge="data-purge"', false)
             ->call('confirm', ContentIndex::ACTION_PURGE, $publication->getKey())
             ->assertSee('role="alertdialog"', false)
             ->assertSee('Delete this publication permanently?')
@@ -129,21 +131,21 @@ class DestructiveActionsTest extends TestCase
         $staff = User::factory()->editor()->create(['name' => 'Omar Ali']);
 
         Livewire::actingAs($this->admin)->test(UsersIndex::class)
-            ->assertSee('class="'.self::OUTLINE.'" wire:click="confirm(\'deactivate\', '.$staff->getKey().')" data-deactivate', false)
+            ->assertSee('class="data-table__action is-danger" title="Deactivate" wire:click="confirm(\'deactivate\', '.$staff->getKey().')" data-deactivate="data-deactivate"', false)
             ->call('confirm', UsersIndex::ACTION_DEACTIVATE, $staff->getKey())
             ->assertSee('role="alertdialog"', false)
             ->assertSee('class="'.self::FILLED.'" wire:click="runConfirmed"', false);
 
         $applicant = User::factory()->applicant()->create(['name' => 'Huda Salih']);
         Livewire::actingAs($this->admin)->test(Applications::class)
-            ->assertSee('class="'.self::OUTLINE.'" wire:click="decide(\'reject\', '.$applicant->getKey().')" data-reject', false)
+            ->assertSee('class="data-table__action is-danger" title="Reject" wire:click="decide(\'reject\', '.$applicant->getKey().')" data-reject="data-reject"', false)
             ->call('decide', Applications::ACTION_REJECT, $applicant->getKey())
             ->assertSee('confirm-dialog--danger', false)
             ->assertSee('class="'.self::FILLED.'" wire:loading.attr="disabled" data-confirm="data-confirm">Reject', false);
 
         $tribute = Tribute::factory()->pending()->create(['name' => 'Salma']);
         Livewire::actingAs($this->editor)->test(Moderate::class)
-            ->assertSee('class="'.self::OUTLINE.'" wire:click="decline('.$tribute->getKey().')" data-reject', false)
+            ->assertSee('class="data-table__action is-danger" title="Decline" wire:click="decline('.$tribute->getKey().')" data-reject="data-reject"', false)
             ->set('selected', [$tribute->getKey()])
             ->assertSee('class="'.self::OUTLINE.'" wire:click="rejectSelected"', false);
     }
@@ -157,8 +159,8 @@ class DestructiveActionsTest extends TestCase
         $report = ChatReport::factory()->for($message, 'message')->create();
 
         Livewire::actingAs($this->admin)->test(Reports::class)
-            ->assertSee('class="'.self::OUTLINE.'" wire:click="confirm(\''.Reports::ACTION_DELETE.'\', '.$report->getKey().')" data-delete-message', false)
-            ->assertSee('class="'.self::OUTLINE.'" wire:click="confirm(\''.Reports::ACTION_SUSPEND.'\', '.$report->getKey().')" data-suspend-author', false)
+            ->assertSee('class="data-table__action is-danger" title="Remove message" wire:click="confirm(\''.Reports::ACTION_DELETE.'\', '.$report->getKey().')" data-delete-message="data-delete-message"', false)
+            ->assertSee('class="row-menu__item row-menu__item--danger" wire:click="confirm(\''.Reports::ACTION_SUSPEND.'\', '.$report->getKey().')" data-suspend-author="data-suspend-author"', false)
             ->call('confirm', Reports::ACTION_DELETE, $report->getKey())
             ->assertSee('Remove this message permanently?')
             ->assertSee('class="'.self::FILLED.'" wire:click="deleteMessage"', false);

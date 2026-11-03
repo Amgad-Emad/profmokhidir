@@ -6,20 +6,29 @@ namespace App\Livewire\Admin\Community;
 
 use App\Constants\AdminNavigation;
 use App\Constants\CommunityStatus;
+use App\Constants\DataTable;
 use App\Constants\ListToolbar;
+use App\Constants\StatusTone;
 use App\Exceptions\CommunityApplicationException;
 use App\Http\Requests\Admin\CommunityReviewRequest;
 use App\Livewire\Admin\Concerns\NotifiesEditors;
+use App\Livewire\Admin\Concerns\WithDataTable;
 use App\Livewire\Admin\Concerns\WithListToolbar;
 use App\Models\User;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Services\CommunityService;
+use App\Services\DataTableService;
+use App\Support\DataTable\Cell;
+use App\Support\DataTable\Column;
+use App\Support\DataTable\Row;
+use App\Support\DataTable\RowAction;
 use App\Support\ListToolbar\ListFilter;
 use App\Support\ListToolbar\ListSort;
 use App\Support\ListToolbar\ListView;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\HtmlString;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -32,7 +41,7 @@ use Livewire\WithPagination;
  */
 class Applications extends Component
 {
-    use AuthorizesRequests, NotifiesEditors, WithListToolbar, WithPagination;
+    use AuthorizesRequests, NotifiesEditors, WithDataTable, WithListToolbar, WithPagination;
 
     public const string ACTION_APPROVE = 'approve';
 
@@ -44,7 +53,7 @@ class Applications extends Component
 
     public const string ACTION_REMOVE = 'remove';
 
-    public const int PER_PAGE = 15;
+    public const int PER_PAGE = DataTable::DEFAULT_PAGE_SIZE;
 
     /** Opened as Members (the same screen, starting on the members). */
     #[Locked]
@@ -211,11 +220,15 @@ class Applications extends Component
 
     public function render(): View
     {
-        $users = $this->service()->filter($this->search, $this->listCriteria(), self::PER_PAGE, $this->sort ?: null, $this->sort === '' ? ListToolbar::SORT_DESC : $this->direction);
+        $users = $this->service()->filter($this->search, $this->listCriteria(), $this->perPage, $this->sort ?: null, $this->sort === '' ? ListToolbar::SORT_DESC : $this->direction);
         $isMembersPage = $this->membersPage;
 
         return view('livewire.admin.community.applications', [
             'users' => $users,
+            'table' => $this->dataTable($users, $users->getCollection()->map(fn (User $user): Row => $this->row($user))->all(), [
+                'caption' => __('Applications and members'),
+                'id' => 'applications-table',
+            ]),
             'toolbar' => $this->listToolbar($users->total()),
             'current' => CommunityStatus::tryFrom((string) ($this->filters[UserRepositoryInterface::FILTER_COMMUNITY] ?? '')),
             'filtered' => $this->listFiltered() && $this->activeView() === '',
@@ -224,6 +237,56 @@ class Applications extends Component
         ])->layout('components.layouts.admin', [
             'title' => AdminNavigation::get($isMembersPage ? AdminNavigation::MEMBERS : AdminNavigation::APPLICATIONS)['label'],
         ]);
+    }
+
+    /**
+     * Name with email and affiliation, field, when they applied and were
+     * reviewed, and their status; the reason for joining opens under the row.
+     */
+    protected function dataTableColumns(): array
+    {
+        return [
+            Column::primary('name', __('Name'), sortable: true),
+            Column::text('academic_field', __('Academic field'), width: '11rem'),
+            Column::relative('created_at', __('Applied')),
+            Column::relative('reviewed_at', __('Reviewed'), visible: false),
+            Column::status('community_status', __('Status')),
+        ];
+    }
+
+    /**
+     * One applicant or member as a row, with the decisions their status allows.
+     */
+    private function row(User $user): Row
+    {
+        $id = (int) $user->getKey();
+        $status = $user->community_status;
+        $tables = app(DataTableService::class);
+        $may = auth()->user()?->can('review', $user) ?? false;
+        $decide = fn (string $label, string $icon, string $action, bool $inline, bool $danger, string $hook): ?RowAction => $may ? RowAction::wire($label, $icon, 'decide', [$action, $id], inline: $inline, danger: $danger, hook: $hook) : null;
+
+        return new Row(
+            id: $id,
+            title: $user->name,
+            supporting: [$user->email, $user->affiliation],
+            badges: $user->email_verified_at === null ? [['label' => __('Email unverified'), 'tone' => StatusTone::Bronze]] : [],
+            cells: [
+                'academic_field' => Cell::text($user->academic_field ?: __('Not given'), muted: ! $user->academic_field),
+                'created_at' => $tables->relative($user->created_at),
+                'reviewed_at' => $tables->relative($user->reviewed_at),
+                'community_status' => Cell::status($status->label(), StatusTone::forCommunity($status)),
+            ],
+            actions: array_values(array_filter([
+                in_array($status, [CommunityStatus::Pending, CommunityStatus::Rejected], true) ? $decide(__('Approve'), 'check', self::ACTION_APPROVE, true, false, 'data-approve') : null,
+                $status === CommunityStatus::Pending ? $decide(__('Reject'), 'close', self::ACTION_REJECT, true, true, 'data-reject') : null,
+                $status === CommunityStatus::Approved ? $decide(__('Suspend'), 'lock', self::ACTION_SUSPEND, true, true, 'data-suspend') : null,
+                $status === CommunityStatus::Suspended ? $decide(__('Reinstate'), 'undo', self::ACTION_REINSTATE, true, false, 'data-reinstate') : null,
+                in_array($status, [CommunityStatus::Approved, CommunityStatus::Suspended], true) ? $decide(__('Remove'), 'trash', self::ACTION_REMOVE, false, true, 'data-remove') : null,
+            ])),
+            detail: new HtmlString(view('livewire.admin.community.partials.application', ['user' => $user])->render()),
+            detailLabel: __('Reason for joining'),
+            attributes: ['data-user' => $id],
+        );
     }
 
     /**

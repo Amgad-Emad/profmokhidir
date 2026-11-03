@@ -116,6 +116,19 @@ final class SpatieMediaRepository implements MediaRepositoryInterface
         return $model->media()->count();
     }
 
+    public function copyAll(HasMedia $from, HasMedia $to): int
+    {
+        /** @var Model&HasMedia $from */
+        $copied = 0;
+
+        foreach ($from->media()->orderBy('order_column')->get() as $media) {
+            $media->copy($to, $media->collection_name, $media->disk);
+            $copied++;
+        }
+
+        return $copied;
+    }
+
     public function searchImages(?string $term = null, array $filters = [], int $perPage = 24, ?string $sortBy = null, string $sortDirection = 'desc'): LengthAwarePaginator
     {
         $direction = $sortDirection === 'asc' ? 'asc' : 'desc';

@@ -405,6 +405,10 @@ trait WithListToolbar
             $this->selected = [];
         }
 
+        if (property_exists($this, 'reordering')) {
+            $this->reordering = false;
+        }
+
         $this->resetPage();
         $this->listCountMemo = null;
 

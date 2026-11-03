@@ -24,6 +24,8 @@ class ListPreferenceFactory extends Factory
             'screen' => AdminNavigation::PUBLICATIONS,
             'state' => [],
             'density' => null,
+            'columns' => null,
+            'per_page' => null,
         ];
     }
 
@@ -47,5 +49,15 @@ class ListPreferenceFactory extends Factory
     public function compact(): static
     {
         return $this->state(['density' => ListDensity::Compact]);
+    }
+
+    /**
+     * Data table choices: the given columns hidden and 50 rows a page.
+     *
+     * @param  list<string>  $hidden
+     */
+    public function tableChoices(array $hidden = ['updated_at'], int $perPage = 50): static
+    {
+        return $this->state(['columns' => array_fill_keys($hidden, false), 'per_page' => $perPage]);
     }
 }

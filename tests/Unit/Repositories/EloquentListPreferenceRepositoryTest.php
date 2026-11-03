@@ -72,4 +72,27 @@ class EloquentListPreferenceRepositoryTest extends TestCase
         $this->assertSame('draft', $seeded->state['filters']['status']);
         $this->assertSame(1, ListPreference::query()->where('user_id', $editor->getKey())->count());
     }
+
+    #[Test]
+    public function the_table_choices_are_kept_beside_the_view_and_density(): void
+    {
+        $user = User::factory()->editor()->create();
+
+        $this->preferences->save($user, AdminNavigation::PUBLICATIONS, ['q' => 'soil'], ListDensity::Compact);
+        $this->preferences->saveTable($user, AdminNavigation::PUBLICATIONS, ['authors' => true]);
+        $this->preferences->saveTable($user, AdminNavigation::PUBLICATIONS, null, 50);
+
+        $preference = $this->preferences->find($user, AdminNavigation::PUBLICATIONS);
+        $this->assertSame(['authors' => true], $preference->columns);
+        $this->assertSame(50, $preference->per_page);
+        $this->assertSame(['q' => 'soil'], $preference->state);
+        $this->assertSame(ListDensity::Compact, $preference->density);
+
+        $this->preferences->saveTable($user, AdminNavigation::PUBLICATIONS, []);
+        $this->assertSame([], $this->preferences->find($user, AdminNavigation::PUBLICATIONS)->columns);
+        $this->assertSame(1, ListPreference::query()->count());
+
+        $factory = ListPreference::factory()->forScreen(AdminNavigation::AWARDS)->tableChoices(['updated_at'], 100)->create();
+        $this->assertSame(['updated_at' => false], $factory->columns);
+    }
 }

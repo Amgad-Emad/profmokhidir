@@ -96,6 +96,11 @@ interface MediaRepositoryInterface
     public function countFor(HasMedia $model): int;
 
     /**
+     * Copy every file of one model (each collection, with its details) onto another.
+     */
+    public function copyAll(HasMedia $from, HasMedia $to): int;
+
+    /**
      * Every image across the site (the image collections), newest first, for
      * the media library. The term matches file name, alt text and caption;
      * filters use the FILTER_* keys (a collection list matches any of them).
