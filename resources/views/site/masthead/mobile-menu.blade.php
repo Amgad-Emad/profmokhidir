@@ -6,8 +6,8 @@
 @use('App\Constants\Masthead')
 @use('App\Constants\Search')
 <div id="{{ Masthead::MENU_ID }}" x-ref="panel" x-show="open" x-cloak :class="{ 'is-open': shown }" role="dialog" aria-modal="true" aria-label="{{ __(Masthead::MENU_DIALOG_LABEL) }}" tabindex="-1" @keydown.tab="trap($event)" class="site-menu glow-brass on-dark fixed inset-0 z-50 overflow-y-auto bg-surface text-ink lg:hidden">
-    <div class="site-menu__bar mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 sm:px-6">
-        <x-brand.lockup variant="horizontal" :href="route('home')" class="shrink-0" />
+    <div class="site-menu__bar mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 sm:gap-6 sm:px-6">
+        <x-brand.lockup variant="horizontal" :href="route('home')" class="site-menu__lockup shrink-0" />
         <x-locale.switcher variant="masthead" class="site-menu__locale ms-auto" />
         <button type="button" x-ref="close" class="site-menu-toggle" @click="closeMenu()">
             <span class="t-label">{{ __(Masthead::CLOSE) }}</span>

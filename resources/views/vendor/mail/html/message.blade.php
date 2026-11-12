@@ -2,7 +2,7 @@
 {{-- Header --}}
 <x-slot:header>
 <x-mail::header :url="config('app.url')">
-{{ config('app.name') }}
+<img src="{{ asset(\App\Constants\BrandAssets::EMAIL_LOGO) }}" width="{{ \App\Constants\BrandAssets::EMAIL_LOGO_WIDTH_PX }}" alt="{{ __(\App\Constants\BrandMark::TITLE) }}" class="brand-logo" style="display: block; width: {{ \App\Constants\BrandAssets::EMAIL_LOGO_WIDTH_PX }}px; max-width: 100%; height: auto; margin: 0 auto; border: 0;">
 </x-mail::header>
 </x-slot:header>
 

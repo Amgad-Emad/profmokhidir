@@ -3,6 +3,7 @@
 namespace Tests\Feature\Layout;
 
 use App\Constants\Brand;
+use App\Constants\BrandAssets;
 use App\Constants\BrandMark;
 use App\View\Components\Site\Footer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -82,8 +83,11 @@ class PublicLayoutTest extends TestCase
     #[Test]
     public function the_layout_links_the_favicon_set_and_theme_colour(): void
     {
+        $this->assertStringContainsString('<link rel="icon" href="'.asset('favicon.ico').'" sizes="48x48">', $this->html);
         $this->assertStringContainsString('<link rel="icon" href="'.asset('favicon.svg').'" type="image/svg+xml">', $this->html);
-        $this->assertStringContainsString('<link rel="icon" href="'.asset('favicon-32.png').'" sizes="32x32" type="image/png">', $this->html);
+        $this->assertStringContainsString('<link rel="icon" href="'.asset('favicon-32x32.png').'" sizes="32x32" type="image/png">', $this->html);
+        $this->assertStringContainsString('<link rel="icon" href="'.asset('favicon-16x16.png').'" sizes="16x16" type="image/png">', $this->html);
+        $this->assertStringContainsString('<link rel="mask-icon" href="'.asset('safari-pinned-tab.svg').'" color="'.Brand::EVERGREEN.'">', $this->html);
         $this->assertStringContainsString('<link rel="apple-touch-icon" href="'.asset('apple-touch-icon.png').'" sizes="180x180">', $this->html);
         $this->assertStringContainsString('<link rel="manifest" href="'.asset('site.webmanifest').'">', $this->html);
         // One theme-color per scheme (evergreen chrome in light, cypress in dark), from <x-theme.head>.
@@ -96,22 +100,24 @@ class PublicLayoutTest extends TestCase
     public function the_favicon_files_exist_and_are_built_from_the_mark(): void
     {
         $svg = file_get_contents(public_path('favicon.svg'));
-        $this->assertStringContainsString(BrandMark::LETTERS_PATH, $svg, 'favicon.svg uses the mark outlines');
+        $this->assertSame(file_get_contents(public_path(BrandAssets::ICON)), $svg, 'favicon.svg is the evergreen app icon');
         $this->assertStringContainsString('fill="'.Brand::EVERGREEN.'"', $svg);
-        $this->assertStringContainsString('fill="'.Brand::IVORY.'"', $svg);
-        $this->assertStringNotContainsString('stroke', $svg, 'The small-size disc version has no ring');
-        $this->assertStringContainsString('<title id="title">'.BrandMark::TITLE.'</title>', $svg);
+        $this->assertStringContainsString('role="img"', $svg);
 
-        foreach (['favicon-32.png' => 32, 'apple-touch-icon.png' => 180] as $file => $size) {
+        foreach (['favicon-16x16.png' => 16, 'favicon-32x32.png' => 32, 'favicon-48x48.png' => 48, 'favicon-96x96.png' => 96, 'apple-touch-icon.png' => 180, 'android-chrome-192x192.png' => 192, 'android-chrome-512x512.png' => 512, 'maskable-icon-192x192.png' => 192, 'maskable-icon-512x512.png' => 512] as $file => $size) {
             [$width, $height, $type] = getimagesize(public_path($file));
             $this->assertSame([$size, $size, IMAGETYPE_PNG], [$width, $height, $type], $file);
         }
 
         $manifest = json_decode(file_get_contents(public_path('site.webmanifest')), true, flags: JSON_THROW_ON_ERROR);
         $this->assertSame(Brand::EVERGREEN, $manifest['theme_color']);
-        $this->assertSame(Brand::EVERGREEN, $manifest['background_color']);
+        $this->assertSame(Brand::IVORY, $manifest['background_color']);
         $this->assertSame(BrandMark::TITLE, $manifest['name']);
-        $this->assertSame(['/favicon.svg', '/favicon-32.png', '/apple-touch-icon.png'], array_column($manifest['icons'], 'src'));
+        $this->assertSame(['/android-chrome-192x192.png', '/android-chrome-512x512.png', '/maskable-icon-192x192.png', '/maskable-icon-512x512.png'], array_column($manifest['icons'], 'src'));
+
+        foreach ($manifest['icons'] as $icon) {
+            $this->assertFileExists(public_path(ltrim($icon['src'], '/')));
+        }
     }
 
     #[Test]

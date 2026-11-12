@@ -333,17 +333,72 @@
         background-color: var(--accent-line);
     }
 
-    /* Mark: <x-brand.mark />. Clear space is inline padding, so the box is wider than `size`. */
+    /* Mark: <x-brand.mark />. Clear space is inline padding, so the box is larger than `size`. */
     .brand-mark {
-        display: inline-block;
+        display: inline-flex;
         box-sizing: content-box;
         flex-shrink: 0;
-        overflow: visible;
         vertical-align: middle;
+    }
+
+    .brand-mark__art {
+        height: var(--brand-mark-height);
+        width: auto;
+        max-width: none;
+    }
+
+    .brand-mark--icon .brand-mark__art {
+        border-radius: 22%;
+    }
+
+    /* Logo artwork (<x-brand.art>): a "tone=evergreen" artwork draws both colourways; show the one for the mode. */
+    .brand-art.brand-art--dark {
+        display: none;
+    }
+
+    :root[data-theme='dark'] .brand-art.brand-art--light {
+        display: none;
+    }
+
+    :root[data-theme='dark'] .brand-art.brand-art--dark {
+        display: block;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        :root:not([data-theme='light']) .brand-art.brand-art--light {
+            display: none;
+        }
+
+        :root:not([data-theme='light']) .brand-art.brand-art--dark {
+            display: block;
+        }
     }
 
     .brand-lockup {
         color: currentColor;
+    }
+
+    /* The logo artwork in the lockup: height-led, the width follows the artwork's ratio. */
+    .brand-lockup__art {
+        display: block;
+        width: auto;
+        max-width: 100%;
+        height: 2.5rem;
+    }
+
+    .brand-lockup__art--horizontal {
+        @media (width >= 40rem) {
+            height: 2.75rem;
+        }
+
+        @media (width >= 64rem) {
+            height: 3rem;
+        }
+    }
+
+    .brand-lockup__art--stacked {
+        width: 18rem;
+        height: auto;
     }
 
     /* Skip link: hidden until focused, then a pill at the top left. */

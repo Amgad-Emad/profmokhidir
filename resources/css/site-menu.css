@@ -138,3 +138,12 @@
         transform: none;
     }
 }
+
+@layer components {
+    /* Phones: the logo steps down so the bar keeps the language and Close buttons in view at 360px. */
+    .site-menu__lockup .brand-lockup__art {
+        @media (width < 40rem) {
+            height: 2rem;
+        }
+    }
+}

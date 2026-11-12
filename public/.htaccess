@@ -4,7 +4,9 @@
     </IfModule>
 
     RewriteEngine On
-
+RewriteCond %{HTTP_HOST} ^mokhidir\.holisticpathtechnologies\.com$ [NC,OR]
+RewriteCond %{HTTP_HOST} ^www\.profmokhidir\.com$ [NC]
+RewriteRule ^ https://profmokhidir.com%{REQUEST_URI} [L,R=301]
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]

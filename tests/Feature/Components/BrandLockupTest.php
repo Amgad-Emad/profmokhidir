@@ -2,6 +2,9 @@
 
 namespace Tests\Feature\Components;
 
+use App\Constants\BrandAssets;
+use App\Constants\BrandMark;
+use App\Constants\Locales;
 use Illuminate\Support\Facades\Blade;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -9,34 +12,55 @@ use Tests\TestCase;
 class BrandLockupTest extends TestCase
 {
     #[Test]
-    public function the_stacked_lockup_puts_a_72px_mark_above_the_label_and_name(): void
+    public function the_stacked_lockup_is_the_stacked_logo_without_the_tagline_by_default(): void
     {
         $html = Blade::render('<x-brand.lockup variant="stacked" />');
 
         $this->assertStringContainsString('brand-lockup--stacked', $html);
-        $this->assertStringContainsString('data-size="72"', $html);
-        $this->assertStringContainsString('aria-hidden="true"', $html, 'The mark is decorative beside the name');
-        $this->assertMatchesRegularExpression('/<svg.*<span class="t-label text-accent-text">Professor<\/span>\s*<span class="font-display font-light leading-none text-3xl">Mohamed Osman Khidir<\/span>/s', $html);
+        $this->assertStringContainsString('src="'.asset(BrandAssets::path(BrandAssets::LOGO_STACKED_NO_TAGLINE)).'"', $html);
+        $this->assertStringContainsString('alt="'.BrandMark::TITLE.'"', $html, 'The artwork names the Professor');
+
+        $this->assertStringContainsString('src="'.asset(BrandAssets::path(BrandAssets::LOGO_STACKED)).'"', Blade::render('<x-brand.lockup variant="stacked" tagline />'));
     }
 
     #[Test]
-    public function the_horizontal_lockup_puts_a_32px_ring_mark_left_of_the_text(): void
+    public function the_horizontal_lockup_is_compact_on_phones_and_one_line_from_sm_up(): void
     {
         $html = Blade::render('<x-brand.lockup variant="horizontal" />');
 
         $this->assertStringContainsString('brand-lockup--horizontal', $html);
-        $this->assertStringContainsString('data-size="32"', $html);
-        $this->assertStringContainsString('data-variant="ring"', $html);
-        $this->assertStringContainsString('text-lg sm:text-xl', $html);
+        $this->assertMatchesRegularExpression('/<picture[^>]*><source media="\(min-width: 40rem\)" srcset="'.preg_quote(asset(BrandAssets::path(BrandAssets::LOGO_HORIZONTAL)), '/').'"/', $html);
+        $this->assertStringContainsString('<img src="'.asset(BrandAssets::path(BrandAssets::LOGO_COMPACT)).'"', $html);
+
+        $compact = Blade::render('<x-brand.lockup variant="horizontal" compact />');
+        $this->assertStringNotContainsString('<picture', $compact);
+        $this->assertStringContainsString(BrandAssets::path(BrandAssets::LOGO_COMPACT), $compact);
     }
 
     #[Test]
-    public function tone_evergreen_uses_a_bronze_label_for_light_surfaces(): void
+    public function tone_evergreen_draws_both_colourways_for_the_page_surface(): void
     {
-        $html = Blade::render('<x-brand.lockup tone="evergreen" />');
+        $html = Blade::render('<x-brand.lockup variant="stacked" tone="evergreen" />');
 
-        $this->assertStringContainsString('t-label text-accent-text', $html);
-        $this->assertStringContainsString('data-tone="evergreen"', $html);
+        $this->assertStringContainsString(BrandAssets::path(BrandAssets::LOGO_STACKED_NO_TAGLINE, BrandAssets::ON_LIGHT), $html);
+        $this->assertStringContainsString(BrandAssets::path(BrandAssets::LOGO_STACKED_NO_TAGLINE, BrandAssets::ON_DARK), $html);
+        $this->assertStringContainsString('brand-art--light', $html);
+        $this->assertStringContainsString('brand-art--dark', $html);
+    }
+
+    #[Test]
+    public function arabic_pages_set_the_translated_name_beside_the_mark(): void
+    {
+        app()->setLocale(Locales::AR);
+
+        $html = Blade::render('<x-brand.lockup variant="stacked" tone="evergreen" />');
+
+        $this->assertStringNotContainsString('brand-lockup--artwork', $html, 'The artwork spells the name in Latin capitals');
+        $this->assertStringContainsString('data-size="72"', $html);
+        $this->assertStringContainsString('aria-hidden="true"', $html, 'The mark is decorative beside the name');
+        $this->assertMatchesRegularExpression('/brand-mark.*<span class="t-label text-accent-text">'.preg_quote(__('Professor'), '/').'<\/span>\s*<span class="font-display font-light leading-none text-3xl">'.preg_quote(__('Mohamed Osman Khidir'), '/').'<\/span>/s', $html);
+
+        $this->assertStringContainsString('t-label text-ink', Blade::render('<x-brand.lockup label-tone="champagne" />'));
     }
 
     #[Test]

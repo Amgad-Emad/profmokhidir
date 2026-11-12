@@ -13,7 +13,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 /**
- * The error pages are evergreen with the MK mark, one Cormorant line, a search
+ * The error pages are evergreen with the mark, one Cormorant line, a search
  * box that needs no script, the chapters of the site and a pill button home. 404 and 403 are reached through real requests; 419, 500
  * and 503 are rendered directly because the test client never trips them.
  */
@@ -66,7 +66,7 @@ class ErrorPagesTest extends TestCase
         $this->assertStringContainsString('<meta name="robots" content="'.Seo::ROBOTS_NOINDEX.'">', $html);
         $this->assertMatchesRegularExpression('/<body class="[^"]*glow-brass[^"]*bg-surface[^"]*text-ink[^"]*">/', $html);
         $this->assertStringContainsString('data-error-code="'.$code.'"', $html);
-        $this->assertStringContainsString('class="brand-mark brand-mark--ring"', $html, 'The MK mark in its ring');
+        $this->assertStringContainsString('class="brand-mark brand-mark--full"', $html, 'The full mark');
         $this->assertStringContainsString('<p class="t-label text-accent-text">'.ErrorPages::LABEL_PREFIX.' '.$code.'</p>', $html);
         $this->assertStringContainsString('<h1 class="t-heading text-ink-strong">'.e($page['title']).'</h1>', $html);
         $this->assertStringContainsString('<p class="t-quote max-w-xl">'.e($page['line']).'</p>', $html);

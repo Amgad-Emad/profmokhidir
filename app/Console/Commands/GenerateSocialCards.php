@@ -78,7 +78,7 @@ class GenerateSocialCards extends Command
     {
         $canvas = BrandCanvas::make(SocialCards::WIDTH, SocialCards::HEIGHT);
 
-        // Mark: hairline brass ring with ivory "MK" letters, centred near the top.
+        // Mark: the logo artwork (book, sprout and rays), centred near the top.
         $canvas->mark((int) (SocialCards::WIDTH / 2), 166, SocialCards::MARK_SIZE_PX);
 
         // Quote in the display italic, wrapped to the card's measure and centred.

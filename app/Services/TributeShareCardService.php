@@ -227,7 +227,7 @@ class TributeShareCardService
             $canvas->labelRuns($meta, '  ·  ', 13, Brand::BRASS, $metaTop, 0.3, Locales::dir(app()->getLocale()) === Locales::RTL);
         }
 
-        // Foot: the mark in its ring above the domain.
+        // Foot: the mark above the domain.
         $markCentreY = TributeCards::HEIGHT - $margin - (int) (TributeCards::MARK_SIZE_PX / 2) - 40;
         $canvas->mark($centre, $markCentreY, TributeCards::MARK_SIZE_PX);
         $canvas->tracked(mb_strtoupper(TributeCards::DOMAIN), SocialCards::FONT_LABEL, 13, Brand::BRASS, TributeCards::HEIGHT - $margin + 4, 0.3);

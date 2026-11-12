@@ -310,7 +310,7 @@ class TributeFormTest extends TestCase
         $this->get(route('tributes.thanks'))
             ->assertOk()
             ->assertSee('<title>Thank you · ', false)
-            ->assertSeeInOrder(['t-label text-accent-text', 'Tributes', 'rule-brass', 'class="seal seal--open" aria-hidden="true" data-rise', 'brand-mark--ring', 'data-size="56" data-tone="ivory"', 'id="section-title" class="t-quote', Taglines::TRIBUTE_THANKS], false)
+            ->assertSeeInOrder(['t-label text-accent-text', 'Tributes', 'rule-brass', 'class="seal seal--open" aria-hidden="true" data-rise', 'brand-mark--full', 'data-size="56" data-tone="ivory"', 'id="section-title" class="t-quote', Taglines::TRIBUTE_THANKS], false)
             ->assertSee('href="'.route('tributes').'"', false)
             ->assertDontSee('livewire', false);
     }

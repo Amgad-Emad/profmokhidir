@@ -145,12 +145,15 @@ class VideosPageTest extends TestCase
     {
         Video::factory()->published()->provider(VideoProvider::Vimeo, 'https://vimeo.com/76979871')->create(['slug' => 'interview', 'title' => 'Interview']);
 
-        $this->get(route('videos.show', 'interview'))
+        $response = $this->get(route('videos.show', 'interview'))
             ->assertOk()
             ->assertSee('src="https://player.vimeo.com/video/76979871?dnt=1&amp;autoplay=1"', false)
             ->assertSee('glow-brass', false)
             ->assertSee('Watch on Vimeo · vimeo.com')
-            ->assertDontSee('<img', false);
+            ->assertDontSee('vimeocdn', false);
+
+        preg_match('/<main\b.*<\/main>/s', $response->getContent(), $main);
+        $this->assertStringNotContainsString('<img', $main[0], 'No poster image is fetched for the video (the logo lives in the header)');
     }
 
     #[Test]

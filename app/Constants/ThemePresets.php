@@ -58,7 +58,7 @@ final class ThemePresets
                 'name' => 'Khartoum Sand & Nile',
                 'description' => 'Warm sand, deep Nile blue-green and copper.',
                 'light' => ['surface' => '#f3ebdd', 'surface-raised' => '#e6d8c1', 'primary' => '#0a3634', 'accent-line' => '#b8733f', 'ink' => '#123332', 'danger' => '#9b2c2c', 'mark-ring' => '#b8733f'],
-                'dark' => ['surface' => '#0b2e2d', 'surface-raised' => '#174645', 'primary' => '#0b2e2d', 'accent-line' => '#d08a5a', 'ink' => '#eadfcb', 'danger' => '#efb0a5', 'ink-strong' => '#f3ebdd', 'mark-ring' => '#d08a5a'],
+                'dark' => ['surface' => '#061c1b', 'surface-raised' => '#0e2a29', 'primary' => '#061c1b', 'accent-line' => '#d08a5a', 'ink' => '#eadfcb', 'danger' => '#efb0a5', 'ink-strong' => '#f3ebdd', 'mark-ring' => '#d08a5a'],
             ],
             self::GRAPHITE => [
                 'name' => 'Graphite & Paper',

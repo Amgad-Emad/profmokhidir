@@ -95,6 +95,15 @@
         white-space: nowrap;
     }
 
+    /* The logo artwork steps down with the bar. */
+    .site-header__lockup .brand-lockup__art {
+        transition: height var(--duration-masthead) var(--ease-rise);
+    }
+
+    .site-header.is-compact .site-header__lockup .brand-lockup__art {
+        height: 2.25rem;
+    }
+
     /* ------------------------------------------------------------ utility line */
     .masthead-utility {
         height: var(--masthead-utility-height);

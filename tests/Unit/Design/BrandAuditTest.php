@@ -488,9 +488,11 @@ class BrandAuditTest extends TestCase
             $this->assertNotContains($token, ThemeTokens::keys(), "--{$token} must not be editable");
         }
 
-        $mark = (string) file_get_contents(resource_path('views/components/brand/mark.blade.php'));
-        $this->assertStringContainsString('var(--mark-ring)', $mark);
-        $this->assertStringContainsString("'--mark-ink'", $mark);
-        $this->assertStringNotContainsString('--ink-strong', $mark);
+        // The mark and the logos are the fixed-colour artwork files, never tinted by theme tokens.
+        foreach (['mark', 'art', 'lockup'] as $component) {
+            $view = (string) file_get_contents(resource_path("views/components/brand/{$component}.blade.php"));
+            $this->assertStringNotContainsString('var(--ink', $view, "brand/{$component} takes no theme ink");
+            $this->assertStringNotContainsString('fill:', $view, "brand/{$component} never fills the mark");
+        }
     }
 }

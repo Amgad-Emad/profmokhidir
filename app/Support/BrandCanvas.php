@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Constants\Brand;
+use App\Constants\BrandAssets;
 use App\Constants\SocialCards;
 use ArPHP\I18N\Arabic;
 use GdImage;
@@ -31,6 +32,9 @@ final class BrandCanvas
 
     /** Arabic drawn through tracked() (labels) is set this much larger than the Latin size asked for. */
     public const float ARABIC_LABEL_SCALE = 1.3;
+
+    /** Width of the mark artwork as a share of the square passed to mark(). */
+    public const float MARK_WIDTH_RATIO = 1.4;
 
     private GdImage $canvas;
 
@@ -86,50 +90,25 @@ final class BrandCanvas
     }
 
     /**
-     * The mark: a 1px hairline brass ring with the "MK" letters, centred on (cx, cy)
-     * in final-size pixels; `size` is the ring diameter in final-size pixels.
+     * The mark (book, sprout and rays, the on-dark artwork in BrandAssets::MARK_PNG_ON_DARK),
+     * centred on (cx, cy) in final-size pixels. `size` is the square it fits in: the mark is
+     * MARK_WIDTH_RATIO of it wide and keeps its own proportions, so it never exceeds the height.
      */
-    public function mark(int $cx, int $cy, int $size, string $ringHex = Brand::BRASS, string $inkHex = Brand::IVORY): void
+    public function mark(int $cx, int $cy, int $size): void
     {
-        $s = $this->scale;
-        $cx = $this->px($cx);
-        $cy = $this->px($cy);
-        $size = $this->px($size);
-        $radius = (int) ($size / 2);
-        $ring = $this->colour($ringHex);
-        $ink = $this->colour($inkHex);
+        $file = public_path(BrandAssets::MARK_PNG_ON_DARK);
+        $art = is_file($file) ? imagecreatefrompng($file) : false;
 
-        // Hairline at the final size: a brass disc with the glowing centre restored.
-        $inner = imagecreatetruecolor($size, $size);
-        imagecopy($inner, $this->canvas, 0, 0, $cx - $radius, $cy - $radius, $size, $size);
-        imagefilledellipse($this->canvas, $cx, $cy, $size, $size, $ring);
-
-        $mask = imagecreatetruecolor($size, $size);
-        $transparent = imagecolorallocatealpha($mask, 0, 0, 0, 127);
-        imagefill($mask, 0, 0, $transparent);
-        imagealphablending($mask, false);
-        imagesavealpha($mask, true);
-        $opaque = imagecolorallocatealpha($mask, 0, 0, 0, 0);
-        imagefilledellipse($mask, $radius, $radius, $size - 2 * $s, $size - 2 * $s, $opaque);
-
-        for ($y = 0; $y < $size; $y++) {
-            for ($x = 0; $x < $size; $x++) {
-                if ((imagecolorat($mask, $x, $y) >> 24) === 0) {
-                    imagesetpixel($this->canvas, $cx - $radius + $x, $cy - $radius + $y, imagecolorat($inner, $x, $y));
-                }
-            }
+        if ($art === false) {
+            throw new RuntimeException("Brand mark artwork not found: {$file}");
         }
 
-        imagedestroy($mask);
-        imagedestroy($inner);
+        $width = $this->px((int) round($size * self::MARK_WIDTH_RATIO));
+        $height = (int) round($width * imagesy($art) / imagesx($art));
 
-        // Letters: Cormorant Garamond Light "MK" at 44/96 of the ring, optically centred.
-        $font = self::font(SocialCards::FONT_DISPLAY);
-        $pointSize = $this->pointSizeForWidth('MK', $font, $size * 0.655);
-        $box = imagettfbbox($pointSize, 0, $font, 'MK');
-        $textWidth = $box[2] - $box[0];
-        $textHeight = $box[1] - $box[7];
-        imagettftext($this->canvas, $pointSize, 0, (int) round($cx - $textWidth / 2 - $box[0]), (int) round($cy + $textHeight / 2 - $box[1]), $ink, $font, 'MK');
+        imagealphablending($this->canvas, true);
+        imagecopyresampled($this->canvas, $art, $this->px($cx) - intdiv($width, 2), $this->px($cy) - intdiv($height, 2), 0, 0, $width, $height, imagesx($art), imagesy($art));
+        imagedestroy($art);
     }
 
     /**
