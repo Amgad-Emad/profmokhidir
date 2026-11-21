@@ -111,7 +111,7 @@ final class Sections
                 'path' => '/publications',
                 'route' => 'publications',
                 'placement' => self::PLACEMENT_PRIMARY,
-                'summary' => 'Books, articles and papers by type and year, with citations and links.',
+                'summary' => 'Books, articles and papers by type and year, with links.',
             ],
             self::AWARDS => [
                 'label' => 'Awards',

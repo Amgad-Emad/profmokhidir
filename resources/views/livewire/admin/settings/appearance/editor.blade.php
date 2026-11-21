@@ -17,7 +17,9 @@
             @endif
         </p>
         <h2 id="appearance-editor-title" class="font-display text-4xl font-light">{{ $theme->name }}</h2>
-        @if (! $editable)
+        @if (! $editing)
+            <p class="max-w-xl text-sm font-normal text-ink-muted" data-read-only>{{ __('Shown read-only: the colours of a theme cannot be changed here. Apply it to use it on the site.') }}</p>
+        @elseif (! $editable)
             <p class="max-w-xl text-sm font-normal text-ink-muted" data-read-only>{{ __('Templates are read-only. Duplicate this one to change its colours; the copy keeps a link to it, so any colour can be reset to the template.') }}</p>
         @else
             <form wire:submit="rename" class="form-row max-w-xl" novalidate data-rename>
@@ -31,12 +33,14 @@
         @if ($editable)
             <x-button type="button" wire:click="saveDraft" wire:loading.attr="disabled" data-save-draft>{{ __('Save as draft') }}</x-button>
         @endif
-        <x-button type="button" variant="primary" wire:click="publish" wire:loading.attr="disabled" :disabled="$theme->is_preset && $theme->is_active" data-publish>{{ $theme->is_preset ? __('Apply to the site') : __('Publish') }}</x-button>
+        <x-button type="button" variant="primary" wire:click="publish" wire:loading.attr="disabled" :disabled="$theme->is_preset && $theme->is_active" data-publish>{{ $theme->is_preset || ! $editing ? __('Apply to the site') : __('Publish') }}</x-button>
         <x-button variant="quiet" :href="$previewSiteUrl" target="_blank" rel="noopener" data-preview-site>{{ __('Preview on site') }}<span class="sr-only"> {{ __('(opens in a new tab; shows the last saved draft, to you only)') }}</span></x-button>
-        <x-button type="button" variant="quiet" wire:click="duplicate" data-duplicate-current>{{ __('Duplicate') }}</x-button>
+        @if ($editing)
+            <x-button type="button" variant="quiet" wire:click="duplicate" data-duplicate-current>{{ __('Duplicate') }}</x-button>
+        @endif
         <x-button type="button" variant="quiet" wire:click="export" data-export><x-icon name="download" class="size-4" />{{ __('Export JSON') }}</x-button>
         <x-button type="button" variant="quiet" wire:click="toggleHistory" data-history><x-icon name="history" class="size-4" />{{ __('History') }}</x-button>
-        @if ($editable)
+        @if (! $theme->is_preset && auth()->user()->can('delete', $theme))
             <x-button type="button" variant="danger" wire:click="askDelete" data-delete-theme><x-icon name="trash" class="size-4" />{{ __('Delete') }}</x-button>
         @endif
     </div>

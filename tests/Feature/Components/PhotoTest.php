@@ -165,7 +165,7 @@ class PhotoTest extends TestCase
     }
 
     #[Test]
-    public function a_wall_photo_sets_a_museum_label_and_an_archive_duotone_can_lift(): void
+    public function a_wall_photo_sets_a_museum_label_and_shows_one_untreated_image(): void
     {
         $album = Album::factory()->create();
         $media = $this->app->make(AlbumService::class)->addPhoto($album, PlaceholderImage::grey(64, 48), [
@@ -177,16 +177,17 @@ class PhotoTest extends TestCase
 
         $this->assertStringContainsString('data-lightbox-note="With the first cohort."', $html);
         $this->assertStringContainsString('data-lightbox-credit="Family archive"', $html);
-        $this->assertStringContainsString('photo__frame overflow-hidden rounded-card photo__frame--lift bg-surface-sunken', $html);
-        $this->assertMatchesRegularExpression('/<img src="[^"]+"[^>]*alt=""[^>]*class="photo__under h-full w-full object-cover"[^>]*aria-hidden="true">\s*<img/', $html, 'The untreated print sits beneath the duotone');
-        $this->assertSame(2, substr_count($html, '<img'));
+        // Photos show in their original colours, so there is no duotone to lift and no second image.
+        $this->assertStringContainsString('photo__frame overflow-hidden rounded-card bg-surface-sunken', $html);
+        $this->assertStringNotContainsString('photo__under', $html);
+        $this->assertSame(1, substr_count($html, '<img'));
         $this->assertStringContainsString('<figcaption class="museum-label">', $html);
         $this->assertStringContainsString('<span class="museum-label__title">Gezira research station</span>', $html);
         $this->assertStringContainsString('<span class="museum-label__meta smallcaps">Wad Madani, 1972</span>', $html);
         $this->assertStringContainsString('<span class="museum-label__note">With the first cohort.</span>', $html);
         $this->assertStringNotContainsString('t-label', $html);
 
-        // Portraits keep the warm monochrome: no lift layer; the museum label is the one caption.
+        // Portraits likewise: no lift layer; the museum label is the one caption.
         $portrait = $this->app->make(AlbumService::class)->addPhoto($album, PlaceholderImage::grey(48, 64), [MediaProperties::TREATMENT => MediaTreatment::Portrait, MediaProperties::YEAR => 1980]);
         $html = Blade::render('<x-photo :media="$media" :lift="true" />', ['media' => $portrait]);
 

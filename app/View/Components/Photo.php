@@ -90,12 +90,12 @@ class Photo extends Component
     }
 
     /**
-     * The duotone lifts toward the original on hover: an untreated copy sits
-     * beneath the treated image, which fades a little. Archive photos only.
+     * Photos show in their original colours, so there is no duotone to lift
+     * toward the original on hover any more; `lift` is accepted and ignored.
      */
     public function lifts(): bool
     {
-        return $this->lift && $this->treatmentClass === ResponsiveImage::CLASS_ARCHIVE;
+        return false;
     }
 
     public function render(): View

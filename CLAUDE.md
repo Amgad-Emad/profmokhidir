@@ -62,7 +62,7 @@ Mark: "MK" in Cormorant Garamond Light inside a 1px brass hairline ring. Below 3
 
 Motion: unhurried and scroll-linked. Content rises 40px and fades in over 1200ms, staggered 120ms, easing cubic-bezier(0.16,1,0.3,1). Hero elements scale 1.0 to 0.7 with scroll. Brass rules draw left to right (right to left on Arabic pages) over 1600ms ease-in-out to open sections. Nothing bounces, spins or flashes. Respect prefers-reduced-motion (show content instantly).
 
-Photography: portraits in warm monochrome (desaturate, warm with ~12% ivory tone); archive photos in an evergreen-to-ivory duotone; detail crops of books and handwriting. No filters, vignettes, heavy grain or bright colour. Every photo has a caption with place and year in the label style.
+Photography: every photo shows in its original colours (the owner's decision, 21 November 2026: no warm monochrome, no duotone); detail crops of books and handwriting. No filters, vignettes or heavy grain. Every photo has a caption with place and year in the label style.
 
 UI: 4px radius cards; pill-shaped buttons, either ivory filled or outline; fixed glassy evergreen header (translucent evergreen with backdrop blur). Generous whitespace, measured and quiet.
 

@@ -49,7 +49,7 @@ class LightboxTest extends TestCase
         $this->assertStringContainsString('lightboxNote', $js);
         $this->assertStringContainsString('lightboxCredit', $js);
         $this->assertMatchesRegularExpression('/@media \(min-width: 1024px\) \{[^}]*\.lightbox__figure \{\s*flex-direction: row;/s', $css, 'The label sits beside the photograph on desktop');
-        $this->assertMatchesRegularExpression('/\(hover: hover\) and \(pointer: fine\) and \(prefers-reduced-motion: no-preference\)[^{]*\{[^@]*\.photo__frame--lift \.photo-archive \{\s*transition: opacity 1200ms var\(--ease-rise\);/s', $css, 'The duotone lifts only on hover-capable pointers without reduced motion');
+        $this->assertStringNotContainsString('photo__frame--lift', $css, 'Photos show in their original colours: no duotone lift');
         $this->assertStringContainsString('transition: opacity 400ms var(--ease-rise);', $css);
         $this->assertDoesNotMatchRegularExpression('/#[0-9a-f]{3,6}\b/i', $css, 'Only brand tokens are used');
         $this->assertDoesNotMatchRegularExpression('/scale\(/', $css);

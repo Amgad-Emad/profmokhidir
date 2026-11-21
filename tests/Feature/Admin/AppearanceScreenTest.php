@@ -34,6 +34,8 @@ class AppearanceScreenTest extends TestCase
     {
         parent::setUp();
 
+        // These tests cover the editor, which is off unless the site turns it on.
+        config(['appearance.editing' => true]);
         $this->admin = User::factory()->admin()->create();
     }
 

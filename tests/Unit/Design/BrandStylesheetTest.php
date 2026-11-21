@@ -90,7 +90,9 @@ class BrandStylesheetTest extends TestCase
 
         $this->assertStringContainsString('cubic-bezier(0.16, 1, 0.3, 1)', $this->css);
         $this->assertStringContainsString('prefers-reduced-motion', $this->css);
-        $this->assertStringContainsString("filter: url('#duotone-archive')", $this->css);
+        // Photos show in their original colours (owner's decision): no monochrome or duotone filter.
+        $this->assertStringNotContainsString("filter: url('#duotone-archive')", $this->css);
+        $this->assertStringNotContainsString('grayscale(1)', $this->css);
     }
 
     #[Test]

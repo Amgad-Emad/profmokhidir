@@ -18,6 +18,9 @@ class EloquentAwardRepository extends BaseContentRepository implements AwardRepo
 
     protected array $filterColumns = ['status', 'year'];
 
+    /** The roll of honour shows each award's photographs. */
+    protected array $publishedWith = ['media'];
+
     public function __construct(Award $award)
     {
         parent::__construct($award);

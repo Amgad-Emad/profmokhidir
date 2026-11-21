@@ -80,13 +80,15 @@ class StakeholderArchiveSeeder extends Seeder
             // Already imported: bring the photo settings added since (home timeline, crop focus) up to date
             // and add any recording an earlier, interrupted or older import did not create.
             try {
-                $updated = $this->syncPhotoSettings($manifest['albums'], $manifest['portrait']) + $this->introduceHonours();
+                $updated = $this->syncPhotoSettings($manifest['albums'], $manifest['portrait']) + $this->introduceHonours()
+                    + $this->attachAwardImages($manifest['awards'], $manifest['albums']);
                 $added = $this->importVideos($manifest['videos'], $manifest['albums']);
+                $entries = $this->importCv($manifest['cv'], $manifest['awards']) + $this->importPublications($manifest['publications']);
             } finally {
                 File::deleteDirectory($this->staging);
             }
 
-            $this->command?->info("The stakeholders' archive is already imported; {$updated} settings brought up to date, {$added} videos added.");
+            $this->command?->info("The stakeholders' archive is already imported; {$updated} settings brought up to date, {$added} videos and {$entries} CV entries or publications added.");
 
             return;
         }
@@ -95,8 +97,8 @@ class StakeholderArchiveSeeder extends Seeder
             $this->retirePlaceholders();
             $this->importProfile($manifest['profile'], $manifest['portrait']);
             $this->importAlbums($manifest['albums']);
-            $this->importAwards($manifest['awards']);
-            $this->importCv($manifest['cv']);
+            $this->importAwards($manifest['awards'], $manifest['albums']);
+            $this->importCv($manifest['cv'], $manifest['awards']);
             $this->importQuotes($manifest['quotes']);
             $this->importPublications($manifest['publications']);
             $this->importTeaching($manifest['teaching']);
@@ -175,8 +177,9 @@ class StakeholderArchiveSeeder extends Seeder
 
     /**
      * @param  list<array<string, mixed>>  $awards
+     * @param  list<array<string, mixed>>  $albums  where the award photographs are described
      */
-    private function importAwards(array $awards): void
+    private function importAwards(array $awards, array $albums): void
     {
         foreach ($awards as $award) {
             $this->awards->create([
@@ -187,14 +190,88 @@ class StakeholderArchiveSeeder extends Seeder
                 'status' => ContentStatus::Published,
             ]);
         }
+
+        $this->attachAwardImages($awards, $albums);
     }
 
     /**
-     * @param  list<array{0: CvSection, 1: array<string, string>, 2: array<string, string>, 3: array<string, string>|null, 4: int|null, 5: int|null}>  $entries
+     * Give each award its photographs (the certificate, medal or shield) from the
+     * honours album's descriptions. An award that already has images, which an
+     * editor may have chosen, is left alone, so this is safe to run again.
+     *
+     * @param  list<array<string, mixed>>  $awards
+     * @param  list<array<string, mixed>>  $albums
+     * @return int how many awards were given images
      */
-    private function importCv(array $entries): void
+    private function attachAwardImages(array $awards, array $albums): int
     {
+        $photos = $this->photosByFile($albums);
+        $existing = Award::query()->get()->keyBy(fn (Award $award): string => (string) $award->getTranslation('name', Locales::DEFAULT));
+        $given = 0;
+
+        foreach ($awards as $entry) {
+            $award = $existing[$entry['name'][Locales::DEFAULT]] ?? null;
+
+            if ($award === null || ($entry['images'] ?? []) === [] || $this->awards->images($award)->isNotEmpty()) {
+                continue;
+            }
+
+            foreach ($entry['images'] as $file) {
+                $photo = $photos[$file] ?? throw new RuntimeException("No album photo describes the award image {$file}.");
+                $properties = $photo['properties'];
+                unset($properties[MediaProperties::IS_COVER], $properties[MediaProperties::ON_TIMELINE]);
+
+                $this->awards->addImage($award, $this->source($photo['file']), $properties, preserveOriginal: true);
+            }
+
+            $given++;
+        }
+
+        return $given;
+    }
+
+    /**
+     * Every album photo's manifest entry, by file name.
+     *
+     * @param  list<array<string, mixed>>  $albums
+     * @return array<string, array<string, mixed>>
+     */
+    private function photosByFile(array $albums): array
+    {
+        $photos = [];
+
+        foreach ($albums as $album) {
+            foreach ($album['photos'] as $photo) {
+                $photos[basename($photo['file'])] = $photo;
+            }
+        }
+
+        return $photos;
+    }
+
+    /**
+     * @param  list<array{0: CvSection, 1: array<string, string>, 2: array<string, string>|null, 3: array<string, string>|null, 4: int|null, 5: int|null}>  $entries
+     * @param  list<array<string, mixed>>  $awards
+     * @return int how many entries were added
+     */
+    private function importCv(array $entries, array $awards): int
+    {
+        // His honours belong to the record too: each award is an achievement in the year it was given.
+        foreach ($awards as $award) {
+            $entries[] = [CvSection::Achievement, $award['name'], $award['organisation'] ?? null, null, $award['year'], $award['year']];
+        }
+
+        // Entries already on the site (trashed included, so a deletion is respected) are skipped.
+        $existing = CvEntry::withTrashed()->get()
+            ->map(fn (CvEntry $entry): string => $entry->section->value.'|'.$entry->getTranslation('title', Locales::DEFAULT))->all();
+        $added = 0;
+
         foreach ($entries as [$section, $title, $organisation, $description, $start, $end]) {
+            if (in_array($section->value.'|'.$title[Locales::DEFAULT], $existing, true)) {
+                continue;
+            }
+
+            $added++;
             $this->cvEntries->create([
                 'section' => $section,
                 'title' => $title,
@@ -205,6 +282,8 @@ class StakeholderArchiveSeeder extends Seeder
                 'status' => ContentStatus::Published,
             ]);
         }
+
+        return $added;
     }
 
     /**
@@ -223,20 +302,36 @@ class StakeholderArchiveSeeder extends Seeder
 
     /**
      * @param  list<array<string, mixed>>  $papers
+     * @return int how many works were added
      */
-    private function importPublications(array $papers): void
+    private function importPublications(array $papers): int
     {
+        // A work already on the site (trashed included, so a deletion is respected) is skipped.
+        $existing = Publication::withTrashed()->get()->map(fn (Publication $publication): string => (string) $publication->getTranslation('title', Locales::DEFAULT))->all();
+        $added = 0;
+
         foreach ($papers as $paper) {
+            if (in_array($paper['title'][Locales::DEFAULT], $existing, true)) {
+                continue;
+            }
+
+            $added++;
             $publication = $this->publications->create([
                 'type' => $paper['type'],
                 'title' => $paper['title'],
-                'authors' => 'Mohamed Osman Khidir',
-                'abstract' => $paper['abstract'],
+                'authors' => $paper['authors'] ?? 'Mohamed Osman Khidir',
+                'year' => $paper['year'] ?? null,
+                'venue_publisher' => $paper['venue_publisher'] ?? null,
+                'abstract' => $paper['abstract'] ?? null,
                 'status' => ContentStatus::Published,
             ]);
 
-            $this->publications->attachFile($publication, $this->stage($paper['file']));
+            if (isset($paper['file'])) {
+                $this->publications->attachFile($publication, $this->stage($paper['file']));
+            }
         }
+
+        return $added;
     }
 
     /**
@@ -270,13 +365,7 @@ class StakeholderArchiveSeeder extends Seeder
     {
         $existing = Video::withTrashed()->get()->map(fn (Video $video): string => (string) $video->getTranslation('title', Locales::DEFAULT))->all();
         $videos = array_values(array_filter($videos, fn (array $entry): bool => ! in_array($entry['title'][Locales::DEFAULT], $existing, true)));
-        $photos = [];
-
-        foreach ($albums as $album) {
-            foreach ($album['photos'] as $photo) {
-                $photos[basename($photo['file'])] = $photo;
-            }
-        }
+        $photos = $this->photosByFile($albums);
 
         foreach ($videos as $entry) {
             $location = $entry['location'];

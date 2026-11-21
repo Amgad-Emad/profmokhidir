@@ -2,10 +2,12 @@
     Admin › Appearance (App\Livewire\Admin\Settings\Appearance): the brand note and "Restore brand
     colours", the suggested templates and custom themes, then the editor of the selected theme beside a
     live preview of real pages. Every colour comes from the theme being edited; nothing here names one.
+    With editing off (config appearance.editing, the default) every theme can be inspected and applied,
+    but the controls that change colours or make a new theme are not shown ($editing, $editable).
 --}}
 @use('App\Constants\Appearance')
 <div class="appearance" data-appearance>
-    <x-admin.page-header :eyebrow="__('Settings')" :title="__('Appearance')" :intro="__('Choose the colours of the whole site, the community chat, the sign-in screens, the dashboard and the accent of emails, separately for the light and the dark mode. Fonts and layout stay as they are.')">
+    <x-admin.page-header :eyebrow="__('Settings')" :title="__('Appearance')" :intro="$editing ? __('Choose the colours of the whole site, the community chat, the sign-in screens, the dashboard and the accent of emails, separately for the light and the dark mode. Fonts and layout stay as they are.') : __('Choose which colour theme the whole site, the community chat, the sign-in screens, the dashboard and emails use. Inspect any theme in the light and the dark mode before you apply it. Themes cannot be edited or added here.')">
         <x-button type="button" :variant="$active?->slug === \App\Constants\ThemePresets::BRAND ? 'secondary' : 'primary'" wire:click="restoreBrand" data-restore-brand>{{ __('Restore brand colours') }}</x-button>
     </x-admin.page-header>
 
@@ -54,9 +56,9 @@
                                 <time datetime="{{ $revision->created_at->toIso8601String() }}">{{ $revision->created_at->translatedFormat(\App\Constants\DateFormats::LONG.', H:i') }}</time>{{ $revision->user ? ' · '.$revision->user->name : '' }}
                             </p>
                         </div>
-                        @unless ($loop->first)
+                        @if (! $loop->first && $editing)
                             <x-button variant="quiet" size="sm" type="button" wire:click="restoreRevision({{ $revision->getKey() }})" data-restore-revision="{{ $revision->getKey() }}">{{ __('Load this version') }}</x-button>
-                        @endunless
+                        @endif
                     </li>
                 @endforeach
             </ol>

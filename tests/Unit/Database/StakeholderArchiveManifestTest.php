@@ -35,7 +35,16 @@ class StakeholderArchiveManifestTest extends TestCase
         }
 
         foreach ($this->manifest['publications'] as $paper) {
-            $named[] = $paper['file'];
+            // Works only cited in his reference lists have no copy in the archive.
+            if (isset($paper['file'])) {
+                $named[] = $paper['file'];
+            }
+        }
+
+        foreach ($this->manifest['awards'] as $award) {
+            foreach ($award['images'] as $image) {
+                $named[] = 'photos/'.$image;
+            }
         }
 
         foreach ($this->manifest['teaching']['materials'] as $material) {
@@ -100,7 +109,10 @@ class StakeholderArchiveManifestTest extends TestCase
 
         foreach ($this->manifest['publications'] as $paper) {
             $maps[] = $paper['title'];
-            $maps[] = $paper['abstract'];
+
+            if (isset($paper['abstract'])) {
+                $maps[] = $paper['abstract'];
+            }
         }
 
         foreach ($this->manifest['teaching']['materials'] as $material) {

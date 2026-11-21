@@ -63,6 +63,23 @@ class ArchiveFieldsFormTest extends TestCase
     }
 
     #[Test]
+    public function the_publication_form_has_no_citation_field_and_saving_keeps_a_stored_citation(): void
+    {
+        $editor = User::factory()->editor()->create();
+        $publication = Publication::factory()->published()->create(['citation' => 'Khidir, M. O. (1978). Kept.']);
+
+        Livewire::actingAs($editor)->test(PublicationForm::class, ['publication' => $publication])
+            ->assertSee('Source and links')
+            ->assertDontSee('Citation as written')
+            ->assertDontSee('BibTeX')
+            ->set('form.title', 'Renamed')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->assertSame('Khidir, M. O. (1978). Kept.', $publication->fresh()->citation);
+    }
+
+    #[Test]
     public function publication_topics_and_the_featured_flag_are_validated(): void
     {
         Livewire::actingAs(User::factory()->editor()->create())->test(PublicationForm::class)

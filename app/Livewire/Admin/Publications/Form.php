@@ -54,7 +54,6 @@ class Form extends ContentForm
             'year' => null,
             'venue_publisher' => null,
             'doi' => null,
-            'citation' => null,
             'abstract' => null,
             'url' => null,
             'topic' => null,

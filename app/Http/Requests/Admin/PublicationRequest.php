@@ -28,7 +28,6 @@ class PublicationRequest extends ContentRequest
             'year' => self::yearRule(),
             'venue_publisher' => ['nullable', 'string', 'max:255'],
             'doi' => ['nullable', 'string', 'max:255'],
-            'citation' => ['nullable', 'string', 'max:2000'],
             'abstract' => ['nullable', 'string', 'max:5000'],
             'url' => self::urlRule(),
             'topic' => ['nullable', 'string', 'max:'.Catalogue::TOPIC_MAX],

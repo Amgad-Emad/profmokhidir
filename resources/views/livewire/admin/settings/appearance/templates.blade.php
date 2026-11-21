@@ -1,4 +1,4 @@
-{{-- The suggested templates (read-only: Apply or Duplicate to edit), then the custom themes and Import. --}}
+{{-- The suggested templates (read-only: Apply or Duplicate to edit), then the custom themes and Import. With editing off: Apply and Inspect only. --}}
 @use('App\Constants\Appearance')
 @use('App\Constants\ThemePresets')
 @php
@@ -9,7 +9,7 @@
 @endphp
 <section class="mt-12" aria-labelledby="appearance-templates-title" data-appearance-templates>
     <h2 id="appearance-templates-title" class="font-display text-3xl font-light">{{ __('Suggested templates') }}</h2>
-    <p class="mt-2 max-w-2xl text-sm font-normal text-ink-muted">{{ __('Each has a light and a dark variant that pass the contrast check. Templates cannot be changed: apply one as it is, or duplicate it to make your own.') }}</p>
+    <p class="mt-2 max-w-2xl text-sm font-normal text-ink-muted">{{ $editing ? __('Each has a light and a dark variant that pass the contrast check. Templates cannot be changed: apply one as it is, or duplicate it to make your own.') : __('Each has a light and a dark variant that pass the contrast check. Inspect one to see all its colours, or apply it as it is.') }}</p>
 
     <ul class="theme-cards mt-6" role="list">
         @foreach ([$brandTheme, ...$alternatives->all()] as $preset)
@@ -34,18 +34,24 @@
                 </div>
                 <div class="theme-card__actions">
                     <x-button type="button" size="sm" :variant="$preset->is_active ? 'secondary' : 'primary'" wire:click="apply({{ $preset->id }})" :disabled="$preset->is_active" data-apply="{{ $preset->slug }}">{{ $preset->is_active ? __('Applied') : __('Apply') }}<span class="sr-only"> {{ __($definition['name']) }}</span></x-button>
-                    <x-button type="button" size="sm" variant="quiet" wire:click="duplicate({{ $preset->id }})" data-duplicate="{{ $preset->slug }}">{{ __('Duplicate to edit') }}<span class="sr-only"> {{ __($definition['name']) }}</span></x-button>
+                    @if ($editing)
+                        <x-button type="button" size="sm" variant="quiet" wire:click="duplicate({{ $preset->id }})" data-duplicate="{{ $preset->slug }}">{{ __('Duplicate to edit') }}<span class="sr-only"> {{ __($definition['name']) }}</span></x-button>
+                    @endif
                     <x-button type="button" size="sm" variant="quiet" wire:click="select({{ $preset->id }})" :aria-pressed="$theme->id === $preset->id ? 'true' : 'false'" data-inspect="{{ $preset->slug }}">{{ __('Inspect') }}<span class="sr-only"> {{ __($definition['name']) }}</span></x-button>
                 </div>
             </li>
         @endforeach
     </ul>
 
+    @if ($editing || $custom->isNotEmpty())
     <div class="mt-12 flex flex-wrap items-end justify-between gap-4">
         <div>
             <h2 class="font-display text-3xl font-light">{{ __('Your themes') }}</h2>
-            <p class="mt-2 text-sm font-normal text-ink-muted">{{ __('Duplicate a template to start one, or import a theme exported from this screen.') }}</p>
+            @if ($editing)
+                <p class="mt-2 text-sm font-normal text-ink-muted">{{ __('Duplicate a template to start one, or import a theme exported from this screen.') }}</p>
+            @endif
         </div>
+        @if ($editing)
         <div class="flex flex-col items-end gap-1">
             <label class="btn btn--secondary btn--small cursor-pointer" for="theme-import">
                 <x-icon name="upload" class="size-4" />{{ __('Import JSON') }}
@@ -53,6 +59,7 @@
             <input id="theme-import" type="file" class="sr-only" accept="application/json,.json" wire:model="importFile" aria-describedby="theme-import-error" data-import>
             <p id="theme-import-error" class="form-error max-w-sm text-sm" role="alert">@error('importFile'){{ $message }}@enderror</p>
         </div>
+        @endif
     </div>
 
     @if ($custom->isEmpty())
@@ -68,9 +75,14 @@
                     @if ($own->hasDraft())
                         <x-admin.status-badge tone="bronze" :label="__('Draft')" />
                     @endif
-                    <x-button type="button" size="sm" variant="quiet" wire:click="select({{ $own->id }})" :aria-pressed="$theme->id === $own->id ? 'true' : 'false'" data-edit-theme="{{ $own->id }}"><x-icon name="pencil" class="size-4" />{{ __('Edit') }}<span class="sr-only"> {{ $own->name }}</span></x-button>
+                    @if ($editing)
+                        <x-button type="button" size="sm" variant="quiet" wire:click="select({{ $own->id }})" :aria-pressed="$theme->id === $own->id ? 'true' : 'false'" data-edit-theme="{{ $own->id }}"><x-icon name="pencil" class="size-4" />{{ __('Edit') }}<span class="sr-only"> {{ $own->name }}</span></x-button>
+                    @else
+                        <x-button type="button" size="sm" variant="quiet" wire:click="select({{ $own->id }})" :aria-pressed="$theme->id === $own->id ? 'true' : 'false'" data-inspect-theme="{{ $own->id }}">{{ __('Inspect') }}<span class="sr-only"> {{ $own->name }}</span></x-button>
+                    @endif
                 </li>
             @endforeach
         </ul>
+    @endif
     @endif
 </section>

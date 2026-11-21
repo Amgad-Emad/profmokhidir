@@ -48,7 +48,7 @@ class StakeholderArchiveSeederTest extends TestCase
         $this->assertNotSoftDeleted($real);
         $this->assertSame(count($manifest['awards']) + 1, Award::query()->count());
         $this->assertSame(count($manifest['albums']), Album::query()->published()->count());
-        $this->assertSame(count($manifest['cv']), CvEntry::query()->published()->count());
+        $this->assertSame(count($manifest['cv']) + count($manifest['awards']), CvEntry::query()->published()->count(), 'Every certificate-backed entry, and each honour as an achievement');
         $this->assertSame(count($manifest['publications']), Publication::query()->published()->count());
         $this->assertSame(count($manifest['teaching']['materials']), TeachingMaterial::query()->published()->count());
         $this->assertSame(count($manifest['videos']), Video::query()->published()->count());
@@ -63,7 +63,12 @@ class StakeholderArchiveSeederTest extends TestCase
         $portrait = Profile::query()->firstOrFail()->getFirstMedia(MediaCollections::PORTRAIT);
         $this->assertSame('ahfad-2019-portrait.jpg', $portrait?->file_name);
 
-        Publication::query()->get()->each(fn (Publication $paper) => $this->assertNotNull($paper->getFirstMedia(MediaCollections::FILE), $paper->title));
+        // Every paper in the archive has its file; the works only cited in his reference lists have none.
+        $withFiles = collect($manifest['publications'])->filter(fn (array $paper): bool => isset($paper['file']))->pluck('title.en')->all();
+        Publication::query()->get()->each(fn (Publication $paper) => in_array($paper->getTranslation('title', 'en'), $withFiles, true)
+            ? $this->assertNotNull($paper->getFirstMedia(MediaCollections::FILE), $paper->title)
+            : $this->assertNull($paper->getFirstMedia(MediaCollections::FILE), $paper->title));
+        $this->assertCount(4, $withFiles);
         TeachingMaterial::query()->get()->each(fn (TeachingMaterial $material) => $this->assertNotNull($material->getFirstMedia(MediaCollections::FILE), $material->title));
 
         $ceremony = Video::query()->where('provider', VideoProvider::File->value)->orderBy('sort_order')->firstOrFail();
@@ -82,7 +87,7 @@ class StakeholderArchiveSeederTest extends TestCase
         Queue::fake();
 
         $this->seed(StakeholderArchiveSeeder::class);
-        $this->assertSame('محمد عثمان خضر', Profile::query()->firstOrFail()->getTranslation('name', Locales::AR), 'A new site gets its profile from the archive.');
+        $this->assertSame('الأستاذ الدكتور محمد عثمان خضر', Profile::query()->firstOrFail()->getTranslation('name', Locales::AR), 'A new site gets its profile from the archive.');
         $awards = Award::query()->count();
         $albums = Album::query()->count();
 
@@ -144,5 +149,67 @@ class StakeholderArchiveSeederTest extends TestCase
         $this->assertSame([1980, 1990, 2000, 2010], $chapters->keys()->all(), 'Only decades with a dated honour.');
         $this->assertSame('honour-1986-yarmouk-shield.jpg', $chapters[1980]['photo']?->file_name);
         $this->assertSame('ahfad-2019-conferral.jpg', $chapters[2010]['photo']?->file_name, 'After: the photograph of the honour itself.');
+    }
+
+    #[Test]
+    public function every_award_gets_its_photographs_and_an_earlier_import_is_given_them_once(): void
+    {
+        Storage::fake('public');
+        Storage::fake('private');
+        Queue::fake();
+
+        $this->seed(StakeholderArchiveSeeder::class);
+
+        $awards = app(\App\Services\AwardService::class);
+        $byName = Award::query()->get()->keyBy(fn (Award $award): string => $award->getTranslation('name', Locales::DEFAULT));
+
+        foreach (StakeholderArchiveSeeder::manifest()['awards'] as $entry) {
+            $images = $awards->images($byName[$entry['name']['en']]);
+            $this->assertSame($entry['images'], $images->pluck('file_name')->all(), $entry['name']['en']);
+            $this->assertNotNull($images->first()->getCustomProperty(MediaProperties::ALT_TEXT), 'Award images carry the album description');
+            $this->assertNull($images->first()->getCustomProperty(MediaProperties::ON_TIMELINE), 'The timeline keeps reading the album copies');
+        }
+
+        $medal = $byName['University Medal'];
+        $this->assertSame(['honour-squ-medal.jpg', 'honour-squ-case.jpg'], $awards->images($medal)->pluck('file_name')->all());
+
+        // An import made before awards had photographs; an editor's own choice is kept.
+        foreach ($awards->images($medal) as $image) {
+            $awards->removeImage($image);
+        }
+        $this->seed(StakeholderArchiveSeeder::class);
+        $this->seed(StakeholderArchiveSeeder::class);
+
+        $this->assertSame(['honour-squ-medal.jpg', 'honour-squ-case.jpg'], $awards->images($medal->fresh())->pluck('file_name')->all());
+        $this->assertSame(15, \App\Models\Media::query()->where('collection_name', MediaCollections::AWARD_IMAGES)->count());
+    }
+
+    #[Test]
+    public function an_earlier_import_gains_the_cv_entries_and_cited_works_it_lacked_once(): void
+    {
+        Storage::fake('public');
+        Storage::fake('private');
+        Queue::fake();
+
+        $this->seed(StakeholderArchiveSeeder::class);
+        $manifest = StakeholderArchiveSeeder::manifest();
+
+        $doha = CvEntry::query()->get()->first(fn (CvEntry $entry): bool => $entry->getTranslation('title', 'en') === 'Meeting of the Federation of Arab Scientific Research Councils');
+        $this->assertSame('Federation of Arab Scientific Research Councils, Doha, Qatar', $doha?->getTranslation('organisation', 'en'));
+        $honour = CvEntry::query()->get()->first(fn (CvEntry $entry): bool => $entry->getTranslation('title', 'en') === 'Gold Order of Science, Letters and Arts');
+        $this->assertSame([\App\Constants\CvSection::Achievement, 2002, 2002], [$honour?->section, $honour?->start_year, $honour?->end_year]);
+
+        $book = Publication::query()->get()->first(fn (Publication $work): bool => $work->getTranslation('title', 'en') === 'Principles and Methods of Plant Breeding');
+        $this->assertSame([2002, 'Mahira Printing and Publishing, Khartoum North'], [$book?->year, $book?->venue_publisher]);
+        $this->assertSame('Ali Elkhidir Kambal and Mohamed Osman Khidir', Publication::query()->get()->first(fn (Publication $work): bool => $work->getTranslation('title', 'en') === 'Genetically Modified Crops')?->authors);
+
+        // An import made before these were in the archive; an editor's deletion is respected.
+        $doha->forceDelete();
+        $book->delete();
+        $this->seed(StakeholderArchiveSeeder::class);
+        $this->seed(StakeholderArchiveSeeder::class);
+
+        $this->assertSame(count($manifest['cv']) + count($manifest['awards']), CvEntry::query()->count());
+        $this->assertSame(count($manifest['publications']) - 1, Publication::query()->count(), 'The trashed book is not brought back');
     }
 }

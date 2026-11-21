@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Constants\Catalogue;
-use App\Constants\CitationStyle;
 use App\Constants\DateFormats;
 use App\Constants\PageSizes;
 use App\Constants\PublicationType;
@@ -21,7 +20,7 @@ use Illuminate\Support\HtmlString;
  * Assembles the publications catalogue: the "Selected works" strip, the
  * filtered page of records grouped by decade (each with the decade's full count
  * under the filters), the type / year-range / topic filter options, and for
- * each record its author line and its citation in every style.
+ * each record its author line.
  *
  * @phpstan-type TypeOption array{value: string, label: string, active: bool}
  * @phpstan-type DecadeGroup array{decade: int|null, label: string, anchor: string, count: int, items: Collection<int, Publication>}
@@ -30,7 +29,6 @@ class PublicationsPageService
 {
     public function __construct(
         private readonly PublicationService $publications,
-        private readonly CitationFormatterService $citations,
         private readonly NavigationService $navigation,
         private readonly TypesetterService $typesetter,
         private readonly SeoService $seo,
@@ -43,7 +41,6 @@ class PublicationsPageService
      *     publications: LengthAwarePaginator<int, Publication>,
      *     groups: list<DecadeGroup>,
      *     featured: Collection<int, Publication>,
-     *     citations: array<int, list<array{style: CitationStyle, label: string, edition: string, text: string, html: string, code: bool}>>,
      *     authors: array<int, HtmlString>,
      *     types: list<TypeOption>,
      *     years: list<int>,
@@ -71,7 +68,6 @@ class PublicationsPageService
             'groups' => $this->groupByDecade($items, $this->publications->decadeCounts($filters)),
             // The strip introduces the whole catalogue, so it stays off filtered views and later pages.
             'featured' => $filters->isEmpty() && $paginator->currentPage() === 1 ? $this->publications->featured() : new Collection,
-            'citations' => $items->mapWithKeys(fn (Publication $publication): array => [(int) $publication->getKey() => $this->citations->all($publication)])->all(),
             'authors' => $items->mapWithKeys(fn (Publication $publication): array => [(int) $publication->getKey() => $this->authorsHtml($publication->authors)])->all(),
             'types' => array_map(fn (PublicationType $option): array => [
                 'value' => $option->value,

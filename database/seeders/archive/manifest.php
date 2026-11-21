@@ -51,8 +51,8 @@ $award = [P::ON_TIMELINE => true];
 
 $ahfadPortrait = $photo(
     'ahfad-2019-portrait.jpg',
-    ['Professor Khidir in academic dress at the Ahfad University for Women graduation ceremony', 'البروفيسور محمد عثمان خضر بالزي الأكاديمي في حفل تخريج جامعة الأحفاد للبنات'],
-    ['Professor Mohamed Osman Khidir, an elderly man in a white academic gown with gold trim, a dark sash and a striped tie, standing before a decorated stage.', 'البروفيسور محمد عثمان خضر، رجل مسن يرتدي رداءً أكاديمياً أبيض بحواشٍ ذهبية ووشاحاً داكناً وربطة عنق مخططة، يقف أمام منصة مزينة.'],
+    ['Professor Khidir in academic dress at the Ahfad University for Women graduation ceremony', 'الأستاذ الدكتور محمد عثمان خضر بالزي الأكاديمي في حفل تخريج جامعة الأحفاد للبنات'],
+    ['Professor Mohamed Osman Khidir, an elderly man in a white academic gown with gold trim, a dark sash and a striped tie, standing before a decorated stage.', 'الأستاذ الدكتور محمد عثمان خضر، رجل مسن يرتدي رداءً أكاديمياً أبيض بحواشٍ ذهبية ووشاحاً داكناً وربطة عنق مخططة، يقف أمام منصة مزينة.'],
     // Focus near the top, so crops to a landscape frame keep his face.
     $omdurman, 2019, $portrait + $ceremonyCredit + [P::IS_COVER => true, P::FOCUS_X => 50, P::FOCUS_Y => 18],
 );
@@ -60,7 +60,7 @@ $ahfadPortrait = $photo(
 return [
     // About: the name, title and affiliation the documents give, and the portrait.
     'profile' => [
-        'name' => ['en' => 'Mohamed Osman Khidir', 'ar' => 'محمد عثمان خضر'],
+        'name' => ['en' => 'Mohamed Osman Khidir', 'ar' => 'الأستاذ الدكتور محمد عثمان خضر'],
         'title' => ['en' => 'Professor Emeritus of Agronomy', 'ar' => 'بروفيسور فخري في علم المحاصيل'],
         'affiliation' => ['en' => 'Faculty of Agriculture, University of Khartoum', 'ar' => 'كلية الزراعة، جامعة الخرطوم'],
     ],
@@ -72,32 +72,32 @@ return [
             'title' => ['en' => 'Honorary Doctorate, Ahfad University for Women', 'ar' => 'الدكتوراه الفخرية من جامعة الأحفاد للبنات'],
             'description' => [
                 'en' => 'On 19 October 2019, at its annual graduation ceremony in Omdurman, Ahfad University for Women conferred on Professor Khidir the degree of Doctor of Science, honoris causa, in recognition of his contribution to higher education and scientific research in Sudan and the Arab world.',
-                'ar' => 'في 19 أكتوبر 2019، وخلال حفل التخريج السنوي في أم درمان، منحت جامعة الأحفاد للبنات البروفيسور محمد عثمان خضر درجة الدكتوراه الفخرية في العلوم، تقديراً لإسهامه في مسيرة التعليم العالي والبحث العلمي في السودان والوطن العربي.',
+                'ar' => 'في 19 أكتوبر 2019، وخلال حفل التخريج السنوي في أم درمان، منحت جامعة الأحفاد للبنات الأستاذ الدكتور محمد عثمان خضر درجة الدكتوراه الفخرية في العلوم، تقديراً لإسهامه في مسيرة التعليم العالي والبحث العلمي في السودان والوطن العربي.',
             ],
             'photos' => [
                 $ahfadPortrait,
                 $photo(
                     'ahfad-2019-conferral.jpg',
                     ['Receiving the honorary doctorate from the President of Ahfad University for Women', 'تسلّم شهادة الدكتوراه الفخرية من رئيس جامعة الأحفاد للبنات'],
-                    ['Professor Khidir, in a white gown and leaning on a walking frame, receives an open certificate folder from the university president in a dark gown with silver bars; graduates in white sit behind them.', 'البروفيسور خضر، بردائه الأبيض ومستنداً إلى مشاية، يتسلّم ملف الشهادة من رئيس الجامعة بردائه الداكن ذي الأشرطة الفضية، وخلفهما خريجون بالزي الأبيض.'],
+                    ['Professor Khidir, in a white gown and leaning on a walking frame, receives an open certificate folder from the university president in a dark gown with silver bars; graduates in white sit behind them.', 'الأستاذ الدكتور محمد عثمان خضر، بردائه الأبيض ومستنداً إلى مشاية، يتسلّم ملف الشهادة من رئيس الجامعة بردائه الداكن ذي الأشرطة الفضية، وخلفهما خريجون بالزي الأبيض.'],
                     $omdurman, 2019, $portrait + $ceremonyCredit + $award,
                 ),
                 $photo(
                     'ahfad-2019-handshake.jpg',
                     ['A handshake with the university president after the conferral', 'مصافحة رئيس الجامعة عقب منح الدرجة'],
-                    ['Professor Khidir and the university president, both in academic gowns, shake hands on the ceremony stage.', 'البروفيسور خضر ورئيس الجامعة بالزي الأكاديمي يتصافحان على منصة الحفل.'],
+                    ['Professor Khidir and the university president, both in academic gowns, shake hands on the ceremony stage.', 'الأستاذ الدكتور محمد عثمان خضر ورئيس الجامعة بالزي الأكاديمي يتصافحان على منصة الحفل.'],
                     $omdurman, 2019, $portrait + $ceremonyCredit,
                 ),
                 $photo(
                     'ahfad-2019-scroll.jpg',
                     ['Receiving the degree scroll during the ceremony', 'تسلّم وثيقة الدرجة خلال الحفل'],
-                    ['Professor Khidir takes a scroll tied with a gold tassel from a woman in a white gown and veil.', 'البروفيسور خضر يتسلّم وثيقة ملفوفة بشرابة ذهبية من سيدة ترتدي رداءً أبيض وطرحة.'],
+                    ['Professor Khidir takes a scroll tied with a gold tassel from a woman in a white gown and veil.', 'الأستاذ الدكتور محمد عثمان خضر يتسلّم وثيقة ملفوفة بشرابة ذهبية من سيدة ترتدي رداءً أبيض وطرحة.'],
                     $omdurman, 2019, $portrait + $ceremonyCredit,
                 ),
                 $photo(
                     'ahfad-2019-standing.jpg',
                     ['Standing for the conferral among guests and graduates', 'واقفاً لمنح الدرجة بين الضيوف والخريجين'],
-                    ['Professor Khidir stands in his white gown, hands on a walking frame, with guests and graduates seated around him.', 'البروفيسور خضر واقفاً بردائه الأبيض ويداه على المشاية، ومن حوله الضيوف والخريجون جلوس.'],
+                    ['Professor Khidir stands in his white gown, hands on a walking frame, with guests and graduates seated around him.', 'الأستاذ الدكتور محمد عثمان خضر واقفاً بردائه الأبيض ويداه على المشاية، ومن حوله الضيوف والخريجون جلوس.'],
                     $omdurman, 2019, $portrait,
                 ),
                 $photo(
@@ -109,7 +109,7 @@ return [
                 $photo(
                     'ahfad-2019-letter.jpg',
                     ['Letter of thanks from Professor Gasim Badri, President of Ahfad University for Women, 4 November 2019', 'خطاب شكر وتقدير من البروفيسور قاسم بدري، رئيس جامعة الأحفاد للبنات، بتاريخ 4 نوفمبر 2019'],
-                    ['A typed Arabic letter on Ahfad University for Women letterhead, dated 4 November 2019, thanking Professor Khidir for honouring the graduation ceremony of 19 October 2019 with his presence.', 'خطاب مطبوع باللغة العربية على ترويسة جامعة الأحفاد للبنات بتاريخ 4 نوفمبر 2019، يشكر البروفيسور خضر على تشريفه حفل التخريج في 19 أكتوبر 2019.'],
+                    ['A typed Arabic letter on Ahfad University for Women letterhead, dated 4 November 2019, thanking Professor Khidir for honouring the graduation ceremony of 19 October 2019 with his presence.', 'خطاب مطبوع باللغة العربية على ترويسة جامعة الأحفاد للبنات بتاريخ 4 نوفمبر 2019، يشكر الأستاذ الدكتور محمد عثمان خضر على تشريفه حفل التخريج في 19 أكتوبر 2019.'],
                     $omdurman, 2019,
                 ),
             ],
@@ -118,7 +118,7 @@ return [
             'title' => ['en' => 'Honours and distinctions', 'ar' => 'الأوسمة والتكريمات'],
             'description' => [
                 'en' => 'Medals, shields and certificates of honour presented to Professor Khidir by universities, academies and the State.',
-                'ar' => 'ميداليات ودروع وشهادات تكريم قدّمتها للبروفيسور خضر جامعات وأكاديميات والدولة.',
+                'ar' => 'ميداليات ودروع وشهادات تكريم قدّمتها للأستاذ الدكتور محمد عثمان خضر جامعات وأكاديميات والدولة.',
             ],
             'photos' => [
                 $photo(
@@ -136,7 +136,7 @@ return [
                 $photo(
                     'honour-2014-uofk-conference-shield.jpg',
                     ['Shield of honour from the University of Khartoum at the Fifth Annual Conference on Postgraduate Studies and Scientific Research in Agricultural and Veterinary Sciences, 24–27 February 2014', 'درع تكريم من جامعة الخرطوم في المؤتمر السنوي الخامس للدراسات العليا والبحث العلمي في مجال العلوم الزراعية والبيطرية، 24–27 فبراير 2014'],
-                    ['A wooden shield in a presentation box lined with yellow satin, its silver plate bearing the University of Khartoum crest and the words "In honour of Professor Mohamed Osman Khidir".', 'درع خشبي في علبة مبطنة بالساتان الأصفر، على لوحته الفضية شعار جامعة الخرطوم وعبارة "تكريم البروفيسور محمد عثمان خضر".'],
+                    ['A wooden shield in a presentation box lined with yellow satin, its silver plate bearing the University of Khartoum crest and the words "In honour of Professor Mohamed Osman Khidir".', 'درع خشبي في علبة مبطنة بالساتان الأصفر، على لوحته الفضية شعار جامعة الخرطوم وعبارة "تكريم الأستاذ الدكتور محمد عثمان خضر".'],
                     $khartoum, 2014, $award,
                 ),
                 $photo(
@@ -263,7 +263,7 @@ return [
             'title' => ['en' => 'Meetings and conferences', 'ar' => 'اجتماعات ومؤتمرات'],
             'description' => [
                 'en' => 'Professor Khidir among delegates and colleagues at regional and international gatherings on science, technology and research.',
-                'ar' => 'البروفيسور خضر بين الوفود والزملاء في ملتقيات إقليمية ودولية حول العلم والتقانة والبحث العلمي.',
+                'ar' => 'الأستاذ الدكتور محمد عثمان خضر بين الوفود والزملاء في ملتقيات إقليمية ودولية حول العلم والتقانة والبحث العلمي.',
             ],
             'photos' => [
                 $photo(
@@ -295,61 +295,73 @@ return [
             'organisation' => ['en' => 'Biographical Publications, Cambridgeshire, England', 'ar' => 'منشورات السير الذاتية، كامبريدجشير، إنجلترا'],
             'year' => 1984,
             'description' => ['en' => 'Included for outstanding contributions to society.', 'ar' => 'أُدرج اسمه تقديراً لإسهاماته المتميزة في خدمة المجتمع.'],
+            // Photographs of the certificate, medal or shield, described in the honours album; the first leads.
+            'images' => ['honour-1984-whos-who.jpg'],
         ],
         [
             'name' => ['en' => 'Tenth Anniversary Shield', 'ar' => 'درع الذكرى العاشرة'],
             'organisation' => ['en' => 'Yarmouk University, Jordan', 'ar' => 'جامعة اليرموك، الأردن'],
             'year' => 1986,
+            'images' => ['honour-1986-yarmouk-shield.jpg'],
         ],
         [
             'name' => ['en' => '2000 Outstanding Scholars of the 20th Century', 'ar' => 'ألفا عالم متميز في القرن العشرين'],
             'organisation' => ['en' => 'International Biographical Centre, Cambridge', 'ar' => 'المركز الدولي للسير الذاتية، كامبريدج'],
             'year' => 1999,
             'description' => ['en' => 'In honour of an outstanding contribution to genetics and plant breeding.', 'ar' => 'تكريماً لإسهامه المتميز في مجال الوراثة وتربية النبات.'],
+            'images' => ['honour-1999-ibc-scholars.jpg'],
         ],
         [
             'name' => ['en' => 'Al-Zubair Prize for Innovation and Scientific Excellence', 'ar' => 'جائزة الشهيد الزبير محمد صالح للإبداع والتميز العلمي'],
             'year' => 2002,
             'description' => ['en' => 'Awarded in the field of agriculture, at the level of established scientists, for his research on breeding oil crops.', 'ar' => 'مُنحت في مجال الزراعة على مستوى العلماء، تقديراً لأبحاثه في تربية المحاصيل الزيتية.'],
+            'images' => ['honour-2002-zubair-prize.jpg'],
         ],
         [
             'name' => ['en' => 'Gold Order of Science, Letters and Arts', 'ar' => 'وسام العلم والآداب والفنون الذهبي'],
             'organisation' => ['en' => 'Presidency of the Republic of the Sudan', 'ar' => 'رئاسة الجمهورية، جمهورية السودان'],
             'year' => 2002,
             'description' => ['en' => 'Conferred in appreciation of his distinguished service to the nation in education, science, letters and the arts.', 'ar' => 'مُنح تقديراً لما قدّمه من أعمال جليلة للوطن في ميادين التربية والتعليم والعلوم والآداب والفنون.'],
+            'images' => ['honour-2002-order-of-science.jpg'],
         ],
         [
             'name' => ['en' => 'Honour of the Fifth Annual Conference on Postgraduate Studies and Scientific Research', 'ar' => 'تكريم المؤتمر السنوي الخامس للدراسات العليا والبحث العلمي'],
             'organisation' => ['en' => 'University of Khartoum', 'ar' => 'جامعة الخرطوم'],
             'year' => 2014,
             'description' => ['en' => 'Conference on agricultural and veterinary sciences, Khartoum, 24–27 February 2014.', 'ar' => 'في مجال العلوم الزراعية والبيطرية، الخرطوم، 24–27 فبراير 2014.'],
+            'images' => ['honour-2014-uofk-conference-shield.jpg'],
         ],
         [
             'name' => ['en' => 'Honorary Doctor of Science', 'ar' => 'الدكتوراه الفخرية في العلوم'],
             'organisation' => ['en' => 'Ahfad University for Women', 'ar' => 'جامعة الأحفاد للبنات'],
             'year' => 2019,
             'description' => ['en' => 'In recognition of his contribution to higher education and scientific research in Sudan and the Arab world; conferred at the university\'s graduation ceremony in Omdurman on 19 October 2019.', 'ar' => 'تقديراً لجهوده في تنمية مسيرة التعليم العالي والبحث العلمي في السودان والوطن العربي؛ مُنحت في حفل تخريج الجامعة بأم درمان في 19 أكتوبر 2019.'],
+            'images' => ['ahfad-2019-certificate.jpg', 'ahfad-2019-conferral.jpg'],
         ],
         [
             'name' => ['en' => 'Fellow of the African Academy of Sciences', 'ar' => 'زميل الأكاديمية الأفريقية للعلوم'],
             'organisation' => ['en' => 'African Academy of Sciences', 'ar' => 'الأكاديمية الأفريقية للعلوم'],
             'year' => null,
             'description' => ['en' => 'For outstanding contributions to the advancement of science in Africa.', 'ar' => 'تقديراً لإسهاماته المتميزة في تقدّم العلوم في أفريقيا.'],
+            'images' => ['honour-aas-fellow.jpg'],
         ],
         [
             'name' => ['en' => 'Shield of Honour', 'ar' => 'درع التكريم'],
             'organisation' => ['en' => 'University of Khartoum', 'ar' => 'جامعة الخرطوم'],
             'year' => null,
+            'images' => ['honour-uofk-shield-1.jpg', 'honour-uofk-shield-2.jpg'],
         ],
         [
             'name' => ['en' => 'University Medal', 'ar' => 'ميدالية الجامعة'],
             'organisation' => ['en' => 'Sultan Qaboos University, Oman', 'ar' => 'جامعة السلطان قابوس، سلطنة عُمان'],
             'year' => null,
+            'images' => ['honour-squ-medal.jpg', 'honour-squ-case.jpg'],
         ],
         [
             'name' => ['en' => 'Medal of the Sudanese Encyclopedia of Agricultural Sciences', 'ar' => 'ميدالية الموسوعة السودانية للعلوم الزراعية'],
             'organisation' => ['en' => 'Sudanese Encyclopedia of Agricultural Sciences (SENAS)', 'ar' => 'الموسوعة السودانية للعلوم الزراعية (SENAS)'],
             'year' => null,
+            'images' => ['honour-senas-medal-front.jpg', 'honour-senas-medal-reverse.jpg'],
         ],
     ],
 
@@ -367,6 +379,10 @@ return [
         [CvSection::Achievement, ['en' => 'United Nations Conference on Science and Technology for Development', 'ar' => 'مؤتمر الأمم المتحدة للعلم والتكنولوجيا من أجل التنمية'], ['en' => 'United Nations, Vienna', 'ar' => 'الأمم المتحدة، فيينا'], ['en' => 'Participant.', 'ar' => 'مشارك.'], 1979, 1979],
         [CvSection::Achievement, ['en' => '2nd International Conference on Agriculture, Food Security and Biotechnology', 'ar' => 'المؤتمر الدولي الثاني للزراعة والأمن الغذائي والتقانة الحيوية'], ['en' => 'ISESCO, COMSATS, IRCC, University of Khartoum and the Ministry of Higher Education and Scientific Research, Khartoum', 'ar' => 'الإيسيسكو وكومساتس ومركز البحوث والاستشارات الصناعية وجامعة الخرطوم ووزارة التعليم العالي والبحث العلمي، الخرطوم'], ['en' => 'Session chairperson, 17–18 October 2016.', 'ar' => 'رئيس جلسة، 17–18 أكتوبر 2016.'], 2016, 2016],
         [CvSection::Project, ['en' => 'Training course on research methodology and scientific writing in English', 'ar' => 'دورة تدريبية في منهجية البحث والكتابة العلمية باللغة الإنجليزية'], ['en' => 'Faculty of Agriculture, University of Khartoum, with the Ministry of Higher Education and Scientific Research', 'ar' => 'كلية الزراعة، جامعة الخرطوم، بالتعاون مع وزارة التعليم العالي والبحث العلمي'], ['en' => 'September 2016.', 'ar' => 'سبتمبر 2016.'], 2016, 2016],
+        // From the photograph of the meeting in the "Meetings and conferences" album; the year is not recorded.
+        [CvSection::Achievement, ['en' => 'Meeting of the Federation of Arab Scientific Research Councils', 'ar' => 'اجتماع اتحاد مجالس البحث العلمي العربية'], ['en' => 'Federation of Arab Scientific Research Councils, Doha, Qatar', 'ar' => 'اتحاد مجالس البحث العلمي العربية، الدوحة، قطر'], ['en' => 'Participant.', 'ar' => 'مشارك.'], null, null],
+        // From the workshop slides among his teaching materials; the date is not given.
+        [CvSection::Project, ['en' => 'Workshop on the quality of doctoral theses: research proposal, supervision and examination', 'ar' => 'ورشة عمل ضمان جودة رسائل الدكتوراه: مشروع البحث والإشراف والتقويم'], ['en' => 'Graduate College, University of Khartoum', 'ar' => 'كلية الدراسات العليا، جامعة الخرطوم'], ['en' => 'Prepared and presented the workshop.', 'ar' => 'أعدّ ورشة العمل وقدّمها.'], null, null],
     ],
 
     // Home: lines from his own lectures and papers, between the chapters of his life. Each is quoted
@@ -428,6 +444,41 @@ return [
             ],
             'file' => 'documents/paper-oilseeds-sudan-current-status.pdf',
         ],
+        // Works his own reference lists cite (the slides "Genetically modified crops: cotton as an example");
+        // no copy is in the archive, so they are listed without a file.
+        [
+            'type' => PublicationType::Book,
+            'title' => ['en' => 'Principles and Methods of Plant Breeding', 'ar' => 'مبادئ وطرق تربية النبات'],
+            'year' => 2002,
+            'venue_publisher' => 'Mahira Printing and Publishing, Khartoum North',
+            'abstract' => [
+                'en' => 'A textbook of plant breeding, in Arabic. Its seventh chapter, Modern Technologies and Plant Breeding (pages 224–248), is the one his later work on genetically modified crops cites.',
+                'ar' => 'كتاب مرجعي في تربية النبات باللغة العربية. ويستشهد عمله اللاحق عن المحاصيل المحوّرة وراثياً بفصله السابع «التقانات الحديثة وتربية النبات» (الصفحات 224–248).',
+            ],
+        ],
+        [
+            'type' => PublicationType::Report,
+            'title' => ['en' => 'Genetically Modified Crops', 'ar' => 'المحاصيل المحوّرة وراثياً'],
+            'authors' => 'Ali Elkhidir Kambal and Mohamed Osman Khidir',
+            'year' => 2003,
+            'venue_publisher' => 'Sudanese Standards and Metrology Organization, Khartoum',
+            'abstract' => [
+                'en' => 'A paper presented to the technical committee formed to study the foods imported under American aid.',
+                'ar' => 'ورقة قُدّمت للجنة الفنية لدراسة الأغذية التي استوردتها المعونة الأمريكية.',
+            ],
+        ],
+        [
+            'type' => PublicationType::JournalArticle,
+            'title' => ['en' => 'Genetically Modified Crops and Their Role in Agricultural Development', 'ar' => 'المحاصيل المحوّرة وراثياً ودورها في التنمية الزراعية'],
+            'year' => 2005,
+            'venue_publisher' => 'Journal of Agricultural Investment, no. 3, pp. 30–34 (Arab Authority for Agricultural Investment and Development, Khartoum)',
+        ],
+        [
+            'type' => PublicationType::Other,
+            'title' => ['en' => 'Genetically Modified Foods', 'ar' => 'الأغذية المحوّرة وراثياً'],
+            'year' => 2012,
+            'venue_publisher' => 'SNAS (Sudanese National Academy of Sciences) Newsletter 7, pp. 6–7',
+        ],
     ],
 
     // Teaching Materials: grouped by course. Public downloads.
@@ -486,7 +537,7 @@ return [
             'date' => '2019-10-19',
             'event' => ['en' => 'Ahfad University for Women graduation ceremony', 'ar' => 'حفل تخريج جامعة الأحفاد للبنات'],
             'location' => $omdurman,
-            'description' => ['en' => 'Professor Khidir receives the honorary degree of Doctor of Science at the university\'s annual graduation ceremony.', 'ar' => 'البروفيسور خضر يتسلّم درجة الدكتوراه الفخرية في العلوم في حفل التخريج السنوي للجامعة.'],
+            'description' => ['en' => 'Professor Khidir receives the honorary degree of Doctor of Science at the university\'s annual graduation ceremony.', 'ar' => 'الأستاذ الدكتور محمد عثمان خضر يتسلّم درجة الدكتوراه الفخرية في العلوم في حفل التخريج السنوي للجامعة.'],
             'provider' => VideoProvider::File,
             'file' => 'videos/ahfad-2019-ceremony-part-1.mp4',
             'thumbnail' => 'ahfad-2019-conferral.jpg',

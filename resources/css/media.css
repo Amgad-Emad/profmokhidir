@@ -22,20 +22,6 @@
         text-decoration: none;
     }
 
-    /* The untreated print beneath a lifting duotone (see .photo__frame--lift below). */
-    .photo__frame--lift {
-        position: relative;
-    }
-
-    .photo__frame--lift .photo__under {
-        position: absolute;
-        inset: 0;
-    }
-
-    .photo__frame--lift .photo-archive {
-        position: relative;
-    }
-
     /* ---------------------------------------------------- museum label */
     /* Title in Cormorant, place and year in small caps with old-style figures, an optional one-line note. */
     .museum-label {
@@ -449,14 +435,3 @@
     }
 }
 
-/* On a pointer that hovers, with motion allowed, a duotone lifts slowly a little toward the original print. */
-@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-    .photo__frame--lift .photo-archive {
-        transition: opacity 1200ms var(--ease-rise);
-    }
-
-    .photo__frame--lift:hover .photo-archive,
-    .photo__link:focus-visible .photo__frame--lift .photo-archive {
-        opacity: 0.72;
-    }
-}

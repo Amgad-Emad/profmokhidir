@@ -57,7 +57,7 @@ class PicturesPageTest extends TestCase
                 'href="'.route('pictures').'" class="filter-pill" aria-current="true">Albums', 'href="'.route('pictures', ['view' => 'decades']).'" class="filter-pill">Through the decades',
                 'class="exhibition mt-16" data-rise-group',
                 'exhibition__item', 'href="'.route('pictures.show', 'field').'" class="exhibition__cover"',
-                'photo__frame--lift', 'aspect-ratio: 64 / 48', 'class="photo__under', 'srcset="'.$cover->getUrl(MediaConversions::SMALL).' 480w', 'width="64" height="48"', 'photo-archive', 'loading="lazy"',
+                'aspect-ratio: 64 / 48', 'srcset="'.$cover->getUrl(MediaConversions::SMALL).' 480w', 'width="64" height="48"', 'photo-archive', 'loading="lazy"',
                 'exhibition__title', 'In the field', 'exhibition__meta smallcaps', '3 photographs', 'Research stations across the decades.',
                 'href="'.route('pictures.show', 'empty').'"', 'media-card__placeholder', 'Empty album', '0 photographs',
             ], false)
@@ -98,7 +98,7 @@ class PicturesPageTest extends TestCase
                 'data-lightbox-caption="Gezira research station"', 'data-lightbox-meta="Wad Madani, 1972"',
                 'data-lightbox-note="With the first cohort."', 'data-lightbox-credit="Family archive"',
                 'data-lightbox-width="64" data-lightbox-height="48"',
-                'photo__frame--lift', 'aspect-ratio: 64 / 48', 'class="photo__under h-full w-full object-cover"',
+                'aspect-ratio: 64 / 48',
                 'alt="Standing in a sorghum field"', 'width="64" height="48"', 'class="photo-archive h-full w-full object-cover"', 'loading="lazy"',
                 'View larger', '<figcaption class="museum-label">', 'museum-label__title">Gezira research station', 'museum-label__meta smallcaps">Wad Madani, 1972', 'museum-label__note">With the first cohort.',
                 'class="wall__item" style="--span: 4"',
@@ -113,7 +113,7 @@ class PicturesPageTest extends TestCase
 
         $html = $response->getContent();
         $this->assertStringNotContainsString('data-lightbox-caption', substr($html, strpos($html, 'data-lightbox-alt="Portrait at the gate"')));
-        $this->assertStringNotContainsString('photo__under', substr($html, strpos($html, 'class="wall__item" style="--span: 4"')), 'Portraits keep the warm monochrome without a lift layer');
+        $this->assertStringNotContainsString('photo__under', $html, 'Photos show in their original colours, with no duotone lift layer');
         $this->assertStringNotContainsString('href="'.route('pictures.show', 'field').'"', substr($html, strpos($html, 'aria-label="More albums"')), 'The album does not link to itself');
     }
 

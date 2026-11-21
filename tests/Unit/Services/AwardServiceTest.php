@@ -5,12 +5,19 @@ namespace Tests\Unit\Services;
 use App\Constants\AuditAction;
 use App\Constants\CacheKeys;
 use App\Constants\ContentStatus;
+use App\Constants\Disks;
+use App\Constants\MediaCollections;
+use App\Constants\MediaProperties;
+use App\Constants\MediaTreatment;
+use App\Exceptions\ImagesNotReadyException;
 use App\Models\AuditLog;
 use App\Models\Award;
 use App\Models\User;
 use App\Services\AwardService;
+use App\Support\PlaceholderImage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -158,5 +165,40 @@ class AwardServiceTest extends TestCase
         $this->assertTrue($this->service->find($match->id)->is($match));
         $this->assertNull($this->service->find(999));
         $this->assertTrue($this->service->findOrFail($match->id)->is($match));
+    }
+
+    #[Test]
+    public function images_are_added_in_order_on_the_public_disk_and_clear_the_cached_roll(): void
+    {
+        Storage::fake(Disks::PUBLIC);
+        $award = Award::factory()->published()->create();
+        Cache::put(CacheKeys::AWARDS, 'stale');
+
+        $first = $this->service->addImage($award, PlaceholderImage::grey(40, 30), [MediaProperties::ALT_TEXT => 'The certificate']);
+        $second = $this->service->addImage($award, PlaceholderImage::grey(40, 30));
+
+        $this->assertSame(MediaCollections::AWARD_IMAGES, $first->collection_name);
+        $this->assertSame(Disks::PUBLIC, $first->disk);
+        $this->assertSame(MediaTreatment::Archive->value, $first->getCustomProperty(MediaProperties::TREATMENT));
+        $this->assertSame([$first->id, $second->id], $this->service->images($award)->pluck('id')->all());
+        $this->assertFalse(Cache::has(CacheKeys::AWARDS));
+
+        Cache::put(CacheKeys::AWARDS, 'stale');
+        $this->service->removeImage($second);
+
+        $this->assertSame([$first->id], $this->service->images($award->fresh())->pluck('id')->all());
+        $this->assertFalse(Cache::has(CacheKeys::AWARDS));
+    }
+
+    #[Test]
+    public function an_award_cannot_be_published_while_an_image_lacks_its_details(): void
+    {
+        Storage::fake(Disks::PUBLIC);
+        $award = Award::factory()->draft()->create();
+        $this->service->addImage($award, PlaceholderImage::grey(40, 30));
+
+        $this->expectException(ImagesNotReadyException::class);
+
+        $this->service->publish($award);
     }
 }

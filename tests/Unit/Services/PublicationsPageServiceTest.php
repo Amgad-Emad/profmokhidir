@@ -3,7 +3,6 @@
 namespace Tests\Unit\Services;
 
 use App\Constants\Catalogue;
-use App\Constants\CitationStyle;
 use App\Constants\PageSizes;
 use App\Constants\PublicationType;
 use App\Constants\Sections;
@@ -124,14 +123,14 @@ class PublicationsPageServiceTest extends TestCase
     }
 
     #[Test]
-    public function each_record_on_the_page_has_its_author_line_and_every_citation_style(): void
+    public function each_record_on_the_page_has_its_author_line(): void
     {
         $publication = Publication::factory()->published()->create(['authors' => 'Smith, J. and M. O. Khidir', 'year' => 1990]);
 
         $data = $this->service->data();
         $id = (int) $publication->getKey();
 
-        $this->assertSame(CitationStyle::cases(), array_column($data['citations'][$id], 'style'));
+        $this->assertArrayNotHasKey('citations', $data);
         $this->assertSame(
             'Smith, J.; <span class="smallcaps author-self">M.'.Typesetting::NBSP.'O.'.Typesetting::NBSP.'Khidir</span>',
             (string) $data['authors'][$id],

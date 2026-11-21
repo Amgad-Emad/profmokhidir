@@ -2,7 +2,10 @@
 
 namespace Database\Factories;
 
+use App\Constants\MediaProperties;
 use App\Models\Award;
+use App\Services\AwardService;
+use App\Support\PlaceholderImage;
 use Database\Factories\Concerns\HasPublishingStates;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -28,5 +31,24 @@ class AwardFactory extends Factory
             'source_url' => fake()->boolean(60) ? fake()->url() : null,
             'sort_order' => fake()->numberBetween(1, 50),
         ];
+    }
+
+    /**
+     * Photographs of the certificate, medal or shield, with every detail the public site needs.
+     */
+    public function withImages(int $count = 1, int $width = 640, int $height = 480): static
+    {
+        return $this->afterCreating(function (Award $award) use ($count, $width, $height): void {
+            $service = app(AwardService::class);
+
+            for ($i = 1; $i <= $count; $i++) {
+                $service->addImage($award, PlaceholderImage::grey($width, $height, "Award {$i}"), [
+                    MediaProperties::ALT_TEXT => "Placeholder photograph {$i} of {$award->name}",
+                    MediaProperties::CAPTION => "[Placeholder] Certificate {$i}",
+                    MediaProperties::PLACE => fake()->city(),
+                    MediaProperties::YEAR => $award->year ?? fake()->numberBetween(1975, 2023),
+                ]);
+            }
+        });
     }
 }

@@ -1,6 +1,8 @@
 {{--
-    Awards as a roll of honour: an engraved-plaque feel made only of type and hairlines. Each award is
-    centred, its name in Cormorant small caps, the awarding body and year below, separated by ornaments.
+    Awards as a roll of honour: an engraved-plaque feel made of type and hairlines. Each award is centred,
+    its name in Cormorant small caps, the awarding body and year below, separated by ornaments. An award with
+    photographs hangs the first one above its name in a mounted frame, the others as small thumbnails beneath;
+    every photograph opens in the object view (one lightbox for the whole roll).
 --}}
 @inject('pageCopy', 'App\Services\PageContentService')
 <x-layouts.public :title="$section['title']" :description="$section['summary']">
@@ -12,7 +14,7 @@
         @if ($awards->isEmpty())
             <x-empty-state class="mt-6" :message="$pageCopy->text('awards', 'empty')" />
         @else
-            <div class="honour-roll">
+            <div class="honour-roll" @if ($hasImages) x-data="lightbox" @endif>
                 <x-ornament type="double-rule" />
                 <ol class="honour-roll__list">
                     @foreach ($awards as $award)
@@ -20,7 +22,20 @@
                             @unless ($loop->first)
                                 <x-ornament type="rule-dot" class="honour__ornament" />
                             @endunless
+                            @php $photos = $awardImages[$award->getKey()]; @endphp
                             <article class="honour__plaque" aria-labelledby="award-{{ $award->getKey() }}" data-rise>
+                                @if ($photos->isNotEmpty())
+                                    <div class="honour__exhibit">
+                                        <x-photo :media="$photos->first()" :lightbox="true" :captioned="false" sizes="(min-width: 640px) 26rem, calc(100vw - 4rem)" class="honour__lead" />
+                                        @if ($photos->count() > 1)
+                                            <ul class="honour__thumbs" aria-label="{{ __('More photographs of :award', ['award' => $award->name]) }}">
+                                                @foreach ($photos->slice(1) as $image)
+                                                    <li><x-photo :media="$image" :lightbox="true" :captioned="false" aspect="1 / 1" sizes="5rem" class="honour__thumb" /></li>
+                                                @endforeach
+                                            </ul>
+                                        @endif
+                                    </div>
+                                @endif
                                 <h2 @contentLang($award) id="award-{{ $award->getKey() }}" class="honour__name">@typeset($award->name)</h2>
                                 @if (filled($award->organisation) || $award->year)
                                     <p class="honour__meta">
@@ -40,6 +55,9 @@
                     @endforeach
                 </ol>
                 <x-ornament type="double-rule" />
+                @if ($hasImages)
+                    <x-lightbox :label="$section['title']" />
+                @endif
             </div>
         @endif
 

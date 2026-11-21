@@ -301,26 +301,13 @@
         }
     }
 
-    /* Photography. Portraits: warm monochrome (grey, then ~12% ivory warmth). */
-    .photo-portrait {
-        filter: grayscale(1) sepia(0.12) brightness(1.03) contrast(0.97);
-    }
-
-    /* Archive photos: the brand duotone via the SVG filter in <x-duotone-filter />. */
+    /*
+     | Photography shows each photo in its original colours (the owner's decision, 21 November 2026:
+     | no warm monochrome, no duotone). The treatment classes stay as hooks for the frame background.
+     */
+    .photo-portrait,
     .photo-archive {
-        filter: url('#duotone-archive');
-        background-color: var(--duotone-shadow);
-    }
-
-    /* The theme may give the dark mode its own duotone (<x-duotone-filter> draws one filter per mode). */
-    :root[data-theme='dark'] .photo-archive {
-        filter: url('#duotone-archive-dark');
-    }
-
-    @media (prefers-color-scheme: dark) {
-        :root:not([data-theme='light']) .photo-archive {
-            filter: url('#duotone-archive-dark');
-        }
+        filter: none;
     }
 
     /* Short brass rule (empty states, small openers). */
@@ -558,32 +545,6 @@
         width: 1px;
         height: 1px;
         overflow: hidden;
-    }
-
-    /* Citation disclosure on the publications list. */
-    .cite summary {
-        cursor: pointer;
-        list-style: none;
-    }
-
-    .cite summary::-webkit-details-marker {
-        display: none;
-    }
-
-    .cite summary::after {
-        content: '+';
-        margin-inline-start: 0.5rem;
-        color: var(--accent-text);
-    }
-
-    .cite[open] summary::after {
-        content: '−';
-    }
-
-    .cite__text {
-        @apply mt-4 rounded-card border border-rule bg-surface-field p-5 font-sans text-base font-normal leading-relaxed text-ink;
-        white-space: pre-wrap;
-        word-break: break-word;
     }
 
     /* Hero portrait: a 4px-radius frame with a strong hairline. */

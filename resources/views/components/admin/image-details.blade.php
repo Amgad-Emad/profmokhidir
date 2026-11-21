@@ -7,7 +7,6 @@
 @props(['prefix', 'required' => false])
 @use('App\Constants\Locales')
 @use('App\Constants\MediaProperties')
-@use('App\Constants\MediaTreatment')
 @php
     $tabs = 'image-'.str_replace('.', '-', $prefix);
     $described = [MediaProperties::ALT_TEXT, MediaProperties::CAPTION, MediaProperties::PLACE];
@@ -34,7 +33,6 @@
     <div class="form-row">
         <x-form.year :model="$prefix.'.'.MediaProperties::YEAR" :label="__('Year')" :required="$required" class="form-col--third" />
     </div>
-    <x-form.select :model="$prefix.'.'.MediaProperties::TREATMENT" :label="__('Treatment')" :options="MediaTreatment::labels()" required :hint="__('Portraits go warm monochrome; archive photos take the evergreen duotone.')" />
     <div class="form-row">
         <x-form.input :model="$prefix.'.'.MediaProperties::CREDIT" :label="__('Credit')" class="form-col--half" />
         <x-form.input :model="$prefix.'.'.MediaProperties::PERMISSIONS_NOTE" :label="__('Permissions note')" class="form-col--half" />

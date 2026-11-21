@@ -26,7 +26,11 @@ use Livewire\WithFileUploads;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
- * Admin › Appearance (admins only, "manage appearance"): the suggested
+ * Admin › Appearance (admins only, "manage appearance"). While editing is off
+ * (config appearance.editing, the default) every theme can still be inspected,
+ * previewed, applied, exported and deleted, but no colour can be changed and no
+ * new theme made (no duplicate, import, rename, draft or version restore). The
+ * suggested
  * templates as cards (Apply, Duplicate to edit), the custom themes, and the
  * editor of the selected theme: a Light | Dark switch, the Basic colours as
  * large swatches, every other token under "Advanced colours", the contrast
@@ -93,6 +97,7 @@ class Appearance extends Component
 
     public function setColour(string $token, string $colour, ?string $mode = null): void
     {
+        $this->ensureEditing();
         $this->authorize('update', $this->current());
         $mode = Theme::tryFrom($mode ?? $this->mode)?->value ?? $this->mode;
         $this->resetErrorBag('colour.'.$token);
@@ -120,6 +125,7 @@ class Appearance extends Component
     /** "Reset to template": the value the theme's template sets, or nothing (the token derives again). */
     public function resetToken(string $token): void
     {
+        $this->ensureEditing();
         $this->authorize('update', $this->current());
         $template = $this->themes()->templateValues($this->current())[$this->mode];
 
@@ -135,6 +141,7 @@ class Appearance extends Component
     /** Every advanced colour of this mode follows the Basic colours again. */
     public function resetAdvanced(): void
     {
+        $this->ensureEditing();
         $this->authorize('update', $this->current());
         $this->{$this->mode} = array_intersect_key($this->{$this->mode}, array_flip(ThemeTokens::basic()));
         $this->dirty = true;
@@ -144,6 +151,7 @@ class Appearance extends Component
     /** The contrast guard's Fix: the nearest shade of the foreground that passes. */
     public function fix(string $mode, string $pair): void
     {
+        $this->ensureEditing();
         $this->authorize('update', $this->current());
 
         foreach ($this->palette()->check($this->resolved()) as $result) {
@@ -158,6 +166,7 @@ class Appearance extends Component
 
     public function saveDraft(bool $anyway = false): void
     {
+        $this->ensureEditing();
         $theme = $this->current();
         $this->authorize('update', $theme);
 
@@ -215,6 +224,7 @@ class Appearance extends Component
 
     public function duplicate(?int $id = null): void
     {
+        $this->ensureEditing();
         $this->authorize('create', ColourTheme::class);
         $source = $id === null ? $this->current() : $this->theme($id);
         $copy = $this->themes()->duplicate($source, auth()->user());
@@ -230,6 +240,7 @@ class Appearance extends Component
 
     public function rename(): void
     {
+        $this->ensureEditing();
         $theme = $this->current();
         $this->authorize('update', $theme);
         $this->validate((new ThemeRequest)->rules(), (new ThemeRequest)->messages());
@@ -267,6 +278,7 @@ class Appearance extends Component
 
     public function restoreRevision(int $revision): void
     {
+        $this->ensureEditing();
         $theme = $this->current();
         $this->authorize('update', $theme);
         $this->themes()->restoreRevision($theme, $revision, auth()->user());
@@ -292,6 +304,7 @@ class Appearance extends Component
 
     public function updatedImportFile(): void
     {
+        $this->ensureEditing();
         $this->authorize('create', ColourTheme::class);
         $request = new ThemeImportRequest;
         $this->validate($request->rules(), $request->messages());
@@ -325,11 +338,12 @@ class Appearance extends Component
         $presets = $themes->where('is_preset', true)->mapWithKeys(fn (ColourTheme $preset): array => [$preset->id => $this->themes()->resolve($preset, published: true)]);
 
         return view('livewire.admin.settings.appearance', [
+            'editing' => self::editingEnabled(),
             'theme' => $theme,
             'themes' => $themes,
             'presetColours' => $presets,
             'active' => $themes->firstWhere('is_active', true),
-            'editable' => auth()->user()->can('update', $theme),
+            'editable' => self::editingEnabled() && auth()->user()->can('update', $theme),
             'resolved' => $resolved,
             'checks' => $checks,
             'failures' => array_values(array_filter($checks, static fn (array $check): bool => ! $check['passes'])),
@@ -344,6 +358,24 @@ class Appearance extends Component
             'revisions' => $this->showHistory ? $this->themes()->history($theme) : collect(),
             'minimums' => ThemeContrast::minimums(),
         ])->layout('components.layouts.admin', ['title' => AdminNavigation::get(AdminNavigation::APPEARANCE)['label']]);
+    }
+
+    /**
+     * Whether colour themes can be changed here (config appearance.editing). Off,
+     * the screen only shows the live theme.
+     */
+    public static function editingEnabled(): bool
+    {
+        return (bool) config('appearance.editing', false);
+    }
+
+    /**
+     * Changing a theme's colours or name, and making a new theme (duplicate,
+     * import), are refused while editing is off, whatever the browser sends.
+     */
+    private function ensureEditing(): void
+    {
+        abort_unless(self::editingEnabled(), 403);
     }
 
     private function publishTheme(ColourTheme $theme): void

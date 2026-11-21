@@ -58,7 +58,7 @@ class ArabicSiteCoreTest extends TestCase
         $this->get('/ar/about')
             ->assertOk()
             ->assertSee('lang="ar" dir="rtl"', false)
-            ->assertSee('عن الأستاذ الدكتور خضر')
+            ->assertSee('عن الأستاذ الدكتور محمد عثمان خضر')
             ->assertSee('هذا المحتوى متاح بالإنجليزية فقط')
             ->assertSee('lang="en" dir="ltr"', false)
             ->assertSee('تابع القراءة')
@@ -114,8 +114,8 @@ class ArabicSiteCoreTest extends TestCase
             ->assertSee('عقد 1970')
             ->assertSee('سجلان')
             ->assertSee('عرض 1–2 من أصل سجلين')
-            ->assertSee('استشهاد')
-            ->assertSee('dir="ltr" x-show=', false);
+            ->assertDontSee('استشهاد')
+            ->assertDontSee('citePanel', false);
     }
 
     #[Test]

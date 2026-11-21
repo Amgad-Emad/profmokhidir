@@ -33,7 +33,7 @@ final class Taglines
     /** The one line on each "Continue the story" card. */
     public const string STORY_ABOUT = 'The full biography, his fields of expertise and the facts of a long career.';
 
-    public const string STORY_PUBLICATIONS = 'Books, articles and papers, with citations and links, by year and type.';
+    public const string STORY_PUBLICATIONS = 'Books, articles and papers, with links, by year and type.';
 
     public const string STORY_TRIBUTES = 'Words from his students, colleagues and friends, and a place to add your own.';
 

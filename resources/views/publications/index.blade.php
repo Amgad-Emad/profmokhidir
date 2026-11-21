@@ -150,36 +150,6 @@
                                                 @endif
                                             </ul>
                                             @endif
-
-                                            <details class="cite" x-data="citePanel" data-default-style="{{ $citations[$id][0]['style']->value }}">
-                                                <summary class="link-meta">{{ __('Cite') }}<span class="sr-only"> {{ $publication->title }}</span></summary>
-                                                <div class="cite__panel">
-                                                    <div class="cite__tabs" role="tablist" aria-label="{{ __('Citation format') }}" x-cloak>
-                                                        @foreach ($citations[$id] as $citation)
-                                                            <button type="button" role="tab" class="cite__tab" data-style="{{ $citation['style']->value }}"
-                                                                id="cite-{{ $id }}-{{ $citation['style']->value }}-tab" aria-controls="cite-{{ $id }}-{{ $citation['style']->value }}"
-                                                                x-bind:aria-selected="(style === '{{ $citation['style']->value }}').toString()"
-                                                                x-bind:tabindex="style === '{{ $citation['style']->value }}' ? 0 : -1"
-                                                                x-on:click="select('{{ $citation['style']->value }}')" x-on:keydown="move($event)">{{ $citation['label'] }}</button>
-                                                        @endforeach
-                                                    </div>
-                                                    @foreach ($citations[$id] as $citation)
-                                                        <div role="tabpanel" class="cite__format" id="cite-{{ $id }}-{{ $citation['style']->value }}" aria-labelledby="cite-{{ $id }}-{{ $citation['style']->value }}-tab"
-                                                            data-format="{{ $citation['style']->value }}" dir="ltr" x-show="style === '{{ $citation['style']->value }}'" tabindex="0">
-                                                            <p class="cite__style">{{ $citation['label'] }} <span class="cite__edition">{{ $citation['edition'] }}</span></p>
-                                                            @if ($citation['code'])
-                                                                <pre class="cite__code" data-cite-text>{!! $citation['html'] !!}</pre>
-                                                            @else
-                                                                <p class="cite__text" data-cite-text>{!! $citation['html'] !!}</p>
-                                                            @endif
-                                                        </div>
-                                                    @endforeach
-                                                    <div class="cite__actions" x-cloak>
-                                                        <button type="button" class="filter-pill" x-on:click="copy()"><span x-text="copied ? {{ \Illuminate\Support\Js::from(__('Copied')) }} : {{ \Illuminate\Support\Js::from(__('Copy')) }}">{{ __('Copy') }}</span></button>
-                                                        <span class="sr-only" role="status" x-text="copied ? {{ \Illuminate\Support\Js::from(__('Citation copied to the clipboard')) }} : ''"></span>
-                                                    </div>
-                                                </div>
-                                            </details>
                                         </article>
                                     </li>
                                 @endforeach

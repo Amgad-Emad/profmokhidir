@@ -24,6 +24,9 @@ final class MediaCollections
     /** Album: ordered photos. */
     public const string PHOTOS = 'photos';
 
+    /** Award: ordered photographs of the certificate, medal or shield. */
+    public const string AWARD_IMAGES = 'award_images';
+
     /** OtherItem: free-form images or files. */
     public const string MEDIA = 'media';
 
@@ -43,6 +46,6 @@ final class MediaCollections
      */
     public static function images(): array
     {
-        return [self::PORTRAIT, self::THUMBNAIL, self::PHOTOS, self::MEDIA, self::PAGE_IMAGES];
+        return [self::PORTRAIT, self::THUMBNAIL, self::PHOTOS, self::AWARD_IMAGES, self::MEDIA, self::PAGE_IMAGES];
     }
 }

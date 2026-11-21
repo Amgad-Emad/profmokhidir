@@ -3,7 +3,7 @@
     <x-admin.page-header :eyebrow="__('Content')" :title="$isNew ? __('New publication') : __('Edit publication')" :intro="__('A paper, book, chapter or report. Fill in what you know; the public page builds the citation from these fields.')" />
     <x-admin.flash />
 
-    <x-admin.edit-layout :editor="$editor" :sections="['work' => __('The work'), 'citation' => __('Citation details'), 'file' => __('Full text'), 'catalogue' => __('Catalogue')]" class="mt-10">
+    <x-admin.edit-layout :editor="$editor" :sections="['work' => __('The work'), 'citation' => __('Source and links'), 'file' => __('Full text'), 'catalogue' => __('Catalogue')]" class="mt-10">
         <x-admin.form-section id="work" :title="__('The work')">
             <x-admin.locale-tabs id="work-text" :label="__('The work')" :fields="['title', 'abstract']">
                 @foreach (Locales::all() as $locale)
@@ -18,15 +18,14 @@
                 <x-form.select class="form-col--two-thirds" model="form.type" :label="__('Type')" :options="$types" required :hint="__('Used by the Type filter on the public page.')" />
                 <x-form.year class="form-col--third" model="form.year" :label="__('Year')" :hint="__('Year of publication.')" />
             </div>
-            <x-form.input model="form.authors" :label="__('Authors')" :hint="__('As they should appear in the citation, separated by commas, for example Khidir, M. O., Hassan, A.')" />
+            <x-form.input model="form.authors" :label="__('Authors')" :hint="__('As they should appear on the public page, separated by commas, for example Khidir, M. O., Hassan, A.')" />
         </x-admin.form-section>
-        <x-admin.form-section id="citation" :title="__('Citation details')" :intro="__('Where the work appeared and how to find it. Leave out anything you do not have.')">
+        <x-admin.form-section id="citation" :title="__('Source and links')" :intro="__('Where the work appeared and how to find it. Leave out anything you do not have.')">
             <x-form.input model="form.venue_publisher" :label="__('Journal, venue or publisher')" :hint="__('For example Journal of Agricultural Science.')" />
             <div class="form-row">
                 <x-form.input class="form-col--half" model="form.doi" :label="__('DOI')" placeholder="10.1000/xyz123" dir="ltr" :hint="__('The identifier that starts with 10. — it becomes a permanent link.')" />
                 <x-form.input class="form-col--half" model="form.url" :label="__('Link')" type="url" placeholder="https://" :hint="__('A page where the work can be read.')" />
             </div>
-            <x-form.textarea model="form.citation" :label="__('Citation as written')" rows="3" :hint="__('Kept for the record. The public page writes APA, MLA, Chicago and BibTeX from the fields above.')" />
         </x-admin.form-section>
         <x-admin.form-section id="file" :title="__('Full text')" :intro="__('A PDF readers can open from the publications page.')">
             <x-form.upload model="document" :label="__('Full text file')" :media="$file" :href="$fileUrl" :remove="$file ? 'removeDocument' : null" :accept="$fileAccept" :hint="$fileHint" />

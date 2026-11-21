@@ -418,98 +418,6 @@
         color: var(--accent-text);
     }
 
-    /* ---------------------------------------------------- catalogue: cite panel */
-    .record .cite summary {
-        min-height: 2.75rem;
-    }
-
-    .cite__panel {
-        margin-top: var(--space-2);
-        padding: var(--space-3);
-        border: 1px solid var(--rule);
-        border-radius: var(--radius-card);
-        background-color: var(--surface-raised);
-    }
-
-    .cite__tabs {
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-1);
-        margin-bottom: var(--space-2);
-        border-bottom: 1px solid var(--rule);
-    }
-
-    .cite__tab {
-        min-height: 2.75rem;
-        padding: 0 0.75rem;
-        margin-bottom: -1px;
-        border-bottom: 1px solid transparent;
-        font-family: var(--font-display);
-        font-size: 1.125rem;
-        letter-spacing: 0.04em;
-        color: var(--ink-muted);
-        transition:
-            color 300ms var(--ease-rise),
-            border-color 300ms var(--ease-rise);
-    }
-
-    .cite__tab[aria-selected='true'] {
-        color: var(--ink);
-        border-bottom-color: var(--ink);
-    }
-
-    .cite__format + .cite__format {
-        margin-top: var(--space-3);
-    }
-
-    .cite__style {
-        font-family: var(--font-display);
-        font-size: 1.125rem;
-        font-variant-caps: all-small-caps;
-        letter-spacing: 0.1em;
-        color: var(--accent-text);
-    }
-
-    .cite__edition {
-        margin-inline-start: 0.5rem;
-        font-family: var(--font-sans);
-        font-variant-caps: normal;
-        letter-spacing: normal;
-        font-size: 0.9375rem; /* 15px */
-        color: var(--ink-muted);
-    }
-
-    /* With the tabs working, the style name is in the tab already. */
-    .cite[data-enhanced] .cite__style {
-        display: none;
-    }
-
-    .cite__panel .cite__text {
-        margin-top: var(--space-1);
-        white-space: normal;
-    }
-
-    .cite__code {
-        margin-top: var(--space-1);
-        padding: var(--space-2) var(--space-3);
-        overflow-x: auto;
-        border: 1px solid var(--rule);
-        border-radius: var(--radius-card);
-        background-color: var(--surface-field);
-        font-family: var(--font-mono);
-        font-size: 0.9375rem; /* 15px */
-        line-height: 1.6;
-        color: var(--ink);
-        white-space: pre;
-    }
-
-    .cite__actions {
-        display: flex;
-        align-items: center;
-        gap: var(--space-2);
-        margin-top: var(--space-2);
-    }
-
     /* -------------------------------------------------- Other Information index */
     .catalogue-index__toc {
         margin-top: var(--space-8);
@@ -680,12 +588,102 @@
         margin-block: var(--space-6);
     }
 
+    /*
+     | Two awards to a row from tablet width: the roll widens, the dotted rule between awards gives way
+     | to the row gap, and every lead photograph is shown whole at one height so the names in a row
+     | line up. Phones keep one award per row with the rules between.
+     */
+    @media (min-width: 768px) {
+        .honour-roll {
+            max-width: 64rem;
+        }
+
+        .honour-roll__list {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            column-gap: var(--space-8);
+            row-gap: var(--space-12);
+            align-items: start;
+        }
+
+        .honour-roll__list .honour__ornament {
+            display: none;
+        }
+
+        /* The height goes on the frame: the image's own h-full utility then fills it, contained. */
+        .honour-roll__list .honour__lead,
+        .honour-roll__list .honour__lead .photo__link,
+        .honour-roll__list .honour__lead .photo__frame {
+            width: 100%;
+        }
+
+        .honour-roll__list .honour__lead .photo__frame {
+            height: 20rem;
+        }
+
+        /* Shown whole, never cropped: !important because the shared photo markup carries object-cover. */
+        .honour-roll__list .honour__lead .photo__frame img {
+            max-height: none;
+            object-fit: contain !important;
+        }
+    }
+
     .honour__plaque {
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: var(--space-1);
         padding-block: var(--space-2);
+    }
+
+    /* An award's photographs: the lead one mounted like a framed exhibit (a mat of raised surface inside a
+       hairline, 4px radius), shown whole at its own proportions; further ones as small square thumbnails. */
+    .honour__exhibit {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-2);
+        width: 100%;
+        margin-bottom: var(--space-4);
+    }
+
+    .honour__lead {
+        width: 100%;
+        max-width: 26rem;
+    }
+
+    .honour__lead .photo__frame {
+        padding: var(--space-2);
+        border: 1px solid var(--rule-strong);
+        background-color: var(--surface-raised);
+        box-shadow: 0 1px 0 var(--rule);
+    }
+
+    .honour__lead .photo__frame img {
+        height: auto;
+        max-height: 32rem;
+        object-fit: contain;
+        border-radius: calc(var(--radius-card) / 2);
+    }
+
+    .honour__thumbs {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: var(--space-1);
+    }
+
+    .honour__thumb {
+        width: 5rem;
+    }
+
+    .honour__thumb .photo__frame {
+        border: 1px solid var(--rule);
+    }
+
+    .photo__link:focus-visible .photo__frame {
+        outline: 2px solid var(--focus);
+        outline-offset: 3px;
     }
 
     .honour__name {

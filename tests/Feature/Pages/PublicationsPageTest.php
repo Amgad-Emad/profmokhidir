@@ -75,19 +75,15 @@ class PublicationsPageTest extends TestCase
                 'href="https://doi.org/10.1000/abc"', '<span class="record__doi-label">DOI</span> <span class="font-mono">10.1000/abc</span>',
                 'href="https://www.example.org/book"', 'Read online · example.org',
                 'target="_blank"', 'Download · PDF · 2.1 MB',
-                '<details class="cite" x-data="citePanel" data-default-style="apa">', 'Cite<span class="sr-only"> Principles of Dryland Agronomy</span>',
-                'role="tablist" aria-label="Citation format"', '>APA</button>', '>MLA</button>', '>Chicago</button>', '>BibTeX</button>',
-                'role="tabpanel"', 'Khidir, M. O., &amp; Smith, J. (1978). <i>Principles of Dryland Agronomy</i>. Khartoum University Press. https://doi.org/10.1000/abc',
-                'Khidir, M. O., and J. Smith. <i>Principles of Dryland Agronomy</i>. Khartoum University Press, 1978, https://doi.org/10.1000/abc.',
-                '<pre class="cite__code" data-cite-text>@book{khidir1978principles,',
-                '<span x-text="copied ? &#039;Copied&#039; : &#039;Copy&#039;">Copy</span>',
                 'Early report',
             ], false)
             ->assertDontSee('Publications will be listed here');
 
         $html = $response->getContent();
         $this->assertSame(1, substr_count($html, 'record__doi-label'), 'Only publications with a DOI get a DOI link');
-        $this->assertSame(3, substr_count($html, '<details class="cite"'), 'Every record can be cited');
+        $this->assertStringNotContainsString('class="cite', $html, 'There is no citation panel');
+        $this->assertStringNotContainsString('citePanel', $html);
+        $this->assertStringNotContainsString('BibTeX', $html);
         $this->assertSame(1, substr_count($html, 'class="record__links"'), 'Records without any link have no link list');
         $this->assertStringNotContainsString('target="_blank" rel="noopener" class="link-meta">Read online', $html, 'External links open in the same tab');
         $this->assertGreaterThanOrEqual(2, substr_count($html, 'data-rise-group'));
