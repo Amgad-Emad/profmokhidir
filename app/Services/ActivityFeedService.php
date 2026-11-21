@@ -84,6 +84,7 @@ class ActivityFeedService
             AuditAction::MEDIA_UPLOADED => $label ? [':actor uploaded :file', ['file' => $label]] : [':actor uploaded a file', []],
             AuditAction::MEDIA_UPDATED => $label ? [':actor updated the details of :file', ['file' => $label]] : [':actor updated the details of an image', []],
             AuditAction::MEDIA_DELETED => $label ? [':actor deleted :file', ['file' => $label]] : [':actor deleted a file', []],
+            AuditAction::MEDIA_REPLACED => $label ? [':actor replaced the file of :file', ['file' => $label]] : [':actor replaced a file', []],
             default => [':actor :action', ['action' => AuditAction::label($log->action)]],
         };
     }

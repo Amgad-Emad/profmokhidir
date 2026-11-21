@@ -72,6 +72,8 @@ final class AuditAction
 
     public const string MEDIA_DELETED = 'media.deleted';
 
+    public const string MEDIA_REPLACED = 'media.replaced';
+
     public const string CHAT_MESSAGE_DELETED = 'chat.message_deleted';
 
     public const string CHAT_MESSAGE_REPORTED = 'chat.message_reported';
@@ -120,7 +122,7 @@ final class AuditAction
             self::ROLE_ASSIGNED, self::ROLE_REMOVED, self::ROLES_SYNCED, self::USER_DELETED,
             self::USER_INVITED, self::USER_INVITE_RESENT, self::USER_DEACTIVATED, self::USER_REACTIVATED, self::SETTINGS_UPDATED,
             self::CONTENT_CREATED, self::CONTENT_RESTORED, self::CONTENT_PUBLISHED, self::CONTENT_UNPUBLISHED, self::CONTENT_DELETED, self::CONTENT_PURGED,
-            self::TRIBUTE_EDITED, self::TRIBUTE_FEATURED, self::TRIBUTE_UNFEATURED, self::TRIBUTE_REOPENED, self::MEDIA_UPLOADED, self::MEDIA_UPDATED, self::MEDIA_DELETED,
+            self::TRIBUTE_EDITED, self::TRIBUTE_FEATURED, self::TRIBUTE_UNFEATURED, self::TRIBUTE_REOPENED, self::MEDIA_UPLOADED, self::MEDIA_UPDATED, self::MEDIA_DELETED, self::MEDIA_REPLACED,
             self::CHAT_MESSAGE_DELETED, self::CHAT_MESSAGE_REPORTED, self::CHAT_REPORT_RESOLVED,
             self::CHAT_MESSAGE_PINNED, self::CHAT_MESSAGE_UNPINNED, self::ADMIN_LOGIN, self::PAGE_PUBLISHED, self::PAGE_UNPUBLISHED,
             self::THEME_CREATED, self::THEME_SAVED, self::THEME_PUBLISHED, self::THEME_RENAMED, self::THEME_DELETED,
@@ -168,6 +170,7 @@ final class AuditAction
             self::MEDIA_UPLOADED => __('uploaded a file'),
             self::MEDIA_UPDATED => __('updated image details'),
             self::MEDIA_DELETED => __('deleted a file'),
+            self::MEDIA_REPLACED => __('replaced a file'),
             self::CHAT_MESSAGE_DELETED => __('deleted a chat message'),
             self::CHAT_MESSAGE_REPORTED => __('reported a chat message'),
             self::CHAT_REPORT_RESOLVED => __('resolved a chat report'),

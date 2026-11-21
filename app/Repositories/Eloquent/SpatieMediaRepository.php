@@ -16,8 +16,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\MediaCollections\FileAdder;
+use Spatie\MediaLibrary\MediaCollections\Filesystem;
 use Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Spatie\MediaLibrary\Support\File;
 
 final class SpatieMediaRepository implements MediaRepositoryInterface
 {
@@ -71,6 +74,37 @@ final class SpatieMediaRepository implements MediaRepositoryInterface
         $media->forceFill([Archive::DECADE => $decade, Archive::FEATURED => $featured])->save();
 
         return $media;
+    }
+
+    public function replaceFile(Media $media, string|UploadedFile $file, array $properties = []): Media
+    {
+        $path = $file instanceof UploadedFile ? (string) $file->getRealPath() : $file;
+        $originalName = $file instanceof UploadedFile ? $file->getClientOriginalName() : basename($file);
+        $fileName = app(FileAdder::class)->defaultSanitizer($originalName);
+        $filesystem = app(Filesystem::class);
+
+        // The new file goes into the same directory (the path follows the media id), so clear it first.
+        $filesystem->removeAllFiles($media);
+
+        $media->forceFill([
+            'name' => pathinfo($originalName, PATHINFO_FILENAME),
+            'file_name' => $fileName,
+            'mime_type' => File::getMimeType($path),
+            'size' => (int) filesize($path),
+            'generated_conversions' => [],
+            'responsive_images' => [],
+        ]);
+
+        foreach ($properties as $key => $value) {
+            $value === null ? $media->forgetCustomProperty($key) : $media->setCustomProperty($key, $value);
+        }
+
+        $media->save();
+
+        // Copies the file in and queues the WebP conversions again.
+        $filesystem->add($path, $media, $fileName);
+
+        return $media->refresh();
     }
 
     public function delete(Media $media): bool

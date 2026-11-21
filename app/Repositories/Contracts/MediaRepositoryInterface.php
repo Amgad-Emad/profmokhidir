@@ -67,6 +67,16 @@ interface MediaRepositoryInterface
      */
     public function updateArchiveFields(Media $media, ?int $decade, bool $featured): Media;
 
+    /**
+     * Swap the file of a media row for another, keeping the row itself: its id,
+     * owner, collection, order, archive columns and custom properties. The old
+     * file and its conversions are deleted and the conversions are made again.
+     * Properties are merged in (null forgets one).
+     *
+     * @param  array<string, mixed>  $properties
+     */
+    public function replaceFile(Media $media, string|UploadedFile $file, array $properties = []): Media;
+
     public function delete(Media $media): bool;
 
     public function clearCollection(HasMedia $model, string $collection): void;

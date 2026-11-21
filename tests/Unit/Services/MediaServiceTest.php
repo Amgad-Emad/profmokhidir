@@ -3,11 +3,14 @@
 namespace Tests\Unit\Services;
 
 use App\Constants\AuditAction;
+use App\Constants\CacheKeys;
 use App\Constants\Disks;
 use App\Constants\MediaCollections;
 use App\Constants\MediaProperties;
 use App\Constants\MediaTreatment;
+use App\Constants\Uploads;
 use App\Models\Album;
+use App\Models\Award;
 use App\Models\TeachingMaterial;
 use App\Models\User;
 use App\Models\Video;
@@ -15,6 +18,7 @@ use App\Services\MediaService;
 use App\Support\PlaceholderImage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
@@ -179,5 +183,45 @@ class MediaServiceTest extends TestCase
         $this->service->clear($album, MediaCollections::PHOTOS);
 
         $this->assertSame(0, $album->fresh()->media()->count());
+    }
+
+    #[Test]
+    public function replace_keeps_the_details_takes_the_new_size_audits_and_clears_the_owner_cache(): void
+    {
+        $editor = User::factory()->editor()->create();
+        $award = Award::factory()->published()->create();
+        $media = $this->service->attach($award, UploadedFile::fake()->image('old.jpg', 40, 30), MediaCollections::AWARD_IMAGES, [
+            MediaProperties::ALT_TEXT => 'The certificate',
+            MediaProperties::TRANSLATIONS => ['ar' => [MediaProperties::ALT_TEXT => 'الشهادة']],
+        ]);
+        Cache::put(CacheKeys::AWARDS, 'stale');
+
+        $replaced = $this->service->replace($media, UploadedFile::fake()->image('new.jpg', 120, 90), $editor);
+
+        $this->assertSame($media->id, $replaced->id);
+        $this->assertSame('new.jpg', $replaced->file_name);
+        $this->assertSame(120, $replaced->getCustomProperty(MediaProperties::WIDTH));
+        $this->assertSame(90, $replaced->getCustomProperty(MediaProperties::HEIGHT));
+        $this->assertSame('The certificate', $replaced->getTranslatedProperty(MediaProperties::ALT_TEXT, 'en'));
+        $this->assertSame('الشهادة', $replaced->getTranslatedProperty(MediaProperties::ALT_TEXT, 'ar'));
+        $this->assertFalse(Cache::has(CacheKeys::AWARDS));
+        $this->assertDatabaseHas('audit_logs', ['action' => AuditAction::MEDIA_REPLACED, 'user_id' => $editor->id]);
+    }
+
+    #[Test]
+    public function replacement_rules_and_accept_follow_the_kind_of_file_the_collection_holds(): void
+    {
+        $video = Video::factory()->create();
+        $material = TeachingMaterial::factory()->create();
+        $poster = $this->service->attach($video, UploadedFile::fake()->image('poster.jpg', 40, 30), MediaCollections::THUMBNAIL);
+        $clip = $this->service->attach($video, UploadedFile::fake()->create('clip.mp4', 10, 'video/mp4'), MediaCollections::VIDEO);
+        $file = $this->service->attach($material, UploadedFile::fake()->create('notes.pdf', 10, 'application/pdf'), MediaCollections::FILE);
+
+        $this->assertSame(Uploads::imageRules(), $this->service->replacementRules($poster));
+        $this->assertSame(Uploads::videoRules(), $this->service->replacementRules($clip));
+        $this->assertSame(Uploads::documentRules(), $this->service->replacementRules($file));
+        $this->assertStringContainsString('.webp', $this->service->replacementAccept($poster));
+        $this->assertStringContainsString('.mp4', $this->service->replacementAccept($clip));
+        $this->assertStringContainsString('.pdf', $this->service->replacementAccept($file));
     }
 }

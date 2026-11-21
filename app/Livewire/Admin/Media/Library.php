@@ -49,7 +49,8 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * Every image on the site in one place under the list toolbar (views for what
  * still needs work; Album, Used as, Treatment, Alt text and Usage filters), upload new photos
  * into an album, edit the brand details (alt text, caption, place, year,
- * treatment), and delete after seeing where the image is used.
+ * treatment), replace the file (keeping those details and where it is used),
+ * and delete after seeing where the image is used.
  */
 class Library extends Component
 {
@@ -80,6 +81,9 @@ class Library extends Component
 
     /** @var list<UploadedFile> */
     public $uploads = [];
+
+    /** @var UploadedFile|null the file chosen to replace the image being edited */
+    public $replacement = null;
 
     public function mount(): void
     {
@@ -153,6 +157,7 @@ class Library extends Component
     {
         $this->editingId = null;
         $this->details = [];
+        $this->replacement = null;
         $this->resetErrorBag();
     }
 
@@ -177,6 +182,38 @@ class Library extends Component
         $this->media()->updateProperties($media, $this->details, auth()->user());
         $this->cancelEdit();
         $this->toast(__('Image details saved.'));
+    }
+
+    /**
+     * A new file was chosen in the details drawer: put it in place of the
+     * image being edited, keeping its details and everywhere it is used.
+     */
+    public function updatedReplacement(): void
+    {
+        if ($this->editingId === null) {
+            $this->replacement = null;
+
+            return;
+        }
+
+        $media = $this->media()->findOrFail($this->editingId);
+        $this->authorizeMedia($media);
+
+        try {
+            $this->validate(
+                ['replacement' => $this->media()->replacementRules($media)],
+                $this->remap((new ImageUploadRequest)->messages(), ImageUploadRequest::FIELD, 'replacement'),
+                ['replacement' => __('image')],
+            );
+        } catch (ValidationException $exception) {
+            $this->replacement = null;
+
+            throw $exception;
+        }
+
+        $this->media()->replace($media, $this->replacement, auth()->user());
+        $this->replacement = null;
+        $this->toast(__('Image replaced. Its details were kept.'));
     }
 
     public function updatedUploads(): void
@@ -343,7 +380,9 @@ class Library extends Component
             MediaCollections::PORTRAIT => __('Portrait'),
             MediaCollections::THUMBNAIL => __('Video posters'),
             MediaCollections::PHOTOS => __('Album photos'),
+            MediaCollections::AWARD_IMAGES => __('Award certificates'),
             MediaCollections::MEDIA => __('Other information'),
+            MediaCollections::PAGE_IMAGES => __('Page images'),
         ];
     }
 

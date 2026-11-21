@@ -8,10 +8,13 @@ use App\Constants\Archive;
 use App\Constants\AuditAction;
 use App\Constants\ContentTypes;
 use App\Constants\Locales;
+use App\Constants\MediaCollections;
 use App\Constants\MediaConversions;
 use App\Constants\MediaProperties;
 use App\Constants\MediaTreatment;
+use App\Constants\Uploads;
 use App\Models\Media as LocalizedMedia;
+use App\Models\PageBlock;
 use App\Models\User;
 use App\Repositories\Contracts\MediaRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -79,6 +82,59 @@ class MediaService
         }
 
         return $media;
+    }
+
+    /**
+     * Put a new file in place of an existing one. Everything else stays: the
+     * alt text, caption, place, year and translations, the order, the album
+     * cover and archive flags, and the media id (page blocks name it). The new
+     * image's size replaces the old one, the WebP conversions are made again
+     * and the public pages that show it are refreshed.
+     */
+    public function replace(Media $media, string|UploadedFile $file, ?User $actor = null): Media
+    {
+        $dimensions = $this->dimensions($file);
+        $properties = $dimensions === [] ? [MediaProperties::WIDTH => null, MediaProperties::HEIGHT => null] : $dimensions;
+        $previous = $media->file_name;
+
+        $media = $this->media->replaceFile($media, $file, $properties);
+
+        if ($actor !== null) {
+            $this->audit->record($actor, AuditAction::MEDIA_REPLACED, $media->model, $this->auditMeta($media) + ['previous_file_name' => $previous]);
+        }
+
+        $this->flushOwnerCache($media);
+
+        return $media;
+    }
+
+    /**
+     * Validation rules for a file that replaces this one: the same kind of
+     * file as the collection holds (an image, a video or a document).
+     *
+     * @return list<mixed>
+     */
+    public function replacementRules(Media $media): array
+    {
+        return match (true) {
+            in_array($media->collection_name, MediaCollections::images(), true) => Uploads::imageRules(),
+            $media->collection_name === MediaCollections::VIDEO => Uploads::videoRules(),
+            default => Uploads::documentRules(),
+        };
+    }
+
+    /**
+     * The file types a replacement may be, for the file picker's accept attribute.
+     */
+    public function replacementAccept(Media $media): string
+    {
+        $extensions = match (true) {
+            in_array($media->collection_name, MediaCollections::images(), true) => Uploads::IMAGE_EXTENSIONS,
+            $media->collection_name === MediaCollections::VIDEO => Uploads::VIDEO_EXTENSIONS,
+            default => Uploads::DOCUMENT_EXTENSIONS,
+        };
+
+        return '.'.implode(',.', $extensions);
     }
 
     public function remove(Media $media, ?User $actor = null): bool
@@ -348,6 +404,28 @@ class MediaService
         }
 
         return $clean;
+    }
+
+    /**
+     * Forget the cached public pages of the record that owns a file: its
+     * section (through its content service) or the editable page of a block.
+     */
+    private function flushOwnerCache(Media $media): void
+    {
+        $owner = $media->model;
+
+        if ($owner instanceof PageBlock) {
+            app(PageContentService::class)->flush($owner->page?->key);
+
+            return;
+        }
+
+        $type = ContentTypes::keyForModel((string) $media->model_type);
+        $service = $type === null ? null : (ContentTypes::services()[$type] ?? null);
+
+        if ($service !== null) {
+            app($service)->flushCache();
+        }
     }
 
     /**

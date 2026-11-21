@@ -35,6 +35,9 @@ trait ManagesImages
 
     public ?int $confirmingImageId = null;
 
+    /** @var array<int, UploadedFile|null> media id => the file chosen to replace it */
+    public array $replacements = [];
+
     abstract protected function imageCollection(): string;
 
     abstract protected function attachImage(Model $record, UploadedFile $file, array $details): Media;
@@ -113,6 +116,42 @@ trait ManagesImages
         $this->mediaService()->updateProperties($image, $this->images[$id], auth()->user());
         $this->loadImages();
         $this->notify('Image details saved.');
+    }
+
+    /**
+     * A new file was chosen for one image: put it in place of the old one,
+     * keeping the image's details, order and flags.
+     */
+    public function updatedReplacements(mixed $value, string|int $key): void
+    {
+        $id = (int) $key;
+        $field = "replacements.$id";
+
+        try {
+            $this->validate(
+                [$field => Uploads::imageRules()],
+                $this->prefixMessages((new ImageUploadRequest)->messages(), ImageUploadRequest::FIELD, $field),
+                [$field => __('image')],
+            );
+        } catch (ValidationException $exception) {
+            unset($this->replacements[$id]);
+
+            throw $exception;
+        }
+
+        $record = $this->record();
+        $image = $this->mediaService()->find($id);
+        $file = $this->replacements[$id] ?? null;
+        unset($this->replacements[$id]);
+
+        if (! $record instanceof HasMedia || $image === null || ! $file instanceof UploadedFile || ! array_key_exists($id, $this->images)) {
+            return;
+        }
+
+        $this->authorize('manageMedia', $record);
+        $this->mediaService()->replace($image, $file, auth()->user());
+        $this->loadImages();
+        $this->notify('Image replaced. Its details were kept.');
     }
 
     public function confirmRemoveImage(int $id): void

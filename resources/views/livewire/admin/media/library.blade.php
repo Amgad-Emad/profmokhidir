@@ -44,7 +44,7 @@
                 @endphp
                 <li wire:key="media-{{ $id }}" class="library-tile" data-media="{{ $id }}">
                     <button type="button" class="library-tile__open" wire:click="edit({{ $id }})" aria-label="{{ __('Details of :image', ['image' => $caption]) }}">
-                        <img src="{{ $image->getUrl() }}" alt="" loading="lazy" decoding="async">
+                        <img src="{{ $image->getUrl() }}?v={{ $image->updated_at?->timestamp }}" alt="" loading="lazy" decoding="async">
                     </button>
                     <div class="library-tile__body">
                         <p class="library-tile__name" title="{{ $caption }}" dir="auto">{{ $caption }}</p>
@@ -72,7 +72,10 @@
         @if ($editing)
             @php $editingUsage = $usages[(int) $editing->getKey()] ?? app(\App\Services\MediaService::class)->usage($editing); @endphp
             <div data-details-dialog>
-                <img src="{{ $editing->getUrl() }}" alt="" class="w-full rounded-card border border-rule object-contain" style="max-height: 16rem">
+                <img src="{{ $editing->getUrl() }}?v={{ $editing->updated_at?->timestamp }}" alt="" class="w-full rounded-card border border-rule object-contain" style="max-height: 16rem">
+                <div class="mt-4" data-replace-file>
+                    <x-form.upload model="replacement" id="replace-file" :label="__('Replace the file')" :hint="__('The new file takes this one’s place everywhere it is used. Alt text, caption, place, year and translations are kept.').' '.$uploadHint" :accept="app(\App\Services\MediaService::class)->replacementAccept($editing)" image />
+                </div>
                 <p class="mt-3 text-sm font-normal text-ink-muted">
                     {{ $editingUsage['trashed'] ? __('Used by :type: :label (in the trash).', ['type' => $editingUsage['type_label'], 'label' => $editingUsage['label']]) : __('Used by :type: :label.', ['type' => $editingUsage['type_label'], 'label' => $editingUsage['label']]) }}
                     @if ($editingUsage['url'])<a href="{{ $editingUsage['url'] }}" class="link-meta">{{ __('Open it') }}</a>@endif

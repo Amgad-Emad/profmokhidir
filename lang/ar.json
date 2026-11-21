@@ -2466,5 +2466,15 @@
     "Images can be added once the award has a name and has been saved once.": "يمكن إضافة الصور بعد تسمية الجائزة وحفظها مرة واحدة.",
     "Choose which colour theme the whole site, the community chat, the sign-in screens, the dashboard and emails use. Inspect any theme in the light and the dark mode before you apply it. Themes cannot be edited or added here.": "اختر سمة الألوان التي يستخدمها الموقع كله والمحادثة المجتمعية وشاشات تسجيل الدخول ولوحة التحكم والرسائل البريدية. افحص أي سمة في الوضعين الفاتح والداكن قبل تطبيقها. لا يمكن تعديل السمات أو إضافة سمات جديدة من هنا.",
     "Each has a light and a dark variant that pass the contrast check. Inspect one to see all its colours, or apply it as it is.": "لكل منها نسخة فاتحة وأخرى داكنة تجتازان فحص التباين. افحص إحداها لترى جميع ألوانها، أو طبّقها كما هي.",
-    "Shown read-only: the colours of a theme cannot be changed here. Apply it to use it on the site.": "معروضة للقراءة فقط: لا يمكن تغيير ألوان السمة من هنا. طبّقها لاستخدامها في الموقع."
+    "Shown read-only: the colours of a theme cannot be changed here. Apply it to use it on the site.": "معروضة للقراءة فقط: لا يمكن تغيير ألوان السمة من هنا. طبّقها لاستخدامها في الموقع.",
+    "replaced a file": "استبدل ملفًا",
+    ":actor replaced the file of :file": ":actor: استبدل ملف :file",
+    ":actor replaced a file": ":actor: استبدل ملفًا",
+    "Image replaced. Its details were kept.": "استُبدلت الصورة، وبقيت بياناتها كما هي.",
+    "Replace image": "استبدال الصورة",
+    "Replacing the image…": "جارٍ استبدال الصورة…",
+    "Replace the file": "استبدال الملف",
+    "Award certificates": "شهادات الجوائز",
+    "Page images": "صور الصفحات",
+    "The new file takes this one’s place everywhere it is used. Alt text, caption, place, year and translations are kept.": "يحلّ الملف الجديد محلّ هذا الملف في كل مكان يُستخدم فيه، مع الإبقاء على النص البديل والتعليق والمكان والسنة والترجمات."
 }

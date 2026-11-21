@@ -2466,5 +2466,15 @@
     "Images can be added once the award has a name and has been saved once.": "Images can be added once the award has a name and has been saved once.",
     "Choose which colour theme the whole site, the community chat, the sign-in screens, the dashboard and emails use. Inspect any theme in the light and the dark mode before you apply it. Themes cannot be edited or added here.": "Choose which colour theme the whole site, the community chat, the sign-in screens, the dashboard and emails use. Inspect any theme in the light and the dark mode before you apply it. Themes cannot be edited or added here.",
     "Each has a light and a dark variant that pass the contrast check. Inspect one to see all its colours, or apply it as it is.": "Each has a light and a dark variant that pass the contrast check. Inspect one to see all its colours, or apply it as it is.",
-    "Shown read-only: the colours of a theme cannot be changed here. Apply it to use it on the site.": "Shown read-only: the colours of a theme cannot be changed here. Apply it to use it on the site."
+    "Shown read-only: the colours of a theme cannot be changed here. Apply it to use it on the site.": "Shown read-only: the colours of a theme cannot be changed here. Apply it to use it on the site.",
+    "replaced a file": "replaced a file",
+    ":actor replaced the file of :file": ":actor replaced the file of :file",
+    ":actor replaced a file": ":actor replaced a file",
+    "Image replaced. Its details were kept.": "Image replaced. Its details were kept.",
+    "Replace image": "Replace image",
+    "Replacing the image…": "Replacing the image…",
+    "Replace the file": "Replace the file",
+    "Award certificates": "Award certificates",
+    "Page images": "Page images",
+    "The new file takes this one’s place everywhere it is used. Alt text, caption, place, year and translations are kept.": "The new file takes this one’s place everywhere it is used. Alt text, caption, place, year and translations are kept."
 }

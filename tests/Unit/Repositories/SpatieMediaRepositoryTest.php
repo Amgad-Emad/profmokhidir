@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Repositories;
 
+use App\Constants\Archive;
 use App\Constants\Disks;
 use App\Constants\MediaCollections;
 use App\Constants\MediaConversions;
@@ -19,7 +20,6 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
-use App\Constants\Archive;
 use Tests\TestCase;
 
 class SpatieMediaRepositoryTest extends TestCase
@@ -223,5 +223,35 @@ class SpatieMediaRepositoryTest extends TestCase
         $this->assertCount(1, $message->fresh()->attachments());
         $this->assertCount(0, $upload->fresh()->getMedia(MediaCollections::CHAT_PENDING));
     }
-}
 
+    #[Test]
+    public function replace_file_swaps_the_file_and_keeps_the_row_its_details_order_and_archive_fields(): void
+    {
+        $album = Album::factory()->create();
+        $first = $this->repository->attach($album, UploadedFile::fake()->image('old.jpg', 40, 30), MediaCollections::PHOTOS, [
+            MediaProperties::ALT_TEXT => 'The old view',
+            MediaProperties::CAPTION => 'Kept caption',
+            MediaProperties::IS_COVER => true,
+        ]);
+        $second = $this->repository->attach($album, UploadedFile::fake()->image('other.jpg', 40, 30), MediaCollections::PHOTOS);
+        $this->repository->reorder([$second->id, $first->id]);
+        $this->repository->updateArchiveFields($first->fresh(), 1970, true);
+        $oldPath = $first->fresh()->getPathRelativeToRoot();
+
+        $replaced = $this->repository->replaceFile($first->fresh(), UploadedFile::fake()->image('new photo.png', 80, 60), [MediaProperties::WIDTH => 80]);
+
+        $this->assertSame($first->id, $replaced->id);
+        $this->assertSame('new-photo.png', $replaced->file_name);
+        $this->assertSame('image/png', $replaced->mime_type);
+        $this->assertSame('The old view', $replaced->getCustomProperty(MediaProperties::ALT_TEXT));
+        $this->assertSame('Kept caption', $replaced->getCustomProperty(MediaProperties::CAPTION));
+        $this->assertTrue($replaced->getCustomProperty(MediaProperties::IS_COVER));
+        $this->assertSame(80, $replaced->getCustomProperty(MediaProperties::WIDTH));
+        $this->assertSame(2, (int) $replaced->order_column);
+        $this->assertSame(1970, (int) $replaced->getAttribute(Archive::DECADE));
+        $this->assertTrue((bool) $replaced->getAttribute(Archive::FEATURED));
+        Storage::disk(Disks::PUBLIC)->assertMissing($oldPath);
+        Storage::disk(Disks::PUBLIC)->assertExists($replaced->getPathRelativeToRoot());
+        $this->assertCount(2, $album->fresh()->getMedia(MediaCollections::PHOTOS));
+    }
+}
