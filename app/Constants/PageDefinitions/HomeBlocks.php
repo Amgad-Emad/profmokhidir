@@ -27,7 +27,10 @@ final class HomeBlocks
 
     public const string HERO_HEADING_SECOND = 'Mohamed Osman Khidir';
 
-    public const string CHAPTERS_INTRO = 'Each decade of his life, drawn from the record of his education, appointments and honours.';
+    public const string CHAPTERS_INTRO = 'His honours, decade by decade: the prizes, medals and distinctions of a life in science.';
+
+    /** The introduction before the chapters became a record of his honours (replaced on import when unedited). */
+    public const string CHAPTERS_INTRO_BEFORE_HONOURS = 'Each decade of his life, drawn from the record of his education, appointments and honours.';
 
     public const string CHAPTERS_EMPTY = 'The chapters of his life will appear here as his record is catalogued.';
 

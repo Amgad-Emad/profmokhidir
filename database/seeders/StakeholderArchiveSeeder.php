@@ -19,6 +19,10 @@ use App\Services\AlbumService;
 use App\Services\AwardService;
 use App\Services\CvEntryService;
 use App\Services\HomeQuoteService;
+use App\Services\MediaService;
+use App\Services\PageService;
+use App\Constants\Pages;
+use App\Constants\PageDefinitions\HomeBlocks;
 use App\Services\ProfileService;
 use App\Services\PublicationService;
 use App\Services\TeachingMaterialService;
@@ -60,6 +64,8 @@ class StakeholderArchiveSeeder extends Seeder
         private readonly VideoService $videos,
         private readonly TermTranslationService $terms,
         private readonly HomeQuoteService $quotes,
+        private readonly MediaService $media,
+        private readonly PageService $pages,
     ) {}
 
     public function run(): void
@@ -68,7 +74,9 @@ class StakeholderArchiveSeeder extends Seeder
         $firstAlbum = $manifest['albums'][0]['title']['en'];
 
         if (Album::query()->get()->contains(fn (Album $album): bool => $album->getTranslation('title', Locales::DEFAULT) === $firstAlbum)) {
-            $this->command?->info('The stakeholders\' archive is already imported.');
+            // Already imported: only bring the photo settings added since (home timeline, crop focus) up to date.
+            $updated = $this->syncPhotoSettings($manifest['albums'], $manifest['portrait']) + $this->introduceHonours();
+            $this->command?->info("The stakeholders' archive is already imported; {$updated} settings brought up to date.");
 
             return;
         }
@@ -87,6 +95,7 @@ class StakeholderArchiveSeeder extends Seeder
             $this->importTeaching($manifest['teaching']);
             $this->terms->save($manifest['terms']);
             $this->importVideos($manifest['videos'], $manifest['albums']);
+            $this->introduceHonours();
         } finally {
             File::deleteDirectory($this->staging);
         }
@@ -284,6 +293,77 @@ class StakeholderArchiveSeeder extends Seeder
 
             $this->videos->setThumbnail($video, $this->stage($poster['file']), $properties);
         }
+    }
+
+    /**
+     * On a site imported earlier: offer the manifest's award photos to the home
+     * timeline and give the portrait (and its album copy) its crop focus.
+     * Other photo details, which editors may have changed, are left alone.
+     *
+     * @param  list<array<string, mixed>>  $albums
+     * @param  array{file: string, properties: array<string, mixed>}  $portrait
+     */
+    private function syncPhotoSettings(array $albums, array $portrait): int
+    {
+        $wanted = [];
+
+        foreach ($albums as $album) {
+            foreach ($album['photos'] as $photo) {
+                $wanted[basename($photo['file'])] = array_intersect_key($photo['properties'], array_flip([MediaProperties::ON_TIMELINE, MediaProperties::FOCUS_X, MediaProperties::FOCUS_Y]));
+            }
+        }
+
+        $updated = 0;
+
+        foreach (Album::query()->get() as $album) {
+            foreach ($album->photos() as $photo) {
+                $settings = $wanted[$photo->file_name] ?? [];
+
+                if (! empty($settings[MediaProperties::ON_TIMELINE]) && ! $photo->getCustomProperty(MediaProperties::ON_TIMELINE, false)) {
+                    $this->albums->setOnTimeline($album, $photo, true);
+                    $updated++;
+                }
+
+                $focus = array_intersect_key($settings, array_flip([MediaProperties::FOCUS_X, MediaProperties::FOCUS_Y]));
+
+                if ($focus !== [] && $photo->getCustomProperty(MediaProperties::FOCUS_Y) === null) {
+                    $this->media->updateProperties($photo, $focus);
+                    $updated++;
+                }
+            }
+        }
+
+        $current = $this->profiles->current()?->portrait();
+        $focus = array_intersect_key($portrait['properties'], array_flip([MediaProperties::FOCUS_X, MediaProperties::FOCUS_Y]));
+
+        if ($current !== null && $current->file_name === basename($portrait['file']) && $focus !== [] && $current->getCustomProperty(MediaProperties::FOCUS_Y) === null) {
+            $this->media->updateProperties($current, $focus);
+            $this->profiles->flushCache();
+            $updated++;
+        }
+
+        $this->albums->flushCache();
+
+        return $updated;
+    }
+
+    /**
+     * The home page's "A life in chapters" now lists his honours: its stored
+     * introduction is updated when it is still the original wording and the
+     * page has no unpublished draft (an editor's own wording is kept).
+     */
+    private function introduceHonours(): int
+    {
+        $page = $this->pages->findByKey(Pages::HOME);
+
+        if ($page === null || ! $page->isPublished() || $this->pages->hasDraft($page)
+            || ($this->pages->liveValues($page)['chapters_intro'] ?? null) !== HomeBlocks::CHAPTERS_INTRO_BEFORE_HONOURS) {
+            return 0;
+        }
+
+        $this->pages->publish($page, ['chapters_intro' => HomeBlocks::CHAPTERS_INTRO], null, ['chapters_intro' => __(HomeBlocks::CHAPTERS_INTRO, [], Locales::AR)]);
+
+        return 1;
     }
 
     /**

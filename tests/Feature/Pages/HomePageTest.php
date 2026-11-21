@@ -73,25 +73,25 @@ class HomePageTest extends TestCase
     }
 
     #[Test]
-    public function a_life_in_chapters_shows_decades_with_numerals_milestones_photos_and_a_scroll_drawn_line(): void
+    public function a_life_in_chapters_shows_his_honours_by_decade_with_numerals_photos_and_a_scroll_drawn_line(): void
     {
         CvEntry::factory()->published()->create(['section' => CvSection::Education, 'title' => 'B.Sc. (Agriculture)', 'organisation' => 'University of Khartoum', 'start_year' => 1958, 'end_year' => 1962]);
-        CvEntry::factory()->published()->create(['section' => CvSection::Appointment, 'title' => 'Lecturer in Agronomy', 'organisation' => 'University of Khartoum', 'start_year' => 1969, 'end_year' => 1975]);
-        CvEntry::factory()->draft()->create(['title' => 'Draft entry', 'start_year' => 1970]);
+        Award::factory()->published()->create(['name' => 'Fellowship of the Academy', 'organisation' => 'Academy of Sciences', 'year' => 1967]);
+        Award::factory()->draft()->create(['name' => 'Draft award', 'year' => 1970]);
         Award::factory()->published()->create(['name' => 'Order of Merit', 'organisation' => 'Republic of Sudan', 'year' => 1986]);
         $this->archivePhoto(1967, 'Students at Shambat');
 
         $html = $this->get(route('home'))->assertOk()
             ->assertSeeInOrder([
-                'Chapter </span>I</p>', '1950–1959', '1958–1962', 'B.Sc. (Agriculture)', 'Education', 'University of Khartoum',
-                'Chapter </span>II</p>', '1960–1969', 'Lecturer in Agronomy', 'Appointment', 'Students at Shambat', 'Shambat, 1967',
-                'Chapter </span>III</p>', '1980–1989', '1986', 'Order of Merit', 'Award', 'Republic of Sudan',
+                'Chapter </span>I</p>', '1960–1969', '1967', 'Fellowship of the Academy', 'Award', 'Academy of Sciences', 'Students at Shambat', 'Shambat, 1967',
+                'Chapter </span>II</p>', '1980–1989', '1986', 'Order of Merit', 'Award', 'Republic of Sudan',
             ], false)
-            ->assertDontSee('Draft entry')
+            ->assertDontSee('Draft award')
+            ->assertDontSee('id="chapter-1950s"', false)
             ->getContent();
 
-        $this->assertSame(3, substr_count($html, '<article class="life-chapter"'));
-        $this->assertSame(3, substr_count($html, 'data-scroll-line'));
+        $this->assertSame(2, substr_count($html, '<article class="life-chapter"'));
+        $this->assertSame(2, substr_count($html, 'data-scroll-line'));
         $this->assertStringContainsString('<h3 id="chapter-1960s" class="life-chapter__years">1960–1969</h3>', $html);
         $this->assertMatchesRegularExpression('/life-chapter__photo" data-rise>\s*<figure[^>]*>.*?class="photo-archive h-full w-full object-cover"[^>]*loading="lazy"/s', $html);
     }
@@ -100,7 +100,7 @@ class HomePageTest extends TestCase
     public function published_home_quotes_sit_between_chapters_as_evergreen_interludes(): void
     {
         foreach ([1965, 1975, 1985] as $year) {
-            CvEntry::factory()->published()->create(['start_year' => $year]);
+            Award::factory()->published()->create(['year' => $year]);
         }
 
         HomeQuote::factory()->published()->sortOrder(1)->create(['quote' => 'Knowledge is the light we pass on.', 'attribution' => 'A former student', 'source' => 'Tribute']);

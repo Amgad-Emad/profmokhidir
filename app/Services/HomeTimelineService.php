@@ -14,8 +14,9 @@ use App\Models\CvEntry;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
- * "A life in chapters": regroups the published CV entries and awards by decade.
- * Each decade with at least one dated milestone becomes a chapter with a Roman
+ * "A life in chapters": his dated awards and honours, regrouped by decade (the
+ * CV page carries his education and appointments). Each decade with at least
+ * one dated honour becomes a chapter with a Roman
  * numeral, its years, its two or three most telling milestones (see
  * HomeTimeline::priority()) and, when an album holds one from those years, an
  * archive photo. It reads the cached published listings of each type, so it
@@ -76,25 +77,14 @@ class HomeTimelineService
     }
 
     /**
-     * Every dated milestone, unsorted: CV entries by the year they began (or
-     * ended, when only that is known) and awards by the year given.
+     * Every dated award, unsorted, by the year given. Undated awards wait for
+     * an editor to record their year.
      *
      * @return list<array{year: int, years: string, title: string, detail: ?string, kind: string, label: string}>
      */
     public function milestones(): array
     {
         $milestones = [];
-
-        foreach ($this->cv->published() as $entry) {
-            /** @var CvEntry $entry */
-            $year = $entry->start_year ?? $entry->end_year;
-
-            if ($year === null) {
-                continue;
-            }
-
-            $milestones[] = $this->milestone($year, (string) $entry->yearRange(), $entry->title, $entry->organisation, $entry->section->value, (string) Locales::attributesFor($entry));
-        }
 
         foreach ($this->awards->published() as $award) {
             /** @var Award $award */

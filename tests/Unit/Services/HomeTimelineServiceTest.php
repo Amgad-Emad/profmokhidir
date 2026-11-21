@@ -44,59 +44,54 @@ class HomeTimelineServiceTest extends TestCase
     }
 
     #[Test]
-    public function published_cv_entries_and_awards_are_grouped_into_decade_chapters_with_roman_numerals(): void
+    public function published_awards_are_grouped_into_decade_chapters_with_roman_numerals_and_cv_entries_are_not(): void
     {
         $this->entry(CvSection::Education, 'B.Sc.', 1958, 1962);
         $this->entry(CvSection::Appointment, 'Lecturer', 1969, 1975);
-        Award::factory()->published()->create(['name' => 'Teaching Award', 'organisation' => 'University', 'year' => 1991]);
+        $this->award('Fellowship', 1968, 'Academy');
+        $this->award('Teaching Award', 1991, 'University');
+        $this->award('Medal', 1993);
         Award::factory()->published()->create(['name' => 'Undated', 'year' => null]);
-        CvEntry::factory()->published()->create(['title' => 'Undated entry', 'start_year' => null, 'end_year' => null]);
-        CvEntry::factory()->published()->create(['section' => CvSection::Project, 'title' => 'End only', 'start_year' => null, 'end_year' => 1993]);
 
         $chapters = $this->service->chapters();
 
-        $this->assertSame([1950, 1960, 1990], array_column($chapters, 'decade'));
-        $this->assertSame(['I', 'II', 'III'], array_column($chapters, 'numeral'));
-        $this->assertSame([1, 2, 3], array_column($chapters, 'number'));
-        $this->assertSame(['1950–1959', '1960–1969', '1990–1999'], array_column($chapters, 'years'));
-        $this->assertSame(['chapter-1950s', 'chapter-1960s', 'chapter-1990s'], array_column($chapters, 'id'));
+        $this->assertSame([1960, 1990], array_column($chapters, 'decade'), 'Only decades with a dated honour; education and appointments stay on the CV page.');
+        $this->assertSame(['I', 'II'], array_column($chapters, 'numeral'));
+        $this->assertSame([1, 2], array_column($chapters, 'number'));
+        $this->assertSame(['1960–1969', '1990–1999'], array_column($chapters, 'years'));
+        $this->assertSame(['chapter-1960s', 'chapter-1990s'], array_column($chapters, 'id'));
 
         $this->assertSame([
-            'year' => 1958, 'years' => '1958–1962', 'title' => 'B.Sc.', 'detail' => 'University of Khartoum',
-            'kind' => CvSection::Education->value, 'label' => 'Education', 'lang' => '',
+            'year' => 1968, 'years' => '1968', 'title' => 'Fellowship', 'detail' => 'Academy',
+            'kind' => HomeTimeline::KIND_AWARD, 'label' => 'Award', 'lang' => '',
         ], $chapters[0]['milestones'][0]);
-        $this->assertSame(['Teaching Award', 'End only'], array_column($chapters[2]['milestones'], 'title'));
-        $this->assertSame('Award', $chapters[2]['milestones'][0]['label']);
-        $this->assertSame('1993', $chapters[2]['milestones'][1]['years']);
+        $this->assertSame(['Teaching Award', 'Medal'], array_column($chapters[1]['milestones'], 'title'));
         $this->assertStringNotContainsString('Undated', json_encode(array_column($chapters, 'milestones')));
+        $this->assertStringNotContainsString('B.Sc.', json_encode(array_column($chapters, 'milestones')));
     }
 
     #[Test]
-    public function a_crowded_decade_keeps_its_three_most_telling_milestones_in_date_order(): void
+    public function a_crowded_decade_keeps_its_first_honours_in_date_order(): void
     {
-        $this->entry(CvSection::Project, 'Project', 1980, 1985);
-        $this->entry(CvSection::Achievement, 'Achievement', 1981, 1981);
-        $this->entry(CvSection::Leadership, 'Dean', 1988, 1994);
-        $this->entry(CvSection::Appointment, 'Professor', 1982, 2005);
-        Award::factory()->published()->create(['name' => 'Order of Merit', 'year' => 1986]);
+        foreach ([1988, 1981, 1986, 1983] as $year) {
+            $this->award('Award of '.$year, $year);
+        }
 
         $milestones = $this->service->chapters()[0]['milestones'];
 
         $this->assertCount(HomeTimeline::MILESTONES_PER_CHAPTER, $milestones);
-        $this->assertSame(['Professor', 'Order of Merit', 'Dean'], array_column($milestones, 'title'));
-        $this->assertSame([1982, 1986, 1988], array_column($milestones, 'year'));
+        $this->assertSame([1981, 1983, 1986], array_column($milestones, 'year'));
     }
 
     #[Test]
     public function each_chapter_takes_an_unused_archive_photo_from_its_decade(): void
     {
-        $this->entry(CvSection::Education, 'B.Sc.', 1962, 1965);
-        $this->entry(CvSection::Appointment, 'Lecturer', 1966, 1969);
-        $this->entry(CvSection::Appointment, 'Professor', 1982, 2005);
+        $this->award('Prize', 1964);
+        $this->award('Medal', 1968);
+        $this->award('Order', 1982);
 
         $album = Album::factory()->published()->create();
         $first = $this->photo($album, 1964);
-        $second = $this->photo($album, 1968);
         $this->photo($album, 1975);
         $this->photo($album, 1984, MediaTreatment::Portrait);
         $this->photo(Album::factory()->draft()->create(), 1985);
@@ -105,15 +100,14 @@ class HomeTimelineServiceTest extends TestCase
 
         $this->assertSame($first->id, $chapters[0]['photo']?->id);
         $this->assertNull($chapters[1]['photo'], 'Portraits and photos in draft albums are never used');
-        $this->assertCount(3, $this->service->archivePhotos());
-        $this->assertNotSame($second->id, $chapters[1]['photo']?->id);
+        $this->assertCount(2, $this->service->archivePhotos());
     }
 
     #[Test]
     public function photos_offered_to_the_timeline_replace_the_other_archive_photos(): void
     {
-        $this->entry(CvSection::Education, 'B.Sc.', 1959, 1959);
-        $this->entry(CvSection::Appointment, 'Lecturer', 1984, 1990);
+        $this->award('Prize', 1959);
+        $this->award('Shield', 1986);
 
         $album = Album::factory()->published()->create();
         $this->photo($album, 1959);
@@ -162,6 +156,11 @@ class HomeTimelineServiceTest extends TestCase
             'section' => $section, 'title' => $title, 'organisation' => 'University of Khartoum',
             'start_year' => $start, 'end_year' => $end,
         ]);
+    }
+
+    private function award(string $name, int $year, ?string $organisation = null): Award
+    {
+        return Award::factory()->published()->create(['name' => $name, 'organisation' => $organisation, 'year' => $year, 'description' => null]);
     }
 
     private function photo(Album $album, int $year, MediaTreatment $treatment = MediaTreatment::Archive): Media

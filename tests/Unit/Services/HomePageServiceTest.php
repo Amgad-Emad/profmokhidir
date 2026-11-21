@@ -80,7 +80,7 @@ class HomePageServiceTest extends TestCase
     public function each_chapter_but_the_last_is_followed_by_the_next_published_quote(): void
     {
         foreach ([1965, 1975, 1985] as $year) {
-            CvEntry::factory()->published()->create(['start_year' => $year, 'end_year' => $year + 2]);
+            Award::factory()->published()->create(['year' => $year]);
         }
 
         HomeQuote::factory()->published()->sortOrder(2)->create(['quote' => 'Second']);
@@ -97,7 +97,7 @@ class HomePageServiceTest extends TestCase
     public function fewer_quotes_than_gaps_leave_the_later_gaps_empty(): void
     {
         foreach ([1965, 1975, 1985] as $year) {
-            CvEntry::factory()->published()->create(['start_year' => $year]);
+            Award::factory()->published()->create(['year' => $year]);
         }
 
         HomeQuote::factory()->published()->create(['quote' => 'Only one']);

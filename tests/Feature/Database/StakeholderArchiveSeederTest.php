@@ -91,4 +91,30 @@ class StakeholderArchiveSeederTest extends TestCase
         $this->assertSame($awards, Award::query()->count());
         $this->assertSame($albums, Album::query()->count());
     }
+
+    #[Test]
+    public function running_it_again_on_an_earlier_import_offers_the_award_photos_to_the_home_timeline(): void
+    {
+        Storage::fake('public');
+        Storage::fake('private');
+        Queue::fake();
+
+        $this->seed(StakeholderArchiveSeeder::class);
+
+        // An import made before the timeline flags existed.
+        foreach (\App\Models\Media::query()->where('collection_name', MediaCollections::PHOTOS)->get() as $photo) {
+            $photo->forgetCustomProperty(MediaProperties::ON_TIMELINE);
+            $photo->save();
+        }
+        app(\App\Services\AlbumService::class)->flushCache();
+        $chapters = collect(app(\App\Services\HomeTimelineService::class)->chapters())->keyBy('decade');
+        $this->assertSame('ahfad-2019-certificate.jpg', $chapters[2010]['photo']?->file_name, 'Before: the 2010s show a scanned certificate.');
+
+        $this->seed(StakeholderArchiveSeeder::class);
+
+        $chapters = collect(app(\App\Services\HomeTimelineService::class)->chapters())->keyBy('decade');
+        $this->assertSame([1980, 1990, 2000, 2010], $chapters->keys()->all(), 'Only decades with a dated honour.');
+        $this->assertSame('honour-1986-yarmouk-shield.jpg', $chapters[1980]['photo']?->file_name);
+        $this->assertSame('ahfad-2019-conferral.jpg', $chapters[2010]['photo']?->file_name, 'After: the photograph of the honour itself.');
+    }
 }
