@@ -129,13 +129,9 @@ class StakeholderArchiveSeeder extends Seeder
      */
     private function importProfile(array $details, array $portrait): void
     {
-        if ($this->profiles->current() === null) {
-            $this->command?->warn('No profile yet: the name, title and portrait were not set.');
-
-            return;
-        }
-
-        $profile = $this->profiles->save($details);
+        // On a new site the profile is created here, published with what the archive establishes;
+        // the biography and the rest are written in Admin › About & profile.
+        $profile = $this->profiles->save($this->profiles->current() === null ? $details + ['status' => ContentStatus::Published] : $details);
 
         $properties = $portrait['properties'];
         unset($properties[MediaProperties::IS_COVER]);

@@ -82,6 +82,7 @@ class StakeholderArchiveSeederTest extends TestCase
         Queue::fake();
 
         $this->seed(StakeholderArchiveSeeder::class);
+        $this->assertSame('محمد عثمان خضر', Profile::query()->firstOrFail()->getTranslation('name', Locales::AR), 'A new site gets its profile from the archive.');
         $awards = Award::query()->count();
         $albums = Album::query()->count();
 
