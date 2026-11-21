@@ -73,16 +73,23 @@ class StakeholderArchiveSeeder extends Seeder
         $manifest = self::manifest();
         $firstAlbum = $manifest['albums'][0]['title']['en'];
 
+        $this->staging = storage_path('app/archive-import');
+        File::ensureDirectoryExists($this->staging);
+
         if (Album::query()->get()->contains(fn (Album $album): bool => $album->getTranslation('title', Locales::DEFAULT) === $firstAlbum)) {
-            // Already imported: only bring the photo settings added since (home timeline, crop focus) up to date.
-            $updated = $this->syncPhotoSettings($manifest['albums'], $manifest['portrait']) + $this->introduceHonours();
-            $this->command?->info("The stakeholders' archive is already imported; {$updated} settings brought up to date.");
+            // Already imported: bring the photo settings added since (home timeline, crop focus) up to date
+            // and add any recording an earlier, interrupted or older import did not create.
+            try {
+                $updated = $this->syncPhotoSettings($manifest['albums'], $manifest['portrait']) + $this->introduceHonours();
+                $added = $this->importVideos($manifest['videos'], $manifest['albums']);
+            } finally {
+                File::deleteDirectory($this->staging);
+            }
+
+            $this->command?->info("The stakeholders' archive is already imported; {$updated} settings brought up to date, {$added} videos added.");
 
             return;
         }
-
-        $this->staging = storage_path('app/archive-import');
-        File::ensureDirectoryExists($this->staging);
 
         try {
             $this->retirePlaceholders();
@@ -257,9 +264,12 @@ class StakeholderArchiveSeeder extends Seeder
     /**
      * @param  list<array<string, mixed>>  $videos
      * @param  list<array<string, mixed>>  $albums  where the poster images are described
+     * @return int how many recordings were added; one that already exists (trashed included) is skipped
      */
-    private function importVideos(array $videos, array $albums): void
+    private function importVideos(array $videos, array $albums): int
     {
+        $existing = Video::withTrashed()->get()->map(fn (Video $video): string => (string) $video->getTranslation('title', Locales::DEFAULT))->all();
+        $videos = array_values(array_filter($videos, fn (array $entry): bool => ! in_array($entry['title'][Locales::DEFAULT], $existing, true)));
         $photos = [];
 
         foreach ($albums as $album) {
@@ -293,6 +303,8 @@ class StakeholderArchiveSeeder extends Seeder
 
             $this->videos->setThumbnail($video, $this->stage($poster['file']), $properties);
         }
+
+        return count($videos);
     }
 
     /**

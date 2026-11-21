@@ -93,6 +93,34 @@ class StakeholderArchiveSeederTest extends TestCase
     }
 
     #[Test]
+    public function running_it_again_adds_the_videos_an_earlier_import_did_not_create(): void
+    {
+        Storage::fake('public');
+        Storage::fake('private');
+        Queue::fake();
+
+        $this->seed(StakeholderArchiveSeeder::class);
+        $expected = Video::query()->count();
+        $this->assertGreaterThan(0, $expected);
+
+        // An import that stopped before the videos, or one made before they were in the archive.
+        Video::query()->get()->each(fn (Video $video) => $video->forceDelete());
+
+        $this->seed(StakeholderArchiveSeeder::class);
+
+        $this->assertSame($expected, Video::query()->published()->count());
+        $this->assertTrue(Video::query()->get()->every(fn (Video $video): bool => $video->thumbnail() !== null));
+
+        // A recording an editor has since moved to the trash is not brought back.
+        $trashed = Video::query()->firstOrFail();
+        $trashed->delete();
+        $this->seed(StakeholderArchiveSeeder::class);
+
+        $this->assertSame($expected, Video::withTrashed()->count());
+        $this->assertSoftDeleted($trashed);
+    }
+
+    #[Test]
     public function running_it_again_on_an_earlier_import_offers_the_award_photos_to_the_home_timeline(): void
     {
         Storage::fake('public');
