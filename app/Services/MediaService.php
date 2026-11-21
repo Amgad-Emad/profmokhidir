@@ -340,7 +340,7 @@ class MediaService
                 $value = (int) $value;
             }
 
-            if ($key === MediaProperties::IS_COVER && $value !== null) {
+            if (in_array($key, [MediaProperties::IS_COVER, MediaProperties::ON_TIMELINE], true) && $value !== null) {
                 $value = (bool) $value;
             }
 

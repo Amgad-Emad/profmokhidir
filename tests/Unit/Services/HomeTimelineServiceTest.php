@@ -110,6 +110,26 @@ class HomeTimelineServiceTest extends TestCase
     }
 
     #[Test]
+    public function photos_offered_to_the_timeline_replace_the_other_archive_photos(): void
+    {
+        $this->entry(CvSection::Education, 'B.Sc.', 1959, 1959);
+        $this->entry(CvSection::Appointment, 'Lecturer', 1984, 1990);
+
+        $album = Album::factory()->published()->create();
+        $this->photo($album, 1959);
+        $this->photo($album, 1985);
+        $shield = $this->photo($album, 1986, MediaTreatment::Portrait);
+
+        $this->app->make(AlbumService::class)->setOnTimeline($album, $shield, true);
+
+        $chapters = $this->service->chapters();
+
+        $this->assertNull($chapters[0]['photo'], 'Once a photo is offered, decades without an offered photo show none.');
+        $this->assertSame($shield->id, $chapters[1]['photo']?->id, 'Offered photos are used whatever their treatment.');
+        $this->assertCount(1, $this->service->archivePhotos());
+    }
+
+    #[Test]
     public function years_of_teaching_run_from_the_first_appointment_to_the_last_year_the_cv_records(): void
     {
         $this->entry(CvSection::Education, 'Ph.D.', 1966, 1969);

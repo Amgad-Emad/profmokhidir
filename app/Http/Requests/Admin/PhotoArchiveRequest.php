@@ -35,6 +35,16 @@ class PhotoArchiveRequest extends ContentRequest
     }
 
     /**
+     * Album photos only: whether the photo is offered to the home timeline.
+     *
+     * @return list<mixed>
+     */
+    public static function timelineRules(): array
+    {
+        return ['boolean'];
+    }
+
+    /**
      * @return array<string, string>
      */
     public function messages(): array

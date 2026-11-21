@@ -72,6 +72,9 @@
                                 <div class="form-row">
                                     <x-form.select class="form-col--half" :model="'archive.'.$id.'.'.\App\Constants\Archive::DECADE" :label="__('Decade')" :options="$decades" :placeholder="__('From the year')" :hint="__('Through the decades files the photo under its year unless you choose another decade.')" />
                                     <x-form.toggle :model="'archive.'.$id.'.'.\App\Constants\Archive::FEATURED" :label="__('Featured on the wall')" :hint="__('Hangs one size larger in the album.')" class="form-col--half" />
+                                    @if (array_key_exists(\App\Constants\MediaProperties::ON_TIMELINE, $archive[$id]))
+                                        <x-form.toggle :model="'archive.'.$id.'.'.\App\Constants\MediaProperties::ON_TIMELINE" :label="__('On the home timeline')" :hint="__('Offers the photo to its decade in “A life in chapters” on the home page. Once any photo is offered, only offered photos are used.')" class="form-col--half" />
+                                    @endif
                                 </div>
                                 <div class="flex items-center gap-4">
                                     <x-button type="submit" variant="quiet" size="sm">{{ __('Save archive details') }}</x-button>

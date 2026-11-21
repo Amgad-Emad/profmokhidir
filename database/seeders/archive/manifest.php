@@ -46,6 +46,8 @@ $davis = ['Davis, California', 'ديفيس، كاليفورنيا'];
 $cambridge = ['Cambridgeshire, England', 'كامبريدجشير، إنجلترا'];
 $portrait = [P::TREATMENT => MediaTreatment::Portrait->value];
 $ceremonyCredit = [P::CREDIT => 'Reflection'];
+// Photographs of his honours are what the home timeline shows beside each decade.
+$award = [P::ON_TIMELINE => true];
 
 $ahfadPortrait = $photo(
     'ahfad-2019-portrait.jpg',
@@ -78,7 +80,7 @@ return [
                     'ahfad-2019-conferral.jpg',
                     ['Receiving the honorary doctorate from the President of Ahfad University for Women', 'تسلّم شهادة الدكتوراه الفخرية من رئيس جامعة الأحفاد للبنات'],
                     ['Professor Khidir, in a white gown and leaning on a walking frame, receives an open certificate folder from the university president in a dark gown with silver bars; graduates in white sit behind them.', 'البروفيسور خضر، بردائه الأبيض ومستنداً إلى مشاية، يتسلّم ملف الشهادة من رئيس الجامعة بردائه الداكن ذي الأشرطة الفضية، وخلفهما خريجون بالزي الأبيض.'],
-                    $omdurman, 2019, $portrait + $ceremonyCredit,
+                    $omdurman, 2019, $portrait + $ceremonyCredit + $award,
                 ),
                 $photo(
                     'ahfad-2019-handshake.jpg',
@@ -123,7 +125,7 @@ return [
                     'honour-2002-order-of-science.jpg',
                     ['Warrant of the Gold Order of Science, Letters and Arts, from the Presidency of the Republic of the Sudan', 'براءة وسام العلم والآداب والفنون الذهبي من رئاسة جمهورية السودان'],
                     ['An Arabic calligraphic warrant headed Republic of the Sudan, Presidency of the Republic, conferring the Gold Order of Science, Letters and Arts, with a red seal.', 'براءة بالخط العربي تحمل عنوان جمهورية السودان، رئاسة الجمهورية، بمنح وسام العلم والآداب والفنون الذهبي، وعليها ختم أحمر.'],
-                    $khartoum, 2002, [P::IS_COVER => true],
+                    $khartoum, 2002, [P::IS_COVER => true] + $award,
                 ),
                 $photo(
                     'honour-2002-zubair-prize.jpg',
@@ -135,25 +137,25 @@ return [
                     'honour-2014-uofk-conference-shield.jpg',
                     ['Shield of honour from the University of Khartoum at the Fifth Annual Conference on Postgraduate Studies and Scientific Research in Agricultural and Veterinary Sciences, 24–27 February 2014', 'درع تكريم من جامعة الخرطوم في المؤتمر السنوي الخامس للدراسات العليا والبحث العلمي في مجال العلوم الزراعية والبيطرية، 24–27 فبراير 2014'],
                     ['A wooden shield in a presentation box lined with yellow satin, its silver plate bearing the University of Khartoum crest and the words "In honour of Professor Mohamed Osman Khidir".', 'درع خشبي في علبة مبطنة بالساتان الأصفر، على لوحته الفضية شعار جامعة الخرطوم وعبارة "تكريم البروفيسور محمد عثمان خضر".'],
-                    $khartoum, 2014,
+                    $khartoum, 2014, $award,
                 ),
                 $photo(
                     'honour-1999-ibc-scholars.jpg',
                     ['Certificate of inclusion in 2000 Outstanding Scholars of the 20th Century, for his contribution to genetics and plant breeding, May 1999', 'شهادة إدراجه ضمن ألفي عالم متميز في القرن العشرين، تقديراً لإسهامه في الوراثة وتربية النبات، مايو 1999'],
                     ['A framed certificate of the International Biographical Centre, Cambridge, naming Mohamed-Osman Khidir among the 2000 Outstanding Scholars of the 20th Century in the field of genetics and plant breeding.', 'شهادة مؤطرة من المركز الدولي للسير الذاتية في كامبريدج تدرج اسم محمد عثمان خضر ضمن ألفي عالم متميز في القرن العشرين في مجال الوراثة وتربية النبات.'],
-                    $cambridge, 1999,
+                    $cambridge, 1999, $award,
                 ),
                 $photo(
                     'honour-1986-yarmouk-shield.jpg',
                     ['Shield of Yarmouk University on its tenth anniversary, 1976–1986', 'درع جامعة اليرموك في ذكراها العاشرة، 1976–1986'],
                     ['A white shield on maroon velvet bearing the Yarmouk University emblem: a torch numbered 10 rising from an open book, framed by an olive branch.', 'درع أبيض على قاعدة من المخمل العنابي يحمل شعار جامعة اليرموك: شعلة عليها الرقم 10 تعلو كتاباً مفتوحاً ويحيط بها غصن زيتون.'],
-                    ['Irbid, Jordan', 'إربد، الأردن'], 1986,
+                    ['Irbid, Jordan', 'إربد، الأردن'], 1986, $award,
                 ),
                 $photo(
                     'honour-1984-whos-who.jpg',
                     ['Certificate of inclusion in the International Who\'s Who of Contemporary Achievement, 12 April 1984', 'شهادة إدراجه في موسوعة من هو من للإنجاز المعاصر الدولية، 12 أبريل 1984'],
                     ['A certificate in a gilt frame with a purple ornamental border, attesting the inclusion of Mohamed Osman Khidir in the International Who\'s Who of Contemporary Achievement for outstanding contributions to society.', 'شهادة في إطار مذهّب بحاشية زخرفية أرجوانية، تثبت إدراج اسم محمد عثمان خضر في موسوعة من هو من للإنجاز المعاصر الدولية لإسهاماته المتميزة في المجتمع.'],
-                    ['St Ives, Cambridgeshire, England', 'سانت آيفز، كامبريدجشير، إنجلترا'], 1984,
+                    ['St Ives, Cambridgeshire, England', 'سانت آيفز، كامبريدجشير، إنجلترا'], 1984, $award,
                 ),
                 // Undated: the year and place are not shown on these items (see the seeder's report).
                 $photo(

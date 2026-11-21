@@ -109,24 +109,31 @@ class HomeTimelineService
     }
 
     /**
-     * Published album photos marked with the archive treatment that record a
-     * year, in album order and then photo order.
+     * The photos the chapters draw from, in album order and then photo order.
+     * When editors have offered photos to the timeline (MediaProperties::ON_TIMELINE,
+     * e.g. his medals and shields) only those are used; otherwise every published
+     * album photo with the archive treatment.
      *
      * @return list<Media>
      */
     public function archivePhotos(): array
     {
-        $photos = [];
+        $chosen = [];
+        $archive = [];
 
         foreach ($this->albums->published() as $album) {
             foreach ($album->photos() as $photo) {
+                if ((bool) $photo->getCustomProperty(MediaProperties::ON_TIMELINE, false)) {
+                    $chosen[] = $photo;
+                }
+
                 if ($photo->getCustomProperty(MediaProperties::TREATMENT) === MediaTreatment::Archive->value) {
-                    $photos[] = $photo;
+                    $archive[] = $photo;
                 }
             }
         }
 
-        return $photos;
+        return $chosen !== [] ? $chosen : $archive;
     }
 
     /**

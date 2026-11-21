@@ -122,6 +122,21 @@ class AlbumService extends AbstractContentService
         return $photo;
     }
 
+    /**
+     * Offer a photo to the home timeline, or withdraw it.
+     */
+    public function setOnTimeline(Album $album, Media $photo, bool $onTimeline, ?User $actor = null): Media
+    {
+        if (! $this->belongsToAlbum($album, $photo)) {
+            throw new InvalidArgumentException('The photo does not belong to this album.');
+        }
+
+        $photo = $this->media->updateProperties($photo, [MediaProperties::ON_TIMELINE => $onTimeline], $actor);
+        $this->flushCache();
+
+        return $photo;
+    }
+
     protected function guardedImageCollections(): array
     {
         return [MediaCollections::PHOTOS];

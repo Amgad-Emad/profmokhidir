@@ -2469,5 +2469,7 @@
     "Sections on the site": "أقسام الموقع",
     "Switch a section off to hide it from visitors: it leaves the menus, the home page, search and the sitemap, and its pages answer \"not found\". Its content is kept, and staff can still open it to check it.": "أوقف قسماً لإخفائه عن الزوار: يختفي من القوائم والصفحة الرئيسية والبحث وخريطة الموقع، وتظهر صفحاته على أنها غير موجودة. يبقى محتواه محفوظاً، ويستطيع فريق التحرير فتحه لمراجعته.",
     "Hidden section": "قسم مخفي",
-    "Visitors cannot see this section. Show it again in Site settings.": "هذا القسم مخفي عن الزوار. يمكنك إظهاره مجدداً من إعدادات الموقع."
+    "Visitors cannot see this section. Show it again in Site settings.": "هذا القسم مخفي عن الزوار. يمكنك إظهاره مجدداً من إعدادات الموقع.",
+    "On the home timeline": "على الخط الزمني في الصفحة الرئيسية",
+    "Offers the photo to its decade in “A life in chapters” on the home page. Once any photo is offered, only offered photos are used.": "يعرض الصورة في عقدها ضمن «حياة في فصول» في الصفحة الرئيسية. متى اختيرت أي صورة، تُستخدم الصور المختارة وحدها."
 }

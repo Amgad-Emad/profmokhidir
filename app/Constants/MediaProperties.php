@@ -30,6 +30,9 @@ final class MediaProperties
     /** Album photos: true marks the cover. */
     public const string IS_COVER = 'is_cover';
 
+    /** Album photos: true offers the photo to the home timeline ("A life in chapters") for its decade. */
+    public const string ON_TIMELINE = 'on_timeline';
+
     /** Pixel size of the original image, recorded at upload so <img> can reserve its space. */
     public const string WIDTH = 'width';
 
@@ -79,7 +82,7 @@ final class MediaProperties
     {
         return [
             self::ALT_TEXT, self::CAPTION, self::PLACE, self::YEAR, self::NOTE,
-            self::CREDIT, self::PERMISSIONS_NOTE, self::TREATMENT, self::IS_COVER,
+            self::CREDIT, self::PERMISSIONS_NOTE, self::TREATMENT, self::IS_COVER, self::ON_TIMELINE,
             self::WIDTH, self::HEIGHT, self::FOCUS_X, self::FOCUS_Y,
         ];
     }

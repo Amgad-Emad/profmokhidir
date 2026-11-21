@@ -28,7 +28,7 @@ class Form extends ContentForm
         loadImages as loadImageDetails;
     }
 
-    /** @var array<int, array{decade: int|string|null, is_featured: bool}> photo id => archive fields */
+    /** @var array<int, array{decade: int|string|null, is_featured: bool, on_timeline: bool}> photo id => archive fields */
     public array $archive = [];
 
     public function mount(?Album $album = null): void
@@ -52,6 +52,7 @@ class Form extends ContentForm
             $this->archive[(int) $photo->getKey()] = [
                 Archive::DECADE => $photo->getAttribute(Archive::DECADE),
                 Archive::FEATURED => (bool) $photo->getAttribute(Archive::FEATURED),
+                MediaProperties::ON_TIMELINE => (bool) $photo->getCustomProperty(MediaProperties::ON_TIMELINE, false),
             ];
         }
     }
@@ -72,7 +73,7 @@ class Form extends ContentForm
 
         $request = new PhotoArchiveRequest;
         $validated = $this->validate(
-            ["archive.$id.".Archive::DECADE => PhotoArchiveRequest::archiveRules()[Archive::DECADE], "archive.$id.".Archive::FEATURED => PhotoArchiveRequest::archiveRules()[Archive::FEATURED]],
+            ["archive.$id.".Archive::DECADE => PhotoArchiveRequest::archiveRules()[Archive::DECADE], "archive.$id.".Archive::FEATURED => PhotoArchiveRequest::archiveRules()[Archive::FEATURED], "archive.$id.".MediaProperties::ON_TIMELINE => PhotoArchiveRequest::timelineRules()],
             ["archive.$id.".Archive::DECADE.'.in' => $request->messages()[Archive::DECADE.'.in']],
             ["archive.$id.".Archive::FEATURED => PhotoArchiveRequest::archiveAttributes()[Archive::FEATURED]],
         );
@@ -81,6 +82,7 @@ class Form extends ContentForm
         $decade = blank($fields[Archive::DECADE]) ? null : (int) $fields[Archive::DECADE];
 
         app(AlbumService::class)->updatePhotoArchive($record, $photo, $decade, (bool) ($fields[Archive::FEATURED] ?? false), auth()->user());
+        app(AlbumService::class)->setOnTimeline($record, $photo, (bool) ($fields[MediaProperties::ON_TIMELINE] ?? false), auth()->user());
         $this->loadImages();
         $this->notify('Archive details saved.');
     }
