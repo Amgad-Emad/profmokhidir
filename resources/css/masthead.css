@@ -544,3 +544,20 @@
         margin-block: -0.5rem;
     }
 }
+
+/*
+ | A page under the breadcrumb trail already has the trail's own space above it,
+ | so its opening section starts closer (in the utilities layer, to win over the
+ | section's own py-20 / lg:py-28).
+ */
+@layer utilities {
+    .breadcrumbs-band + section {
+        padding-top: 3rem;
+    }
+
+    @media (min-width: 64rem) {
+        .breadcrumbs-band + section {
+            padding-top: 4rem;
+        }
+    }
+}

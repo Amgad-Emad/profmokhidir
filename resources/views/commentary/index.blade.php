@@ -1,3 +1,4 @@
+@inject('terms', 'App\Services\TermTranslationService')
 @inject('pageCopy', 'App\Services\PageContentService')
 <x-layouts.public :title="$section['title']" :description="$section['summary']">
     <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28" aria-labelledby="section-title">
@@ -33,7 +34,7 @@
                                 @if (filled($commentary->tags))
                                     <ul class="mt-2 flex flex-wrap gap-2" aria-label="{{ __('Topics') }}">
                                         @foreach ($commentary->tags as $tag)
-                                            <li><a href="{{ route('commentary', ['tag' => $tag]) }}" class="filter-pill min-h-9 px-3 text-sm">{{ $tag }}</a></li>
+                                            <li><a href="{{ route('commentary', ['tag' => $tag]) }}" class="filter-pill min-h-9 px-3 text-sm">{{ $terms->label(\App\Constants\TermVocabulary::CommentaryTag, $tag) }}</a></li>
                                         @endforeach
                                     </ul>
                                 @endif

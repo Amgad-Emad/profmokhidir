@@ -32,6 +32,7 @@ use App\Repositories\Contracts\RoleRepositoryInterface;
 use App\Repositories\Contracts\SearchRepositoryInterface;
 use App\Repositories\Contracts\SectionRepositoryInterface;
 use App\Repositories\Contracts\SettingRepositoryInterface;
+use App\Repositories\Contracts\TermTranslationRepositoryInterface;
 use App\Repositories\Contracts\TeachingMaterialRepositoryInterface;
 use App\Repositories\Contracts\TributeRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
@@ -62,6 +63,7 @@ use App\Repositories\Eloquent\EloquentPublicationRepository;
 use App\Repositories\Eloquent\EloquentRevisionRepository;
 use App\Repositories\Eloquent\EloquentSearchRepository;
 use App\Repositories\Eloquent\EloquentSettingRepository;
+use App\Repositories\Eloquent\EloquentTermTranslationRepository;
 use App\Repositories\Eloquent\EloquentTeachingMaterialRepository;
 use App\Repositories\Eloquent\EloquentTributeRepository;
 use App\Repositories\Eloquent\EloquentUserRepository;
@@ -110,6 +112,7 @@ class RepositoryServiceProvider extends ServiceProvider
         AnalyticsRollupRepositoryInterface::class => EloquentAnalyticsRollupRepository::class,
         ColourThemeRepositoryInterface::class => EloquentColourThemeRepository::class,
         ListPreferenceRepositoryInterface::class => EloquentListPreferenceRepository::class,
+        TermTranslationRepositoryInterface::class => EloquentTermTranslationRepository::class,
     ];
 
     /**

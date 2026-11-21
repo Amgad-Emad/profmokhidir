@@ -106,6 +106,8 @@ final class AuditAction
 
     public const string THEME_REVISION_RESTORED = 'theme.revision_restored';
 
+    public const string TERMS_UPDATED = 'terms.updated';
+
     /**
      * @return list<string>
      */
@@ -122,7 +124,7 @@ final class AuditAction
             self::CHAT_MESSAGE_DELETED, self::CHAT_MESSAGE_REPORTED, self::CHAT_REPORT_RESOLVED,
             self::CHAT_MESSAGE_PINNED, self::CHAT_MESSAGE_UNPINNED, self::ADMIN_LOGIN, self::PAGE_PUBLISHED, self::PAGE_UNPUBLISHED,
             self::THEME_CREATED, self::THEME_SAVED, self::THEME_PUBLISHED, self::THEME_RENAMED, self::THEME_DELETED,
-            self::THEME_IMPORTED, self::THEME_EXPORTED, self::THEME_REVISION_RESTORED,
+            self::THEME_IMPORTED, self::THEME_EXPORTED, self::THEME_REVISION_RESTORED, self::TERMS_UPDATED,
         ];
     }
 
@@ -152,6 +154,7 @@ final class AuditAction
             self::USER_DEACTIVATED => __('deactivated an account'),
             self::USER_REACTIVATED => __('reactivated an account'),
             self::SETTINGS_UPDATED => __('updated the site settings'),
+            self::TERMS_UPDATED => __('updated the Arabic names of categories, courses and topics'),
             self::CONTENT_CREATED => __('created content'),
             self::CONTENT_RESTORED => __('restored content from the trash'),
             self::CONTENT_PUBLISHED => __('published content'),

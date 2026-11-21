@@ -32,7 +32,9 @@
                     <kbd class="site-search-toggle__key" aria-hidden="true">/</kbd>
                 </a>
 
-                <x-button size="sm" :href="$tributeUrl" class="site-header__tribute hidden xl:inline-flex">{{ $tributeLabel }}</x-button>
+                @if ($tributeUrl !== null)
+                    <x-button size="sm" :href="$tributeUrl" class="site-header__tribute hidden xl:inline-flex">{{ $tributeLabel }}</x-button>
+                @endif
 
                 <x-locale.switcher variant="masthead" class="site-header__locale max-sm:hidden" />
 

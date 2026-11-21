@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Constants\Sections;
+use App\Constants\TermVocabulary;
 use App\Models\OtherItem;
 use App\Support\RichText;
 use Illuminate\Database\Eloquent\Collection;
@@ -21,6 +22,7 @@ class OtherPageService
     public function __construct(
         private readonly OtherItemService $items,
         private readonly NavigationService $navigation,
+        private readonly TermTranslationService $terms,
     ) {}
 
     /**
@@ -38,7 +40,7 @@ class OtherPageService
             $label = $category === '' ? self::UNCATEGORISED_LABEL : $category;
 
             $categories[] = [
-                'label' => $category === '' ? __(self::UNCATEGORISED_LABEL) : $category,
+                'label' => $category === '' ? __(self::UNCATEGORISED_LABEL) : (string) $this->terms->label(TermVocabulary::OtherCategory, $category),
                 'anchor' => 'category-'.Str::slug($label),
                 'items' => $items,
             ];

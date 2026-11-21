@@ -20,7 +20,7 @@ class EloquentTeachingMaterialRepository extends BaseContentRepository implement
 
     protected array $sortableColumns = ['title', 'course', 'type', 'material_date', 'access'];
 
-    protected array $filterColumns = ['status', 'type', 'access', 'course'];
+    protected array $filterColumns = ['status', 'type', 'access', 'course', 'topic'];
 
     protected array $publishedWith = ['media'];
 

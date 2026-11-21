@@ -41,6 +41,9 @@ final class CacheKeys
 
     public const string OTHER_ITEMS = 'public.other_items';
 
+    /** Prefix of the cached names of grouping terms in one language (+ locale). */
+    public const string TERM_TRANSLATIONS = 'public.term_translations.';
+
     public const string TRIBUTES = 'public.tributes';
 
     public const string TRIBUTES_FEATURED = 'public.tributes.featured';

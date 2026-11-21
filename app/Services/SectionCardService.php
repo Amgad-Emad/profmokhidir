@@ -20,6 +20,7 @@ class SectionCardService
         private readonly NavigationService $navigation,
         private readonly PageContentService $pages,
         private readonly TypesetterService $typesetter,
+        private readonly SectionVisibilityService $visibility,
     ) {}
 
     /**
@@ -30,7 +31,8 @@ class SectionCardService
      */
     public function cards(array $keys, array $summaries = [], array $images = []): array
     {
-        return array_map(fn (string $key): array => $this->card($key, $summaries[$key] ?? null, $images[$key] ?? null), array_values($keys));
+        // Hidden sections get no card.
+        return array_map(fn (string $key): array => $this->card($key, $summaries[$key] ?? null, $images[$key] ?? null), $this->visibility->visible(array_values($keys)));
     }
 
     /**

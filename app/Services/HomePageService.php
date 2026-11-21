@@ -30,6 +30,7 @@ class HomePageService
         private readonly NavigationService $navigation,
         private readonly PageContentService $pages,
         private readonly SectionCardService $cards,
+        private readonly SectionVisibilityService $visibility,
     ) {}
 
     /**
@@ -107,9 +108,10 @@ class HomePageService
     public function stats(?Profile $profile): array
     {
         $values = [
-            HomeTimeline::STAT_PUBLICATIONS => $this->publications->countPublished(),
+            // A hidden section's figure is left out with it.
+            HomeTimeline::STAT_PUBLICATIONS => $this->visibility->isVisible(Sections::PUBLICATIONS) ? $this->publications->countPublished() : 0,
             HomeTimeline::STAT_YEARS_TEACHING => $this->timeline->yearsOfTeaching(),
-            HomeTimeline::STAT_AWARDS => $this->awards->countPublished(),
+            HomeTimeline::STAT_AWARDS => $this->visibility->isVisible(Sections::AWARDS) ? $this->awards->countPublished() : 0,
             HomeTimeline::STAT_STUDENTS => $profile?->students_supervised,
         ];
 

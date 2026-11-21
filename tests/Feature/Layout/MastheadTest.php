@@ -117,10 +117,10 @@ class MastheadTest extends TestCase
 
         $header = $this->header($this->get(route('about'))->assertOk()->getContent());
 
-        $this->assertMatchesRegularExpression('/<p class="t-label text-accent-text">Latest publication<\/p>\s*<a href="[^"]+#publication-[^"]+" class="featured-card" data-masthead-featured="publication">\s*<span class="featured-card__title">Soils of the Gezira<\/span>/', $header);
+        $this->assertMatchesRegularExpression('/<p class="t-label text-accent-text">Latest publication<\/p>\s*<a href="[^"]+#publication-[^"]+" class="featured-card" data-masthead-featured="publication">\s*<span class="featured-card__title" dir="auto">Soils of the Gezira<\/span>/', $header);
         $this->assertMatchesRegularExpression('/<p class="t-label text-accent-text">Newest album<\/p>\s*<a href="[^"]+" class="featured-card" data-masthead-featured="album">\s*<figure class="photo flex flex-col gap-3 featured-card__photo">.*?<img[^>]*class="photo-archive h-full w-full object-cover"[^>]*loading="lazy"/s', $header, 'The album cover is a small lazy-loaded duotone');
         $this->assertStringContainsString('<span class="featured-card__meta smallcaps">1 photograph</span>', $header);
-        $this->assertMatchesRegularExpression('/data-masthead-featured="tribute">\s*<span class="featured-card__title">Amna Hassan<\/span>\s*<span class="featured-card__quote">&ldquo;He taught us to look twice\.&rdquo;<\/span>/', $header);
+        $this->assertMatchesRegularExpression('/data-masthead-featured="tribute">\s*<span class="featured-card__title" dir="auto">Amna Hassan<\/span>\s*<span class="featured-card__quote" dir="auto">&ldquo;He taught us to look twice\.&rdquo;<\/span>/', $header);
         $this->assertStringNotContainsString('museum-label', $header, 'No captions inside the panels');
     }
 

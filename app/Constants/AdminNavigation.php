@@ -54,6 +54,9 @@ final class AdminNavigation
 
     public const string HOME_QUOTES = 'home-quotes';
 
+    /** Arabic names of categories, types, courses, topics and tags. */
+    public const string TERMS = 'terms';
+
     public const string ALBUMS = 'albums';
 
     public const string MEDIA_LIBRARY = 'media-library';
@@ -111,6 +114,7 @@ final class AdminNavigation
             self::TEACHING => self::item('Teaching materials', self::GROUP_CONTENT, 'content.teaching', 'content/teaching', Permissions::MANAGE_CONTENT),
             self::OTHER => self::item('Other information', self::GROUP_CONTENT, 'content.other', 'content/other', Permissions::MANAGE_CONTENT),
             self::HOME_QUOTES => self::item('Home quotes', self::GROUP_CONTENT, 'content.home-quotes', 'content/home-quotes', Permissions::MANAGE_CONTENT),
+            self::TERMS => self::item('Arabic names', self::GROUP_CONTENT, 'content.terms', 'content/terms', Permissions::MANAGE_CONTENT),
             self::VIDEOS => self::item('Videos', self::GROUP_MEDIA, 'media.videos', 'media/videos', Permissions::MANAGE_CONTENT),
             self::ALBUMS => self::item('Pictures & albums', self::GROUP_MEDIA, 'media.albums', 'media/albums', Permissions::MANAGE_CONTENT),
             self::MEDIA_LIBRARY => self::item('Media library', self::GROUP_MEDIA, 'media.library', 'media/library', Permissions::MANAGE_CONTENT),
@@ -177,7 +181,7 @@ final class AdminNavigation
     public static function built(): array
     {
         return [
-            self::PAGES, self::PROFILE, self::CV, self::PUBLICATIONS, self::AWARDS, self::COMMENTARY, self::TEACHING, self::OTHER, self::HOME_QUOTES,
+            self::PAGES, self::PROFILE, self::CV, self::PUBLICATIONS, self::AWARDS, self::COMMENTARY, self::TEACHING, self::OTHER, self::HOME_QUOTES, self::TERMS,
             self::VIDEOS, self::ALBUMS, self::MEDIA_LIBRARY, self::TRIBUTES,
             self::APPLICATIONS, self::MEMBERS, self::CHAT_REPORTS, self::ANALYTICS, self::USERS, self::SITE_SETTINGS, self::APPEARANCE,
         ];

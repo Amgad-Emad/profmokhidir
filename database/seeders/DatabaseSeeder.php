@@ -32,6 +32,8 @@ class DatabaseSeeder extends Seeder
             CommentarySeeder::class,
             OtherItemSeeder::class,
             HomeQuoteSeeder::class,
+            // Arabic names of the categories, courses, topics and tags above.
+            TermTranslationSeeder::class,
             // Arabic placeholder copy ("[نص مؤقت]") for every item above.
             ArabicPlaceholderSeeder::class,
             TributeSeeder::class,

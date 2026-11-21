@@ -38,6 +38,7 @@ class SearchService
         private readonly SearchRepositoryInterface $repository,
         private readonly NavigationService $navigation,
         private readonly SearchHighlighter $highlighter,
+        private readonly SectionVisibilityService $visibility,
     ) {}
 
     /**
@@ -75,6 +76,10 @@ class SearchService
             $found = $this->repository->search($query, $this->canSeeMembersOnly($user), $perSection);
 
             foreach ($found as $section => $result) {
+                if (! $this->visibility->isVisible($section)) {
+                    continue;
+                }
+
                 $item = $this->navigation->section($section);
                 $hits = $result['items']->map(fn (Model $model): array => $this->present($section, $model, $tokens))->all();
 

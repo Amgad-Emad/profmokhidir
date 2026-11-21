@@ -40,6 +40,8 @@ class SiteSettingsRequest extends FormRequest
             SettingKeys::CHAT_DOCUMENT_MAX_MB => ['nullable', 'integer', 'min:'.ChatAttachments::LIMIT_MIN_MB, 'max:'.ChatAttachments::LIMIT_MAX_MB],
             SettingKeys::ANALYTICS_ENABLED => ['boolean'],
             SettingKeys::ARABIC_DIGITS => ['nullable', 'string', Rule::in(Locales::digitStyles())],
+            'shown' => ['array'],
+            'shown.*' => ['boolean'],
         ];
     }
 

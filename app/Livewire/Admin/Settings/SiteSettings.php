@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace App\Livewire\Admin\Settings;
 
 use App\Constants\AdminNavigation;
+use App\Constants\Sections;
 use App\Constants\SettingKeys;
 use App\Http\Requests\Admin\SiteSettingsRequest;
 use App\Livewire\Admin\Concerns\NotifiesEditors;
 use App\Models\Setting;
+use App\Services\NavigationService;
+use App\Services\SectionVisibilityService;
 use App\Services\SettingService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -29,12 +32,16 @@ class SiteSettings extends Component
     /** @var array<string, string|bool|null> */
     public array $form = [];
 
+    /** Section key => shown on the site (false: hidden from visitors). */
+    public array $shown = [];
+
     public function mount(): void
     {
         $this->authorize('viewAny', Setting::class);
         $this->form = $this->settings()->all();
         $this->form[SettingKeys::CHAT_UPLOADS_ENABLED] = $this->form[SettingKeys::CHAT_UPLOADS_ENABLED] !== '0';
         $this->form[SettingKeys::ANALYTICS_ENABLED] = $this->form[SettingKeys::ANALYTICS_ENABLED] === '1';
+        $this->loadShown();
     }
 
     public function save(): void
@@ -42,8 +49,14 @@ class SiteSettings extends Component
         $this->authorize('update', Setting::class);
 
         $request = new SiteSettingsRequest;
+        $rules = $request->rules();
+        $sectionRules = ['shown' => $rules['shown'], 'shown.*' => $rules['shown.*']];
+        unset($rules['shown'], $rules['shown.*']);
+
+        $shown = $this->validate($sectionRules)['shown'] ?? [];
+
         $validated = $this->validate(
-            self::prefix($request->rules()),
+            self::prefix($rules),
             self::prefix($request->messages()),
             self::prefix($request->attributes()),
         )['form'] ?? [];
@@ -54,18 +67,23 @@ class SiteSettings extends Component
             $values[$key] = $validated[$key] ?? null;
         }
 
+        // Sections switched off are stored as the hidden list.
+        $values[SettingKeys::HIDDEN_SECTIONS] = implode(',', array_keys(array_filter($shown, fn ($on): bool => ! $on))) ?: null;
+
         $values[SettingKeys::CHAT_UPLOADS_ENABLED] = (bool) ($validated[SettingKeys::CHAT_UPLOADS_ENABLED] ?? false);
         $values[SettingKeys::ANALYTICS_ENABLED] = (bool) ($validated[SettingKeys::ANALYTICS_ENABLED] ?? false);
 
         $this->form = $this->settings()->update($values, auth()->user());
         $this->form[SettingKeys::CHAT_UPLOADS_ENABLED] = $this->form[SettingKeys::CHAT_UPLOADS_ENABLED] !== '0';
         $this->form[SettingKeys::ANALYTICS_ENABLED] = $this->form[SettingKeys::ANALYTICS_ENABLED] === '1';
+        $this->loadShown();
         $this->toast(__('Site settings saved.'));
     }
 
     public function render(): View
     {
         return view('livewire.admin.settings.site-settings', [
+            'sections' => $this->sectionLabels(),
             'labels' => SettingKeys::labels(),
             'defaults' => $this->settings()->defaults(),
         ])->layout('components.layouts.admin', ['title' => AdminNavigation::get(AdminNavigation::SITE_SETTINGS)['label']]);
@@ -84,6 +102,32 @@ class SiteSettings extends Component
         }
 
         return $prefixed;
+    }
+
+    private function loadShown(): void
+    {
+        $hidden = app(SectionVisibilityService::class)->hidden();
+        $this->shown = [];
+
+        foreach (Sections::all() as $key) {
+            $this->shown[$key] = ! in_array($key, $hidden, true);
+        }
+    }
+
+    /**
+     * Each section's name as visitors see it in the navigation.
+     *
+     * @return array<string, string>
+     */
+    private function sectionLabels(): array
+    {
+        $labels = [];
+
+        foreach (Sections::all() as $key) {
+            $labels[$key] = app(NavigationService::class)->section($key)['label'];
+        }
+
+        return $labels;
     }
 
     private function settings(): SettingService

@@ -1,4 +1,5 @@
 {{-- Teaching materials as a syllabus: each course with its description and a numbered reading list. --}}
+@inject('terms', 'App\Services\TermTranslationService')
 @inject('pageCopy', 'App\Services\PageContentService')
 <x-layouts.public :title="$section['title']" :description="$section['summary']">
     <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28" aria-labelledby="section-title">
@@ -13,7 +14,7 @@
                 <form novalidate method="get" action="{{ $clearUrl }}" class="mt-12 flex flex-col gap-6 border-y border-rule py-8 sm:flex-row sm:flex-wrap sm:items-end" data-rise>
                     @if ($topics !== [])
                         <x-form.select name="topic" id="filter-topic" :label="__('Topic')" :optional="false" size="compact" class="sm:min-w-56"
-                                       :placeholder="__('All topics')" :value="$active['topic']" :options="array_combine($topics, $topics)" />
+                                       :placeholder="__('All topics')" :value="$active['topic']" :options="$terms->options(\App\Constants\TermVocabulary::TeachingTopic, $topics)" />
                     @endif
                     @if (count($types) > 1)
                         <x-form.select name="type" id="filter-type" :label="__('Type')" :optional="false" size="compact" class="sm:min-w-44"
@@ -56,7 +57,7 @@
                                     $file = $material->file();
                                     $meta = [
                                         $material->type?->label(),
-                                        $material->topic,
+                                        $terms->label(\App\Constants\TermVocabulary::TeachingTopic, $material->topic),
                                         filled($material->version) ? __('Version :version', ['version' => $material->version]) : null,
                                         $material->material_date,
                                         isset($files[$id]) ? $files[$id]['type'].' · '.$files[$id]['size'] : null,

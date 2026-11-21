@@ -47,6 +47,7 @@ use App\Http\Controllers\AppearancePreviewController;
 use App\Http\Controllers\ThemeController;
 use App\Http\Controllers\TributeController;
 use App\Http\Controllers\VideoController;
+use App\Http\Middleware\EnsureSectionVisible;
 use App\Http\Middleware\EnsureCommunityMember;
 use App\Http\Middleware\EnsureLocalEnvironment;
 use App\Livewire\Admin\Albums\Form as AlbumForm;
@@ -61,6 +62,7 @@ use App\Livewire\Admin\CvEntries\Form as CvEntryForm;
 use App\Livewire\Admin\CvEntries\Index as CvEntryIndex;
 use App\Livewire\Admin\HomeQuotes\Form as HomeQuoteForm;
 use App\Livewire\Admin\HomeQuotes\Index as HomeQuoteIndex;
+use App\Livewire\Admin\Terms\Index as TermIndex;
 use App\Livewire\Admin\Media\Library as MediaLibrary;
 use App\Livewire\Admin\OtherItems\Form as OtherItemForm;
 use App\Livewire\Admin\OtherItems\Index as OtherItemIndex;
@@ -152,10 +154,10 @@ $publicRoutes = function () use ($sections): void {
     Route::get(Analytics::PRIVACY_PATH, PrivacyController::class)->name(Analytics::PRIVACY_ROUTE);
 };
 
-Route::group([Locales::ACTION_KEY => Locales::DEFAULT], $publicRoutes);
+Route::group([Locales::ACTION_KEY => Locales::DEFAULT, 'middleware' => EnsureSectionVisible::class], $publicRoutes);
 
 foreach (Locales::prefixed() as $locale) {
-    Route::group(['prefix' => Locales::prefix($locale), 'as' => $locale.'.', Locales::ACTION_KEY => $locale], $publicRoutes);
+    Route::group(['prefix' => Locales::prefix($locale), 'as' => $locale.'.', Locales::ACTION_KEY => $locale, 'middleware' => EnsureSectionVisible::class], $publicRoutes);
 }
 
 // The language switcher: keeps the choice, then opens the same page in that language.
@@ -171,6 +173,7 @@ Route::get(Seo::ROBOTS_PATH, RobotsController::class)->name(Seo::ROBOTS_ROUTE);
 // Teaching files are the same in every language.
 Route::get($sections[Sections::TEACHING]['path'].'/{material}/download', [TeachingMaterialController::class, 'download'])
     ->whereNumber('material')
+    ->middleware(EnsureSectionVisible::class)
     ->name($sections[Sections::TEACHING]['route'].'.download');
 
 // One room: /community/chat. Attachments are staged in a temporary area first and
@@ -263,6 +266,10 @@ Route::middleware(['auth', 'verified', 'role:'.implode('|', Roles::staff())])
                 Route::get($path.'/create', $form)->name($name.'.create');
                 Route::get($path.'/{'.$parameter.':id}/edit', $form)->whereNumber($parameter)->name($name.'.edit');
             }
+
+            // Arabic names of the categories, courses, topics and tags editors type in English.
+            Route::get(AdminNavigation::get(AdminNavigation::TERMS)['path'], TermIndex::class)
+                ->name(substr(AdminNavigation::routeFor(AdminNavigation::TERMS), strlen(AdminNavigation::ROUTE_PREFIX)));
 
             // Page copy: the list of pages, one edit screen each, and the error pages drawn with their drafts.
             $pages = AdminNavigation::get(AdminNavigation::PAGES)['path'];

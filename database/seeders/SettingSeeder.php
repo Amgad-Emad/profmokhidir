@@ -32,6 +32,8 @@ class SettingSeeder extends Seeder
             // Off: visitor analytics waits for the client's approval.
             SettingKeys::ANALYTICS_ENABLED => '0',
             SettingKeys::ARABIC_DIGITS => Locales::DIGITS_LATIN,
+            // Every section shows.
+            SettingKeys::HIDDEN_SECTIONS => null,
         ];
 
         $settings->seedDefaults($defaults);

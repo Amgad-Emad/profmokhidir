@@ -15,6 +15,7 @@ use InvalidArgumentException;
  * marking the item that matches the current route. Each section's name comes
  * from Header & footer and its title and summary from its own page in
  * Admin › Pages (PageContentService), the section constants being the default.
+ * Sections hidden in Site settings are left out (SectionVisibilityService).
  *
  * @phpstan-type NavItem array{key: string, label: string, title: string, url: string, route: string, placement: string, summary: string, active: bool}
  */
@@ -23,6 +24,7 @@ class NavigationService
     public function __construct(
         private readonly SectionRepositoryInterface $sections,
         private readonly PageContentService $pages,
+        private readonly SectionVisibilityService $visibility,
     ) {}
 
     /**
@@ -78,7 +80,10 @@ class NavigationService
      */
     public function chapter(string $key): int
     {
-        $position = array_search($key, array_keys($this->sections->all()), true);
+        // Hidden sections leave the count, so the visible ones read I, II, III without a gap.
+        $keys = array_keys($this->sections->all());
+        $visible = $this->visibility->visible($keys);
+        $position = array_search($key, in_array($key, $visible, true) ? $visible : $keys, true);
 
         if ($position === false) {
             throw new InvalidArgumentException(sprintf('Unknown section "%s".', $key));
@@ -108,6 +113,10 @@ class NavigationService
         $items = [];
 
         foreach ($definitions as $key => $definition) {
+            if (! $this->visibility->isVisible($key)) {
+                continue;
+            }
+
             $items[] = $this->item($key, $definition, $currentRoute);
         }
 

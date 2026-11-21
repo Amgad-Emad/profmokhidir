@@ -9,6 +9,8 @@ use App\Constants\Pages;
 use App\Constants\Search;
 use App\Services\MastheadService;
 use App\Services\NavigationService;
+use App\Constants\Sections;
+use App\Services\SectionVisibilityService;
 use App\Services\PageContentService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
@@ -43,7 +45,8 @@ class Header extends Component
 
     public string $searchShortcuts;
 
-    public string $tributeUrl;
+    /** Null when Tributes is hidden. */
+    public ?string $tributeUrl;
 
     /** The tribute pill's label (Admin › Pages › Header & footer). */
     public string $tributeLabel;
@@ -51,7 +54,7 @@ class Header extends Component
     /** @var list<array{key: string, label: string, title: string, url: string, route: string, placement: string, summary: string, active: bool}> */
     public array $sections;
 
-    public function __construct(MastheadService $masthead, NavigationService $navigation, PageContentService $pages, Request $request, public bool $hero = false)
+    public function __construct(MastheadService $masthead, NavigationService $navigation, PageContentService $pages, SectionVisibilityService $visibility, Request $request, public bool $hero = false)
     {
         $current = $request->route()?->getName();
         $user = $request->user();
@@ -64,7 +67,7 @@ class Header extends Component
         $this->signInUrl = route('login');
         $this->searchUrl = route(Search::ROUTE);
         $this->searchShortcuts = Search::keyShortcuts();
-        $this->tributeUrl = route('tributes.create');
+        $this->tributeUrl = $visibility->isVisible(Sections::TRIBUTES) ? route('tributes.create') : null;
         $this->tributeLabel = $pages->text(Pages::NAVIGATION, 'header_tribute');
     }
 

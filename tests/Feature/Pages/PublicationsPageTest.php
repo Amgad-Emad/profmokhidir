@@ -58,7 +58,7 @@ class PublicationsPageTest extends TestCase
 
         $response
             ->assertSeeInOrder([
-                'class="catalogue mt-20" x-data="catalogueSheet"',
+                'class="catalogue mt-12 lg:mt-14" x-data="catalogueSheet"',
                 'aria-controls="catalogue-filters"', 'Refine the catalogue',
                 '<aside id="catalogue-filters" class="catalogue__filters"',
                 '<legend id="type-label" class="t-label form-label">Type</legend>', 'name="type" value="" checked="checked"', 'All types',
@@ -104,10 +104,10 @@ class PublicationsPageTest extends TestCase
         $this->get(route('publications'))
             ->assertOk()
             ->assertSeeInOrder([
-                '<section class="selected-works mt-20" aria-labelledby="selected-works-title">', 'Selected works', 'rule-brass',
+                '<section class="selected-works mt-12 lg:mt-16" aria-labelledby="selected-works-title">', 'Selected works', 'rule-brass',
                 'class="selected-works__item"', 'Report', 'Featured report', '>1990<',
                 'class="selected-works__item"', 'Book', 'Featured book', 'Khartoum University Press', '>1978<',
-                'class="catalogue mt-20"',
+                'class="catalogue mt-12 lg:mt-14"',
             ], false)
             ->assertDontSee('Draft featured');
 

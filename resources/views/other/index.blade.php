@@ -1,4 +1,5 @@
 {{-- Other Information as a catalogue index: items grouped by category, each set as a catalogue record. --}}
+@inject('terms', 'App\Services\TermTranslationService')
 @inject('pageCopy', 'App\Services\PageContentService')
 <x-layouts.public :title="$section['title']" :description="$section['summary']">
     <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28" aria-labelledby="section-title">
@@ -33,7 +34,7 @@
                                 <li class="record">
                                     <p class="record__year" aria-hidden="true">{{ $item->date?->format('Y') }}</p>
                                     <article class="record__body" aria-labelledby="other-{{ $item->getKey() }}-title">
-                                        <x-meta :items="[$item->typeLabel(), $item->date]" />
+                                        <x-meta :items="[$terms->label(\App\Constants\TermVocabulary::OtherType, $item->item_type), $item->date]" />
                                         <h3 id="other-{{ $item->getKey() }}-title" class="record__title" @contentLang($item)>
                                             @if ($item->hasDetail())
                                                 <a href="{{ route('other.show', $item->slug) }}">@typeset($item->title)</a>

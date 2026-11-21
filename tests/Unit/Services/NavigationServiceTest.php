@@ -96,7 +96,7 @@ class NavigationServiceTest extends TestCase
             'awards' => (new ConstantSectionRepository)->find(Sections::AWARDS),
         ]);
 
-        $items = (new NavigationService($repository, $this->app->make(PageContentService::class)))->primary();
+        $items = (new NavigationService($repository, $this->app->make(PageContentService::class), $this->app->make(\App\Services\SectionVisibilityService::class)))->primary();
 
         $this->assertCount(1, $items);
         $this->assertSame('Awards', $items[0]['label']);

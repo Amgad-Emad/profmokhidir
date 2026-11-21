@@ -84,6 +84,8 @@ class SettingService
             SettingKeys::ANALYTICS_ENABLED => '0',
             // Western digits on Arabic pages until the client prefers Arabic-Indic ones.
             SettingKeys::ARABIC_DIGITS => Locales::DIGITS_LATIN,
+            // Every section shows until an administrator hides one.
+            SettingKeys::HIDDEN_SECTIONS => null,
         ];
     }
 

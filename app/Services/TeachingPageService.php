@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Constants\Sections;
 use App\Constants\TeachingMaterialType;
+use App\Constants\TermVocabulary;
 use App\Models\TeachingMaterial;
 use App\Models\User;
 use App\Support\FileSize;
@@ -26,6 +27,7 @@ class TeachingPageService
     public function __construct(
         private readonly TeachingMaterialService $materials,
         private readonly NavigationService $navigation,
+        private readonly TermTranslationService $terms,
     ) {}
 
     /**
@@ -105,7 +107,7 @@ class TeachingPageService
 
             $courses[] = [
                 'name' => $name,
-                'label' => $name === '' ? __(self::OTHER_COURSE_LABEL) : $name,
+                'label' => $name === '' ? __(self::OTHER_COURSE_LABEL) : (string) $this->terms->label(TermVocabulary::TeachingCourse, $name),
                 'anchor' => 'course-'.($name === '' ? 'other' : Str::slug($name)),
                 'description' => $description,
                 'materials' => $materials,

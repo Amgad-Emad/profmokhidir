@@ -1,3 +1,4 @@
+@inject('terms', 'App\Services\TermTranslationService')
 @inject('pageCopy', 'App\Services\PageContentService')
 <x-layouts.public :title="$item->title" :description="$item->summary">
     <article class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28" aria-labelledby="section-title">
@@ -6,7 +7,7 @@
 
             <x-locale.fallback-note :model="$item" />
 
-            <x-meta class="mt-8" :items="[$item->typeLabel(), $item->category, $item->date]" data-rise />
+            <x-meta class="mt-8" :items="[$terms->label(\App\Constants\TermVocabulary::OtherType, $item->item_type), $terms->label(\App\Constants\TermVocabulary::OtherCategory, $item->category), $item->date]" data-rise />
 
             @if (filled($item->summary))
                 <p class="mt-10 font-display text-2xl font-light italic leading-snug text-ink-muted" data-rise @contentLang($item, 'summary')>{{ $item->summary }}</p>

@@ -5,6 +5,16 @@
 
     <form wire:submit="save" class="mt-4 max-w-3xl space-y-12" novalidate data-site-settings>
         <x-form.error-summary after-save :intro="\App\Constants\FormControls::ERROR_SUMMARY_INTRO" />
+        <fieldset class="form-grid" id="sections" data-section-visibility>
+            <legend class="t-label text-accent-text">{{ __('Sections on the site') }}</legend>
+            <p class="text-sm font-normal text-ink-muted">{{ __('Switch a section off to hide it from visitors: it leaves the menus, the home page, search and the sitemap, and its pages answer "not found". Its content is kept, and staff can still open it to check it.') }}</p>
+            <div class="form-row">
+                @foreach ($sections as $key => $label)
+                    <x-form.toggle class="form-col--half" :model="'shown.'.$key" :label="$label" />
+                @endforeach
+            </div>
+        </fieldset>
+
         <fieldset class="form-grid">
             <legend class="t-label text-accent-text">{{ __('Public contact details') }}</legend>
             <p class="text-sm font-normal text-ink-muted">{{ __('Shown in the Contact block of the About page when the profile has no contact email of its own.') }}</p>

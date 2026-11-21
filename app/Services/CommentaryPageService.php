@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Constants\PageSizes;
 use App\Constants\Sections;
+use App\Constants\TermVocabulary;
 use App\Models\Commentary;
 use App\Support\RichText;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -21,6 +22,7 @@ class CommentaryPageService
 {
     public function __construct(
         private readonly CommentaryService $commentaries,
+        private readonly TermTranslationService $terms,
         private readonly NavigationService $navigation,
         private readonly TypesetterService $typesetter,
         private readonly EssayService $essay,
@@ -106,7 +108,7 @@ class CommentaryPageService
     {
         return array_map(fn (string $tag): array => [
             'value' => $tag,
-            'label' => $tag,
+            'label' => (string) $this->terms->label(TermVocabulary::CommentaryTag, $tag),
             'url' => $this->url($tag),
             'active' => $tag === $activeTag,
         ], $tags);

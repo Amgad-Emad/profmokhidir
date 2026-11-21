@@ -37,6 +37,9 @@ final class SettingKeys
     /** Arabic pages: running-text numbers in Western ("latin", the default) or Arabic-Indic digits ("arabic"). Years, citations, DOIs and data always use Western digits. */
     public const string ARABIC_DIGITS = 'arabic_digits';
 
+    /** Public sections hidden from visitors: Sections keys, comma separated (blank: every section shows). */
+    public const string HIDDEN_SECTIONS = 'hidden_sections';
+
     /**
      * @return list<string>
      */
@@ -54,6 +57,7 @@ final class SettingKeys
             self::CHAT_DOCUMENT_MAX_MB,
             self::ANALYTICS_ENABLED,
             self::ARABIC_DIGITS,
+            self::HIDDEN_SECTIONS,
         ];
     }
 
@@ -94,6 +98,7 @@ final class SettingKeys
             self::CHAT_DOCUMENT_MAX_MB => __('Largest document (MB)'),
             self::ANALYTICS_ENABLED => __('Record visitor analytics'),
             self::ARABIC_DIGITS => __('Digits on Arabic pages'),
+            self::HIDDEN_SECTIONS => __('Hidden sections'),
         ];
     }
 

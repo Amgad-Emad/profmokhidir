@@ -115,6 +115,7 @@ final class AdminUx
             AdminNavigation::TEACHING => 'layers',
             AdminNavigation::OTHER => 'info',
             AdminNavigation::HOME_QUOTES => 'quote',
+            AdminNavigation::TERMS => 'list',
             AdminNavigation::VIDEOS => 'video',
             AdminNavigation::ALBUMS => 'image',
             AdminNavigation::MEDIA_LIBRARY => 'grid',

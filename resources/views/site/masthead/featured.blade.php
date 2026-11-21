@@ -5,9 +5,9 @@
         @if ($featured['media'] !== null)
             <x-photo :media="$featured['media']" tone="ivory" sizes="(min-width: 1024px) 14rem, 100vw" :captioned="false" :label="false" aspect="4 / 3" class="featured-card__photo" />
         @endif
-        <span class="featured-card__title">{{ $featured['title'] }}</span>
+        <span class="featured-card__title" dir="auto">{{ $featured['title'] }}</span>
         @if ($featured['quote'] !== null)
-            <span class="featured-card__quote">&ldquo;{{ $featured['quote'] }}&rdquo;</span>
+            <span class="featured-card__quote" dir="auto">&ldquo;{{ $featured['quote'] }}&rdquo;</span>
         @endif
         @if ($featured['meta'] !== null)
             <span class="featured-card__meta smallcaps">{{ $featured['meta'] }}</span>

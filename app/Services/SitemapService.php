@@ -29,6 +29,7 @@ class SitemapService
 {
     public function __construct(
         private readonly NavigationService $navigation,
+        private readonly SectionVisibilityService $visibility,
         private readonly ProfileService $profiles,
         private readonly CvEntryService $cvEntries,
         private readonly PublicationService $publications,
@@ -99,7 +100,7 @@ class SitemapService
             'lastmod' => $this->format($this->latest(array_merge(...array_map(fn (Collection $list): array => $list->all(), array_values($lists))))),
         ]];
 
-        foreach (Sections::all() as $key) {
+        foreach ($this->visibility->visible(Sections::all()) as $key) {
             if ($key === Sections::ABOUT && $profile !== null && ! $this->inLocale($profile, $locale)) {
                 continue;
             }
@@ -107,7 +108,15 @@ class SitemapService
             $entries[] = ['loc' => $this->navigation->section($key)['url'], 'lastmod' => $this->format($this->latest($lists[$key]->all()))];
         }
 
-        $entries[] = ['loc' => route(Sections::definitions()[Sections::TRIBUTES]['route'].'.create'), 'lastmod' => null];
+        if ($this->visibility->isVisible(Sections::TRIBUTES)) {
+            $entries[] = ['loc' => route(Sections::definitions()[Sections::TRIBUTES]['route'].'.create'), 'lastmod' => null];
+        }
+
+        foreach ([Sections::VIDEOS, Sections::PICTURES, Sections::COMMENTARY, Sections::OTHER] as $key) {
+            if (! $this->visibility->isVisible($key)) {
+                $lists[$key] = new Collection;
+            }
+        }
 
         foreach ($lists[Sections::VIDEOS] as $video) {
             if ($this->inLocale($video, $locale)) {

@@ -3,6 +3,7 @@
     filters (type, year range, topic) beside the records, which are grouped by decade. The filters are a
     plain GET form, so they work without JavaScript; on small screens they move into a sheet.
 --}}
+@inject('terms', 'App\Services\TermTranslationService')
 @inject('pageCopy', 'App\Services\PageContentService')
 @inject('typesetter', 'App\Services\TypesetterService')
 @inject('localeService', 'App\Services\LocaleService')
@@ -16,7 +17,7 @@
             <x-empty-state class="mt-6" :message="$pageCopy->text('publications', 'empty')" />
         @else
             @if ($featured->isNotEmpty())
-                <section class="selected-works mt-20" aria-labelledby="selected-works-title">
+                <section class="selected-works mt-12 lg:mt-16" aria-labelledby="selected-works-title">
                     <h2 id="selected-works-title" class="t-label text-accent-text" data-rise>{{ $pageCopy->text('publications', 'selected_label') }}</h2>
                     <hr class="rule-brass mt-4" data-rule>
                     <ol class="selected-works__list" data-rise-group>
@@ -36,7 +37,7 @@
                 </section>
             @endif
 
-            <div class="catalogue mt-20" x-data="catalogueSheet">
+            <div class="catalogue mt-12 lg:mt-14" x-data="catalogueSheet">
                 <div class="catalogue__toolbar lg:hidden" x-cloak>
                     <x-button type="button" x-ref="toggle" aria-controls="catalogue-filters" x-bind:aria-expanded="open.toString()" x-on:click="show()">
                         {{ $pageCopy->text('publications', 'refine_label') }}
@@ -80,7 +81,7 @@
 
                         @if ($topics !== [])
                             <x-form.radio-group name="topic" :label="__('Topic')" :optional="false" :value="$active['topic'] ?? ''"
-                                                :options="['' => __('All topics')] + array_combine($topics, $topics)" />
+                                                :options="['' => __('All topics')] + $terms->options(\App\Constants\TermVocabulary::PublicationTopic, $topics)" />
                         @endif
 
                         <div class="flex flex-wrap items-center gap-3">
@@ -122,7 +123,7 @@
                                     <li class="record" id="publication-{{ $publication->slug }}">
                                         <p class="record__year" aria-hidden="true">{{ $publication->year }}</p>
                                         <article class="record__body" aria-labelledby="publication-{{ $id }}-title">
-                                            <x-meta :items="[$publication->type?->label(), $publication->topic]" />
+                                            <x-meta :items="[$publication->type?->label(), $terms->label(\App\Constants\TermVocabulary::PublicationTopic, $publication->topic)]" />
                                             <h3 @contentLang($publication) id="publication-{{ $id }}-title" class="record__title">@typeset($publication->title)</h3>
                                             @if (filled($publication->authors))
                                                 <p class="record__authors">{{ $authors[$id] }}</p>

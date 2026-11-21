@@ -9,6 +9,7 @@ use App\Constants\Chapters;
 use App\Constants\DateFormats;
 use App\Constants\Masthead;
 use App\Constants\Pages;
+use App\Constants\Sections;
 use App\Models\Album;
 use App\Models\Profile;
 use App\Models\Publication;
@@ -46,6 +47,7 @@ class MastheadService
         private readonly TributeService $tributes,
         private readonly AuthenticationService $auth,
         private readonly PageContentService $pages,
+        private readonly SectionVisibilityService $visibility,
     ) {}
 
     /**
@@ -64,6 +66,11 @@ class MastheadService
             $key = $copy['key'];
             $definition = $definitions[$key];
             $items = $this->links($definition, $currentRoute, $user);
+
+            // Every section of the chapter is hidden: the chapter leaves the menu.
+            if ($items === []) {
+                continue;
+            }
 
             $chapters[] = [
                 'key' => $key,
@@ -154,7 +161,15 @@ class MastheadService
             ? ($this->pages->keyed(Pages::NAVIGATION, 'featured_labels')[$kind]['label'] ?? __(Chapters::featuredLabels()[$kind]))
             : null;
 
-        if ($label === null) {
+        $section = match ($kind) {
+            Chapters::FEATURED_PORTRAIT => Sections::ABOUT,
+            Chapters::FEATURED_PUBLICATION => Sections::PUBLICATIONS,
+            Chapters::FEATURED_ALBUM => Sections::PICTURES,
+            Chapters::FEATURED_TRIBUTE => Sections::TRIBUTES,
+            default => null,
+        };
+
+        if ($label === null || ($section !== null && ! $this->visibility->isVisible($section))) {
             return null;
         }
 
@@ -178,7 +193,7 @@ class MastheadService
         $sections = $this->pages->keyed(Pages::NAVIGATION, 'sections');
         $actions = $this->pages->keyed(Pages::NAVIGATION, 'actions');
 
-        foreach ($definition['sections'] as $section) {
+        foreach ($this->visibility->visible($definition['sections']) as $section) {
             $item = $this->navigation->section($section, $currentRoute);
 
             $links[] = [
@@ -193,7 +208,9 @@ class MastheadService
         foreach ($definition['actions'] as $key) {
             $action = $this->chapters->action($key);
 
-            if ($action === null || ! $this->sees($action['audience'], $user)) {
+            $section = $action === null ? null : $this->visibility->sectionForRoute($action['route']);
+
+            if ($action === null || ! $this->sees($action['audience'], $user) || ($section !== null && ! $this->visibility->isVisible($section))) {
                 continue;
             }
 
