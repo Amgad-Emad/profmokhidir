@@ -45,11 +45,21 @@
                     <li class="page-list__item page-list__item--collapsed" wire:key="{{ $key }}-ar-{{ $item['key'] ?? $index }}" x-data="collapsible('item-ar-{{ $key }}-{{ $index }}', false, false, 'list-ar-{{ $key }}')" x-on:focusin="focusIn($event)" x-bind:class="{ 'page-list__item--collapsed': ! open }">
                         @include('livewire.admin.pages.partials.list-item-head', ['name' => __($block->itemLabel).' '.($index + 1), 'bodyId' => 'item-ar-'.$key.'-'.$index.'-body', 'idPrefix' => 'head-ar', 'canRemove' => ! $block->fixedItems && count((array) $english) > ((array) $block->default === [] ? 0 : 1)])
                         <div id="item-ar-{{ $key }}-{{ $index }}-body" class="fold" x-bind:class="{ 'fold--open': open, 'fold--settled': settled }" x-bind:inert="! open" inert data-collapsible-body><div class="fold__inner page-list__body">
-                        @foreach (PageBlockDefinition::grouped($fieldsHere) as $group => $fields)
+                        @php
+                            $itemGroups = PageBlockDefinition::grouped($fieldsHere);
+                            // Extra milestones stay out of sight while empty; "Add milestone" shows the next one.
+                            $emptyGroups = array_values(array_diff(array_keys(PageBlockDefinition::emptyAddableGroups($itemGroups, (array) $item)), $addedGroups[$key][$index] ?? []));
+                            $addThing = collect(PageBlockDefinition::emptyAddableGroups($itemGroups, (array) $item))->first();
+                            $lastAddable = collect($itemGroups)->filter(fn ($fields) => collect($fields)->pluck('addable')->filter()->isNotEmpty())->keys()->last();
+                        @endphp
+                        <div class="page-list__groups">
+                        @foreach ($itemGroups as $group => $fields)
                             @php
                                 $fields = PageBlockDefinition::laidOut($fields);
                                 $pairShort = count(array_filter($fields, fn ($spec) => PageBlockDefinition::isShort($spec))) > 1;
                             @endphp
+                            @php $emptyAt = in_array($group, $emptyGroups, true); @endphp
+                            @unless ($emptyAt)
                             @if ($group !== '')<fieldset class="page-list__group"><legend class="page-list__legend">{{ __($group) }}</legend>@endif
                             <div class="form-row">
                                 @foreach ($fields as $field => $spec)
@@ -78,7 +88,12 @@
                                 @endforeach
                             </div>
                             @if ($group !== '')</fieldset>@endif
+                            @endunless
+                            @if ($group === $lastAddable && $emptyGroups !== [])
+                                <x-button variant="secondary" size="sm" type="button" class="page-list__add" wire:click="addGroup('{{ $key }}', {{ $index }}, '{{ $emptyGroups[0] }}')"><x-icon name="plus" class="size-4" />{{ __('Add '.$addThing) }}</x-button>
+                            @endif
                         @endforeach
+                        </div>
                         </div></div>
                     </li>
                 @endforeach

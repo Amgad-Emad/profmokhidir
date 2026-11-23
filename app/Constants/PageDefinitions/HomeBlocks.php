@@ -65,10 +65,12 @@ final class HomeBlocks
 
         for ($n = 1; $n <= self::MILESTONES; $n++) {
             $group = 'Milestone '.$n;
-            $fields['m'.$n.'_year'] = Block::field('Year', 20, Block::FIELD_PLAIN, false, $group);
-            $fields['m'.$n.'_title'] = Block::field('Title', 200, Block::FIELD_TEXT, false, $group);
-            $fields['m'.$n.'_label'] = Block::field('Kind', 40, Block::FIELD_TEXT, false, $group);
-            $fields['m'.$n.'_detail'] = Block::field('Details', 200, Block::FIELD_TEXT, false, $group);
+            // Milestones after the first stay out of the editor while empty, behind "Add milestone".
+            $field = fn (array $spec): array => $n > 1 ? Block::addable($spec, 'milestone') : $spec;
+            $fields['m'.$n.'_year'] = $field(Block::field('Year', 20, Block::FIELD_PLAIN, false, $group));
+            $fields['m'.$n.'_title'] = $field(Block::field('Title', 200, Block::FIELD_TEXT, false, $group));
+            $fields['m'.$n.'_label'] = $field(Block::field('Kind', 40, Block::FIELD_TEXT, false, $group));
+            $fields['m'.$n.'_detail'] = $field(Block::field('Details', 200, Block::FIELD_TEXT, false, $group));
         }
 
         return $fields + [

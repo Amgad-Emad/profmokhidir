@@ -2527,5 +2527,6 @@
     "Shown on the page": "ظاهر في الصفحة",
     "Hidden from the page": "مخفي من الصفحة",
     "“:section” is hidden. Visitors no longer see it; its words are kept.": "أُخفي «:section». لم يعد الزوار يرونه، ونصوصه محفوظة.",
-    "“:section” is back on the page.": "عاد «:section» إلى الصفحة."
+    "“:section” is back on the page.": "عاد «:section» إلى الصفحة.",
+    "Add milestone": "إضافة محطة"
 }

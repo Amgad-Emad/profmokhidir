@@ -257,6 +257,40 @@ final readonly class PageBlockDefinition
     }
 
     /**
+     * A field of a group that stays out of the editor while the whole group is empty, revealed
+     * by "Add :thing" (a chapter's second and third milestone).
+     *
+     * @param  array<string, mixed>  $spec
+     * @return array<string, mixed>
+     */
+    public static function addable(array $spec, string $thing): array
+    {
+        return ['addable' => $thing] + $spec;
+    }
+
+    /**
+     * The groups of an item that are addable and still empty, in order: [group label => what it is].
+     *
+     * @param  array<string, array<string, array<string, mixed>>>  $groups  PageBlockDefinition::grouped()
+     * @param  array<string, mixed>  $item  the English item
+     * @return array<string, string>
+     */
+    public static function emptyAddableGroups(array $groups, array $item): array
+    {
+        $empty = [];
+
+        foreach ($groups as $group => $fields) {
+            $thing = collect($fields)->pluck('addable')->filter()->first();
+
+            if ($group !== '' && is_string($thing) && collect(array_keys($fields))->every(fn (string $field): bool => blank($item[$field] ?? null))) {
+                $empty[$group] = $thing;
+            }
+        }
+
+        return $empty;
+    }
+
+    /**
      * Whether a list item may leave this field empty.
      *
      * @param  array{required?: bool}  $spec

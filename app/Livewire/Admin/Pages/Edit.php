@@ -69,6 +69,9 @@ class Edit extends Component
     /** @var array<string, UploadedFile|null> image block key => the file being uploaded */
     public array $uploads = [];
 
+    /** @var array<string, array<int, list<string>>> block => item index => groups added with "Add milestone" (empty ones stay out of sight otherwise) */
+    public array $addedGroups = [];
+
     public bool $showHistory = false;
 
     /** An earlier version was loaded; the next save is recorded as a restore. */
@@ -337,6 +340,18 @@ class Edit extends Component
             [$this->arabic[$key][$index], $this->arabic[$key][$target]] = [$this->arabic[$key][$target], $this->arabic[$key][$index]];
         }
         $this->dispatch(AdminUx::EVENT_CHANGED);
+    }
+
+    /**
+     * Show the next empty addable group of an item (a chapter's second, then third milestone).
+     */
+    public function addGroup(string $key, int $index, string $group): void
+    {
+        if ($this->listDefinition($key) === null || ! isset($this->form[$key][$index])) {
+            return;
+        }
+
+        $this->addedGroups[$key][$index] = array_values(array_unique([...($this->addedGroups[$key][$index] ?? []), $group]));
     }
 
     /**
