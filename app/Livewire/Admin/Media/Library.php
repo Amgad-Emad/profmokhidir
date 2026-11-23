@@ -335,7 +335,7 @@ class Library extends Component
 
         foreach ($images as $image) {
             $usages[(int) $image->getKey()] = $this->media()->usage($image);
-            $missing[(int) $image->getKey()] = $this->media()->missingForPublishing($image);
+            $missing[(int) $image->getKey()] = $this->media()->missingDetails($image);
         }
 
         $confirming = $this->isConfirming(self::ACTION_DELETE) ? $this->media()->find((int) $this->confirmingId) : null;

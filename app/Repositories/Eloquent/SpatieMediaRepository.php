@@ -69,6 +69,23 @@ final class SpatieMediaRepository implements MediaRepositoryInterface
         return $media;
     }
 
+    public function foldTranslationKeys(): int
+    {
+        $changed = 0;
+
+        LocalizedMedia::query()->where('custom_properties', 'like', '%"'.MediaProperties::TRANSLATIONS.'.%')->lazyById()->each(function (LocalizedMedia $media) use (&$changed): void {
+            $folded = LocalizedMedia::foldTranslationKeys((array) $media->custom_properties);
+
+            if ($folded !== $media->custom_properties) {
+                $media->custom_properties = $folded;
+                $media->save();
+                $changed++;
+            }
+        });
+
+        return $changed;
+    }
+
     public function updateArchiveFields(Media $media, ?int $decade, bool $featured): Media
     {
         $media->forceFill([Archive::DECADE => $decade, Archive::FEATURED => $featured])->save();
@@ -268,7 +285,7 @@ final class SpatieMediaRepository implements MediaRepositoryInterface
     private function whereIncomplete(Builder $query): Builder
     {
         return $query->where(function (Builder $query): void {
-            foreach (MediaProperties::requiredForPublishing() as $property) {
+            foreach (MediaProperties::details() as $property) {
                 $path = 'custom_properties->'.$property;
 
                 $query->orWhereNull($path)->orWhere($path, '');

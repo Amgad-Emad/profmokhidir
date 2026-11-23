@@ -337,6 +337,8 @@ abstract class ContentForm extends Component
         $isNew = $this->record() === null;
         $wasPublished = $this->record()?->getAttribute('status') === ContentStatus::Published;
 
+        $this->beforeStore();
+
         try {
             $record = $this->store($this->dataFrom($validated));
         } catch (ImagesNotReadyException $exception) {
@@ -590,6 +592,12 @@ abstract class ContentForm extends Component
 
         return $form;
     }
+
+    /**
+     * Runs on a manual save, publish or unpublish, after the form is valid and
+     * before the record is stored (ManagesImages saves edited image details here).
+     */
+    protected function beforeStore(): void {}
 
     protected function afterCreate(Model $record): void {}
 

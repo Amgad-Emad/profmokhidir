@@ -77,6 +77,7 @@ class SectionCardTest extends TestCase
         $main = explode('<footer', $about)[0];
         $this->assertSame(0, substr_count($main, 'sm:grid-cols-3'), 'no three-column grid inside the reading column');
 
+        $this->fillHomeSections();
         $home = $this->get(route('home'))->assertOk()->getContent();
         $this->assertStringContainsString('<ul class="section-cards mt-12" data-rise-group>', $home);
         $this->assertSame(3, substr_count($home, 'data-section-card='));

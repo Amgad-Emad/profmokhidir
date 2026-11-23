@@ -3,7 +3,11 @@
 namespace Tests\Feature\Pages;
 
 use App\Constants\ErrorPages;
+use App\Constants\PageDefinitions\HomeBlocks;
+use App\Constants\Pages;
 use App\Constants\SettingKeys;
+use App\Services\HomeSectionsImportService;
+use App\Services\PageService;
 use App\Services\SettingService;
 use Database\Seeders\PageContentSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -49,6 +53,13 @@ class PageContentSnapshotTest extends TestCase
         if ($path === '/privacy') {
             $this->app->make(SettingService::class)->update([SettingKeys::ANALYTICS_ENABLED => true]);
         }
+
+        // The home sections are filled from the records, as the migration did when they moved into Admin › Pages › Home.
+        // Empty first: the migration already filled them when the test database was built, before this test's records existed.
+        $pages = app(PageService::class);
+        $pages->install();
+        $pages->publishBlocks($pages->findByKey(Pages::HOME), [HomeBlocks::CHAPTER_ITEMS => [], HomeBlocks::FIGURES => [], HomeBlocks::STORY_CARDS => []]);
+        app(HomeSectionsImportService::class)->import();
 
         $response = $this->get($path)->assertOk();
 

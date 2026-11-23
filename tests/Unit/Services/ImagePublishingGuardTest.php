@@ -2,10 +2,8 @@
 
 namespace Tests\Unit\Services;
 
-use App\Constants\ContentStatus;
 use App\Constants\Disks;
 use App\Constants\MediaProperties;
-use App\Exceptions\ImagesNotReadyException;
 use App\Models\Album;
 use App\Models\Profile;
 use App\Services\AlbumService;
@@ -31,27 +29,15 @@ class ImagePublishingGuardTest extends TestCase
     }
 
     #[Test]
-    public function an_album_cannot_be_published_while_a_photo_lacks_details(): void
+    public function an_album_publishes_while_a_photo_lacks_details(): void
     {
         $album = Album::factory()->draft()->create();
-        $ready = $this->albums->addPhoto($album, PlaceholderImage::grey(64, 64), $this->completeDetails());
-        $incomplete = $this->albums->addPhoto($album, PlaceholderImage::grey(64, 64), [MediaProperties::ALT_TEXT => 'Only alt']);
+        $this->albums->addPhoto($album, PlaceholderImage::grey(64, 64), $this->completeDetails());
+        $this->albums->addPhoto($album, PlaceholderImage::grey(64, 64), [MediaProperties::ALT_TEXT => 'Only alt']);
+        $this->albums->addPhoto($album, PlaceholderImage::grey(64, 64));
 
-        try {
-            $this->albums->publish($album);
-            $this->fail('Expected ImagesNotReadyException');
-        } catch (ImagesNotReadyException $exception) {
-            $this->assertSame([$incomplete->getKey()], $exception->mediaIds());
-            $this->assertSame([MediaProperties::CAPTION, MediaProperties::PLACE, MediaProperties::YEAR], $exception->missing[$incomplete->getKey()]);
-            $this->assertStringContainsString('1 image still lacks a caption, a place, a year', $exception->getMessage());
-        }
-
-        $this->assertTrue($album->fresh()->isDraft());
-        $this->assertSame([$incomplete->getKey() => [MediaProperties::CAPTION, MediaProperties::PLACE, MediaProperties::YEAR]], $this->albums->incompleteImages($album));
-
-        // The same guard applies to a status change made through the form.
-        $this->expectException(ImagesNotReadyException::class);
-        $this->albums->update($album, ['status' => ContentStatus::Published->value]);
+        $this->assertSame([], $this->albums->incompleteImages($album));
+        $this->assertTrue($this->albums->publish($album)->isPublished());
     }
 
     #[Test]
@@ -73,15 +59,14 @@ class ImagePublishingGuardTest extends TestCase
     }
 
     #[Test]
-    public function the_profile_portrait_is_guarded_too(): void
+    public function the_profile_publishes_while_the_portrait_lacks_details(): void
     {
         Storage::fake(Disks::PUBLIC);
         $profiles = $this->app->make(ProfileService::class);
         $profile = Profile::factory()->draft()->create();
         $profiles->setPortrait($profile, PlaceholderImage::grey(64, 80), [MediaProperties::ALT_TEXT => 'Portrait']);
 
-        $this->expectException(ImagesNotReadyException::class);
-        $profiles->save(['status' => 'published']);
+        $this->assertTrue($profiles->save(['status' => 'published'])->isPublished());
     }
 
     /**

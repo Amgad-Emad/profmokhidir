@@ -79,40 +79,33 @@ class ProfileFormTest extends TestCase
         $this->assertNotNull($portrait);
         $this->assertSame(MediaTreatment::Portrait->value, $portrait->getCustomProperty(MediaProperties::TREATMENT));
 
-        // Publishing waits for the portrait details.
-        $component->set('form.status', ContentStatus::Published->value)
-            ->call('save')
-            ->assertHasErrors(['form.status']);
-
+        // The portrait details are optional, and the form's own save keeps any typed in.
         $id = $portrait->getKey();
-        $component->set("images.$id.alt_text", 'Portrait of Professor Khidir')
-            ->set("images.$id.caption", 'Portrait')
-            ->set("images.$id.place", 'Khartoum')
-            ->set("images.$id.year", '1990')
-            ->call('saveImage', $id)
-            ->assertHasNoErrors()
+        $component->set('form.status', ContentStatus::Published->value)
+            ->set("images.$id.alt_text", 'Portrait of Professor Khidir')
             ->call('save')
             ->assertHasNoErrors()
             ->assertSee('data-view-on-site', false)
             ->assertSee(route('about'), false);
 
         $this->assertTrue($profile->fresh()->isPublished());
+        $this->assertSame('Portrait of Professor Khidir', $profile->fresh()->portrait()->getCustomProperty(MediaProperties::ALT_TEXT));
     }
 
     #[Test]
-    public function the_portrait_always_needs_alt_text_caption_place_and_year_even_on_a_draft(): void
+    public function the_portrait_details_are_optional(): void
     {
         $profile = Profile::factory()->draft()->create();
 
         $component = Livewire::actingAs($this->editor)->test(EditProfile::class)
             ->set('newImages', UploadedFile::fake()->image('portrait.jpg', 60, 80))
             ->assertHasNoErrors()
-            ->assertViewHas('detailsRequired', true);
+            ->assertViewHas('detailsRequired', false);
 
         $id = $profile->fresh()->portrait()->getKey();
 
         $component->call('saveImage', $id)
-            ->assertHasErrors(["images.$id.alt_text", "images.$id.caption", "images.$id.place", "images.$id.year"]);
+            ->assertHasNoErrors();
 
         $component->set("images.$id.alt_text", 'Portrait of Professor Khidir')
             ->set("images.$id.caption", 'Portrait')

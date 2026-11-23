@@ -6,10 +6,14 @@
 --}}
 @props(['tabs', 'locale'])
 @use('App\Constants\Locales')
-@php $isDefault = $locale === Locales::DEFAULT; @endphp
-<div role="tabpanel" id="{{ $tabs }}-panel-{{ $locale }}" aria-labelledby="{{ $tabs }}-tab-{{ $locale }}" lang="{{ Locales::html($locale) }}" dir="{{ Locales::dir($locale) }}"
+@php
+    $isDefault = $locale === Locales::DEFAULT;
+    // The panel of the dashboard's language is the one open at first (see x-admin.locale-tabs).
+    $isStart = $locale === (Locales::isValid(app()->getLocale()) ? app()->getLocale() : Locales::DEFAULT);
+@endphp
+<div role="tabpanel" id="{{ $tabs }}-panel-{{ $locale }}" aria-labelledby="{{ $tabs }}-tab-{{ $locale }}" data-content-lang="{{ $locale }}"
      {{ $attributes->class(['locale-tabs__panel form-grid']) }}
-     x-show="active === '{{ $locale }}'" @unless ($isDefault) style="display: none" @endunless data-locale-panel="{{ $locale }}">
+     x-show="active === '{{ $locale }}'" @unless ($isStart) style="display: none" @endunless data-locale-panel="{{ $locale }}">
     @unless ($isDefault)
         <p class="form-hint" lang="{{ Locales::html(app()->getLocale()) }}" dir="{{ Locales::dir(app()->getLocale()) }}" data-translation-note>{{ __('Optional. Anything left empty here shows the English text on Arabic pages.') }}</p>
     @endunless

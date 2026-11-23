@@ -66,10 +66,25 @@ class EloquentPageRepository implements PageRepositoryInterface
 
     public function saveBlock(Page $page, string $key, PageBlockType $type, array $attributes): PageBlock
     {
-        return $this->blocks->newQuery()->updateOrCreate(
-            ['page_id' => $page->getKey(), 'key' => $key],
-            ['type' => $type] + $attributes,
-        );
+        /** @var PageBlock $block */
+        $block = $this->blocks->newQuery()->firstOrNew(['page_id' => $page->getKey(), 'key' => $key]);
+        $block->setAttribute('type', $type);
+
+        foreach ($attributes as $attribute => $value) {
+            if ($value === null && in_array($attribute, $block->translatable, true)) {
+                // A translatable column set to null clears every language. (Setting it through the
+                // translations would clear only the current language and leave the others behind.)
+                $block->setRawAttributes(array_merge($block->getAttributes(), [$attribute => null]));
+
+                continue;
+            }
+
+            $block->setAttribute($attribute, $value);
+        }
+
+        $block->save();
+
+        return $block;
     }
 
     public function deleteBlock(Page $page, string $key): bool

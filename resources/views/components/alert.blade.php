@@ -7,9 +7,10 @@
 @php
     $tone = $tone instanceof \App\Constants\StatusTone ? $tone : \App\Constants\StatusTone::from($tone);
 @endphp
-<div {{ $attributes->class(['flex items-start gap-3 rounded-card border bg-surface-panel px-4 py-3 text-sm', $tone->badgeClasses()]) }} role="{{ $role }}">
-    <x-icon :name="$tone->icon()" class="mt-0.5 size-5" />
-    <div class="text-ink">
+<div {{ $attributes->class(['alert flex items-start gap-3 rounded-card border bg-surface-panel px-4 py-3 text-sm', $tone->badgeClasses()]) }} role="{{ $role }}">
+    {{-- The icon sits in a box one text line tall, so it centres on the first line in either language. --}}
+    <span class="alert__icon flex shrink-0 items-center" aria-hidden="true"><x-icon :name="$tone->icon()" class="size-5" /></span>
+    <div class="min-w-0 flex-1 text-ink">
         @if ($title)
             <p class="font-medium">{{ $title }}</p>
         @endif

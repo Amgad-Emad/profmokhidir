@@ -17,6 +17,7 @@ use App\Constants\Uploads;
 use App\Http\Requests\Admin\PageRequest;
 use App\Livewire\Admin\Concerns\NotifiesEditors;
 use App\Models\Page;
+use App\Services\PageRecordsService;
 use App\Services\PageService;
 use App\Services\PreviewService;
 use App\Services\RevisionService;
@@ -26,6 +27,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -192,6 +194,28 @@ class Edit extends Component
     }
 
     /**
+     * Take one section (by its slug) off the public page, or put it back, at once. Its words stay as they are.
+     */
+    public function toggleSectionVisibility(string $slug): void
+    {
+        $record = $this->record();
+        $this->authorize('publish', $record);
+
+        $section = collect(PageBlocks::hideableSections($this->pageKey))->first(fn (string $title): bool => Str::slug($title) === $slug);
+
+        if ($section === null) {
+            return;
+        }
+
+        $hide = ! in_array($section, $record->hiddenSections(), true);
+        $this->pages()->setSectionHidden($record, $section, $hide, auth()->user());
+        $this->dispatch(AdminUx::EVENT_SAVED, at: now()->toIso8601String());
+        $this->toast($hide
+            ? __('“:section” is hidden. Visitors no longer see it; its words are kept.', ['section' => __($section)])
+            : __('“:section” is back on the page.', ['section' => __($section)]));
+    }
+
+    /**
      * Show visitors the original wording again, keeping every edit for later.
      */
     public function unpublish(): void
@@ -281,7 +305,10 @@ class Edit extends Component
     {
         $definition = $this->listDefinition($key);
 
-        if ($definition === null || $definition->fixedItems || count($this->form[$key]) <= 1) {
+        // A list whose built-in default is empty (chapters, figures, cards) may be emptied completely.
+        $minimum = (array) $definition?->default === [] ? 0 : 1;
+
+        if ($definition === null || $definition->fixedItems || count($this->form[$key]) <= $minimum) {
             return;
         }
 
@@ -382,6 +409,9 @@ class Edit extends Component
             'hasDraft' => $this->pages()->hasDraft($record),
             'editor' => $this->editorState($record),
             'previewUrls' => $this->previewUrls($record),
+            'records' => app(PageRecordsService::class)->for($this->pageKey),
+            'hideableSections' => PageBlocks::hideableSections($this->pageKey),
+            'hiddenSections' => $record->hiddenSections(),
             'imageHint' => __(':types, up to :size.', ['types' => implode(', ', array_map('strtoupper', Uploads::IMAGE_EXTENSIONS)), 'size' => Uploads::imageMaxLabel()]),
         ])->layout('components.layouts.admin', [
             'title' => __('Edit page: :page', ['page' => __($definition['title'])]),
@@ -446,6 +476,13 @@ class Edit extends Component
             if ($definition->type->hasImage()) {
                 $images[$key] = $this->pages()->imageFor($page, $key, $this->form[$key]['media_id'] ?? null);
             }
+
+            // A list's item images, keyed "block.index".
+            if ($definition->imageFields() !== []) {
+                foreach ((array) ($this->form[$key] ?? []) as $index => $item) {
+                    $images[$key.'.'.$index] = $this->pages()->listImage(is_array($item) ? ($item['media_id'] ?? null) : null);
+                }
+            }
         }
 
         return $images;
@@ -453,6 +490,12 @@ class Edit extends Component
 
     private function upload(string $key): void
     {
+        if (str_contains($key, '.')) {
+            $this->uploadListImage(...explode('.', $key, 2));
+
+            return;
+        }
+
         $file = $this->uploads[$key] ?? null;
 
         if (! $file instanceof UploadedFile || ! PageBlocks::has($this->pageKey, $key) || ! PageBlocks::get($this->pageKey, $key)->type->hasImage()) {
@@ -465,6 +508,51 @@ class Edit extends Component
         $media = $this->pages()->uploadImage($this->record(), $key, $file, (array) $this->form[$key], auth()->user());
         $this->form[$key]['media_id'] = (int) $media->getKey();
         $this->uploads[$key] = null;
+        $this->dispatch(AdminUx::EVENT_CHANGED);
+    }
+
+    /**
+     * An image chosen for one list item (uploads.{block}.{index}): stored on the block and named by the item.
+     */
+    private function uploadListImage(string $key, string $index): void
+    {
+        $definition = $this->listDefinition($key);
+        $file = $this->uploads[$key][$index] ?? null;
+
+        if ($definition === null || $definition->imageFields() === [] || ! $file instanceof UploadedFile || ! isset($this->form[$key][(int) $index])) {
+            return;
+        }
+
+        $field = 'uploads.'.$key.'.'.$index;
+        $this->authorize('manageMedia', $this->record());
+        $this->validateOnly($field, [$field => PageRequest::uploadRules()], [], [$field => 'image']);
+
+        $item = (array) $this->form[$key][(int) $index];
+        $media = $this->pages()->uploadImage($this->record(), $key, $file, $item, auth()->user());
+        $this->form[$key][(int) $index]['media_id'] = (int) $media->getKey();
+        $this->uploads[$key][$index] = null;
+        $this->dispatch(AdminUx::EVENT_CHANGED);
+    }
+
+    /**
+     * Take the image out of one list item.
+     */
+    public function removeListImage(string $key, int $index): void
+    {
+        $definition = $this->listDefinition($key);
+
+        if ($definition === null || $definition->imageFields() === [] || ! isset($this->form[$key][$index])) {
+            return;
+        }
+
+        $this->authorize('manageMedia', $this->record());
+        $mediaId = (int) ($this->form[$key][$index]['media_id'] ?? 0);
+        $this->form[$key][$index]['media_id'] = null;
+
+        if ($mediaId > 0) {
+            $this->pages()->removeImage($this->record(), $key, $mediaId, auth()->user());
+        }
+
         $this->dispatch(AdminUx::EVENT_CHANGED);
     }
 

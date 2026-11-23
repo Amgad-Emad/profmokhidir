@@ -302,6 +302,26 @@ function trackLivewire() {
     });
 }
 
+// Language tabs are laid out in the dashboard's language; the text typed in a field is in the tab's
+// language. Each field takes that language (lang), so screen readers and fonts treat its words right.
+function tagContentLanguage() {
+    let queued = false;
+    const tag = () => {
+        queued = false;
+        document.querySelectorAll('[data-content-lang]').forEach((panel) => {
+            panel.querySelectorAll('input:not([type="file"]):not([type="checkbox"]):not([type="radio"]), textarea, .ProseMirror').forEach((field) => {
+                if (field.getAttribute('lang') !== panel.dataset.contentLang) field.setAttribute('lang', panel.dataset.contentLang);
+            });
+        });
+    };
+    tag();
+    new MutationObserver(() => {
+        if (queued) return;
+        queued = true;
+        requestAnimationFrame(tag);
+    }).observe(document.body, { childList: true, subtree: true });
+}
+
 export function initForms() {
     if (window.__formsReady) return;
     window.__formsReady = true;
@@ -311,6 +331,7 @@ export function initForms() {
     const start = () => {
         trackValidation();
         trackTyping();
+        tagContentLanguage();
     };
     document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', start) : start();
     trackLivewire();

@@ -374,18 +374,25 @@
     }
 
     .brand-lockup__art--horizontal {
+        height: 2.75rem;
+
         @media (width >= 40rem) {
-            height: 2.75rem;
+            height: 3.25rem;
         }
 
         @media (width >= 64rem) {
-            height: 3rem;
+            height: 3.75rem;
         }
     }
 
     .brand-lockup__art--stacked {
         width: 18rem;
         height: auto;
+    }
+
+    /* An alert's icon box is one line of its text tall, so it centres on the first line in either language. */
+    .alert__icon {
+        height: 1lh;
     }
 
     /* Skip link: hidden until focused, then a pill at the top left. */

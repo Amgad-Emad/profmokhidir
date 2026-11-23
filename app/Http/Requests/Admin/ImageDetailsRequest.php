@@ -11,7 +11,8 @@ use Illuminate\Validation\Rules\Enum;
 
 /**
  * Details of an existing image. Alt text, caption, place and year are
- * optional on a draft and required once the image is going public.
+ * optional (owner's decision, 23 November 2026), unless a caller passes
+ * $required = true to rulesFor().
  */
 class ImageDetailsRequest extends ContentRequest
 {
@@ -20,7 +21,7 @@ class ImageDetailsRequest extends ContentRequest
      */
     public function rules(): array
     {
-        return self::rulesFor((bool) $this->boolean('complete'));
+        return self::rulesFor(false);
     }
 
     /**

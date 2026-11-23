@@ -50,7 +50,7 @@
             <x-brand.art :artwork="BrandAssets::LOGO_COMPACT" :ratio="BrandAssets::LOGO_COMPACT_RATIO" :wide="BrandAssets::LOGO_HORIZONTAL" :wide-ratio="BrandAssets::LOGO_HORIZONTAL_RATIO" :height="(int) ($size ?? 48)" :tone="$tone" :alt="$name" class="brand-lockup__art brand-lockup__art--horizontal" />
         @endif
     @else
-        <x-brand.mark :size="$size ?? ($stacked ? 72 : 36)" :tone="$tone" decorative />
+        <x-brand.mark :size="$size ?? ($stacked ? 96 : ($compact ? 44 : 48))" :tone="$tone" decorative />
         <span @class(['flex flex-col', 'mt-4 items-center gap-2' => $stacked, 'items-start gap-0.5' => ! $stacked])>
             <span class="t-label {{ $labelColour }}">{{ __('Professor') }}</span>
             <span @class(['font-display font-light leading-none', 'text-3xl' => $stacked, 'text-lg sm:text-xl' => ! $stacked && ! $compact, 'text-lg whitespace-nowrap' => ! $stacked && $compact])>{{ __('Mohamed Osman Khidir') }}</span>

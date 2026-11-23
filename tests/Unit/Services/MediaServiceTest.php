@@ -144,7 +144,7 @@ class MediaServiceTest extends TestCase
     }
 
     #[Test]
-    public function missing_for_publishing_lists_blank_required_properties(): void
+    public function nothing_is_required_for_publishing_and_missing_details_lists_the_blank_ones(): void
     {
         $media = $this->service->attach(Album::factory()->create(), PlaceholderImage::grey(64, 64), MediaCollections::PHOTOS, [
             MediaProperties::ALT_TEXT => 'Alt',
@@ -152,10 +152,11 @@ class MediaServiceTest extends TestCase
             MediaProperties::YEAR => 1990,
         ]);
 
-        $this->assertSame([MediaProperties::CAPTION, MediaProperties::PLACE], $this->service->missingForPublishing($media));
+        $this->assertSame([], $this->service->missingForPublishing($media));
+        $this->assertSame([MediaProperties::CAPTION, MediaProperties::PLACE], $this->service->missingDetails($media));
 
         $media = $this->service->updateProperties($media, [MediaProperties::CAPTION => 'c', MediaProperties::PLACE => 'p']);
-        $this->assertSame([], $this->service->missingForPublishing($media));
+        $this->assertSame([], $this->service->missingDetails($media));
     }
 
     #[Test]

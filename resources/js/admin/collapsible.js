@@ -1,0 +1,72 @@
+/*
+ | A part of an edit screen that folds away: a form section, or one item of a
+ | page list (a chapter, a figure, a card). `startOpen` sets how it first
+ | shows; with `remember` the viewer's choice is kept per screen (and an
+ | address pointing into it opens it on load), without it every visit starts
+ | the same way (the page editor starts all folded, whatever the address).
+ | Parts that share a `group` act as an accordion: opening one folds the rest.
+ | The section nav only scrolls to a part and never opens it; a link that points
+ | at a field inside a part (an error summary) opens it, and so does the keyboard
+ | reaching a field inside its body.
+ */
+import { readSetting, writeSetting } from './storage';
+
+const OPENED = 'admin-collapsible-opened';
+
+export function collapsible(id, startOpen = true, remember = true, group = null) {
+    const key = `admin.collapsed.${window.location.pathname}.${id}`;
+
+    return {
+        open: remember ? !readSetting(key, !startOpen) : startOpen,
+        // Clipping is lifted once a panel has finished opening, so focus rings and pop-overs show.
+        settled: remember ? !readSetting(key, !startOpen) : startOpen,
+
+        init() {
+            this.$watch('open', (open) => {
+                this.settled = false;
+                clearTimeout(this._settle);
+                if (open) this._settle = setTimeout(() => { this.settled = this.open; }, 450);
+                if (remember) writeSetting(key, !open);
+                if (open && group) window.dispatchEvent(new CustomEvent(OPENED, { detail: { group, id } }));
+            });
+
+            if (remember) this.reveal(window.location.hash);
+
+            this._onClick = (event) => {
+                const link = event.target.closest('a[href^="#"]');
+                if (link && !link.closest('.edit-layout__nav')) this.reveal(link.getAttribute('href'));
+            };
+            this._onOpened = (event) => {
+                if (group && event.detail.group === group && event.detail.id !== id) this.open = false;
+            };
+
+            document.addEventListener('click', this._onClick);
+            window.addEventListener(OPENED, this._onOpened);
+        },
+
+        destroy() {
+            document.removeEventListener('click', this._onClick);
+            window.removeEventListener(OPENED, this._onOpened);
+        },
+
+        toggle() {
+            this.open = !this.open;
+        },
+
+        // Focus reaching a field inside the body opens the part (not focus on its own heading).
+        focusIn(event) {
+            if (event.target.closest('[data-collapsible-body]') && this.$el.contains(event.target)) {
+                this.open = true;
+            }
+        },
+
+        // Open when a link or the address points at this part or at something inside it.
+        reveal(hash) {
+            const target = hash && hash.length > 1 ? document.getElementById(decodeURIComponent(hash.slice(1))) : null;
+
+            if (target && (target === this.$el || this.$el.contains(target))) {
+                this.open = true;
+            }
+        },
+    };
+}

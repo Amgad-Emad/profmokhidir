@@ -13,6 +13,7 @@ import { watchPlaceholders } from './admin/placeholders';
 import { initShortcuts } from './admin/shortcuts';
 import { listToolbar, listPopover } from './admin/list-toolbar';
 import { dataTable } from './admin/data-table';
+import { collapsible } from './admin/collapsible';
 
 initForms();
 initShortcuts();
@@ -34,6 +35,7 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('listToolbar', listToolbar);
     Alpine.data('listPopover', listPopover);
     Alpine.data('dataTable', dataTable);
+    Alpine.data('collapsible', collapsible);
 
     /*
      | Drag-and-drop reordering of table rows (native HTML5 drag events). Rows are

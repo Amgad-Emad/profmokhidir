@@ -12,6 +12,8 @@
 @use('App\Constants\Locales')
 @use('App\Livewire\Admin\ContentForm')
 @php
+    // Open on the dashboard's language: an Arabic dashboard shows the Arabic text first.
+    $start = Locales::isValid(app()->getLocale()) ? app()->getLocale() : Locales::DEFAULT;
     $invalid = [];
     $bag = $errors ?? null;
 
@@ -28,7 +30,7 @@
 @endphp
 <div {{ $attributes->class(['locale-tabs grid gap-6']) }} data-locale-tabs="{{ $id }}"
      x-data="{
-        active: @js(Locales::DEFAULT),
+        active: @js($start),
         order: @js(Locales::all()),
         select(locale, focus) {
             this.active = locale;
@@ -64,7 +66,7 @@
      x-on:click.window="reveal($event)">
     <div class="flex flex-wrap items-center gap-2 border-b border-rule" role="tablist" aria-label="{{ __('Language of :group', ['group' => $label]) }}" x-on:keydown="key($event)">
         @foreach (Locales::all() as $locale)
-            @php $selected = $locale === Locales::DEFAULT; @endphp
+            @php $selected = $locale === $start; @endphp
             <button type="button" role="tab" class="admin-tab inline-flex items-center gap-2" id="{{ $id }}-tab-{{ $locale }}" aria-controls="{{ $id }}-panel-{{ $locale }}"
                     lang="{{ Locales::html($locale) }}" dir="{{ Locales::dir($locale) }}"
                     aria-selected="{{ $selected ? 'true' : 'false' }}" tabindex="{{ $selected ? '0' : '-1' }}"

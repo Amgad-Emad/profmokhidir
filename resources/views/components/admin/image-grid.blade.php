@@ -15,7 +15,7 @@
     @if ($canUpload && ($multiple || $media->isEmpty()))
         <div class="mt-6">
             <x-form.upload model="newImages" id="new-images" :label="$multiple ? __('Add images') : __('Upload an image')"
-                           :hint="__(':formats. Every image needs alt text, a caption, a place and a year before it can be published.', ['formats' => $hint])" :accept="$accept" :multiple="$multiple" image />
+                           :hint="$hint" :accept="$accept" :multiple="$multiple" image />
         </div>
     @elseif (! $canUpload)
         <p class="mt-6 text-sm font-normal text-ink-muted">{{ __('Save first, then add images.') }}</p>

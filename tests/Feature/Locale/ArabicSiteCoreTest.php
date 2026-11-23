@@ -32,6 +32,7 @@ class ArabicSiteCoreTest extends TestCase
     #[Test]
     public function the_arabic_home_page_is_right_to_left_with_arabic_copy_and_navigation(): void
     {
+        $this->fillHomeSections();
         $this->get('/ar')
             ->assertOk()
             ->assertSee('lang="ar" dir="rtl"', false)
@@ -159,6 +160,7 @@ class ArabicSiteCoreTest extends TestCase
     public function the_english_pages_are_unchanged(): void
     {
         Publication::factory()->published()->type(PublicationType::Book)->year(1978)->count(2)->create();
+        $this->fillHomeSections();
 
         $this->get('/')
             ->assertOk()

@@ -56,6 +56,19 @@ final class PageBlocks
     /**
      * The admin sections of a page, in order, each with its block keys.
      *
+     * The sections of a page an editor may take off the public page (their "Show on the page" switch).
+     *
+     * @return list<string> section headings
+     */
+    public static function hideableSections(string $page): array
+    {
+        return match ($page) {
+            Pages::HOME => HomeBlocks::HIDEABLE,
+            default => [],
+        };
+    }
+
+    /**
      * @return array<string, list<string>> section heading => block keys
      */
     public static function sections(string $page): array

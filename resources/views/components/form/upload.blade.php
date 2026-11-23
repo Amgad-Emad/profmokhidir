@@ -67,15 +67,16 @@
             <p class="form-file__name" x-text="fileName">{{ $currentName }}</p>
             <p class="form-file__meta" x-text="fileMeta">{{ $currentMeta }}</p>
         </div>
+        {{-- One set of small pills: Open and Replace in outline, Remove in the danger outline. --}}
         <div class="form-file__actions">
             @if ($href)
-                <a href="{{ $href }}" target="_blank" rel="noopener" class="form-file__action">{{ __('Open') }}<span class="sr-only"> {{ __(':name (opens in a new tab)', ['name' => $currentName]) }}</span></a>
+                <x-button :href="$href" variant="secondary" size="sm" target="_blank" rel="noopener" class="form-file__action"><x-icon name="external" class="size-4" />{{ __('Open') }}<span class="sr-only"> {{ __(':name (opens in a new tab)', ['name' => $currentName]) }}</span></x-button>
             @endif
-            <x-button variant="quiet" size="sm" type="button" x-on:click="$refs.input.click()">{{ __(FormControls::UPLOAD_REPLACE) }}<span class="sr-only"> {{ \Illuminate\Support\Str::lower($label) }}</span></x-button>
+            <x-button variant="secondary" size="sm" type="button" class="form-file__action" x-on:click="$refs.input.click()"><x-icon name="upload" class="size-4" />{{ __(FormControls::UPLOAD_REPLACE) }}<span class="sr-only"> {{ \Illuminate\Support\Str::lower($label) }}</span></x-button>
             @if ($remove)
-                <x-button variant="danger" size="sm" type="button" wire:click="{{ $remove }}" x-on:click="clear()">{{ __(FormControls::UPLOAD_REMOVE) }}<span class="sr-only"> {{ \Illuminate\Support\Str::lower($label) }}</span></x-button>
+                <x-button variant="danger" size="sm" type="button" class="form-file__action" wire:click="{{ $remove }}" x-on:click="clear()"><x-icon name="trash" class="size-4" />{{ __(FormControls::UPLOAD_REMOVE) }}<span class="sr-only"> {{ \Illuminate\Support\Str::lower($label) }}</span></x-button>
             @elseif ($model === null)
-                <x-button variant="danger" size="sm" type="button" x-on:click="clear()">{{ __(FormControls::UPLOAD_REMOVE) }}<span class="sr-only"> {{ \Illuminate\Support\Str::lower($label) }}</span></x-button>
+                <x-button variant="danger" size="sm" type="button" class="form-file__action" x-on:click="clear()"><x-icon name="trash" class="size-4" />{{ __(FormControls::UPLOAD_REMOVE) }}<span class="sr-only"> {{ \Illuminate\Support\Str::lower($label) }}</span></x-button>
             @endif
         </div>
     </div>

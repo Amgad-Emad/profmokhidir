@@ -5,40 +5,39 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Constants\HomeTimeline;
+use App\Constants\Locales;
+use App\Constants\MediaProperties;
+use App\Constants\PageDefinitions\HomeBlocks;
 use App\Constants\Pages;
-use App\Constants\Sections;
-use App\Models\HomeQuote;
 use App\Models\Profile;
+use App\Support\PageBlockDefinition;
 use Illuminate\Support\HtmlString;
+use InvalidArgumentException;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
  * Assembles the home page as a slow walk through his life: the hero with the
- * published portrait, "A life in chapters" (HomeTimelineService) with the
- * editors' quotes between the chapters, the figures of "His work in numbers",
- * the three "Continue the story" cards and the closing line. Only published
- * content is used, and each part reads its own service's cached listing.
+ * published portrait, "A life in chapters" with a quote after a chapter, the
+ * figures of "His work in numbers", the "Continue the story" cards and the
+ * closing line. Every section reads the home page's own blocks (Admin › Pages ›
+ * Home), so the editor shows exactly what the page shows.
  */
 class HomePageService
 {
     public function __construct(
         private readonly ProfileService $profiles,
-        private readonly PublicationService $publications,
-        private readonly AwardService $awards,
-        private readonly HomeQuoteService $quotes,
-        private readonly HomeTimelineService $timeline,
-        private readonly NavigationService $navigation,
         private readonly PageContentService $pages,
-        private readonly SectionCardService $cards,
-        private readonly SectionVisibilityService $visibility,
+        private readonly MediaService $media,
+        private readonly TypesetterService $typesetter,
+        private readonly NavigationService $navigation,
     ) {}
 
     /**
      * @return array{
      *     profile: Profile|null,
      *     portrait: Media|null,
-     *     chapters: list<array{number: int, numeral: string, decade: int, years: string, id: string, milestones: list<array{year: int, years: string, title: string, detail: ?string, kind: string, label: string}>, photo: Media|null, interlude: HomeQuote|null}>,
-     *     stats: list<array{key: string, value: int, label: string}>,
+     *     chapters: list<array{number: int, numeral: string, years: string, id: string, milestones: list<array{years: string, title: string, label: string, detail: ?string}>, photo: Media|null, interlude: array{quote: string, credit: ?string}|null}>,
+     *     stats: list<array{key: string, value: string, label: string}>,
      *     stories: list<array{key: string, numeral: string, title: string, summary: string, url: string, image: Media|null}>,
      *     copy: array{label: string, headingFirst: string, headingSecond: string, line: string, epigraph: string, scroll: string, chapters: string, chaptersIntro: HtmlString, chaptersEmpty: string, numbers: string, numbersEmpty: string, continue: string, closing: string, readStory: array{label: string, url: string}, leaveTribute: array{label: string, url: string}},
      *     anchor: string
@@ -56,8 +55,8 @@ class HomePageService
             // An image set in Admin › Pages › Home replaces the profile portrait in the hero.
             'portrait' => $this->pages->image($home, 'hero_image') ?? $profile?->portrait(),
             'chapters' => $chapters,
-            'stats' => $this->stats($profile),
-            'stories' => $this->stories(array_filter(array_column($chapters, 'photo'))),
+            'stats' => $this->stats(),
+            'stories' => $this->stories(),
             'copy' => [
                 'label' => $this->pages->text($home, 'hero_label'),
                 'headingFirst' => $this->pages->text($home, 'hero_heading_first'),
@@ -76,83 +75,147 @@ class HomePageService
                 'leaveTribute' => $this->pages->link($home, 'button_tribute'),
             ],
             'anchor' => HomeTimeline::ANCHOR,
+            // Sections an editor took off the page (Admin › Pages › Home, "Show on the page").
+            'hidden' => array_combine(HomeBlocks::HIDEABLE, array_map(fn (string $section): bool => $this->pages->isHidden($home, $section), HomeBlocks::HIDEABLE)),
         ];
     }
 
     /**
-     * The timeline chapters, each followed by the next published quote as its
-     * interlude. The last chapter has none (the figures follow it), so at most
-     * one quote fewer than there are chapters is shown.
+     * "A life in chapters" as set in Admin › Pages › Home: each chapter's years,
+     * milestones, photo (with the chapter's own alt text, caption, place and
+     * year) and the quote that follows it.
      *
-     * @return list<array{number: int, numeral: string, decade: int, years: string, id: string, milestones: list<array{year: int, years: string, title: string, detail: ?string, kind: string, label: string}>, photo: Media|null, interlude: HomeQuote|null}>
+     * @return list<array{number: int, numeral: string, years: string, id: string, milestones: list<array{years: string, title: string, label: string, detail: ?string}>, photo: Media|null, interlude: array{quote: string, credit: ?string}|null}>
      */
     public function chapters(): array
     {
-        $chapters = $this->timeline->chapters();
-        $quotes = $this->quotes->published()->values();
-        $last = count($chapters) - 1;
+        $chapters = [];
 
-        foreach ($chapters as $index => $chapter) {
-            $chapters[$index]['interlude'] = $index < $last ? $quotes->get($index) : null;
+        foreach (PageBlockDefinition::visibleItems($this->pages->items(Pages::HOME, HomeBlocks::CHAPTER_ITEMS)) as $index => $item) {
+            $milestones = [];
+
+            for ($n = 1; $n <= HomeBlocks::MILESTONES; $n++) {
+                $title = $item['m'.$n.'_title'] ?? null;
+
+                if (blank($title)) {
+                    continue;
+                }
+
+                $milestones[] = [
+                    'years' => (string) ($item['m'.$n.'_year'] ?? ''),
+                    'title' => (string) $title,
+                    'label' => (string) ($item['m'.$n.'_label'] ?? ''),
+                    'detail' => filled($item['m'.$n.'_detail'] ?? null) ? (string) $item['m'.$n.'_detail'] : null,
+                ];
+            }
+
+            $chapters[] = [
+                'number' => $index + 1,
+                'numeral' => match (true) {
+                    (bool) ($item['hide_numeral'] ?? false) => '',
+                    filled($item['numeral'] ?? null) => (string) $item['numeral'],
+                    default => $this->typesetter->roman($index + 1),
+                },
+                'years' => (string) ($item['years'] ?? ''),
+                'id' => $this->chapterId((string) ($item['years'] ?? ''), $index + 1),
+                'milestones' => $milestones,
+                'photo' => $this->photo($item),
+                'interlude' => filled($item['quote'] ?? null)
+                    ? ['quote' => (string) $item['quote'], 'credit' => filled($item['quote_credit'] ?? null) ? (string) $item['quote_credit'] : null]
+                    : null,
+            ];
         }
 
         return $chapters;
     }
 
     /**
-     * "His work in numbers": only the figures that are known and above zero.
-     * Students supervised appears only when editors have recorded it.
+     * "His work in numbers" as set in Admin › Pages › Home.
      *
-     * @return list<array{key: string, value: int, label: string}>
+     * @return list<array{key: string, value: string, label: string}>
      */
-    public function stats(?Profile $profile): array
+    public function stats(): array
     {
-        $values = [
-            // A hidden section's figure is left out with it.
-            HomeTimeline::STAT_PUBLICATIONS => $this->visibility->isVisible(Sections::PUBLICATIONS) ? $this->publications->countPublished() : 0,
-            HomeTimeline::STAT_YEARS_TEACHING => $this->timeline->yearsOfTeaching(),
-            HomeTimeline::STAT_AWARDS => $this->visibility->isVisible(Sections::AWARDS) ? $this->awards->countPublished() : 0,
-            HomeTimeline::STAT_STUDENTS => $profile?->students_supervised,
-        ];
-
         $stats = [];
 
-        foreach (array_keys(HomeTimeline::stats()) as $key) {
-            $value = (int) ($values[$key] ?? 0);
-
-            if ($value > 0) {
-                $stats[] = ['key' => $key, 'value' => $value, 'label' => HomeTimeline::statLabel($key, $value)];
-            }
+        foreach (PageBlockDefinition::visibleItems($this->pages->items(Pages::HOME, HomeBlocks::FIGURES)) as $index => $item) {
+            $stats[] = ['key' => 'figure-'.($index + 1), 'value' => (string) ($item['value'] ?? ''), 'label' => (string) ($item['label'] ?? '')];
         }
 
         return $stats;
     }
 
     /**
-     * The three "Continue the story" section cards (SectionCardService), each with
-     * the home page's own line and an archive photo the timeline has not shown,
-     * falling back to one it has, or none.
+     * The "Continue the story" cards as set in Admin › Pages › Home.
      *
-     * @param  array<int, Media>  $shown  photos already used by the chapters
      * @return list<array{key: string, numeral: string, title: string, summary: string, url: string, image: Media|null}>
      */
-    public function stories(array $shown = []): array
+    public function stories(): array
     {
-        $shownIds = array_map(fn (Media $photo): int => (int) $photo->id, $shown);
-        $photos = $this->timeline->archivePhotos();
-        usort($photos, fn (Media $a, Media $b): int => in_array((int) $a->id, $shownIds, true) <=> in_array((int) $b->id, $shownIds, true));
+        $cards = [];
 
-        $lines = [
-            Sections::ABOUT => $this->pages->text(Pages::HOME, 'story_about'),
-            Sections::PUBLICATIONS => $this->pages->text(Pages::HOME, 'story_publications'),
-            Sections::TRIBUTES => $this->pages->text(Pages::HOME, 'story_tributes'),
-        ];
-        $images = [];
-
-        foreach (Sections::homeStory() as $index => $key) {
-            $images[$key] = $photos[$index] ?? null;
+        foreach (PageBlockDefinition::visibleItems($this->pages->items(Pages::HOME, HomeBlocks::STORY_CARDS)) as $index => $item) {
+            $cards[] = [
+                'key' => 'card-'.($index + 1),
+                // A card opening a section carries that section's chapter numeral, as everywhere on the site.
+                'numeral' => filled($item['numeral'] ?? null) ? (string) $item['numeral'] : $this->typesetter->roman($this->cardNumber((string) ($item['route'] ?? ''), $index + 1)),
+                'title' => (string) ($item['title'] ?? ''),
+                'summary' => (string) ($item['line'] ?? ''),
+                'url' => $this->pages->url($item['route'] ?? null),
+                'image' => $this->media->find((int) ($item['media_id'] ?? 0)),
+            ];
         }
 
-        return $this->cards->cards(Sections::homeStory(), $lines, $images);
+        return $cards;
+    }
+
+    /**
+     * A chapter's anchor: its decade when the years begin with one (chapter-1960s), else its position.
+     */
+    private function chapterId(string $years, int $position): string
+    {
+        return preg_match('/^(\d{3})\d/', $years, $match) === 1 ? 'chapter-'.$match[1].'0s' : HomeTimeline::ANCHOR.'-'.$position;
+    }
+
+    private function cardNumber(string $route, int $position): int
+    {
+        try {
+            return $this->navigation->chapter($route);
+        } catch (InvalidArgumentException) {
+            return $position;
+        }
+    }
+
+    /**
+     * A chapter's photo, described by the chapter (in the current language),
+     * not by wherever the file came from. Nothing is saved to the media item.
+     *
+     * @param  array<string, mixed>  $item
+     */
+    private function photo(array $item): ?Media
+    {
+        $found = $this->media->find((int) ($item['media_id'] ?? 0));
+
+        if ($found === null) {
+            return null;
+        }
+
+        $photo = clone $found;
+        $locale = app()->getLocale();
+
+        foreach ([MediaProperties::ALT_TEXT, MediaProperties::CAPTION, MediaProperties::PLACE, MediaProperties::YEAR] as $property) {
+            $value = $item[$property] ?? null;
+            $paths = [$property];
+
+            if ($locale !== Locales::DEFAULT && in_array($property, MediaProperties::translatable(), true)) {
+                $paths[] = MediaProperties::translationPath($locale, $property);
+            }
+
+            foreach ($paths as $path) {
+                blank($value) ? $photo->forgetCustomProperty($path) : $photo->setCustomProperty($path, $property === MediaProperties::YEAR ? (int) $value : $value);
+            }
+        }
+
+        return $photo;
     }
 }

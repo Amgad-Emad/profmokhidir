@@ -6,6 +6,8 @@ use App\Constants\CvSection;
 use App\Constants\Disks;
 use App\Constants\HomeTimeline;
 use App\Constants\MediaProperties;
+use App\Constants\PageDefinitions\HomeBlocks;
+use App\Constants\Pages;
 use App\Constants\Taglines;
 use App\Models\Album;
 use App\Models\Award;
@@ -14,10 +16,13 @@ use App\Models\HomeQuote;
 use App\Models\Profile;
 use App\Models\Publication;
 use App\Services\AlbumService;
+use App\Services\HomeSectionsImportService;
+use App\Services\PageService;
 use App\Support\PlaceholderImage;
 use App\View\Components\Site\Footer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Testing\TestResponse;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -35,7 +40,7 @@ class HomePageTest extends TestCase
     #[Test]
     public function the_hero_keeps_the_brand_layout_adds_the_epigraph_and_a_scroll_cue(): void
     {
-        $response = $this->get(route('home'))->assertOk();
+        $response = $this->home()->assertOk();
 
         $response
             ->assertSee('<meta name="description" content="'.e(Taglines::HERO_LINE).'">', false)
@@ -59,7 +64,7 @@ class HomePageTest extends TestCase
     {
         Profile::factory()->published()->withPortrait()->create();
 
-        $html = $this->get(route('home'))->assertOk()->getContent();
+        $html = $this->home()->assertOk()->getContent();
 
         preg_match('/<section class="hero.*?<\/section>/s', $html, $hero);
 
@@ -81,7 +86,7 @@ class HomePageTest extends TestCase
         Award::factory()->published()->create(['name' => 'Order of Merit', 'organisation' => 'Republic of Sudan', 'year' => 1986]);
         $this->archivePhoto(1967, 'Students at Shambat');
 
-        $html = $this->get(route('home'))->assertOk()
+        $html = $this->home()->assertOk()
             ->assertSeeInOrder([
                 'Chapter </span>I</p>', '1960–1969', '1967', 'Fellowship of the Academy', 'Award', 'Academy of Sciences', 'Students at Shambat', 'Shambat, 1967',
                 'Chapter </span>II</p>', '1980–1989', '1986', 'Order of Merit', 'Award', 'Republic of Sudan',
@@ -107,7 +112,7 @@ class HomePageTest extends TestCase
         HomeQuote::factory()->published()->sortOrder(2)->create(['quote' => 'A second line.', 'attribution' => null, 'source' => null]);
         HomeQuote::factory()->draft()->sortOrder(0)->create(['quote' => 'A draft quote.']);
 
-        $html = $this->get(route('home'))->assertOk()
+        $html = $this->home()->assertOk()
             ->assertSeeInOrder(['id="chapter-1960s"', 'interlude glow-brass on-dark bg-surface text-ink', 't-quote pull-quote', 'Knowledge is the light we pass on.', 'A former student, Tribute', 'id="chapter-1970s"', 'A second line.', 'id="chapter-1980s"'], false)
             ->assertDontSee('A draft quote.')
             ->getContent();
@@ -125,7 +130,7 @@ class HomePageTest extends TestCase
         CvEntry::factory()->published()->create(['section' => CvSection::Appointment, 'start_year' => 1969, 'end_year' => 2005]);
         Profile::factory()->published()->create(['students_supervised' => 48]);
 
-        $html = $this->get(route('home'))->assertOk()
+        $html = $this->home()->assertOk()
             ->assertSeeInOrder([e(Taglines::HOME_NUMBERS), 'Publications', '>12<', 'Years of teaching', '>36<', 'Awards and honours', '>4<', 'Students supervised', '>48<'], false)
             ->getContent();
 
@@ -141,13 +146,13 @@ class HomePageTest extends TestCase
         Publication::factory()->published()->create();
         Profile::factory()->published()->create(['students_supervised' => null]);
 
-        $this->get(route('home'))->assertOk()->assertSee('Publication')->assertDontSee('Students supervised');
+        $this->home()->assertOk()->assertSee('Publication')->assertDontSee('Students supervised');
     }
 
     #[Test]
     public function every_list_has_a_designed_empty_state_when_nothing_is_published(): void
     {
-        $this->get(route('home'))
+        $this->home()
             ->assertOk()
             ->assertSee('The chapters of his life will appear here as his record is catalogued.')
             ->assertSee('The figures will appear once his publications, appointments and honours are catalogued.')
@@ -160,7 +165,7 @@ class HomePageTest extends TestCase
     {
         $this->archivePhoto(1972, 'Field station');
 
-        $html = $this->get(route('home'))->assertOk()
+        $html = $this->home()->assertOk()
             ->assertSeeInOrder([
                 e(Taglines::HOME_CONTINUE),
                 'href="'.route('about').'" class="section-card"', '>About Prof. Mokhidir</span>', e(Taglines::STORY_ABOUT),
@@ -177,7 +182,7 @@ class HomePageTest extends TestCase
     #[Test]
     public function the_footer_does_not_repeat_the_closing_line_on_the_home_page(): void
     {
-        $html = $this->get(route('home'))->assertOk()->getContent();
+        $html = $this->home()->assertOk()->getContent();
 
         preg_match('/<footer.*<\/footer>/s', $html, $footer);
 
@@ -190,7 +195,7 @@ class HomePageTest extends TestCase
     {
         CvEntry::factory()->published()->create(['start_year' => 1970]);
 
-        $html = $this->get(route('home'))->assertOk()->getContent();
+        $html = $this->home()->assertOk()->getContent();
 
         preg_match_all('/<h([1-6])\b/', $html, $levels);
         $this->assertSame('1', $levels[1][0]);
@@ -211,5 +216,21 @@ class HomePageTest extends TestCase
             MediaProperties::ALT_TEXT => $caption, MediaProperties::CAPTION => $caption,
             MediaProperties::PLACE => 'Shambat', MediaProperties::YEAR => $year,
         ]);
+    }
+
+    /**
+     * The home page after its chapters, figures and cards are filled from the
+     * records the test created (as the migration did when they moved into
+     * Admin › Pages › Home).
+     */
+    private function home(): TestResponse
+    {
+        // Empty first: the migration already filled them when the test database was built, before this test's records existed.
+        $pages = app(PageService::class);
+        $pages->install();
+        $pages->publishBlocks($pages->findByKey(Pages::HOME), [HomeBlocks::CHAPTER_ITEMS => [], HomeBlocks::FIGURES => [], HomeBlocks::STORY_CARDS => []]);
+        app(HomeSectionsImportService::class)->import();
+
+        return $this->get(route('home'));
     }
 }

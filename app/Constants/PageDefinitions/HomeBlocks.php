@@ -23,6 +23,9 @@ final class HomeBlocks
 
     public const string SECTION_SEO = 'Search & sharing';
 
+    /** The home sections an editor may hide from visitors (search & sharing is not a visible section). */
+    public const array HIDEABLE = [self::SECTION_HERO, self::SECTION_CHAPTERS, self::SECTION_NUMBERS, self::SECTION_CONTINUE];
+
     public const string HERO_HEADING_FIRST = 'Professor';
 
     public const string HERO_HEADING_SECOND = 'Mohamed Osman Khidir';
@@ -35,6 +38,49 @@ final class HomeBlocks
     public const string CHAPTERS_EMPTY = 'The chapters of his life will appear here as his record is catalogued.';
 
     public const string NUMBERS_EMPTY = 'The figures will appear once his publications, appointments and honours are catalogued.';
+
+    /** The list blocks that hold the home page's own chapters, figures and cards (edited here, not drawn from other screens). */
+    public const string CHAPTER_ITEMS = 'chapter_items';
+
+    public const string FIGURES = 'figures';
+
+    public const string STORY_CARDS = 'story_cards';
+
+    /** Milestones a chapter holds (m1_*, m2_*, m3_*). */
+    public const int MILESTONES = 3;
+
+    /**
+     * The fields of one chapter: its years, its milestones, a photo and the quote that follows it.
+     *
+     * @return array<string, array{label: string, kind: string, max: int|null, required: bool}>
+     */
+    public static function chapterFields(): array
+    {
+        $fields = [
+            Block::HIDDEN => Block::hiddenField('Hide this chapter'),
+            'numeral' => Block::inline(Block::field('Numeral', 10, Block::FIELD_PLAIN, false)),
+            'years' => Block::inline(Block::field('Years', 30, Block::FIELD_PLAIN, false)),
+            'hide_numeral' => Block::field('Hide the numeral', 1, Block::FIELD_TOGGLE, false),
+        ];
+
+        for ($n = 1; $n <= self::MILESTONES; $n++) {
+            $group = 'Milestone '.$n;
+            $fields['m'.$n.'_year'] = Block::field('Year', 20, Block::FIELD_PLAIN, false, $group);
+            $fields['m'.$n.'_title'] = Block::field('Title', 200, Block::FIELD_TEXT, false, $group);
+            $fields['m'.$n.'_label'] = Block::field('Kind', 40, Block::FIELD_TEXT, false, $group);
+            $fields['m'.$n.'_detail'] = Block::field('Details', 200, Block::FIELD_TEXT, false, $group);
+        }
+
+        return $fields + [
+            'media_id' => Block::imageField('Image', 'Photo'),
+            'alt_text' => Block::field('Alt text', 255, Block::FIELD_TEXT, false, 'Photo'),
+            'caption' => Block::field('Caption', 255, Block::FIELD_TEXT, false, 'Photo'),
+            'place' => Block::field('Place', 120, Block::FIELD_TEXT, false, 'Photo'),
+            'year' => Block::field('Year', 10, Block::FIELD_PLAIN, false, 'Photo'),
+            'quote' => Block::field('Quote', 400, Block::FIELD_TEXT, false, 'Quote after this chapter'),
+            'quote_credit' => Block::field('Who said it', 120, Block::FIELD_TEXT, false, 'Quote after this chapter'),
+        ];
+    }
 
     /**
      * @return list<Block>
@@ -54,15 +100,26 @@ final class HomeBlocks
 
             Block::shortText('chapters_title', 'Chapter title', self::SECTION_CHAPTERS, Taglines::HOME_CHAPTERS, 60),
             Block::longText('chapters_intro', 'Chapter introduction', self::SECTION_CHAPTERS, self::CHAPTERS_INTRO, 240, required: false),
+            Block::list(self::CHAPTER_ITEMS, 'Chapters', self::SECTION_CHAPTERS, [], self::chapterFields(), 'Chapter', maxItems: 12, hint: 'Each chapter as it shows on the home page, in order: its years, up to three milestones, a photo and an optional quote shown after it. Leave the numeral empty to number the chapters I, II, III in order.'),
             Block::shortText('chapters_empty', 'Line while there are no chapters', self::SECTION_CHAPTERS, self::CHAPTERS_EMPTY, 160),
 
             Block::shortText('numbers_title', 'Chapter title', self::SECTION_NUMBERS, Taglines::HOME_NUMBERS, 60),
+            Block::list(self::FIGURES, 'Figures', self::SECTION_NUMBERS, [], [
+                Block::HIDDEN => Block::hiddenField('Hide this figure'),
+                'value' => Block::field('Number', 12, Block::FIELD_PLAIN),
+                'label' => Block::field('Label', 60),
+            ], 'Figure', maxItems: 6, hint: 'Each figure as it shows on the home page: the number and the words under it.'),
             Block::shortText('numbers_empty', 'Line while there are no figures', self::SECTION_NUMBERS, self::NUMBERS_EMPTY, 160),
 
             Block::shortText('continue_title', 'Chapter title', self::SECTION_CONTINUE, Taglines::HOME_CONTINUE, 60),
-            Block::shortText('story_about', 'Card line: About', self::SECTION_CONTINUE, Taglines::STORY_ABOUT, 140),
-            Block::shortText('story_publications', 'Card line: Publications', self::SECTION_CONTINUE, Taglines::STORY_PUBLICATIONS, 140),
-            Block::shortText('story_tributes', 'Card line: Tributes', self::SECTION_CONTINUE, Taglines::STORY_TRIBUTES, 140),
+            Block::list(self::STORY_CARDS, 'Cards', self::SECTION_CONTINUE, [], [
+                Block::HIDDEN => Block::hiddenField('Hide this card'),
+                'title' => Block::field('Title', 60),
+                'numeral' => Block::field('Numeral', 10, Block::FIELD_PLAIN, false),
+                'line' => Block::field('Line', 160, Block::FIELD_TEXT, false),
+                'route' => Block::field('Goes to', 60, Block::FIELD_ROUTE),
+                'media_id' => Block::imageField('Image'),
+            ], 'Card', maxItems: 6, hint: 'Each card as it shows on the home page: its title, line, the page it opens and its image.'),
             Block::shortText('closing_line', 'Closing line under the seal', self::SECTION_CONTINUE, Taglines::HOME_CLOSING, 120),
 
             Block::seo(self::SECTION_SEO, hint: 'Leave the title empty to show his name alone, and the description empty to use the hero tagline.'),

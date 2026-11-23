@@ -56,7 +56,7 @@ class BrandLockupTest extends TestCase
         $html = Blade::render('<x-brand.lockup variant="stacked" tone="evergreen" />');
 
         $this->assertStringNotContainsString('brand-lockup--artwork', $html, 'The artwork spells the name in Latin capitals');
-        $this->assertStringContainsString('data-size="72"', $html);
+        $this->assertStringContainsString('data-size="96"', $html);
         $this->assertStringContainsString('aria-hidden="true"', $html, 'The mark is decorative beside the name');
         $this->assertMatchesRegularExpression('/brand-mark.*<span class="t-label text-accent-text">'.preg_quote(__('Professor'), '/').'<\/span>\s*<span class="font-display font-light leading-none text-3xl">'.preg_quote(__('Mohamed Osman Khidir'), '/').'<\/span>/s', $html);
 

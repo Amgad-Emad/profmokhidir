@@ -9,11 +9,14 @@
 
     <div class="data-table__per-page">
         <label for="{{ $table['id'] }}-per-page">{{ __('data-table.per_page') }}</label>
-        <select id="{{ $table['id'] }}-per-page" class="data-table__select" wire:change="setPerPage($event.target.value)" data-per-page>
-            @foreach ($table['pageSizes'] as $size)
-                <option value="{{ $size }}" @selected($size === $table['perPage'])>{{ $digits->digits($size) }}</option>
-            @endforeach
-        </select>
+        <span class="data-table__select-wrap">
+            <select id="{{ $table['id'] }}-per-page" class="data-table__select" wire:change="setPerPage($event.target.value)" data-per-page>
+                @foreach ($table['pageSizes'] as $size)
+                    <option value="{{ $size }}" @selected($size === $table['perPage'])>{{ $digits->digits($size) }}</option>
+                @endforeach
+            </select>
+            <x-icon name="chevron-down" class="data-table__select-icon size-4" />
+        </span>
     </div>
 
     @if ($page->hasPages())

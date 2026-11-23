@@ -300,6 +300,65 @@ class PageService
     }
 
     /**
+     * Show or hide one section of the page for visitors, at once (the section keeps its words).
+     */
+    public function setSectionHidden(Page $page, string $section, bool $hidden, ?User $actor = null): Page
+    {
+        if (! in_array($section, PageBlocks::hideableSections($page->key), true)) {
+            throw new InvalidArgumentException(sprintf('Section "%s" of page "%s" cannot be hidden.', $section, $page->key));
+        }
+
+        $sections = array_values(array_diff($page->hiddenSections(), [$section]));
+
+        if ($hidden) {
+            $sections[] = $section;
+        }
+
+        $page = $this->pages->update($page, ['hidden_sections' => $sections === [] ? null : $sections]);
+        $this->content->flush($page->key);
+
+        return $page;
+    }
+
+    /**
+     * The live text a block holds in the current language, whether or not the
+     * block is still defined (for carrying the words of a retired block over).
+     */
+    public function storedText(Page $page, string $key): ?string
+    {
+        $value = $this->pages->block($page, $key)?->getTranslation('value', app()->getLocale(), false);
+
+        return is_string($value) && trim($value) !== '' ? $value : null;
+    }
+
+    /**
+     * Put the given blocks live as they are (English value and Arabic value),
+     * leaving every other block and any pending draft untouched. Used to fill
+     * blocks from data that used to be drawn from other screens.
+     *
+     * @param  array<string, mixed>  $values  block key => English value
+     * @param  array<string, mixed>  $arabic  block key => Arabic value (normalised, null for none)
+     */
+    public function publishBlocks(Page $page, array $values, array $arabic = []): void
+    {
+        DB::transaction(function () use ($page, $values, $arabic): void {
+            foreach ($values as $key => $value) {
+                $definition = PageBlocks::get($page->key, $key);
+                $english = PageBlockValue::normalise($definition, $value);
+                $block = $this->pages->block($page, $key);
+
+                $this->pages->saveBlock($page, $key, $definition->type, [
+                    'value' => [Locales::DEFAULT => $english, Locales::AR => $arabic[$key] ?? null],
+                    'draft_value' => $block?->getTranslations('draft_value') ?: null,
+                    'sort_order' => $block?->sort_order ?? array_search($key, array_keys(PageBlocks::for($page->key)), true),
+                ]);
+            }
+        });
+
+        $this->content->flush($page->key);
+    }
+
+    /**
      * Return the page to its built-in copy for visitors, keeping every edit.
      */
     public function unpublish(Page $page, ?User $actor = null): Page
@@ -338,7 +397,7 @@ class PageService
     {
         $definition = PageBlocks::get($page->key, $key);
 
-        if (! $definition->type->hasImage()) {
+        if (! $definition->type->hasImage() && $definition->imageFields() === []) {
             throw new InvalidArgumentException(sprintf('Block "%s" does not hold an image.', $key));
         }
 
@@ -362,14 +421,51 @@ class PageService
         $block = $this->pages->block($page, $key);
         $media = $block?->media()->find($mediaId);
 
-        $live = $block?->getTranslation('value', Locales::DEFAULT, false);
-        $draft = $block?->getTranslation('draft_value', Locales::DEFAULT, false);
+        $inUse = [
+            ...self::mediaIdsIn($block?->getTranslation('value', Locales::DEFAULT, false)),
+            ...self::mediaIdsIn($block?->getTranslation('draft_value', Locales::DEFAULT, false)),
+        ];
 
-        if ($block === null || $media === null || in_array($mediaId, [(int) (is_array($live) ? ($live['media_id'] ?? 0) : 0), (int) (is_array($draft) ? ($draft['media_id'] ?? 0) : 0)], true)) {
+        // Only the block's own uploads are deleted; a photo chosen from an album is left alone.
+        if ($block === null || $media === null || in_array($mediaId, $inUse, true)) {
             return false;
         }
 
         return $this->media->remove($media, $actor);
+    }
+
+    /**
+     * Any media item an image field of a list names (an uploaded file or an album photo), for the edit screen.
+     */
+    public function listImage(mixed $mediaId): ?Media
+    {
+        $id = (int) $mediaId;
+
+        return $id > 0 ? $this->media->find($id) : null;
+    }
+
+    /**
+     * Every media_id a block value names: the image block's own, or each list item's.
+     *
+     * @return list<int>
+     */
+    private static function mediaIdsIn(mixed $value): array
+    {
+        if (! is_array($value)) {
+            return [];
+        }
+
+        $ids = [];
+
+        foreach ($value as $key => $item) {
+            if ($key === 'media_id' && is_numeric($item)) {
+                $ids[] = (int) $item;
+            } elseif (is_array($item)) {
+                array_push($ids, ...self::mediaIdsIn($item));
+            }
+        }
+
+        return $ids;
     }
 
     /**
@@ -397,22 +493,22 @@ class PageService
             return;
         }
 
-        $properties = array_filter([
-            MediaProperties::ALT_TEXT => $value['alt_text'] ?? null,
-            MediaProperties::CAPTION => $value['caption'] ?? null,
-            MediaProperties::PLACE => $value['place'] ?? null,
-            MediaProperties::YEAR => $value['year'] ?? null,
-        ], fn ($property): bool => $property !== null);
+        // A detail emptied in the editor is emptied on the media item too (null forgets it), so an
+        // old place or year never lingers in the media library or on the page.
+        $properties = [
+            MediaProperties::ALT_TEXT => blank($value['alt_text'] ?? null) ? null : $value['alt_text'],
+            MediaProperties::CAPTION => blank($value['caption'] ?? null) ? null : $value['caption'],
+            MediaProperties::PLACE => blank($value['place'] ?? null) ? null : $value['place'],
+            MediaProperties::YEAR => blank($value['year'] ?? null) ? null : $value['year'],
+        ];
 
         foreach ([MediaProperties::ALT_TEXT, MediaProperties::CAPTION, MediaProperties::PLACE] as $property) {
-            if (filled($arabic[$property] ?? null)) {
-                $properties[MediaProperties::translationPath(Locales::AR, $property)] = $arabic[$property];
-            }
+            $translated = $arabic[$property] ?? null;
+            // Arabic that only repeats the English (filled in when left empty) is not a translation.
+            $properties[MediaProperties::translationPath(Locales::AR, $property)] = filled($translated) && $translated !== $properties[$property] ? $translated : null;
         }
 
-        if ($properties !== []) {
-            $this->media->updateProperties($media, $properties);
-        }
+        $this->media->updateProperties($media, $properties);
     }
 
     /**
@@ -424,7 +520,11 @@ class PageService
             return null;
         }
 
-        return self::blankToNull($block->getTranslation($block->hasDraft() ? 'draft_value' : 'value', $locale, false));
+        // A draft that holds nothing for this language (e.g. only Arabic words changed) leaves the
+        // published value of that language in place, so a list never reads as emptied.
+        $draft = $block->hasDraft() ? self::blankToNull($block->getTranslation('draft_value', $locale, false)) : null;
+
+        return $draft ?? self::blankToNull($block->getTranslation('value', $locale, false));
     }
 
     private static function blankToNull(mixed $value): mixed

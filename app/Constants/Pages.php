@@ -14,6 +14,21 @@ use InvalidArgumentException;
  */
 final class Pages
 {
+    /**
+     * Page => the content type whose records the page lists, shown inside the
+     * page's own editor (Admin › Pages › that page) under the page's words.
+     */
+    public const array RECORDS = [
+        self::CV => ContentTypes::CV_ENTRY,
+        self::PUBLICATIONS => ContentTypes::PUBLICATION,
+        self::AWARDS => ContentTypes::AWARD,
+        self::VIDEOS => ContentTypes::VIDEO,
+        self::PICTURES => ContentTypes::ALBUM,
+        self::TEACHING => ContentTypes::TEACHING_MATERIAL,
+        self::COMMENTARY => ContentTypes::COMMENTARY,
+        self::OTHER => ContentTypes::OTHER_ITEM,
+    ];
+
     public const string HOME = 'home';
 
     public const string ABOUT = Sections::ABOUT;

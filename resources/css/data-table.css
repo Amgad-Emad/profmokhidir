@@ -675,14 +675,32 @@
         gap: 0.5rem;
     }
 
+    /* The page-size pill draws its own chevron at the inline end, so the number and the chevron
+       keep even room on both sides in either direction (the native arrow crowded it in RTL). */
+    .data-table__select-wrap {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+    }
+
     .data-table__select {
         height: 2.25rem;
-        padding-inline: 0.75rem 2rem;
+        min-width: 4.5rem;
+        padding-inline: 1rem 2.25rem;
         border: 1px solid var(--rule-strong);
         border-radius: 9999px;
         background-color: var(--surface-field);
         color: var(--ink);
         font-size: 0.9375rem;
+        font-variant-numeric: tabular-nums;
+        appearance: none;
+    }
+
+    .data-table__select-icon {
+        position: absolute;
+        inset-inline-end: 0.875rem;
+        color: var(--ink-muted);
+        pointer-events: none;
     }
 
     .data-table__pages {

@@ -12,6 +12,9 @@
     foreach (array_keys($sections) as $title) {
         $nav[Str::slug($title)] = __($title);
     }
+    if ($records) {
+        $nav['page-records'] = $records['plural'];
+    }
 @endphp
 <div class="page-editor" x-data="pagePreview" x-bind:class="{ 'page-editor--preview': open }" data-page-editor="{{ $page->key }}">
     <x-admin.page-header :eyebrow="__('Pages')" :title="__($definition['title'])" :intro="__($definition['summary']).' '.__('You change the words and images here; the layout, typography and colours stay as designed.')">
@@ -22,38 +25,53 @@
     <x-admin.flash />
 
     @if (! $published)
-        <x-alert tone="bronze" class="mt-8" data-page-unpublished>{{ __('This page is a draft: visitors see its original wording. Publish to show these words.') }}</x-alert>
+        <x-alert tone="bronze" class="mt-8" data-page-unpublished>{{ __('This page is a draft: visitors see its original wording. Save to show these words.') }}</x-alert>
     @elseif ($hasDraft)
         <x-alert tone="bronze" class="mt-8" data-page-has-draft>
             <span class="flex flex-wrap items-center justify-between gap-4">
-                <span>{{ __('Some changes are saved as a draft and not yet on the site. Publish changes to put them live.') }}</span>
+                <span>{{ __('Some changes are saved as a draft and not yet on the site. Save to put them live.') }}</span>
                 <x-button variant="quiet" size="sm" type="button" wire:click="discardDraft" data-discard-draft>{{ __('Discard the draft') }}</x-button>
             </span>
         </x-alert>
     @endif
 
     <div class="page-editor__columns mt-10">
-        <x-admin.edit-layout :editor="$editor" :sections="$nav" :autosave="true" :draftable="true" :publish-label="$published ? __('Publish changes') : null" class="page-editor__form">
+        <x-admin.edit-layout :editor="$editor" :sections="$nav" :autosave="true" :save-only="true" class="page-editor__form">
             @foreach ($sections as $title => $keys)
-                <x-admin.form-section :id="Str::slug($title)" :title="__($title)" wire:key="section-{{ Str::slug($title) }}">
+                <x-admin.form-section :id="Str::slug($title)" :title="__($title)" :collapsed="true" wire:key="section-{{ Str::slug($title) }}" @class(['form-section--hidden-on-page' => in_array($title, $hiddenSections, true)])>
+                    @if (in_array($title, $hideableSections, true))
+                        @php $shown = ! in_array($title, $hiddenSections, true); @endphp
+                        <x-slot:actions>
+                            {{-- The site's own outline pill: an eye and "Shown on the page", or a crossed eye and "Hidden" in a quiet dashed outline. --}}
+                            <x-button variant="secondary" size="sm" type="button" role="switch" aria-checked="{{ $shown ? 'true' : 'false' }}" @class(['section-visibility', 'section-visibility--hidden' => ! $shown]) wire:click="toggleSectionVisibility('{{ Str::slug($title) }}')" wire:loading.attr="disabled" data-section-visibility="{{ Str::slug($title) }}">
+                                <x-icon :name="$shown ? 'eye' : 'eye-off'" class="size-4" />
+                                <span>{{ $shown ? __('Shown on the page') : __('Hidden') }}</span>
+                                <span class="sr-only">: {{ __($title) }}</span>
+                            </x-button>
+                        </x-slot:actions>
+                    @endif
                     @foreach ($keys as $key)
                         @include('livewire.admin.pages.partials.block', ['key' => $key, 'block' => $blocks[$key]])
                     @endforeach
                 </x-admin.form-section>
             @endforeach
+
+            @if ($records)
+                @include('livewire.admin.pages.partials.records', ['records' => $records])
+            @endif
         </x-admin.edit-layout>
 
-        <aside class="page-preview" x-show="open" x-cloak :aria-label="__('Preview of the page')" wire:ignore data-page-preview data-preview-urls="{{ json_encode($previewUrls, JSON_UNESCAPED_SLASHES) }}">
+        <aside class="page-preview" x-show="open" x-cloak aria-label="{{ __('Preview of the page') }}" wire:ignore data-page-preview data-preview-urls="{{ json_encode($previewUrls, JSON_UNESCAPED_SLASHES) }}">
             <div class="page-preview__bar">
                 <p class="t-label text-accent-text">{{ __('Preview with your draft') }}</p>
                 <div class="page-preview__controls">
                     @if (count($previewUrls) > 1)
                         <label class="sr-only" for="preview-view">{{ __('Error page shown') }}</label>
-                        <select id="preview-view" class="page-preview__select" x-on:change="show($event.target.value)">
+                        <span class="page-preview__select-wrap"><select id="preview-view" class="page-preview__select" x-on:change="show($event.target.value)">
                             @foreach ($previewUrls as $view => $url)
                                 <option value="{{ $view }}">{{ __('Error :code', ['code' => $view]) }}</option>
                             @endforeach
-                        </select>
+                        </select><x-icon name="chevron-down" class="page-preview__select-icon size-4" /></span>
                     @endif
                     <div class="page-preview__devices" role="group" aria-label="{{ __('Preview width') }}">
                         <button type="button" class="page-preview__device" x-on:click="device = 'desktop'" x-bind:aria-pressed="(device === 'desktop').toString()">{{ __('Desktop') }}</button>
@@ -62,7 +80,7 @@
                     <button type="button" class="page-preview__device" x-on:click="reload()">{{ __('Reload') }}</button>
                 </div>
             </div>
-            <div class="page-preview__viewport" x-ref="viewport">
+            <div class="page-preview__viewport" x-ref="viewport" x-bind:style="viewportStyle">
                 <iframe x-ref="frame" src="{{ reset($previewUrls) }}" title="{{ __('Preview of :page with the draft', ['page' => __($definition['title'])]) }}" class="page-preview__frame" x-bind:style="frameStyle" x-on:load="loading = false" loading="lazy" inert></iframe>
             </div>
             <p class="page-preview__note">{{ __('The preview shows what is saved. Changes appear here a moment after each autosave. To read or use the page itself, open Preview in the save bar: it opens the same page in a new tab.') }}</p>

@@ -90,12 +90,12 @@ class AdminContentRequestsTest extends TestCase
     }
 
     #[Test]
-    public function image_details_are_optional_for_drafts_and_required_for_publishing(): void
+    public function image_details_are_optional_unless_a_caller_requires_them(): void
     {
         $this->assertSame([], Validator::make(['treatment' => 'archive'], ImageDetailsRequest::rulesFor(false))->errors()->keys());
 
         $errors = Validator::make(['treatment' => 'archive'], ImageDetailsRequest::rulesFor(true))->errors()->keys();
-        $this->assertEqualsCanonicalizing(MediaProperties::requiredForPublishing(), $errors);
+        $this->assertEqualsCanonicalizing(MediaProperties::details(), $errors);
 
         $this->assertSame(['treatment'], Validator::make(['treatment' => 'sepia'], ImageDetailsRequest::rulesFor(false))->errors()->keys());
     }

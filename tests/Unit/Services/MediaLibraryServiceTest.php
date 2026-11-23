@@ -79,7 +79,7 @@ class MediaLibraryServiceTest extends TestCase
         $this->assertSame(0, $this->service->library(null, [MediaRepositoryInterface::FILTER_COLLECTION => MediaCollections::PORTRAIT])->total());
         $this->assertSame(1, $this->service->countIncompleteImages());
         $this->assertTrue($this->service->isReadyForPublishing($ready));
-        $this->assertFalse($this->service->isReadyForPublishing($incomplete));
+        $this->assertTrue($this->service->isReadyForPublishing($incomplete), 'Missing details never block publishing.');
     }
 
     #[Test]

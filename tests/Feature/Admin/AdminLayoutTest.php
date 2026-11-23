@@ -3,6 +3,7 @@
 namespace Tests\Feature\Admin;
 
 use App\Constants\AdminNavigation;
+use App\Constants\Pages;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
@@ -33,7 +34,16 @@ class AdminLayoutTest extends TestCase
         }
 
         foreach (AdminNavigation::items() as $key => $item) {
+            if ($key === AdminNavigation::PAGES) {
+                continue; // Listed as one link per page instead.
+            }
+
             $response->assertSee('data-nav-item="'.$key.'"', false)->assertSee($item['label']);
+        }
+
+        foreach (Pages::all() as $page) {
+            $response->assertSee('data-nav-item="pages-'.$page.'"', false)
+                ->assertSee(route(Pages::EDIT_ROUTE, ['page' => $page]), false);
         }
     }
 

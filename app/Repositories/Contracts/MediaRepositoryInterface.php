@@ -63,6 +63,12 @@ interface MediaRepositoryInterface
     public function updateProperties(Media $media, array $properties): Media;
 
     /**
+     * Rewrite every stored media item whose translations sit under literal
+     * "translations.<locale>.<property>" keys into the nested form. Returns how many changed.
+     */
+    public function foldTranslationKeys(): int;
+
+    /**
      * Set the archive columns of an album photo (Archive::DECADE, Archive::FEATURED).
      */
     public function updateArchiveFields(Media $media, ?int $decade, bool $featured): Media;

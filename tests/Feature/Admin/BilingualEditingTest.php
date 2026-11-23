@@ -156,7 +156,7 @@ class BilingualEditingTest extends TestCase
     }
 
     #[Test]
-    public function the_edit_screen_is_in_arabic_for_an_arabic_editor_with_the_english_tab_left_to_right(): void
+    public function the_edit_screen_is_in_arabic_for_an_arabic_editor_with_each_tab_marking_its_content_language(): void
     {
         $commentary = Commentary::factory()->create(['title' => 'On teaching']);
 
@@ -166,8 +166,9 @@ class BilingualEditingTest extends TestCase
             ->assertSee('lang="ar" dir="rtl"', false)
             ->assertSee(__('Edit commentary', [], 'ar'))
             ->assertSee('role="tablist"', false)
-            ->assertSee('id="opening-text-panel-en" aria-labelledby="opening-text-tab-en" lang="en" dir="ltr"', false)
-            ->assertSee('id="opening-text-panel-ar" aria-labelledby="opening-text-tab-ar" lang="ar" dir="rtl"', false)
+            // Both tabs follow the dashboard's direction; each marks the language of the text typed in it.
+            ->assertSee('id="opening-text-panel-en" aria-labelledby="opening-text-tab-en" data-content-lang="en"', false)
+            ->assertSee('id="opening-text-panel-ar" aria-labelledby="opening-text-tab-ar" data-content-lang="ar"', false)
             ->assertSee('العربية');
     }
 }

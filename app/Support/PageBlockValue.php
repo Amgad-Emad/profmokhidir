@@ -162,7 +162,10 @@ final class PageBlockValue
 
             foreach ($definition->editableFields() as $field => $spec) {
                 if ($spec['kind'] === PageBlockDefinition::FIELD_TEXT) {
-                    $arabic[$field] = is_array($source) && is_string($source[$field] ?? null) ? $source[$field] : '';
+                    $stored = is_array($source) && is_string($source[$field] ?? null) ? $source[$field] : '';
+                    // A field that only holds the English words (filled in when it was left empty) shows as
+                    // empty, with the English as its placeholder, so it reads as "not translated yet".
+                    $arabic[$field] = is_array($item) && $stored === ($item[$field] ?? null) ? '' : $stored;
                 }
             }
 
@@ -326,13 +329,36 @@ final class PageBlockValue
             $clean = [];
 
             foreach ($definition->editableFields() as $field => $spec) {
+                if ($spec['kind'] === PageBlockDefinition::FIELD_IMAGE) {
+                    $clean[$field] = self::id($item[$field] ?? null);
+
+                    continue;
+                }
+
+                if ($spec['kind'] === PageBlockDefinition::FIELD_TOGGLE) {
+                    $clean[$field] = filter_var($item[$field] ?? false, FILTER_VALIDATE_BOOL);
+
+                    continue;
+                }
+
                 $text = self::text($item[$field] ?? null, $spec['max']);
+
+                if ($text === null && ! PageBlockDefinition::isRequired($spec)) {
+                    $clean[$field] = null;
+
+                    continue;
+                }
 
                 if ($text === null || ($spec['kind'] === PageBlockDefinition::FIELD_ROUTE && ! PageLinks::isValid($text))) {
                     continue 2;
                 }
 
                 $clean[$field] = $text;
+            }
+
+            // An item whose every field is empty (a freshly added one left blank) is dropped.
+            if (array_filter($clean, fn (mixed $value): bool => $value !== null && $value !== false) === []) {
+                continue;
             }
 
             $items[] = $clean;

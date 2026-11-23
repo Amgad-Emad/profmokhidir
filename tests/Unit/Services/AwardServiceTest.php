@@ -9,7 +9,6 @@ use App\Constants\Disks;
 use App\Constants\MediaCollections;
 use App\Constants\MediaProperties;
 use App\Constants\MediaTreatment;
-use App\Exceptions\ImagesNotReadyException;
 use App\Models\AuditLog;
 use App\Models\Award;
 use App\Models\User;
@@ -191,14 +190,12 @@ class AwardServiceTest extends TestCase
     }
 
     #[Test]
-    public function an_award_cannot_be_published_while_an_image_lacks_its_details(): void
+    public function an_award_publishes_while_an_image_lacks_its_details(): void
     {
         Storage::fake(Disks::PUBLIC);
         $award = Award::factory()->draft()->create();
         $this->service->addImage($award, PlaceholderImage::grey(40, 30));
 
-        $this->expectException(ImagesNotReadyException::class);
-
-        $this->service->publish($award);
+        $this->assertTrue($this->service->publish($award)->isPublished());
     }
 }

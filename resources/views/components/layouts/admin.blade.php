@@ -20,7 +20,7 @@
     $title ??= __('Dashboard');
 @endphp
 <!DOCTYPE html>
-<html lang="{{ \App\Constants\Locales::html(app()->getLocale()) }}" dir="{{ \App\Constants\Locales::dir(app()->getLocale()) }}" {{ $themes->htmlAttributes($theme) }}>
+<html lang="{{ \App\Constants\Locales::html(app()->getLocale()) }}" dir="{{ \App\Constants\Locales::dir(app()->getLocale()) }}" class="admin-html" {{ $themes->htmlAttributes($theme) }}>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">

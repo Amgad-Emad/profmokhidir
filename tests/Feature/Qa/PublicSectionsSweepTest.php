@@ -71,6 +71,7 @@ class PublicSectionsSweepTest extends TestCase
             }
         }
 
+        $this->fillHomeSections();
         $this->get(route('home'))->assertOk()->assertSee($expected[Sections::ABOUT])->assertDontSee('class="empty-state', false);
     }
 

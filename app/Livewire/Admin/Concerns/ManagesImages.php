@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin\Concerns;
 
-use App\Constants\ContentStatus;
 use App\Constants\MediaProperties;
 use App\Constants\MediaTreatment;
 use App\Constants\Uploads;
@@ -20,8 +19,9 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
  * Images of a record (portrait, thumbnail, album photos, other-item media):
- * upload with validation, edit the brand details per image, remove. Details
- * are required as soon as the owning record is published.
+ * upload with validation, edit the brand details per image, remove. Every
+ * detail is optional. Details are saved by each image's Save details button and
+ * also by the form's own Save / Update, so no edit is lost.
  */
 trait ManagesImages
 {
@@ -116,6 +116,58 @@ trait ManagesImages
         $this->mediaService()->updateProperties($image, $this->images[$id], auth()->user());
         $this->loadImages();
         $this->notify('Image details saved.');
+    }
+
+    /**
+     * Save the details of every image the editor changed, with the form's own
+     * Save / Update (ContentForm::beforeStore). Unchanged images are left alone.
+     */
+    protected function beforeStore(): void
+    {
+        $this->saveChangedImages();
+    }
+
+    protected function saveChangedImages(): void
+    {
+        $record = $this->record();
+
+        if (! $record instanceof HasMedia) {
+            return;
+        }
+
+        $request = new ImageDetailsRequest;
+        $changed = [];
+
+        foreach ($this->images as $id => $details) {
+            $image = $this->mediaService()->find((int) $id);
+
+            // Loose comparison on purpose: "" and null, "1986" and 1986 are the same detail.
+            if ($image !== null && $details != $this->detailsOf($image)) {
+                $changed[(int) $id] = $image;
+            }
+        }
+
+        if ($changed === []) {
+            return;
+        }
+
+        $this->authorize('manageMedia', $record);
+
+        $rules = $messages = $attributes = [];
+
+        foreach (array_keys($changed) as $id) {
+            $rules += $this->prefixRules(ImageDetailsRequest::rulesFor($this->imageDetailsRequired($record)), "images.$id.");
+            $messages += $this->prefixMessagesAll($request->messages(), "images.$id.");
+            $attributes += $this->prefixMessagesAll($request->attributes(), "images.$id.");
+        }
+
+        $this->validate($rules, $messages, $attributes);
+
+        foreach ($changed as $id => $image) {
+            $this->mediaService()->updateProperties($image, $this->images[$id], auth()->user());
+        }
+
+        $this->loadImages();
     }
 
     /**
@@ -216,12 +268,13 @@ trait ManagesImages
     }
 
     /**
-     * Whether alt text, caption, place and year must be given now. By default
-     * they are optional on a draft and required once the record is published.
+     * Whether alt text, caption, place and year must be given now: never, they
+     * are optional on drafts and published records alike (owner's decision,
+     * 23 November 2026). Override to require them for one kind of record.
      */
     protected function imageDetailsRequired(Model $record): bool
     {
-        return $record->getAttribute('status') === ContentStatus::Published;
+        return false;
     }
 
     protected function mediaService(): MediaService

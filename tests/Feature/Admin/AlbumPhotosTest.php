@@ -47,7 +47,7 @@ class AlbumPhotosTest extends TestCase
             ->set('newImages', [UploadedFile::fake()->image('one.jpg', 40, 30), UploadedFile::fake()->image('two.png', 40, 30)])
             ->assertHasNoErrors()
             ->assertSee('2 images uploaded')
-            ->assertSee('Needs details');
+            ->assertDontSee('Needs details');
 
         $photos = $album->fresh()->photos();
         $this->assertCount(2, $photos);
@@ -56,7 +56,7 @@ class AlbumPhotosTest extends TestCase
     }
 
     #[Test]
-    public function details_are_optional_on_a_draft_and_required_once_the_album_is_published(): void
+    public function details_are_optional_and_the_album_saves_them_with_its_own_update(): void
     {
         $albums = $this->app->make(AlbumService::class);
         $album = Album::factory()->draft()->create();
@@ -71,32 +71,29 @@ class AlbumPhotosTest extends TestCase
 
         $this->assertSame('Students in the field', $photo->fresh()->getCustomProperty(MediaProperties::ALT_TEXT));
 
-        // Publishing is refused while the photo lacks caption, place and year.
+        // A photo without caption, place or year no longer holds the album back.
         $component->set('form.status', ContentStatus::Published->value)
-            ->call('save')
-            ->assertHasErrors(['form.status'])
-            ->assertSee('still lacks a caption, a place, a year');
-
-        $this->assertTrue($album->fresh()->isDraft());
-
-        $component->set("images.$id.caption", 'Field practical')
-            ->set("images.$id.place", 'Shambat')
-            ->set("images.$id.year", '1979')
-            ->call('saveImage', $id)
-            ->assertHasNoErrors()
-            ->assertSee('Ready')
             ->call('save')
             ->assertHasNoErrors()
             ->assertSee('Album published. It is on the public site now.');
 
         $this->assertTrue($album->fresh()->isPublished());
 
-        // Now every detail is required and the treatment must be valid.
+        // Details edited without "Save details" are saved by the album's own Update.
+        $component->set("images.$id.caption", 'Field practical')
+            ->set("images.$id.".MediaProperties::translationPath('ar', MediaProperties::CAPTION), 'تطبيق ميداني')
+            ->call('publish')
+            ->assertHasNoErrors();
+
+        $this->assertSame('Field practical', $photo->fresh()->getCustomProperty(MediaProperties::CAPTION));
+        $this->assertSame('تطبيق ميداني', $photo->fresh()->getTranslatedProperty(MediaProperties::CAPTION, 'ar'));
+
+        // Emptying a detail of a published album is fine; the treatment must still be valid.
         $component->set("images.$id.caption", '')
             ->set("images.$id.treatment", 'sepia')
             ->call('saveImage', $id)
-            ->assertHasErrors(["images.$id.caption", "images.$id.treatment"])
-            ->assertSee('Add a caption before publishing.');
+            ->assertHasNoErrors(["images.$id.caption"])
+            ->assertHasErrors(["images.$id.treatment"]);
     }
 
     #[Test]

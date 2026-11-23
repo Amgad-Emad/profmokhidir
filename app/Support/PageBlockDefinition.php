@@ -25,6 +25,18 @@ final readonly class PageBlockDefinition
     /** Set by the definition and shown, never edited (for example a chapter's key). */
     public const string FIELD_FIXED = 'fixed';
 
+    /** Text that is the same in every language (years, figures): no Arabic version is asked for. */
+    public const string FIELD_PLAIN = 'plain';
+
+    /** An uploaded image (the item's media_id), shown with the item's alt text, caption, place and year. */
+    public const string FIELD_IMAGE = 'image';
+
+    /** An on/off switch (stored as true or false), e.g. "Hide this chapter". */
+    public const string FIELD_TOGGLE = 'toggle';
+
+    /** The switch that keeps a list item in the editor but off the page. */
+    public const string HIDDEN = 'hidden';
+
     /** Search titles longer than this are cut off in results. */
     public const int SEO_TITLE_MAX = 60;
 
@@ -119,11 +131,139 @@ final readonly class PageBlockDefinition
     }
 
     /**
-     * @return array{label: string, kind: string, max: int|null}
+     * A list item field. An optional field may be left empty; an item missing a
+     * required field is dropped when saved.
+     *
+     * `group` gathers fields under one heading inside an item (a chapter's "Milestone 1", "Photo").
+     *
+     * @return array{label: string, kind: string, max: int|null, required: bool, group: ?string}
      */
-    public static function field(string $label, int $max, string $kind = self::FIELD_TEXT): array
+    public static function field(string $label, int $max, string $kind = self::FIELD_TEXT, bool $required = true, ?string $group = null): array
     {
-        return ['label' => $label, 'kind' => $kind, 'max' => $max];
+        return ['label' => $label, 'kind' => $kind, 'max' => $max, 'required' => $required, 'group' => $group];
+    }
+
+    /**
+     * An item's image, always optional. Store it under the item's media_id.
+     *
+     * @return array{label: string, kind: string, max: int|null, required: bool}
+     */
+    public static function imageField(string $label, ?string $group = null): array
+    {
+        return ['label' => $label, 'kind' => self::FIELD_IMAGE, 'max' => null, 'required' => false, 'group' => $group];
+    }
+
+    /**
+     * The "Hide this ..." switch of a list item: hidden items stay in the editor and leave the page.
+     *
+     * @return array{label: string, kind: string, max: int|null, required: bool, group: ?string}
+     */
+    public static function hiddenField(string $label): array
+    {
+        return ['label' => $label, 'kind' => self::FIELD_TOGGLE, 'max' => null, 'required' => false, 'group' => null];
+    }
+
+    /**
+     * The items a page shows: hidden ones left out.
+     *
+     * @param  array<int, array<string, mixed>>  $items
+     * @return list<array<string, mixed>>
+     */
+    public static function visibleItems(array $items): array
+    {
+        return array_values(array_filter($items, fn (mixed $item): bool => is_array($item) && ! ($item[self::HIDDEN] ?? false)));
+    }
+
+    /**
+     * The fields of one group in the order they lay out best: switches, then short
+     * fields (side by side), then long text and images (full width).
+     *
+     * @param  array<string, array{kind: string, max: int|null}>  $fields
+     * @return array<string, array{kind: string, max: int|null}>
+     */
+    public static function laidOut(array $fields): array
+    {
+        $rank = fn (array $spec): int => match (true) {
+            $spec['kind'] === self::FIELD_TOGGLE => 0,
+            $spec['kind'] === self::FIELD_IMAGE || self::isLong($spec) => 2,
+            default => 1,
+        };
+
+        $order = array_keys($fields);
+        uksort($fields, fn (string $a, string $b): int => [$rank($fields[$a]), array_search($a, $order, true)] <=> [$rank($fields[$b]), array_search($b, $order, true)]);
+
+        return $fields;
+    }
+
+    /**
+     * Whether a field is a short one-line box (half width when it has a short neighbour).
+     *
+     * @param  array{kind: string, max: int|null}  $spec
+     */
+    public static function isShort(array $spec): bool
+    {
+        return in_array($spec['kind'], [self::FIELD_TEXT, self::FIELD_PLAIN, self::FIELD_ROUTE], true) && ! self::isLong($spec);
+    }
+
+    /**
+     * Fields gathered by their group, in order: [group label or '' => [field => spec]].
+     *
+     * @param  array<string, array{label: string, kind: string, max: int|null, group?: ?string}>  $fields
+     * @return array<string, array<string, array{label: string, kind: string, max: int|null}>>
+     */
+    public static function grouped(array $fields): array
+    {
+        $groups = [];
+
+        foreach ($fields as $field => $spec) {
+            $groups[(string) ($spec['group'] ?? '')][$field] = $spec;
+        }
+
+        return $groups;
+    }
+
+    /** List fields allowed this many characters or more are edited in a growing text area, full width. */
+    public const int LONG_FIELD = 120;
+
+    /**
+     * Whether a list field holds enough words to need a text area rather than one line.
+     *
+     * @param  array{kind: string, max: int|null}  $spec
+     */
+    public static function isLong(array $spec): bool
+    {
+        return in_array($spec['kind'], [self::FIELD_TEXT, self::FIELD_PLAIN], true) && (int) $spec['max'] >= self::LONG_FIELD;
+    }
+
+    /**
+     * Whether a field is edited on the item's heading row (shown even while the item is folded).
+     *
+     * @param  array{inline?: bool}  $spec
+     */
+    public static function isInline(array $spec): bool
+    {
+        return (bool) ($spec['inline'] ?? false);
+    }
+
+    /**
+     * A field edited on the item's heading row, e.g. a chapter's numeral and years.
+     *
+     * @param  array<string, mixed>  $spec
+     * @return array<string, mixed>
+     */
+    public static function inline(array $spec): array
+    {
+        return ['inline' => true] + $spec;
+    }
+
+    /**
+     * Whether a list item may leave this field empty.
+     *
+     * @param  array{required?: bool}  $spec
+     */
+    public static function isRequired(array $spec): bool
+    {
+        return $spec['required'] ?? true;
     }
 
     /**
@@ -203,6 +343,16 @@ final readonly class PageBlockDefinition
      */
     public function blankItem(): array
     {
-        return array_map(fn (): string => '', $this->fields);
+        return array_map(fn (array $field): ?string => $field['kind'] === self::FIELD_IMAGE ? null : '', $this->fields);
+    }
+
+    /**
+     * The list's image fields (an item holds at most one, under media_id).
+     *
+     * @return array<string, array{label: string, kind: string, max: int|null}>
+     */
+    public function imageFields(): array
+    {
+        return array_filter($this->fields, fn (array $field): bool => $field['kind'] === self::FIELD_IMAGE);
     }
 }

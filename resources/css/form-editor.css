@@ -107,24 +107,11 @@
 
     .form-file__actions {
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
-        gap: 1.25rem;
-        font-size: 0.9375rem;
+        gap: 0.5rem;
     }
 
-    .form-file__action {
-        min-height: 2.75rem;
-        color: var(--ink);
-        text-decoration: underline;
-        text-decoration-thickness: 1px;
-        text-decoration-color: var(--accent-line);
-        text-underline-offset: 0.25em;
-    }
-
-    .form-file__action--remove {
-        color: var(--danger);
-        text-decoration-color: currentColor;
-    }
 
     .form-progress {
         display: flex;

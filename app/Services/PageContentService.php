@@ -105,6 +105,22 @@ class PageContentService
     }
 
     /**
+     * The address of a destination from PageLinks (a route name), in the current language.
+     */
+    public function url(?string $route): string
+    {
+        return $this->route($route, 'home');
+    }
+
+    /**
+     * Whether editors took this section (its PageBlocks heading) off the page.
+     */
+    public function isHidden(string $page, string $section): bool
+    {
+        return in_array($section, $this->load($page)['hidden'] ?? [], true);
+    }
+
+    /**
      * A list block's items, in order.
      *
      * @return list<array<string, string>>
@@ -139,9 +155,19 @@ class PageContentService
         $value = $this->values($page)[$key];
         $media = clone $media;
 
+        // The block's own details (in this language) are the image's, an emptied one included: the
+        // media item's stored details never show through.
+        $locale = app()->getLocale();
+
         foreach ([MediaProperties::ALT_TEXT, MediaProperties::CAPTION, MediaProperties::PLACE, MediaProperties::YEAR] as $property) {
-            if (filled($value[$property] ?? null)) {
-                $media->setCustomProperty($property, $value[$property]);
+            $paths = [$property];
+
+            if ($locale !== Locales::DEFAULT && in_array($property, MediaProperties::translatable(), true)) {
+                $paths[] = MediaProperties::translationPath($locale, $property);
+            }
+
+            foreach ($paths as $path) {
+                filled($value[$property] ?? null) ? $media->setCustomProperty($path, $value[$property]) : $media->forgetCustomProperty($path);
             }
         }
 
@@ -221,7 +247,7 @@ class PageContentService
                 : $this->stored($page, $previewId);
         } catch (QueryException|PDOException) {
             // The database is unreachable (an error page is being drawn): the built-in copy.
-            $stored = ['values' => [], 'media' => []];
+            $stored = ['values' => [], 'media' => [], 'hidden' => []];
         }
 
         $values = [];
@@ -230,7 +256,7 @@ class PageContentService
             $values[$key] = $this->localise($definition, $stored['values'][$key] ?? [], $locale);
         }
 
-        return $this->loaded[$memo] = ['values' => $values, 'media' => $stored['media']];
+        return $this->loaded[$memo] = ['values' => $values, 'media' => $stored['media'], 'hidden' => $stored['hidden'] ?? []];
     }
 
     /**
@@ -274,7 +300,7 @@ class PageContentService
         $previewing = $model !== null && $previewId === (int) $model->getKey();
 
         if ($model === null || (! $previewing && ! $model->isPublished())) {
-            return ['values' => [], 'media' => []];
+            return ['values' => [], 'media' => [], 'hidden' => []];
         }
 
         $values = [];
@@ -298,7 +324,7 @@ class PageContentService
             }
         }
 
-        return ['values' => $values, 'media' => $media];
+        return ['values' => $values, 'media' => $media, 'hidden' => $model->hiddenSections()];
     }
 
     private function route(?string $route, string $fallback): string

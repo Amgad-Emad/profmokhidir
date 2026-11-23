@@ -7,8 +7,10 @@ namespace App\Services;
 use App\Constants\AdminNavigation;
 use App\Constants\AdminUx;
 use App\Constants\ContentTypes;
+use App\Constants\Pages;
 use App\Constants\Permissions;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Everything the admin frame shows around a screen: the sidebar groups (with
@@ -36,6 +38,12 @@ class AdminShellService
 
             foreach (AdminNavigation::itemsIn($groupKey) as $key => $item) {
                 if (! $user->can($item['permission'])) {
+                    continue;
+                }
+
+                if ($key === AdminNavigation::PAGES) {
+                    array_push($items, ...$this->pageItems());
+
                     continue;
                 }
 
@@ -115,7 +123,13 @@ class AdminShellService
                 continue;
             }
 
-            $crumbs[] = ['label' => AdminNavigation::groups()[$item['group']], 'url' => null];
+            $groupLabel = AdminNavigation::groups()[$item['group']];
+
+            // A group named like its screen (Pages › Pages) shows once.
+            if ($groupLabel !== $item['label']) {
+                $crumbs[] = ['label' => $groupLabel, 'url' => null];
+            }
+
             $isScreen = $currentRoute === $item['route'];
             $crumbs[] = ['label' => $item['label'], 'url' => $isScreen ? null : route($item['route'])];
 
@@ -203,6 +217,33 @@ class AdminShellService
         ];
 
         return $entries;
+    }
+
+    /**
+     * Every site page as its own link to its editor (the page's saved content),
+     * the open one marked active.
+     *
+     * @return list<array{key: string, label: string, url: string, icon: string, active: bool, count: int}>
+     */
+    private function pageItems(): array
+    {
+        $route = request()->route();
+        $current = $route?->getName() === Pages::EDIT_ROUTE ? $route->parameter(Pages::ROUTE_PARAMETER) : null;
+        $current = $current instanceof Model ? $current->getAttribute('key') : $current;
+        $items = [];
+
+        foreach (Pages::definitions() as $key => $definition) {
+            $items[] = [
+                'key' => AdminNavigation::PAGES.'-'.$key,
+                'label' => __($definition['title']),
+                'url' => route(Pages::EDIT_ROUTE, [Pages::ROUTE_PARAMETER => $key]),
+                'icon' => AdminUx::icon(AdminNavigation::PAGES),
+                'active' => $current === $key,
+                'count' => 0,
+            ];
+        }
+
+        return $items;
     }
 
     private function isActive(string $route, ?string $currentRoute): bool

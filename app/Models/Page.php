@@ -15,11 +15,29 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * While it is a draft, visitors see the built-in copy; once published, its
  * blocks. Its version history is the shared revisions table.
  */
-#[Fillable(['key', 'status', 'published_at', 'sort_order'])]
+#[Fillable(['key', 'status', 'published_at', 'sort_order', 'hidden_sections'])]
 class Page extends Model
 {
     /** @use HasFactory<PageFactory> */
     use HasFactory, Publishable;
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return ['hidden_sections' => 'array'];
+    }
+
+    /**
+     * The section headings (PageBlocks) visitors do not see.
+     *
+     * @return list<string>
+     */
+    public function hiddenSections(): array
+    {
+        return array_values(array_filter((array) $this->hidden_sections, 'is_string'));
+    }
 
     public function blocks(): HasMany
     {

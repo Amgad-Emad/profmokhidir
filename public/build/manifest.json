@@ -10,8 +10,8 @@
       "_i18n-DFSjS90y.js"
     ]
   },
-  "_theme-B_4eTF1Q.js": {
-    "file": "assets/theme-B_4eTF1Q.js",
+  "_theme-DjNS5SQ1.js": {
+    "file": "assets/theme-DjNS5SQ1.js",
     "name": "theme",
     "imports": [
       "_i18n-DFSjS90y.js"
@@ -53,7 +53,7 @@
     "isDynamicEntry": true
   },
   "resources/css/app.css": {
-    "file": "assets/app-CQYh4NVn.css",
+    "file": "assets/app-X67H7nQP.css",
     "name": "app",
     "names": [
       "app.css"
@@ -62,13 +62,13 @@
     "isEntry": true
   },
   "resources/js/admin.js": {
-    "file": "assets/admin-CMkP7vA1.js",
+    "file": "assets/admin-CTKEFl-Q.js",
     "name": "admin",
     "src": "resources/js/admin.js",
     "isEntry": true,
     "imports": [
       "_i18n-DFSjS90y.js",
-      "_theme-B_4eTF1Q.js"
+      "_theme-DjNS5SQ1.js"
     ]
   },
   "resources/js/admin/analytics-chart.js": {
@@ -87,28 +87,28 @@
     "isDynamicEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-lSztvInx.js",
+    "file": "assets/app-Hs5AwITY.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "imports": [
       "_i18n-DFSjS90y.js",
       "_lightbox-B7x0plgN.js",
-      "_theme-B_4eTF1Q.js"
+      "_theme-DjNS5SQ1.js"
     ],
     "dynamicImports": [
       "resources/js/analytics.js"
     ]
   },
   "resources/js/chat.js": {
-    "file": "assets/chat-D_cTyl55.js",
+    "file": "assets/chat-D6XVEBvw.js",
     "name": "chat",
     "src": "resources/js/chat.js",
     "isEntry": true,
     "imports": [
       "_i18n-DFSjS90y.js",
       "_lightbox-B7x0plgN.js",
-      "_theme-B_4eTF1Q.js"
+      "_theme-DjNS5SQ1.js"
     ],
     "dynamicImports": [
       "node_modules/katex/dist/katex.mjs"

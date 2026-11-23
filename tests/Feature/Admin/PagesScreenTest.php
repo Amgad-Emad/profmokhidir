@@ -331,7 +331,7 @@ class PagesScreenTest extends TestCase
     }
 
     #[Test]
-    public function the_hero_image_is_uploaded_needs_its_details_and_shows_once_published(): void
+    public function the_hero_image_is_uploaded_publishes_without_details_and_keeps_them_once_filled(): void
     {
         $component = Livewire::actingAs($this->editor)->test(Edit::class, ['page' => Pages::HOME])
             ->set('uploads.hero_image', UploadedFile::fake()->image('hero.jpg', 800, 1000))
@@ -340,8 +340,8 @@ class PagesScreenTest extends TestCase
         $mediaId = $component->get('form.hero_image.media_id');
         $this->assertNotNull($mediaId);
 
-        $component->call('publish')->assertHasErrors(['form.hero_image.alt_text', 'form.hero_image.caption', 'form.hero_image.place', 'form.hero_image.year']);
-        $this->get('/')->assertDontSee('hero.jpg');
+        $component->call('publish')->assertHasNoErrors();
+        $this->get('/')->assertOk();
 
         $component->set('form.hero_image.alt_text', 'Professor Khidir at his desk')
             ->set('form.hero_image.caption', 'At the faculty')
@@ -406,7 +406,7 @@ class PagesScreenTest extends TestCase
     {
         Livewire::actingAs($this->editor)->test(Edit::class, ['page' => Pages::HOME])
             ->set('form.scroll_cue', 'Down')
-            ->assertSee('Use the original wording')
+            ->assertDontSee('Use the original wording')
             ->call('restoreDefault', 'scroll_cue')
             ->assertSet('form.scroll_cue', 'Scroll');
     }

@@ -88,12 +88,26 @@ final class MediaProperties
     }
 
     /**
-     * Properties an image needs before it may appear on the public site.
+     * The details that describe a photo. Optional; the media library flags
+     * images missing any of them ("Needs details", the incomplete filter) as
+     * a reminder, never a block.
+     *
+     * @return list<string>
+     */
+    public static function details(): array
+    {
+        return [self::ALT_TEXT, self::CAPTION, self::PLACE, self::YEAR];
+    }
+
+    /**
+     * Properties an image needs before it may appear on the public site: none.
+     * Alt text, caption, place and year are optional (owner's decision,
+     * 23 November 2026); the public site renders only the ones filled in.
      *
      * @return list<string>
      */
     public static function requiredForPublishing(): array
     {
-        return [self::ALT_TEXT, self::CAPTION, self::PLACE, self::YEAR];
+        return [];
     }
 }

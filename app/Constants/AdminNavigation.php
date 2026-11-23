@@ -12,6 +12,9 @@ namespace App\Constants;
  */
 final class AdminNavigation
 {
+    /** One link per site page (App\Constants\Pages), each opening that page's editor. */
+    public const string GROUP_PAGES = 'pages';
+
     public const string GROUP_CONTENT = 'content';
 
     public const string GROUP_MEDIA = 'media';
@@ -87,6 +90,7 @@ final class AdminNavigation
     public static function groups(): array
     {
         return [
+            self::GROUP_PAGES => self::translate('Pages'),
             self::GROUP_CONTENT => self::translate('Content'),
             self::GROUP_MEDIA => self::translate('Media'),
             self::GROUP_COMMUNITY => self::translate('Community'),
@@ -105,7 +109,8 @@ final class AdminNavigation
     public static function items(): array
     {
         return [
-            self::PAGES => self::item('Pages', self::GROUP_CONTENT, 'content.pages', 'content/pages', Permissions::MANAGE_CONTENT),
+            // Listed in the sidebar as one link per page (AdminShellService::pageItems()), not as one item.
+            self::PAGES => self::item('Pages', self::GROUP_PAGES, 'content.pages', 'content/pages', Permissions::MANAGE_CONTENT),
             self::PROFILE => self::item('About & profile', self::GROUP_CONTENT, 'content.profile', 'content/profile', Permissions::MANAGE_CONTENT),
             self::CV => self::item('CV entries', self::GROUP_CONTENT, 'content.cv', 'content/cv', Permissions::MANAGE_CONTENT),
             self::PUBLICATIONS => self::item('Publications', self::GROUP_CONTENT, 'content.publications', 'content/publications', Permissions::MANAGE_CONTENT),

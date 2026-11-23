@@ -92,10 +92,6 @@ class PageRequest extends FormRequest
     public function messages(): array
     {
         return [
-            '*.alt_text.required_with' => __('Describe the image for people who cannot see it.'),
-            '*.caption.required_with' => __('Every photograph needs a caption.'),
-            '*.place.required_with' => __('Every photograph needs the place it was taken.'),
-            '*.year.required_with' => __('Every photograph needs the year it was taken.'),
             '*.url.url' => __('Enter a full web address beginning with https://.'),
         ];
     }
@@ -209,17 +205,20 @@ class PageRequest extends FormRequest
         }
 
         foreach ($definition->editableFields() as $field => $spec) {
-            $rules[$key.'.*.'.$field] = $spec['kind'] === PageBlockDefinition::FIELD_ROUTE
-                ? ['nullable', 'string', Rule::in(PageLinks::routes())]
-                : ['nullable', 'string', 'max:'.$spec['max']];
+            $rules[$key.'.*.'.$field] = match ($spec['kind']) {
+                PageBlockDefinition::FIELD_ROUTE => ['nullable', 'string', Rule::in(PageLinks::routes())],
+                PageBlockDefinition::FIELD_IMAGE => ['nullable', 'integer', 'min:1'],
+                PageBlockDefinition::FIELD_TOGGLE => ['nullable', 'boolean'],
+                default => ['nullable', 'string', 'max:'.$spec['max']],
+            };
         }
 
         return $rules;
     }
 
     /**
-     * The image's details: alt text always, and for a photograph on the page
-     * its caption, place and year too (every photo on the site carries them).
+     * The image's details, all optional: alt text always, and for a photograph
+     * on the page its caption, place and year too (rendered only when filled).
      *
      * @return array<string, list<mixed>>
      */
@@ -229,7 +228,7 @@ class PageRequest extends FormRequest
         $rules = [
             $key => ['array'],
             $media => ['nullable', 'integer', 'min:1'],
-            $key.'.alt_text' => ['nullable', 'required_with:'.$media, 'string', 'max:'.PageBlockDefinition::IMAGE_TEXT_MAX],
+            $key.'.alt_text' => ['nullable', 'string', 'max:'.PageBlockDefinition::IMAGE_TEXT_MAX],
         ];
 
         if (! $photograph) {
@@ -237,9 +236,9 @@ class PageRequest extends FormRequest
         }
 
         return $rules + [
-            $key.'.caption' => ['nullable', 'required_with:'.$media, 'string', 'max:'.PageBlockDefinition::IMAGE_TEXT_MAX],
-            $key.'.place' => ['nullable', 'required_with:'.$media, 'string', 'max:'.PageBlockDefinition::IMAGE_TEXT_MAX],
-            $key.'.year' => ['nullable', 'required_with:'.$media, 'integer', 'min:1900', 'max:'.(int) date('Y')],
+            $key.'.caption' => ['nullable', 'string', 'max:'.PageBlockDefinition::IMAGE_TEXT_MAX],
+            $key.'.place' => ['nullable', 'string', 'max:'.PageBlockDefinition::IMAGE_TEXT_MAX],
+            $key.'.year' => ['nullable', 'integer', 'min:1900', 'max:'.(int) date('Y')],
             $key.'.focus_x' => ['nullable', 'integer', 'min:0', 'max:100'],
             $key.'.focus_y' => ['nullable', 'integer', 'min:0', 'max:100'],
         ];

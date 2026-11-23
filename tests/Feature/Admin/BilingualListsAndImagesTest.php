@@ -76,7 +76,7 @@ class BilingualListsAndImagesTest extends TestCase
     }
 
     #[Test]
-    public function image_details_save_arabic_alt_text_and_publishing_still_needs_the_english(): void
+    public function image_details_save_arabic_alt_text_and_only_english_counts_as_filled(): void
     {
         $album = Album::factory()->draft()->create();
         App::setLocale(Locales::AR);
@@ -99,8 +99,8 @@ class BilingualListsAndImagesTest extends TestCase
         $this->assertSame('طلاب في الحقل', $media->getTranslatedProperty(MediaProperties::ALT_TEXT, 'ar'));
         $this->assertNull($media->getTranslatedProperty(MediaProperties::ALT_TEXT, 'en'));
 
-        // Arabic alone does not make the image publishable, even for an Arabic editor.
-        $this->assertContains(MediaProperties::ALT_TEXT, app(MediaService::class)->missingForPublishing($media));
+        // Arabic alone does not fill the detail, even for an Arabic editor.
+        $this->assertContains(MediaProperties::ALT_TEXT, app(MediaService::class)->missingDetails($media));
 
         // Clearing the Arabic forgets it.
         $component->set("images.$id.translations.ar.".MediaProperties::ALT_TEXT, '')

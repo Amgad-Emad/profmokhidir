@@ -249,9 +249,29 @@ class MediaService
      */
     public function missingForPublishing(Media $media): array
     {
-        // English is what publishing needs, whatever language the editor works in.
+        return $this->blankOf($media, MediaProperties::requiredForPublishing());
+    }
+
+    /**
+     * Which describing details (alt, caption, place, year) are still empty: a
+     * reminder for the media library, never a block.
+     *
+     * @return list<string> missing property keys
+     */
+    public function missingDetails(Media $media): array
+    {
+        return $this->blankOf($media, MediaProperties::details());
+    }
+
+    /**
+     * @param  list<string>  $keys
+     * @return list<string>
+     */
+    private function blankOf(Media $media, array $keys): array
+    {
+        // English is what counts, whatever language the editor works in.
         return array_values(array_filter(
-            MediaProperties::requiredForPublishing(),
+            $keys,
             fn (string $key): bool => blank($media instanceof LocalizedMedia ? $media->getTranslatedProperty($key, Locales::DEFAULT) : $media->getCustomProperty($key)),
         ));
     }

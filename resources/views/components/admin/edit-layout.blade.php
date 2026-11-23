@@ -8,7 +8,7 @@
     the page editor keeps drafts beside the published page, so it autosaves either way. `draftable`
     and `publish-label` pass through to the save bar.
 --}}
-@props(['editor', 'sections' => [], 'saveLabel' => null, 'autosave' => null, 'draftable' => false, 'publishLabel' => null])
+@props(['editor', 'sections' => [], 'saveLabel' => null, 'autosave' => null, 'draftable' => false, 'publishLabel' => null, 'saveOnly' => false])
 @use('App\Constants\AdminUx')
 @use('App\Constants\Placeholders')
 @php
@@ -42,5 +42,5 @@
         {{ $after ?? '' }}
     </div>
 
-    <x-admin.save-bar :editor="$editor" :save-label="$saveLabel" :draftable="$draftable" :publish-label="$publishLabel" />
+    <x-admin.save-bar :editor="$editor" :save-label="$saveLabel" :draftable="$draftable" :publish-label="$publishLabel" :save-only="$saveOnly" />
 </div>
