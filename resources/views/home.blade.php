@@ -43,7 +43,8 @@
         @forelse ($chapters as $chapter)
             <article class="life-chapter" aria-labelledby="{{ $chapter['id'] }}">
                 <div class="mx-auto max-w-7xl px-4 sm:px-6">
-                    <div class="life-chapter__inner" data-scroll-line>
+                    {{-- Without years the marker column shrinks to the numeral; with neither, the milestones take the row. --}}
+                    <div @class(['life-chapter__inner', 'life-chapter__inner--no-years' => blank($chapter['years']) && filled($chapter['numeral']), 'life-chapter__inner--bare' => blank($chapter['years']) && blank($chapter['numeral'])]) data-scroll-line>
                         <span class="life-chapter__line" aria-hidden="true"></span>
                         <header class="life-chapter__marker">
                             @if (filled($chapter['numeral']))

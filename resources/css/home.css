@@ -81,6 +81,11 @@
         gap: var(--space-1);
     }
 
+    /* With neither years nor numeral the marker holds only the screen-reader heading: no row, no gap. */
+    .life-chapter__inner--bare > .life-chapter__marker {
+        display: contents;
+    }
+
     .life-chapter__years {
         font-family: var(--font-display);
         font-weight: 300;
@@ -154,6 +159,16 @@
 
         .life-chapter__inner::before {
             top: calc(var(--space-12) + 0.5rem);
+        }
+
+        /* No years: the marker column is only as wide as the numeral. */
+        .life-chapter__inner--no-years {
+            grid-template-columns: max-content minmax(0, 1fr);
+        }
+
+        /* Neither years nor numeral: no marker column at all. */
+        .life-chapter__inner--bare {
+            grid-template-columns: minmax(0, 1fr);
         }
 
         /* Below the fixed 5rem header. */

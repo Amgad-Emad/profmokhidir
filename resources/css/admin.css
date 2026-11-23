@@ -1936,6 +1936,18 @@ html.admin-html {
         border-bottom: 0;
     }
 
+    /* The groups of an item, evenly spaced; "Add milestone" sits between them with room around it. */
+    .page-list__groups {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+
+    .page-list__add {
+        align-self: flex-start;
+        margin-block: 0.25rem;
+    }
+
     /* A group of fields inside an item (a milestone, the photo, the quote), boxed under its own heading. */
     .page-list__group {
         display: flex;
