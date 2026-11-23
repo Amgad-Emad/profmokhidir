@@ -37,7 +37,7 @@
                     @php
                         // Words are asked for in Arabic; years, numerals and switches are the same in both
                         // languages and edit the English tab's value, so they can be changed from either tab.
-                        $fieldsHere = array_filter($block->editableFields(), fn ($spec) => ! PageBlockDefinition::isInline($spec) && in_array($spec['kind'], [PageBlockDefinition::FIELD_TEXT, PageBlockDefinition::FIELD_PLAIN, PageBlockDefinition::FIELD_TOGGLE], true));
+                        $fieldsHere = array_filter($block->editableFields(), fn ($spec) => ! PageBlockDefinition::isInline($spec) && in_array($spec['kind'], [PageBlockDefinition::FIELD_TEXT, PageBlockDefinition::FIELD_PLAIN, PageBlockDefinition::FIELD_TOGGLE, PageBlockDefinition::FIELD_IMAGE], true));
                         $firstPlain = array_key_first(array_filter($block->editableFields(), fn ($spec) => $spec['kind'] === PageBlockDefinition::FIELD_PLAIN));
                         $itemName = __($block->itemLabel).' '.($index + 1).(filled($firstPlain ? ($item[$firstPlain] ?? null) : null) ? ' · '.$item[$firstPlain] : '').(! empty($item[PageBlockDefinition::HIDDEN]) ? ' · '.__('Hidden') : '');
                         $englishModel = 'form.'.$key.'.'.$index.'.';
@@ -57,7 +57,13 @@
                                         $half = $pairShort && PageBlockDefinition::isShort($spec);
                                         $sharedId = 'ar-'.str_replace('.', '-', $englishModel.$field);
                                     @endphp
-                                    @if ($spec['kind'] === PageBlockDefinition::FIELD_TOGGLE)
+                                    @if ($spec['kind'] === PageBlockDefinition::FIELD_IMAGE)
+                                        {{-- The same photo as the English tab (one image for both languages). --}}
+                                        @php $itemMedia = $images[$key.'.'.$index] ?? null; @endphp
+                                        <div class="w-full">
+                                            <x-form.upload :model="'uploads.'.$key.'.'.$index" :id="'uploads-'.$key.'-'.$index.'-ar'" :label="__($spec['label'])" :hint="$imageHint" :media="$itemMedia" :href="$itemMedia?->getUrl()" :remove="$itemMedia ? 'removeListImage(\''.$key.'\', '.$index.')' : null" accept="image/jpeg,image/png,image/webp" :image="true" />
+                                        </div>
+                                    @elseif ($spec['kind'] === PageBlockDefinition::FIELD_TOGGLE)
                                         <x-form.toggle :model="$englishModel.$field" :id="$sharedId" :label="__($spec['label'])" :hint="$field === PageBlockDefinition::HIDDEN ? __('Hidden items stay here and leave the page until you switch this off.') : __('The same in both languages.')" />
                                     @elseif ($spec['kind'] === PageBlockDefinition::FIELD_PLAIN)
                                         <x-form.input @class(['form-col--half' => $half]) :model="$englishModel.$field" :id="$sharedId" :value="$item[$field] ?? ''" :label="__($spec['label'])" :hint="__('The same in both languages.')" :maxlength="$spec['max']" :counter="true" :optional="PageBlockDefinition::isRequired($spec) ? false : null" dir="ltr" />
