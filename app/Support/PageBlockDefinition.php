@@ -95,9 +95,9 @@ final readonly class PageBlockDefinition
         return new self($key, PageBlockType::Image, $label, $section, self::emptyImage(), required: false, hint: $hint);
     }
 
-    public static function link(string $key, string $label, string $section, string $defaultLabel, string $defaultRoute, int $max, ?string $hint = null): self
+    public static function link(string $key, string $label, string $section, string $defaultLabel, string $defaultRoute, int $max, ?string $hint = null, bool $required = true): self
     {
-        return new self($key, PageBlockType::Link, $label, $section, ['label' => $defaultLabel, 'route' => $defaultRoute, 'url' => null], $max, hint: $hint);
+        return new self($key, PageBlockType::Link, $label, $section, ['label' => $defaultLabel, 'route' => $defaultRoute, 'url' => null], $max, $required, hint: $hint);
     }
 
     /**

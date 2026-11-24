@@ -21,6 +21,7 @@ use App\Services\PageService;
 use App\Support\PlaceholderImage;
 use App\View\Components\Site\Footer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Testing\TestResponse;
 use PHPUnit\Framework\Attributes\Test;
@@ -40,6 +41,9 @@ class HomePageTest extends TestCase
     #[Test]
     public function the_hero_keeps_the_brand_layout_adds_the_epigraph_and_a_scroll_cue(): void
     {
+        // A chapter for the scroll cue to point to: it shows only when the chapters do.
+        Award::factory()->published()->create(['year' => 1985]);
+
         $response = $this->home()->assertOk();
 
         $response
@@ -60,9 +64,16 @@ class HomePageTest extends TestCase
     }
 
     #[Test]
-    public function the_hero_portrait_is_a_warm_monochrome_responsive_image_with_a_place_year_caption(): void
+    public function the_hero_image_is_a_responsive_image_with_a_place_year_caption(): void
     {
-        Profile::factory()->published()->withPortrait()->create();
+        $pages = app(PageService::class);
+        $pages->install();
+        $page = $pages->findByKey(Pages::HOME);
+        $media = $pages->uploadImage($page, 'hero_image', UploadedFile::fake()->image('portrait.jpg', 800, 1000));
+        $pages->publishBlocks($page, ['hero_image' => [
+            'media_id' => $media->getKey(), 'alt_text' => 'Portrait of Professor Khidir', 'caption' => 'Portrait',
+            'place' => 'Khartoum', 'year' => 1998,
+        ]]);
 
         $html = $this->home()->assertOk()->getContent();
 
@@ -78,7 +89,20 @@ class HomePageTest extends TestCase
     }
 
     #[Test]
-    public function a_life_in_chapters_shows_his_honours_by_decade_with_numerals_photos_and_a_scroll_drawn_line(): void
+    public function the_profile_portrait_does_not_stand_in_for_an_empty_hero_image(): void
+    {
+        Profile::factory()->published()->withPortrait()->create();
+
+        $html = $this->home()->assertOk()->getContent();
+
+        preg_match('/<section class="hero.*?<\/section>/s', $html, $hero);
+
+        $this->assertStringNotContainsString('hero__portrait', $hero[0]);
+        $this->assertSame(1, substr_count($hero[0], 'data-scroll-scale'));
+    }
+
+    #[Test]
+    public function a_life_in_chapters_shows_his_honours_by_decade_with_photos_and_a_scroll_drawn_line(): void
     {
         CvEntry::factory()->published()->create(['section' => CvSection::Education, 'title' => 'B.Sc. (Agriculture)', 'organisation' => 'University of Khartoum', 'start_year' => 1958, 'end_year' => 1962]);
         Award::factory()->published()->create(['name' => 'Fellowship of the Academy', 'organisation' => 'Academy of Sciences', 'year' => 1967]);
@@ -88,9 +112,11 @@ class HomePageTest extends TestCase
 
         $html = $this->home()->assertOk()
             ->assertSeeInOrder([
-                'Chapter </span>I</p>', '1960–1969', '1967', 'Fellowship of the Academy', 'Award', 'Academy of Sciences', 'Students at Shambat', 'Shambat, 1967',
-                'Chapter </span>II</p>', '1980–1989', '1986', 'Order of Merit', 'Award', 'Republic of Sudan',
+                '1960–1969', '1967', 'Fellowship of the Academy', 'Award', 'Academy of Sciences', 'Students at Shambat', 'Shambat, 1967',
+                '1980–1989', '1986', 'Order of Merit', 'Award', 'Republic of Sudan',
             ], false)
+            // Numerals show only when an editor enters one: none is made up.
+            ->assertDontSee('<p class="t-numeral text-accent-text">', false)
             ->assertDontSee('Draft award')
             ->assertDontSee('id="chapter-1950s"', false)
             ->getContent();
@@ -150,12 +176,16 @@ class HomePageTest extends TestCase
     }
 
     #[Test]
-    public function every_list_has_a_designed_empty_state_when_nothing_is_published(): void
+    public function sections_with_nothing_entered_are_left_out_with_no_placeholder(): void
     {
         $this->home()
             ->assertOk()
-            ->assertSee('The chapters of his life will appear here as his record is catalogued.')
-            ->assertSee('The figures will appear once his publications, appointments and honours are catalogued.')
+            ->assertDontSee('The chapters of his life will appear here as his record is catalogued.')
+            ->assertDontSee('The figures will appear once his publications, appointments and honours are catalogued.')
+            ->assertDontSee('class="empty-state', false)
+            ->assertDontSee('<section class="life', false)
+            ->assertDontSee('work-in-numbers', false)
+            ->assertDontSee('class="scroll-cue', false)
             ->assertDontSee('<dl class="figures"', false)
             ->assertDontSee('<figure class="interlude', false);
     }

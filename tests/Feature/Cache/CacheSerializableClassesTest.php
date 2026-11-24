@@ -97,6 +97,7 @@ class CacheSerializableClassesTest extends TestCase
         $this->get(route('about'))->assertOk()->assertSee('Cached Name');
         $this->assertTrue(Cache::store('database')->has(CacheKeys::PROFILE));
         $this->get(route('about'))->assertOk()->assertSee('Cached Name');
-        $this->get(route('home'))->assertOk()->assertSee('Khartoum, 1998');
+        // The home hero shows only its own image (Admin › Pages › Home), never the profile portrait.
+        $this->get(route('home'))->assertOk()->assertDontSee('Khartoum, 1998');
     }
 }

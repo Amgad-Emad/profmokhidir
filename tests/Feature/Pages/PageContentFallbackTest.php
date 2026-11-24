@@ -49,13 +49,30 @@ class PageContentFallbackTest extends TestCase
     #[Test]
     public function a_deleted_block_falls_back_to_the_built_in_copy(): void
     {
+        $this->publish(Pages::AWARDS, ['intro' => 'An edited introduction.']);
+        $this->get('/awards')->assertSee('An edited introduction.');
+
+        app(PageRepositoryInterface::class)->deleteBlock(app(PageService::class)->findByKey(Pages::AWARDS), 'intro');
+        app(PageContentService::class)->flush(Pages::AWARDS);
+
+        $this->get('/awards')->assertOk()->assertDontSee('An edited introduction.');
+    }
+
+    #[Test]
+    public function a_deleted_home_block_shows_nothing_instead_of_the_built_in_copy(): void
+    {
         $this->publish(Pages::HOME, ['hero_tagline' => 'An edited tagline.']);
         $this->get('/')->assertSee('An edited tagline.');
 
         app(PageRepositoryInterface::class)->deleteBlock(app(PageService::class)->findByKey(Pages::HOME), 'hero_tagline');
         app(PageContentService::class)->flush(Pages::HOME);
 
-        $this->get('/')->assertOk()->assertSee('Teacher, scholar and mentor. A life devoted to knowledge and to those who sought it.');
+        // Only the head keeps the built-in description; the page itself shows no tagline.
+        $html = $this->get('/')->assertOk()->getContent();
+        preg_match('/<main.*<\/main>/s', $html, $main);
+        $this->assertStringContainsString('<meta name="description" content="Teacher, scholar and mentor.', $html);
+        $this->assertStringNotContainsString('Teacher, scholar and mentor.', $main[0]);
+        $this->assertStringNotContainsString('An edited tagline.', $html);
     }
 
     #[Test]
@@ -68,7 +85,8 @@ class PageContentFallbackTest extends TestCase
             $this->get($path)->assertOk();
         }
 
-        $this->get('/')->assertSee('A life in chapters')->assertSee('His lessons continue in every student he taught.');
+        // The home page shows only what an editor entered: with no rows, none of its built-in copy.
+        $this->get('/')->assertDontSee('A life in chapters')->assertDontSee('<section class="hero', false);
         $this->get('/does-not-exist')->assertNotFound()->assertSee('This page has been misplaced in the archive.');
     }
 

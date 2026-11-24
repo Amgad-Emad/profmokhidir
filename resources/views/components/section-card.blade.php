@@ -19,7 +19,9 @@
             <img src="{{ ResponsiveImage::largestUrl($image) }}" @if ($srcset = ResponsiveImage::srcset($image)) srcset="{{ $srcset }}" sizes="{{ SectionCards::IMAGE_SIZES }}" @endif alt="" class="{{ ResponsiveImage::CLASS_ARCHIVE }}" @if ($position) style="object-position: {{ $position }}" @endif loading="lazy" decoding="async">
         </span>
     @endif
-    <span class="section-card__numeral t-label" aria-hidden="true">{{ $card['numeral'] }}</span>
+    @if (filled($card['numeral'] ?? null))
+        <span class="section-card__numeral t-label" aria-hidden="true">{{ $card['numeral'] }}</span>
+    @endif
     <span class="section-card__title" id="{{ $id }}-title" role="heading" aria-level="{{ $level }}">{{ $card['title'] }}</span>
     @if (filled($card['summary']))
         <span class="section-card__summary" id="{{ $id }}-summary">{{ $card['summary'] }}</span>

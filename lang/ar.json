@@ -2516,7 +2516,7 @@
     "Who said it": "قائله",
     "English: :text": "بالإنجليزية: :text",
     "Numeral": "الرقم الروماني",
-    "Each chapter as it shows on the home page, in order: its years, up to three milestones, a photo and an optional quote shown after it. Leave the numeral empty to number the chapters I, II, III in order.": "كل فصل كما يظهر في الصفحة الرئيسية، بالترتيب: سنواته، وحتى ثلاث محطات، وصورة، واقتباس اختياري يظهر بعده. اترك الرقم فارغًا لترقيم الفصول I، II، III بالترتيب.",
+    "Each chapter as it shows on the home page, in order: its years, up to three milestones, a photo and an optional quote shown after it. Leave the numeral empty to show none.": "كل فصل كما يظهر في الصفحة الرئيسية، بالترتيب: سنواته، وحتى ثلاث محطات، وصورة، واقتباس اختياري يظهر بعده. اترك الرقم فارغًا كي لا يظهر رقم.",
     "Hide this chapter": "إخفاء هذا الفصل",
     "Hide this figure": "إخفاء هذا الرقم",
     "Hide this card": "إخفاء هذه البطاقة",

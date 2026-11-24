@@ -235,7 +235,8 @@ final class PageBlockValue
         $default = (array) $definition->default;
         $value = is_array($value) ? $value : [];
 
-        $label = self::text($value['label'] ?? null, $definition->max) ?? $default['label'];
+        // An optional link emptied on purpose keeps no label (no button); a missing one takes the default.
+        $label = self::text($value['label'] ?? null, $definition->max) ?? ($definition->required || ! array_key_exists('label', $value) ? $default['label'] : '');
         $route = is_string($value['route'] ?? null) && PageLinks::isValid($value['route']) ? $value['route'] : null;
         $url = self::url($value['url'] ?? null);
 

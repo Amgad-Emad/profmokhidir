@@ -110,7 +110,8 @@ class PagesScreenTest extends TestCase
             ->assertSee('Hero tagline')
             ->assertSee('Button: Read his story')
             ->assertSee('maxlength="160"', false)
-            ->assertSee('Left empty, the original wording is kept.');
+            // Every home block may be emptied: the home page shows only what is entered.
+            ->assertDontSee('Left empty, the original wording is kept.');
     }
 
     #[Test]
@@ -155,7 +156,8 @@ class PagesScreenTest extends TestCase
         $component->call('unpublish');
 
         $this->assertSame(ContentStatus::Draft, $this->page(Pages::HOME)->status);
-        $this->get('/')->assertDontSee('Edited closing line.')->assertSee('His lessons continue in every student he taught.');
+        // A draft home page shows none of its blocks: only published, entered content reaches visitors.
+        $this->get('/')->assertOk()->assertDontSee('Edited closing line.')->assertDontSee('<section class="hero', false);
         $component->assertSet('form.closing_line', 'Edited closing line.');
     }
 
@@ -174,15 +176,35 @@ class PagesScreenTest extends TestCase
     #[Test]
     public function required_blocks_cannot_be_emptied_and_show_the_original_instead(): void
     {
+        Livewire::actingAs($this->editor)->test(Edit::class, ['page' => Pages::AWARDS])
+            ->set('form.title', '   ')
+            ->call('publish')
+            ->assertHasNoErrors()
+            ->assertSet('form.title', 'Awards');
+
+        $this->get('/awards')->assertSee('<h1 id="section-title" class="t-heading chapter-opening__title" data-rise>Awards</h1>', false);
+    }
+
+    #[Test]
+    public function home_blocks_emptied_by_an_editor_show_nothing_instead_of_the_original(): void
+    {
         Livewire::actingAs($this->editor)->test(Edit::class, ['page' => Pages::HOME])
             ->set('form.hero_heading_second', '   ')
             ->set('form.chapters_title', '')
+            ->set('form.scroll_cue', '')
+            ->set('form.button_story.label', '')
             ->call('publish')
             ->assertHasNoErrors()
-            ->assertSet('form.hero_heading_second', 'Mohamed Osman Khidir')
-            ->assertSet('form.chapters_title', 'A life in chapters');
+            ->assertSet('form.hero_heading_second', '')
+            ->assertSet('form.chapters_title', '')
+            ->assertSet('form.scroll_cue', '');
 
-        $this->get('/')->assertSee('Mohamed Osman Khidir')->assertSee('A life in chapters');
+        $this->get('/')->assertOk()
+            ->assertDontSee('<span class="block text-ink-strong">', false)
+            ->assertDontSee('>A life in chapters</h2>', false)
+            ->assertDontSee('class="scroll-cue', false)
+            ->assertDontSee('class="btn btn--primary">Read his story</a>', false)
+            ->assertSee('<span class="block text-ink">Professor</span>', false);
     }
 
     #[Test]

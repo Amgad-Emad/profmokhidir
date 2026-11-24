@@ -522,9 +522,22 @@ class PageService
 
         // A draft that holds nothing for this language (e.g. only Arabic words changed) leaves the
         // published value of that language in place, so a list never reads as emptied.
-        $draft = $block->hasDraft() ? self::blankToNull($block->getTranslation('draft_value', $locale, false)) : null;
+        $draft = $block->hasDraft() ? self::translation($block, 'draft_value', $locale) : null;
 
-        return $draft ?? self::blankToNull($block->getTranslation('value', $locale, false));
+        return $draft ?? self::translation($block, 'value', $locale);
+    }
+
+    /**
+     * A column's raw value in one language: null where that language holds nothing (or an empty
+     * list), and '' where an optional block was emptied on purpose, so the form shows it empty
+     * instead of the built-in copy.
+     */
+    private static function translation(PageBlock $block, string $column, string $locale): mixed
+    {
+        $raw = json_decode((string) ($block->getAttributes()[$column] ?? 'null'), true);
+        $value = is_array($raw) && Locales::isLocaleMap($raw) ? ($raw[$locale] ?? null) : null;
+
+        return $value === [] ? null : $value;
     }
 
     private static function blankToNull(mixed $value): mixed

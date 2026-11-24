@@ -32,6 +32,8 @@ class ArabicSiteCoreTest extends TestCase
     #[Test]
     public function the_arabic_home_page_is_right_to_left_with_arabic_copy_and_navigation(): void
     {
+        // A chapter to show: the home page leaves out a section with nothing in it.
+        Award::factory()->published()->create(['year' => 1985]);
         $this->fillHomeSections();
         $this->get('/ar')
             ->assertOk()

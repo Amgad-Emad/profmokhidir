@@ -169,6 +169,8 @@ class MastheadTest extends TestCase
         $this->assertMatchesRegularExpression('/<header class="site-header fixed inset-x-0 top-0 z-40" x-data="masthead" :class="\{ \'is-compact\': compact, \'is-over-hero\': overHero, \'has-chapter-open\': openChapter !== null \}" @keydown\.escape\.window="onEscape\(\)" @resize\.window="onResize\(\)" @scroll\.window\.passive="onScroll\(\)">/', $this->html);
         $this->assertStringContainsString('<main id="main" tabindex="-1" class="site-main">', $this->html);
 
+        // The hero shows only entered content: the home page's blocks.
+        $this->fillHomeSections();
         $home = $this->get(route('home'))->assertOk()->getContent();
         $this->assertStringContainsString('<main id="main" tabindex="-1" class="site-main site-main--hero">', $home);
         $this->assertMatchesRegularExpression('/<section class="hero[^"]*"[^>]*'.Masthead::HERO_ATTRIBUTE.'>/', $home);

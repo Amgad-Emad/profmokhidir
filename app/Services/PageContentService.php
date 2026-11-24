@@ -121,6 +121,27 @@ class PageContentService
     }
 
     /**
+     * Whether an editor saved words for this block (in this language or in
+     * English) on the published page, as opposed to it showing the built-in copy.
+     * A link counts by its label; an image block by its picture (see image()).
+     */
+    public function entered(string $page, string $key): bool
+    {
+        $stored = $this->load($page)['stored'][$key] ?? [];
+
+        foreach (array_unique([app()->getLocale(), Locales::DEFAULT]) as $locale) {
+            $value = $stored[$locale] ?? null;
+            $value = is_array($value) ? ($value['label'] ?? null) : $value;
+
+            if (is_string($value) && trim(html_entity_decode(strip_tags($value), ENT_QUOTES | ENT_HTML5)) !== '') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * A list block's items, in order.
      *
      * @return list<array<string, string>>
@@ -256,7 +277,7 @@ class PageContentService
             $values[$key] = $this->localise($definition, $stored['values'][$key] ?? [], $locale);
         }
 
-        return $this->loaded[$memo] = ['values' => $values, 'media' => $stored['media'], 'hidden' => $stored['hidden'] ?? []];
+        return $this->loaded[$memo] = ['values' => $values, 'media' => $stored['media'], 'hidden' => $stored['hidden'] ?? [], 'stored' => $stored['values']];
     }
 
     /**

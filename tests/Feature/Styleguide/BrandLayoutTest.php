@@ -51,6 +51,9 @@ class BrandLayoutTest extends TestCase
     #[Test]
     public function the_home_page_uses_the_motion_attributes_and_no_livewire(): void
     {
+        // The home page shows only entered content: its blocks and a section to fill.
+        $this->fillHomeSections();
+
         $this->get(route('home'))
             ->assertOk()
             ->assertSee('data-rise-group', false)

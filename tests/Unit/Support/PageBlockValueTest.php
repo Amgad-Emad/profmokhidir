@@ -14,13 +14,13 @@ class PageBlockValueTest extends TestCase
     #[Test]
     public function missing_and_emptied_required_text_takes_the_default_and_optional_text_may_be_empty(): void
     {
-        $required = PageBlocks::get(Pages::HOME, 'hero_label');
+        $required = PageBlocks::get(Pages::AWARDS, 'title');
         $optional = PageBlocks::get(Pages::HOME, 'hero_epigraph');
 
-        $this->assertSame('In honour of', PageBlockValue::normalise($required, null));
-        $this->assertSame('In honour of', PageBlockValue::normalise($required, "  \t "));
+        $this->assertSame('Awards', PageBlockValue::normalise($required, null));
+        $this->assertSame('Awards', PageBlockValue::normalise($required, "  \t "));
         $this->assertSame('Given', PageBlockValue::normalise($required, '  Given  '));
-        $this->assertSame(30, mb_strlen(PageBlockValue::normalise($required, str_repeat('a', 50))));
+        $this->assertSame(60, mb_strlen(PageBlockValue::normalise($required, str_repeat('a', 80))));
         $this->assertSame('', PageBlockValue::normalise($optional, ''));
         $this->assertSame($optional->default, PageBlockValue::normalise($optional, null));
     }
@@ -39,9 +39,13 @@ class PageBlockValueTest extends TestCase
     #[Test]
     public function links_keep_listed_destinations_or_real_web_addresses(): void
     {
-        $link = PageBlocks::get(Pages::HOME, 'button_story');
+        $link = PageBlocks::get(Pages::TRIBUTES, 'button_tribute');
+        $optional = PageBlocks::get(Pages::HOME, 'button_story');
 
-        $this->assertSame(['label' => 'Read his story', 'route' => 'about', 'url' => null], PageBlockValue::normalise($link, ['label' => '', 'route' => 'admin.dashboard']));
+        $this->assertSame(['label' => $link->default['label'], 'route' => $link->default['route'], 'url' => null], PageBlockValue::normalise($link, ['label' => '', 'route' => 'admin.dashboard']));
+        // An optional link (the home page's buttons) emptied on purpose has no label; a missing one takes the default.
+        $this->assertSame(['label' => '', 'route' => 'about', 'url' => null], PageBlockValue::normalise($optional, ['label' => '', 'route' => 'about']));
+        $this->assertSame(['label' => 'Read his story', 'route' => 'about', 'url' => null], PageBlockValue::normalise($optional, null));
         $this->assertSame(['label' => 'Go', 'route' => 'cv', 'url' => null], PageBlockValue::normalise($link, ['label' => 'Go', 'route' => 'cv', 'url' => 'javascript:alert(1)']));
         $this->assertSame(['label' => 'Go', 'route' => null, 'url' => 'https://example.org'], PageBlockValue::normalise($link, ['label' => 'Go', 'route' => 'cv', 'url' => 'https://example.org']));
     }
@@ -80,7 +84,7 @@ class PageBlockValueTest extends TestCase
     #[Test]
     public function it_tells_a_default_value_from_a_changed_one(): void
     {
-        $block = PageBlocks::get(Pages::HOME, 'hero_label');
+        $block = PageBlocks::get(Pages::AWARDS, 'title');
 
         $this->assertTrue(PageBlockValue::isDefault($block, ''));
         $this->assertFalse(PageBlockValue::isDefault($block, 'Other'));

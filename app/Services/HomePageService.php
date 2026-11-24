@@ -12,7 +12,6 @@ use App\Constants\Pages;
 use App\Models\Profile;
 use App\Support\PageBlockDefinition;
 use Illuminate\Support\HtmlString;
-use InvalidArgumentException;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
@@ -20,7 +19,8 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * published portrait, "A life in chapters" with a quote after a chapter, the
  * figures of "His work in numbers", the "Continue the story" cards and the
  * closing line. Every section reads the home page's own blocks (Admin › Pages ›
- * Home), so the editor shows exactly what the page shows.
+ * Home), so the editor shows exactly what the page shows: only what an editor
+ * entered is shown, never the built-in copy, placeholders or empty-state lines.
  */
 class HomePageService
 {
@@ -28,8 +28,6 @@ class HomePageService
         private readonly ProfileService $profiles,
         private readonly PageContentService $pages,
         private readonly MediaService $media,
-        private readonly TypesetterService $typesetter,
-        private readonly NavigationService $navigation,
     ) {}
 
     /**
@@ -38,8 +36,9 @@ class HomePageService
      *     portrait: Media|null,
      *     chapters: list<array{number: int, numeral: string, years: string, id: string, milestones: list<array{years: string, title: string, label: string, detail: ?string}>, photo: Media|null, interlude: array{quote: string, credit: ?string}|null}>,
      *     stats: list<array{key: string, value: string, label: string}>,
+     *     description: string,
      *     stories: list<array{key: string, numeral: string, title: string, summary: string, url: string, image: Media|null}>,
-     *     copy: array{label: string, headingFirst: string, headingSecond: string, line: string, epigraph: string, scroll: string, chapters: string, chaptersIntro: HtmlString, chaptersEmpty: string, numbers: string, numbersEmpty: string, continue: string, closing: string, readStory: array{label: string, url: string}, leaveTribute: array{label: string, url: string}},
+     *     copy: array{label: string, headingFirst: string, headingSecond: string, line: string, epigraph: string, scroll: string, chapters: string, chaptersIntro: HtmlString, numbers: string, continue: string, closing: string, readStory: array{label: string, url: string}|null, leaveTribute: array{label: string, url: string}|null},
      *     anchor: string
      * }
      */
@@ -52,27 +51,27 @@ class HomePageService
 
         return [
             'profile' => $profile,
-            // An image set in Admin › Pages › Home replaces the profile portrait in the hero.
-            'portrait' => $this->pages->image($home, 'hero_image') ?? $profile?->portrait(),
+            // Only the image set in Admin › Pages › Home: no fallback to the profile portrait.
+            'portrait' => $this->pages->image($home, 'hero_image'),
             'chapters' => $chapters,
             'stats' => $this->stats(),
             'stories' => $this->stories(),
+            // The head's description only (never shown on the page): the tagline, or its built-in copy when none is entered.
+            'description' => $this->pages->text($home, 'hero_tagline'),
             'copy' => [
-                'label' => $this->pages->text($home, 'hero_label'),
-                'headingFirst' => $this->pages->text($home, 'hero_heading_first'),
-                'headingSecond' => $this->pages->text($home, 'hero_heading_second'),
-                'line' => $this->pages->text($home, 'hero_tagline'),
-                'epigraph' => $this->pages->text($home, 'hero_epigraph'),
-                'scroll' => $this->pages->text($home, 'scroll_cue'),
-                'chapters' => $this->pages->text($home, 'chapters_title'),
-                'chaptersIntro' => $this->pages->html($home, 'chapters_intro'),
-                'chaptersEmpty' => $this->pages->text($home, 'chapters_empty'),
-                'numbers' => $this->pages->text($home, 'numbers_title'),
-                'numbersEmpty' => $this->pages->text($home, 'numbers_empty'),
-                'continue' => $this->pages->text($home, 'continue_title'),
-                'closing' => $this->pages->text($home, 'closing_line'),
-                'readStory' => $this->pages->link($home, 'button_story'),
-                'leaveTribute' => $this->pages->link($home, 'button_tribute'),
+                'label' => $this->text('hero_label'),
+                'headingFirst' => $this->text('hero_heading_first'),
+                'headingSecond' => $this->text('hero_heading_second'),
+                'line' => $this->text('hero_tagline'),
+                'epigraph' => $this->text('hero_epigraph'),
+                'scroll' => $this->text('scroll_cue'),
+                'chapters' => $this->text('chapters_title'),
+                'chaptersIntro' => $this->pages->entered($home, 'chapters_intro') ? $this->pages->html($home, 'chapters_intro') : new HtmlString(''),
+                'numbers' => $this->text('numbers_title'),
+                'continue' => $this->text('continue_title'),
+                'closing' => $this->text('closing_line'),
+                'readStory' => $this->link('button_story'),
+                'leaveTribute' => $this->link('button_tribute'),
             ],
             'anchor' => HomeTimeline::ANCHOR,
             // Sections an editor took off the page (Admin › Pages › Home, "Show on the page").
@@ -111,11 +110,7 @@ class HomePageService
 
             $chapters[] = [
                 'number' => $index + 1,
-                'numeral' => match (true) {
-                    (bool) ($item['hide_numeral'] ?? false) => '',
-                    filled($item['numeral'] ?? null) => (string) $item['numeral'],
-                    default => $this->typesetter->roman($index + 1),
-                },
+                'numeral' => (bool) ($item['hide_numeral'] ?? false) ? '' : (string) ($item['numeral'] ?? ''),
                 'years' => (string) ($item['years'] ?? ''),
                 'id' => $this->chapterId((string) ($item['years'] ?? ''), $index + 1),
                 'milestones' => $milestones,
@@ -157,8 +152,7 @@ class HomePageService
         foreach (PageBlockDefinition::visibleItems($this->pages->items(Pages::HOME, HomeBlocks::STORY_CARDS)) as $index => $item) {
             $cards[] = [
                 'key' => 'card-'.($index + 1),
-                // A card opening a section carries that section's chapter numeral, as everywhere on the site.
-                'numeral' => filled($item['numeral'] ?? null) ? (string) $item['numeral'] : $this->typesetter->roman($this->cardNumber((string) ($item['route'] ?? ''), $index + 1)),
+                'numeral' => (string) ($item['numeral'] ?? ''),
                 'title' => (string) ($item['title'] ?? ''),
                 'summary' => (string) ($item['line'] ?? ''),
                 'url' => $this->pages->url($item['route'] ?? null),
@@ -177,13 +171,22 @@ class HomePageService
         return preg_match('/^(\d{3})\d/', $years, $match) === 1 ? 'chapter-'.$match[1].'0s' : HomeTimeline::ANCHOR.'-'.$position;
     }
 
-    private function cardNumber(string $route, int $position): int
+    /**
+     * A short text block as the editor entered it, or '' when it holds only the built-in copy.
+     */
+    private function text(string $key): string
     {
-        try {
-            return $this->navigation->chapter($route);
-        } catch (InvalidArgumentException) {
-            return $position;
-        }
+        return $this->pages->entered(Pages::HOME, $key) ? $this->pages->text(Pages::HOME, $key) : '';
+    }
+
+    /**
+     * A link block when the editor gave it a label, else null (no button).
+     *
+     * @return array{label: string, url: string}|null
+     */
+    private function link(string $key): ?array
+    {
+        return $this->pages->entered(Pages::HOME, $key) ? $this->pages->link(Pages::HOME, $key) : null;
     }
 
     /**

@@ -1,22 +1,45 @@
-<x-layouts.public :description="$copy['line']" :hero="! $hidden[\App\Constants\PageDefinitions\HomeBlocks::SECTION_HERO]">
+@php
+    // Only what an editor entered in Admin › Pages › Home shows: a section with nothing in it is left out.
+    $showHero = ! $hidden[\App\Constants\PageDefinitions\HomeBlocks::SECTION_HERO] && ($copy['label'] !== '' || $copy['headingFirst'] !== '' || $copy['headingSecond'] !== '' || $copy['line'] !== '' || $copy['epigraph'] !== '' || $copy['readStory'] || $copy['leaveTribute'] || $portrait);
+    $showChapters = ! $hidden[\App\Constants\PageDefinitions\HomeBlocks::SECTION_CHAPTERS] && $chapters !== [];
+    $showNumbers = ! $hidden[\App\Constants\PageDefinitions\HomeBlocks::SECTION_NUMBERS] && $stats !== [];
+    $showContinue = ! $hidden[\App\Constants\PageDefinitions\HomeBlocks::SECTION_CONTINUE] && ($stories !== [] || $copy['closing'] !== '');
+@endphp
+<x-layouts.public :description="$description" :hero="$showHero">
     {{-- 1. Hero: evergreen, full viewport height, soft brass glow, under the transparent masthead. Text and portrait recede slowly with scroll. --}}
-    @unless ($hidden[\App\Constants\PageDefinitions\HomeBlocks::SECTION_HERO])
-    <section class="hero glow-brass on-dark bg-surface text-ink" aria-labelledby="hero-title" {{ \App\Constants\Masthead::HERO_ATTRIBUTE }}>
+    @if ($showHero)
+    <section class="hero glow-brass on-dark bg-surface text-ink" {!! $copy['headingFirst'] !== '' || $copy['headingSecond'] !== '' ? 'aria-labelledby="hero-title"' : 'aria-label="'.e(__('Introduction')).'"' !!} {{ \App\Constants\Masthead::HERO_ATTRIBUTE }}>
         <div class="hero__inner relative mx-auto grid max-w-7xl items-center gap-12 px-4 pb-36 sm:px-6 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-20">
             <div class="flex flex-col items-start gap-8" data-scroll-scale>
-                <p class="t-label text-accent-text">{{ $copy['label'] }}</p>
-                <h1 id="hero-title" class="t-display">
-                    <span class="block text-ink">{{ $copy['headingFirst'] }}</span>
-                    <span class="block text-ink-strong">{{ $copy['headingSecond'] }}</span>
-                </h1>
-                <p class="t-body max-w-xl text-ink">{{ $copy['line'] }}</p>
+                @if ($copy['label'] !== '')
+                    <p class="t-label text-accent-text">{{ $copy['label'] }}</p>
+                @endif
+                @if ($copy['headingFirst'] !== '' || $copy['headingSecond'] !== '')
+                    <h1 id="hero-title" class="t-display">
+                        @if ($copy['headingFirst'] !== '')
+                            <span class="block text-ink">{{ $copy['headingFirst'] }}</span>
+                        @endif
+                        @if ($copy['headingSecond'] !== '')
+                            <span class="block text-ink-strong">{{ $copy['headingSecond'] }}</span>
+                        @endif
+                    </h1>
+                @endif
+                @if ($copy['line'] !== '')
+                    <p class="t-body max-w-xl text-ink">{{ $copy['line'] }}</p>
+                @endif
                 @if ($copy['epigraph'] !== '')
                     <x-epigraph tone="ivory" class="hero__epigraph">@typeset($copy['epigraph'])</x-epigraph>
                 @endif
-                <div class="flex flex-wrap gap-4">
-                    <x-button variant="primary" :href="$copy['readStory']['url']">{{ $copy['readStory']['label'] }}</x-button>
-                    <x-button :href="$copy['leaveTribute']['url']">{{ $copy['leaveTribute']['label'] }}</x-button>
-                </div>
+                @if ($copy['readStory'] || $copy['leaveTribute'])
+                    <div class="flex flex-wrap gap-4">
+                        @if ($copy['readStory'])
+                            <x-button variant="primary" :href="$copy['readStory']['url']">{{ $copy['readStory']['label'] }}</x-button>
+                        @endif
+                        @if ($copy['leaveTribute'])
+                            <x-button :href="$copy['leaveTribute']['url']">{{ $copy['leaveTribute']['label'] }}</x-button>
+                        @endif
+                    </div>
+                @endif
             </div>
 
             @if ($portrait)
@@ -25,22 +48,28 @@
                 </div>
             @endif
 
-            <a href="#{{ $anchor }}" class="scroll-cue t-label text-accent-text">
-                <span>{{ $copy['scroll'] }}</span><span class="sr-only"> {{ __('to :section', ['section' => $copy['chapters']]) }}</span>
-                <span class="scroll-cue__line" aria-hidden="true" data-rule></span>
-            </a>
+            @if ($copy['scroll'] !== '' && $showChapters)
+                <a href="#{{ $anchor }}" class="scroll-cue t-label text-accent-text">
+                    <span>{{ $copy['scroll'] }}</span>@if ($copy['chapters'] !== '')<span class="sr-only"> {{ __('to :section', ['section' => $copy['chapters']]) }}</span>@endif
+                    <span class="scroll-cue__line" aria-hidden="true" data-rule></span>
+                </a>
+            @endif
         </div>
     </section>
-    @endunless
+    @endif
 
     {{-- 2. A life in chapters: one chapter per decade, a brass hairline down the left, quote interludes between. --}}
-    @unless ($hidden[\App\Constants\PageDefinitions\HomeBlocks::SECTION_CHAPTERS])
-    <section class="life bg-surface text-ink" aria-labelledby="{{ $anchor }}">
+    @if ($showChapters)
+    <section class="life bg-surface text-ink" {!! $copy['chapters'] !== '' ? 'aria-labelledby="'.e($anchor).'"' : 'id="'.e($anchor).'"' !!}>
         <div class="mx-auto max-w-7xl px-4 pt-20 sm:px-6 lg:pt-28">
-            <x-chapter-opening :title="$copy['chapters']" :id="$anchor">{{ $copy['chaptersIntro'] }}</x-chapter-opening>
+            @if ($copy['chapters'] !== '')
+                <x-chapter-opening :title="$copy['chapters']" :id="$anchor">{{ $copy['chaptersIntro'] }}</x-chapter-opening>
+            @elseif ($copy['chaptersIntro']->toHtml() !== '')
+                <div class="t-body max-w-2xl text-ink-muted" data-rise>{{ $copy['chaptersIntro'] }}</div>
+            @endif
         </div>
 
-        @forelse ($chapters as $chapter)
+        @foreach ($chapters as $chapter)
             <article class="life-chapter" aria-labelledby="{{ $chapter['id'] }}">
                 <div class="mx-auto max-w-7xl px-4 sm:px-6">
                     {{-- Without years the marker column shrinks to the numeral; with neither, the milestones take the row. --}}
@@ -103,53 +132,51 @@
                     </div>
                 </figure>
             @endif
-        @empty
-            <div class="mx-auto max-w-7xl px-4 pt-10 sm:px-6">
-                <x-empty-state :message="$copy['chaptersEmpty']" />
-            </div>
-        @endforelse
+        @endforeach
 
         <div class="pb-20 lg:pb-28" aria-hidden="true"></div>
     </section>
-    @endunless
+    @endif
 
     {{-- 4. His work in numbers: lining figures that rise in like everything else, never count up. --}}
-    @unless ($hidden[\App\Constants\PageDefinitions\HomeBlocks::SECTION_NUMBERS])
-    <section class="bg-surface-raised text-ink" aria-labelledby="work-in-numbers">
+    @if ($showNumbers)
+    <section class="bg-surface-raised text-ink"{!! $copy['numbers'] !== '' ? ' aria-labelledby="work-in-numbers"' : '' !!}>
         <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28">
-            <x-chapter-opening :title="$copy['numbers']" id="work-in-numbers" />
-            @if ($stats !== [])
-                <dl class="figures" data-rise-group>
-                    @foreach ($stats as $stat)
-                        <div class="figure">
-                            <dt class="smallcaps figure__label">{{ $stat['label'] }}</dt>
-                            <dd class="figures-lining figure__value">@num($stat['value'])</dd>
-                        </div>
+            @if ($copy['numbers'] !== '')
+                <x-chapter-opening :title="$copy['numbers']" id="work-in-numbers" />
+            @endif
+            <dl class="figures" data-rise-group>
+                @foreach ($stats as $stat)
+                    <div class="figure">
+                        <dt class="smallcaps figure__label">{{ $stat['label'] }}</dt>
+                        <dd class="figures-lining figure__value">@num($stat['value'])</dd>
+                    </div>
+                @endforeach
+            </dl>
+        </div>
+    </section>
+    @endif
+
+    {{-- 5. Continue the story: three section cards across the content width. 6. The seal and the closing line. --}}
+    @if ($showContinue)
+    <section class="bg-surface text-ink"{!! $copy['continue'] !== '' ? ' aria-labelledby="continue-the-story"' : '' !!}>
+        <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28">
+            @if ($copy['continue'] !== '')
+                <x-chapter-opening :title="$copy['continue']" id="continue-the-story" />
+            @endif
+            @if ($stories !== [])
+                <ul class="section-cards mt-12" data-rise-group>
+                    @foreach ($stories as $story)
+                        <li><x-section-card :card="$story" /></li>
                     @endforeach
-                </dl>
-            @else
-                <div class="mt-10">
-                    <x-empty-state :message="$copy['numbersEmpty']" />
-                </div>
+                </ul>
+            @endif
+
+            @if ($copy['closing'] !== '')
+                <x-seal />
+                <p class="t-quote mx-auto mt-8 max-w-2xl text-center text-ink" data-rise>{{ $copy['closing'] }}</p>
             @endif
         </div>
     </section>
-    @endunless
-
-    {{-- 5. Continue the story: three section cards across the content width. 6. The seal and the closing line. --}}
-    @unless ($hidden[\App\Constants\PageDefinitions\HomeBlocks::SECTION_CONTINUE])
-    <section class="bg-surface text-ink" aria-labelledby="continue-the-story">
-        <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28">
-            <x-chapter-opening :title="$copy['continue']" id="continue-the-story" />
-            <ul class="section-cards mt-12" data-rise-group>
-                @foreach ($stories as $story)
-                    <li><x-section-card :card="$story" /></li>
-                @endforeach
-            </ul>
-
-            <x-seal />
-            <p class="t-quote mx-auto mt-8 max-w-2xl text-center text-ink" data-rise>{{ $copy['closing'] }}</p>
-        </div>
-    </section>
-    @endunless
+    @endif
 </x-layouts.public>

@@ -118,6 +118,8 @@ class PublicSectionsSweepTest extends TestCase
 
         $home = $this->get(route('home'))->assertOk();
 
-        $this->assertSame(2, substr_count($home->getContent(), 'class="empty-state flex'), 'The timeline and the figures each have an empty state');
+        // The home page shows only what an editor entered: an empty timeline or figures section is left out.
+        $this->assertSame(0, substr_count($home->getContent(), 'class="empty-state flex'));
+        $home->assertDontSee('work-in-numbers', false);
     }
 }

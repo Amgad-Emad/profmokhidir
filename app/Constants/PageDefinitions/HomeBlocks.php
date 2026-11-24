@@ -35,10 +35,6 @@ final class HomeBlocks
     /** The introduction before the chapters became a record of his honours (replaced on import when unedited). */
     public const string CHAPTERS_INTRO_BEFORE_HONOURS = 'Each decade of his life, drawn from the record of his education, appointments and honours.';
 
-    public const string CHAPTERS_EMPTY = 'The chapters of his life will appear here as his record is catalogued.';
-
-    public const string NUMBERS_EMPTY = 'The figures will appear once his publications, appointments and honours are catalogued.';
-
     /** The list blocks that hold the home page's own chapters, figures and cards (edited here, not drawn from other screens). */
     public const string CHAPTER_ITEMS = 'chapter_items';
 
@@ -90,30 +86,28 @@ final class HomeBlocks
     public static function definitions(): array
     {
         return [
-            Block::shortText('hero_label', 'Hero label', self::SECTION_HERO, Taglines::HERO_LABEL, 30, hint: 'The small label above his name.'),
-            Block::shortText('hero_heading_first', 'Hero heading, first line', self::SECTION_HERO, self::HERO_HEADING_FIRST, 30),
-            Block::shortText('hero_heading_second', 'Hero heading, second line', self::SECTION_HERO, self::HERO_HEADING_SECOND, 60, hint: 'Set large across the hero: keep it to his name.'),
-            Block::shortText('hero_tagline', 'Hero tagline', self::SECTION_HERO, Taglines::HERO_LINE, 160, hint: 'One sentence under his name. It is also the description search engines show.'),
+            Block::shortText('hero_label', 'Hero label', self::SECTION_HERO, Taglines::HERO_LABEL, 30, hint: 'The small label above his name.', required: false),
+            Block::shortText('hero_heading_first', 'Hero heading, first line', self::SECTION_HERO, self::HERO_HEADING_FIRST, 30, required: false),
+            Block::shortText('hero_heading_second', 'Hero heading, second line', self::SECTION_HERO, self::HERO_HEADING_SECOND, 60, hint: 'Set large across the hero: keep it to his name.', required: false),
+            Block::shortText('hero_tagline', 'Hero tagline', self::SECTION_HERO, Taglines::HERO_LINE, 160, hint: 'One sentence under his name. It is also the description search engines show.', required: false),
             Block::shortText('hero_epigraph', 'Hero epigraph', self::SECTION_HERO, Taglines::HOME_EPIGRAPH, 140, required: false, hint: 'A short line in his voice under the tagline. Leave empty to show none.'),
             Block::image('hero_image', 'Hero image', self::SECTION_HERO, 'Shown beside his name. Leave empty to use the portrait from About & profile.'),
-            Block::link('button_story', 'Button: Read his story', self::SECTION_HERO, Taglines::READ_STORY, 'about', 30),
-            Block::link('button_tribute', 'Button: Leave a tribute', self::SECTION_HERO, Taglines::LEAVE_TRIBUTE, 'tributes.create', 30),
-            Block::shortText('scroll_cue', 'Scroll cue', self::SECTION_HERO, Taglines::SCROLL_CUE, 20, hint: 'The one word at the foot of the hero.'),
+            Block::link('button_story', 'Button: Read his story', self::SECTION_HERO, Taglines::READ_STORY, 'about', 30, required: false),
+            Block::link('button_tribute', 'Button: Leave a tribute', self::SECTION_HERO, Taglines::LEAVE_TRIBUTE, 'tributes.create', 30, required: false),
+            Block::shortText('scroll_cue', 'Scroll cue', self::SECTION_HERO, Taglines::SCROLL_CUE, 20, hint: 'The one word at the foot of the hero.', required: false),
 
-            Block::shortText('chapters_title', 'Chapter title', self::SECTION_CHAPTERS, Taglines::HOME_CHAPTERS, 60),
+            Block::shortText('chapters_title', 'Chapter title', self::SECTION_CHAPTERS, Taglines::HOME_CHAPTERS, 60, required: false),
             Block::longText('chapters_intro', 'Chapter introduction', self::SECTION_CHAPTERS, self::CHAPTERS_INTRO, 240, required: false),
-            Block::list(self::CHAPTER_ITEMS, 'Chapters', self::SECTION_CHAPTERS, [], self::chapterFields(), 'Chapter', maxItems: 12, hint: 'Each chapter as it shows on the home page, in order: its years, up to three milestones, a photo and an optional quote shown after it. Leave the numeral empty to number the chapters I, II, III in order.'),
-            Block::shortText('chapters_empty', 'Line while there are no chapters', self::SECTION_CHAPTERS, self::CHAPTERS_EMPTY, 160),
+            Block::list(self::CHAPTER_ITEMS, 'Chapters', self::SECTION_CHAPTERS, [], self::chapterFields(), 'Chapter', maxItems: 12, hint: 'Each chapter as it shows on the home page, in order: its years, up to three milestones, a photo and an optional quote shown after it. Leave the numeral empty to show none.'),
 
-            Block::shortText('numbers_title', 'Chapter title', self::SECTION_NUMBERS, Taglines::HOME_NUMBERS, 60),
+            Block::shortText('numbers_title', 'Chapter title', self::SECTION_NUMBERS, Taglines::HOME_NUMBERS, 60, required: false),
             Block::list(self::FIGURES, 'Figures', self::SECTION_NUMBERS, [], [
                 Block::HIDDEN => Block::hiddenField('Hide this figure'),
                 'value' => Block::field('Number', 12, Block::FIELD_PLAIN),
                 'label' => Block::field('Label', 60),
             ], 'Figure', maxItems: 6, hint: 'Each figure as it shows on the home page: the number and the words under it.'),
-            Block::shortText('numbers_empty', 'Line while there are no figures', self::SECTION_NUMBERS, self::NUMBERS_EMPTY, 160),
 
-            Block::shortText('continue_title', 'Chapter title', self::SECTION_CONTINUE, Taglines::HOME_CONTINUE, 60),
+            Block::shortText('continue_title', 'Chapter title', self::SECTION_CONTINUE, Taglines::HOME_CONTINUE, 60, required: false),
             Block::list(self::STORY_CARDS, 'Cards', self::SECTION_CONTINUE, [], [
                 Block::HIDDEN => Block::hiddenField('Hide this card'),
                 'title' => Block::field('Title', 60),
@@ -122,7 +116,7 @@ final class HomeBlocks
                 'route' => Block::field('Goes to', 60, Block::FIELD_ROUTE),
                 'media_id' => Block::imageField('Image'),
             ], 'Card', maxItems: 6, hint: 'Each card as it shows on the home page: its title, line, the page it opens and its image.'),
-            Block::shortText('closing_line', 'Closing line under the seal', self::SECTION_CONTINUE, Taglines::HOME_CLOSING, 120),
+            Block::shortText('closing_line', 'Closing line under the seal', self::SECTION_CONTINUE, Taglines::HOME_CLOSING, 120, required: false),
 
             Block::seo(self::SECTION_SEO, hint: 'Leave the title empty to show his name alone, and the description empty to use the hero tagline.'),
         ];
