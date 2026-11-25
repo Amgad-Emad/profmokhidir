@@ -1056,6 +1056,16 @@ html.admin-html {
         margin-bottom: 0;
     }
 
+    /* Folded, every section is one even row: its title and chevron. The intro shows once it opens. */
+    .form-section--collapsed .form-section__intro {
+        display: none;
+    }
+
+    /* The About page's profile is its own Livewire form, but its sections are spaced as the page's own. */
+    [data-profile-embedded] {
+        display: contents;
+    }
+
     .form-section__intro {
         margin-top: 0.5rem;
         max-width: var(--container-measure);

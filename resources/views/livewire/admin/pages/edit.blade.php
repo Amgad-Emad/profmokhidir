@@ -11,7 +11,7 @@
     $nav = [];
     // The About page's profile (name, biography, expertise tags, key facts, portrait, contact) sits
     // after the page's opening, in the order the page shows it.
-    $profileSections = $embedsProfile ? ['identity' => __('Identity'), 'biography' => __('Biography'), 'expertise' => __('Expertise & key facts'), 'portrait' => __('Portrait'), 'contact' => __('Contact')] : [];
+    $profileSections = $embedsProfile ? ['identity' => __('Identity'), 'biography' => __('Biography'), 'expertise' => __('Expertise & key facts'), 'portrait' => __('Portrait photo'), 'contact' => __('Contact')] : [];
     foreach (array_keys($sections) as $position => $title) {
         $nav[Str::slug($title)] = __($title);
         if ($position === 0) {

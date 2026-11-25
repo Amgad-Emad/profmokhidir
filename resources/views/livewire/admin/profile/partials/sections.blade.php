@@ -66,8 +66,8 @@
     </div>
 </x-admin.form-section>
 
-<x-admin.form-section id="portrait" :collapsed="$collapsed" :title="__('Portrait')" :intro="__('The photograph that opens the About page and the sign-in screens. It needs alt text, a caption, a place and a year before the profile can be published.')" :form="false">
-    <x-admin.image-grid :label="__('Portrait')" :media="$media" :missing="$missing" :images="$images" :details-required="$detailsRequired" :accept="$imageAccept" :hint="$imageHint" :confirming-id="$confirmingImageId" :can-upload="! $isNew" />
+<x-admin.form-section id="portrait" :collapsed="$collapsed" :title="__('Portrait photo')" :intro="__('The photograph that opens the About page and the sign-in screens. It needs alt text, a caption, a place and a year before the profile can be published.')" :form="false">
+    <x-admin.image-grid :label="__('Portrait photo')" :media="$media" :missing="$missing" :images="$images" :details-required="$detailsRequired" :accept="$imageAccept" :hint="$imageHint" :confirming-id="$confirmingImageId" :can-upload="! $isNew" />
     @if ($isNew)
         <p class="text-sm font-normal text-ink-muted">{{ __('The portrait can be added once the profile has a name and has been saved once.') }}</p>
     @endif

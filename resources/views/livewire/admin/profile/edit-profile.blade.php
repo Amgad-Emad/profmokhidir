@@ -6,7 +6,7 @@
         <x-admin.page-header :eyebrow="__('Content')" :title="__('About & profile')" :intro="__('Everything on the About page: who he was, his biography, his fields of work, his portrait and how visitors can get in touch.')" />
         <x-admin.flash />
 
-        <x-admin.edit-layout :editor="$editor" :sections="['identity' => __('Identity'), 'biography' => __('Biography'), 'expertise' => __('Expertise & key facts'), 'portrait' => __('Portrait'), 'contact' => __('Contact')]" class="mt-10">
+        <x-admin.edit-layout :editor="$editor" :sections="['identity' => __('Identity'), 'biography' => __('Biography'), 'expertise' => __('Expertise & key facts'), 'portrait' => __('Portrait photo'), 'contact' => __('Contact')]" class="mt-10">
             @include('livewire.admin.profile.partials.sections', ['collapsed' => false])
         </x-admin.edit-layout>
 

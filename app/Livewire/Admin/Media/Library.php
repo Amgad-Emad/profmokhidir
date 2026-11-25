@@ -377,7 +377,7 @@ class Library extends Component
     private function collectionLabels(): array
     {
         return [
-            MediaCollections::PORTRAIT => __('Portrait'),
+            MediaCollections::PORTRAIT => __('Portrait photo'),
             MediaCollections::THUMBNAIL => __('Video posters'),
             MediaCollections::PHOTOS => __('Album photos'),
             MediaCollections::AWARD_IMAGES => __('Award certificates'),
