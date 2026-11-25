@@ -8,24 +8,26 @@
 @use('App\Support\PageBlockDefinition')
 @php
     $model = 'arabic.'.$key;
+    // A page that shows only what was entered (the home page) has no placeholders: empty is empty.
+    $enteredOnly = \App\Constants\Pages::showsOnlyEntered($pageKey ?? '');
     $shown = $block->localized()->translate($english);
-    $hint = __('Optional. Left empty, Arabic pages show the wording in the placeholder.');
+    $hint = $enteredOnly ? __('Optional. Left empty, nothing shows on Arabic pages.') : __('Optional. Left empty, Arabic pages show the wording in the placeholder.');
 @endphp
 @switch($block->type)
     @case(PageBlockType::ShortText)
         @if ($block->max >= \App\Support\PageBlockDefinition::LONG_FIELD)
-            <x-form.textarea :model="$model" :value="$value" :label="__($block->label)" :hint="$hint" :maxlength="$block->max" rows="2" :placeholder="is_string($shown) ? $shown : null" dir="rtl" />
+            <x-form.textarea :model="$model" :value="$value" :label="__($block->label)" :hint="$hint" :maxlength="$block->max" rows="2" :placeholder="! $enteredOnly && is_string($shown) ? $shown : null" dir="rtl" />
         @else
-            <x-form.input :model="$model" :value="$value" :label="__($block->label)" :hint="$hint" :maxlength="$block->max" :counter="true" :placeholder="is_string($shown) ? $shown : null" dir="rtl" />
+            <x-form.input :model="$model" :value="$value" :label="__($block->label)" :hint="$hint" :maxlength="$block->max" :counter="true" :placeholder="! $enteredOnly && is_string($shown) ? $shown : null" dir="rtl" />
         @endif
         @break
 
     @case(PageBlockType::LongText)
-        <x-form.editor :model="$model" :label="__($block->label)" :hint="__('Optional. Up to :max characters. Left empty, Arabic pages show the original wording in Arabic.', ['max' => $block->max])" />
+        <x-form.editor :model="$model" :label="__($block->label)" :hint="$enteredOnly ? __('Optional. Up to :max characters. Left empty, nothing shows on Arabic pages.', ['max' => $block->max]) : __('Optional. Up to :max characters. Left empty, Arabic pages show the original wording in Arabic.', ['max' => $block->max])" />
         @break
 
     @case(PageBlockType::Link)
-        <x-form.input :model="$model.'.label'" :value="$value['label'] ?? ''" :label="__($block->label)" :hint="__('The destination is the one chosen in the English tab.')" :maxlength="$block->max" :counter="true" :placeholder="$shown['label'] ?? null" dir="rtl" />
+        <x-form.input :model="$model.'.label'" :value="$value['label'] ?? ''" :label="__($block->label)" :hint="$enteredOnly ? __('The destination is the one chosen in the English tab. Left empty, no button shows on Arabic pages.') : __('The destination is the one chosen in the English tab.')" :maxlength="$block->max" :counter="true" :placeholder="$enteredOnly ? null : ($shown['label'] ?? null)" dir="rtl" />
         @break
 
     @case(PageBlockType::List)
@@ -80,9 +82,9 @@
                                     @else
                                         @php $englishHint = filled($shown[$index][$field] ?? null) ? __('English: :text', ['text' => $shown[$index][$field]]) : null; @endphp
                                         @if (PageBlockDefinition::isLong($spec))
-                                            <x-form.textarea :model="$model.'.'.$index.'.'.$field" :value="$value[$index][$field] ?? ''" :label="__($spec['label'])" :hint="$englishHint" :maxlength="$spec['max']" :counter="true" rows="2" :placeholder="$shown[$index][$field] ?? null" dir="rtl" />
+                                            <x-form.textarea :model="$model.'.'.$index.'.'.$field" :value="$value[$index][$field] ?? ''" :label="__($spec['label'])" :hint="$englishHint" :maxlength="$spec['max']" :counter="true" rows="2" :placeholder="$enteredOnly ? null : ($shown[$index][$field] ?? null)" dir="rtl" />
                                         @else
-                                            <x-form.input @class(['form-col--half' => $half]) :model="$model.'.'.$index.'.'.$field" :value="$value[$index][$field] ?? ''" :label="__($spec['label'])" :hint="$englishHint" :maxlength="$spec['max']" :counter="true" :placeholder="$shown[$index][$field] ?? null" dir="rtl" />
+                                            <x-form.input @class(['form-col--half' => $half]) :model="$model.'.'.$index.'.'.$field" :value="$value[$index][$field] ?? ''" :label="__($spec['label'])" :hint="$englishHint" :maxlength="$spec['max']" :counter="true" :placeholder="$enteredOnly ? null : ($shown[$index][$field] ?? null)" dir="rtl" />
                                         @endif
                                     @endif
                                 @endforeach

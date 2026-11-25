@@ -35,10 +35,12 @@ final class SectionBlocks
     public static function definitions(string $page): array
     {
         $section = Sections::definitions()[$page];
+        // A page that shows only what was entered (About) lets every field be emptied.
+        $required = ! Pages::showsOnlyEntered($page);
 
         return [
-            Block::shortText('title', 'Page heading', self::SECTION_OPENING, $section['title'], 60, hint: 'Also its name in breadcrumbs, search results and the cards that lead here.'),
-            Block::shortText('intro', 'Introduction', self::SECTION_OPENING, $section['summary'], 240, hint: 'One or two sentences under the heading. Also used in menus, cards and as the search description.'),
+            Block::shortText('title', 'Page heading', self::SECTION_OPENING, $section['title'], 60, required: $required, hint: 'Also its name in breadcrumbs, search results and the cards that lead here.'),
+            Block::shortText('intro', 'Introduction', self::SECTION_OPENING, $section['summary'], 240, required: $required, hint: 'One or two sentences under the heading. Also used in menus, cards and as the search description.'),
             Block::image(SectionCards::IMAGE_BLOCK, 'Card image', self::SECTION_OPENING, 'Optional. Shown as a narrow duotone strip on the cards that lead here from the home page and About.'),
             ...self::extra($page),
             Block::seo(self::SECTION_SEO, hint: $page === Pages::ABOUT ? 'Leave the title empty to use the page heading, and the description empty to use the short biography.' : self::SEO_HINT),
@@ -55,10 +57,9 @@ final class SectionBlocks
         return match ($page) {
             Pages::ABOUT => [
                 Block::shortText('epigraph', 'Epigraph', self::SECTION_OPENING, Taglines::ABOUT_EPIGRAPH, 140, required: false, hint: 'Leave empty to show none.'),
-                Block::shortText('empty', 'Line while the biography is not published', $listing, 'The biography is being prepared and will appear here once it is published.', 160),
-                Block::shortText('expertise_heading', 'Heading: Expertise', $listing, 'Expertise', 30),
-                Block::shortText('facts_heading', 'Heading: Key facts', $listing, 'Key facts', 30),
-                Block::shortText('contact_heading', 'Heading: Contact', $listing, 'Contact', 30),
+                Block::shortText('expertise_heading', 'Heading: Expertise', $listing, 'Expertise', 30, required: false),
+                Block::shortText('facts_heading', 'Heading: Key facts', $listing, 'Key facts', 30, required: false),
+                Block::shortText('contact_heading', 'Heading: Contact', $listing, 'Contact', 30, required: false),
             ],
             Pages::CV => [
                 Block::shortText('empty', 'Line while the CV is empty', $listing, 'The curriculum vitae is being compiled and will appear here once it is published.', 160),

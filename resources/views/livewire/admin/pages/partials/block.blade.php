@@ -58,7 +58,7 @@
                 @if ($block->hint)<p class="form-hint">{{ __($block->hint) }}</p>@endif
                 <div class="mt-4 form-grid">
                     <div class="form-row">
-                        <x-form.input class="form-col--half" :model="$model.'.label'" :value="$value['label'] ?? ''" :label="__('Label')" :maxlength="$block->max" :counter="true" :optional="false" :placeholder="$block->default['label']" />
+                        <x-form.input class="form-col--half" :model="$model.'.label'" :value="$value['label'] ?? ''" :label="__('Label')" :maxlength="$block->max" :counter="true" :optional="$block->required ? false : null" :placeholder="\App\Constants\Pages::showsOnlyEntered($pageKey ?? '') ? null : $block->default['label']" />
                         <x-form.select class="form-col--half" :model="$model.'.route'" :label="__('Goes to')" :options="$linkOptions" :optional="false" />
                     </div>
                     <x-form.input :model="$model.'.url'" :label="__('Or a web address')" type="url" :hint="__('Only for a page outside this site, beginning with https://. It replaces the page chosen above.')" />

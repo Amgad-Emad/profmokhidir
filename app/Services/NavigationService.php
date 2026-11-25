@@ -134,11 +134,13 @@ class NavigationService
         return [
             'key' => $key,
             'label' => $this->pages->keyed(Pages::NAVIGATION, 'sections')[$key]['label'] ?? __($definition['label']),
-            'title' => $page === null ? __($definition['title']) : $this->pages->text($page, 'title'),
+            // A heading or intro emptied on a page that shows only what was entered (About) leaves the page,
+            // but menus, breadcrumbs and cards still need a name: the section's own.
+            'title' => $page === null ? __($definition['title']) : ($this->pages->text($page, 'title') ?: __($definition['title'])),
             'url' => route($definition['route']),
             'route' => $definition['route'],
             'placement' => $definition['placement'],
-            'summary' => $page === null ? __($definition['summary']) : $this->pages->text($page, 'intro'),
+            'summary' => $page === null ? __($definition['summary']) : ($this->pages->text($page, 'intro') ?: __($definition['summary'])),
             'active' => $this->isActive($definition['route'], $currentRoute),
         ];
     }

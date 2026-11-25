@@ -62,6 +62,13 @@ final class Pages
     /** Route parameter of the edit screen. */
     public const string ROUTE_PARAMETER = 'page';
 
+    /**
+     * Pages that show only what an editor entered, in each language: an empty field shows
+     * nothing (no built-in copy, no English in place of missing Arabic) and the editor
+     * shows no placeholders.
+     */
+    public const array ENTERED_ONLY = [self::HOME, self::ABOUT];
+
     /** Admin routes: the list, one page's edit screen, and an error page drawn with its drafts. */
     public const string INDEX_ROUTE = 'admin.content.pages';
 
@@ -100,6 +107,11 @@ final class Pages
     /**
      * @return list<string>
      */
+    public static function showsOnlyEntered(string $key): bool
+    {
+        return in_array($key, self::ENTERED_ONLY, true);
+    }
+
     public static function all(): array
     {
         return array_keys(self::definitions());

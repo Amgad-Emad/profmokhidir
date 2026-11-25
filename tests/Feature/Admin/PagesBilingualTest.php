@@ -52,15 +52,49 @@ class PagesBilingualTest extends TestCase
     #[Test]
     public function an_empty_arabic_tab_shows_the_built_in_copy_in_arabic_and_changed_english_until_translated(): void
     {
-        $this->get('/ar')->assertSee(__('In honour of', locale: Locales::AR));
+        $this->get('/ar/awards')->assertSee(__('Awards and recognitions will be listed here once they are published.', locale: Locales::AR));
 
-        Livewire::actingAs($this->editor)->test(Edit::class, ['page' => Pages::HOME])
-            ->set('form.hero_label', 'In memory of')
+        Livewire::actingAs($this->editor)->test(Edit::class, ['page' => Pages::AWARDS])
+            ->set('form.empty', 'Honours will be listed soon.')
             ->call('publish');
 
-        $this->get('/ar')->assertSee('In memory of');
-        $this->assertTrue(app(PageService::class)->needsArabic(app(PageService::class)->findByKey(Pages::HOME)));
+        $this->get('/ar/awards')->assertSee('Honours will be listed soon.');
+        $this->assertTrue(app(PageService::class)->needsArabic(app(PageService::class)->findByKey(Pages::AWARDS)));
         $this->actingAs($this->editor)->get(route(Pages::INDEX_ROUTE))->assertSee('data-needs-arabic', false);
+    }
+
+    #[Test]
+    public function the_about_editor_offers_no_placeholders_and_its_empty_arabic_shows_nothing(): void
+    {
+        Livewire::actingAs($this->editor)->test(Edit::class, ['page' => Pages::ABOUT])
+            ->assertDontSee('placeholder="'.e(__('About Prof. Mokhidir', locale: Locales::AR)).'"', false)
+            ->assertDontSee('placeholder="About Prof. Mokhidir"', false)
+            ->set('form.expertise_heading', '')
+            ->call('publish')
+            ->assertHasNoErrors()
+            ->assertSet('form.expertise_heading', '');
+    }
+
+    #[Test]
+    public function an_empty_arabic_home_field_shows_nothing_and_no_placeholder(): void
+    {
+        Livewire::actingAs($this->editor)->test(Edit::class, ['page' => Pages::HOME])
+            ->set('form.hero_label', 'In memory of')
+            ->set('form.button_story.label', 'Read his story')
+            ->call('publish')
+            ->assertHasNoErrors()
+            // The Arabic tab offers no fallback wording as a placeholder.
+            ->assertDontSee('placeholder="'.e(__('In honour of', locale: Locales::AR)).'"', false)
+            ->assertDontSee('placeholder="In memory of"', false)
+            ->assertDontSee('placeholder="'.e(__('Read his story', locale: Locales::AR)).'"', false)
+            ->assertSee(__('Optional. Left empty, nothing shows on Arabic pages.'));
+
+        // Neither the English words nor a translation of them stand in for the missing Arabic.
+        $this->get('/ar')->assertOk()
+            ->assertDontSee('In memory of')
+            ->assertDontSee(__('In honour of', locale: Locales::AR))
+            ->assertDontSee('class="btn btn--primary"', false);
+        $this->get('/')->assertSee('In memory of');
     }
 
     #[Test]

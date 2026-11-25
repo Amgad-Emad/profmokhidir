@@ -129,7 +129,10 @@ class PageContentService
     {
         $stored = $this->load($page)['stored'][$key] ?? [];
 
-        foreach (array_unique([app()->getLocale(), Locales::DEFAULT]) as $locale) {
+        // On a page that shows only what was entered, missing Arabic is not filled from the English.
+        $locales = Pages::showsOnlyEntered($page) ? [app()->getLocale()] : array_unique([app()->getLocale(), Locales::DEFAULT]);
+
+        foreach ($locales as $locale) {
             $value = $stored[$locale] ?? null;
             $value = is_array($value) ? ($value['label'] ?? null) : $value;
 
@@ -139,6 +142,15 @@ class PageContentService
         }
 
         return false;
+    }
+
+    /**
+     * A short text block as the editor entered it, or '' when it holds only the built-in copy
+     * (see entered()).
+     */
+    public function enteredText(string $page, string $key): string
+    {
+        return $this->entered($page, $key) ? $this->text($page, $key) : '';
     }
 
     /**

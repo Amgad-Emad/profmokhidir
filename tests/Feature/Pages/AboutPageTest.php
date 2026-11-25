@@ -3,8 +3,10 @@
 namespace Tests\Feature\Pages;
 
 use App\Constants\Disks;
+use App\Constants\Pages;
 use App\Constants\Taglines;
 use App\Models\Profile;
+use App\Services\PageService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
@@ -19,10 +21,12 @@ class AboutPageTest extends TestCase
         parent::setUp();
 
         Storage::fake(Disks::PUBLIC);
+        // The page's words as installed: the About page shows only what is stored for it.
+        app(PageService::class)->install();
     }
 
     #[Test]
-    public function it_renders_the_section_header_and_an_empty_state_without_a_published_profile(): void
+    public function it_renders_the_section_header_and_no_placeholder_without_a_published_profile(): void
     {
         Profile::factory()->draft()->create(['short_bio' => 'Draft only']);
 
@@ -30,7 +34,8 @@ class AboutPageTest extends TestCase
             ->assertOk()
             ->assertSee('<title>About Prof. Mokhidir · ', false)
             ->assertSeeInOrder(['chapter-opening', '<span class="sr-only">Chapter </span>I</span>', 'About', 'rule-brass', 'id="section-title"', 'About Prof. Mokhidir'], false)
-            ->assertSee('The biography is being prepared and will appear here once it is published.')
+            ->assertDontSee('The biography is being prepared and will appear here once it is published.')
+            ->assertDontSee('class="empty-state', false)
             ->assertDontSee('Draft only')
             ->assertDontSee('livewire', false);
     }
@@ -62,6 +67,25 @@ class AboutPageTest extends TestCase
             ->assertDontSee('The biography is being prepared');
 
         $this->assertGreaterThanOrEqual(2, substr_count($response->getContent(), 'data-rise-group'));
+    }
+
+    #[Test]
+    public function words_an_editor_emptied_leave_the_page_while_menus_keep_the_section_name(): void
+    {
+        Profile::factory()->published()->create(['expertise' => ['Agronomy'], 'key_facts' => [['label' => 'Field', 'value' => 'Agronomy']]]);
+        $pages = app(PageService::class);
+        $pages->publishBlocks($pages->findByKey(Pages::ABOUT), ['title' => '', 'epigraph' => '', 'expertise_heading' => '', 'facts_heading' => '']);
+
+        $response = $this->get(route('about'))->assertOk()
+            ->assertDontSee('chapter-opening__title', false)
+            ->assertDontSee('id="expertise-title"', false)
+            ->assertDontSee('id="facts-title"', false)
+            ->assertDontSee('class="epigraph', false)
+            ->assertSee('<h1 id="section-title" class="sr-only">About Prof. Mokhidir</h1>', false)
+            ->assertSee('Agronomy');
+
+        // The browser title, breadcrumbs and menus still name the section.
+        $response->assertSee('<title>About Prof. Mokhidir · ', false);
     }
 
     #[Test]

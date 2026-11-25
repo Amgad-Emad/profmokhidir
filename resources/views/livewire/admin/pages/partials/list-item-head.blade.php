@@ -18,7 +18,7 @@
         <label class="sr-only" for="{{ $inputId }}">{{ __($spec['label']) }} ({{ $name }})</label>
         <input id="{{ $inputId }}" type="text" class="page-list__inline-input page-list__inline-input--{{ $field }}" dir="ltr"
                wire:model.live.blur="form.{{ $key }}.{{ $index }}.{{ $field }}" value="{{ $item[$field] ?? '' }}"
-               maxlength="{{ $spec['max'] }}" placeholder="{{ $field === 'numeral' ? app(\App\Services\TypesetterService::class)->roman($index + 1) : __($spec['label']) }}" title="{{ __($spec['label']) }}">
+               maxlength="{{ $spec['max'] }}" placeholder="{{ $field === 'numeral' ? (\App\Constants\Pages::showsOnlyEntered($pageKey ?? '') ? '' : app(\App\Services\TypesetterService::class)->roman($index + 1)) : __($spec['label']) }}" title="{{ __($spec['label']) }}">
     @endforeach
     @if ($canRemove)
         <x-button variant="danger" size="sm" type="button" class="page-list__remove" wire:click="removeItem('{{ $key }}', {{ $index }})" data-remove-item>

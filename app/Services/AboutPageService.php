@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Constants\Pages;
 use App\Constants\Sections;
 use App\Models\Profile;
 use App\Support\RichText;
@@ -12,7 +13,9 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 /**
  * Assembles the About page from the published profile: sanitised and typeset
  * biography, expertise tags, key facts, optional public contact details and the
- * links on to the CV, Publications and Awards sections.
+ * links on to the CV, Publications and Awards sections. The page's own words
+ * (Admin › Pages › About) show only where an editor entered them: no built-in
+ * copy, placeholders or empty-state line.
  */
 class AboutPageService
 {
@@ -23,6 +26,7 @@ class AboutPageService
         private readonly SettingService $settings,
         private readonly TypesetterService $typesetter,
         private readonly SectionCardService $cards,
+        private readonly PageContentService $pages,
     ) {}
 
     /**
@@ -37,7 +41,8 @@ class AboutPageService
      *     contact: array{email: string|null, note: string|null, phone: string|null, address: string|null},
      *     links: list<array{key: string, numeral: string, title: string, summary: string, url: string, image: Media|null}>,
      *     description: string|null,
-     *     schema: array<string, mixed>|null
+     *     schema: array<string, mixed>|null,
+     *     copy: array{title: string, epigraph: string, expertise: string, facts: string, contact: string}
      * }
      */
     public function data(): array
@@ -58,6 +63,13 @@ class AboutPageService
             'links' => $this->links(),
             'description' => $this->seo->description($profile?->short_bio, $section['summary']),
             'schema' => $profile === null ? null : $this->seo->person($profile, $portrait, $section['url']),
+            'copy' => [
+                'title' => $this->pages->enteredText(Pages::ABOUT, 'title'),
+                'epigraph' => $this->pages->enteredText(Pages::ABOUT, 'epigraph'),
+                'expertise' => $this->pages->enteredText(Pages::ABOUT, 'expertise_heading'),
+                'facts' => $this->pages->enteredText(Pages::ABOUT, 'facts_heading'),
+                'contact' => $this->pages->enteredText(Pages::ABOUT, 'contact_heading'),
+            ],
         ];
     }
 

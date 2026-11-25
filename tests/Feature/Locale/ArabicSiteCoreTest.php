@@ -3,12 +3,14 @@
 namespace Tests\Feature\Locale;
 
 use App\Constants\Disks;
+use App\Constants\Pages;
 use App\Constants\PublicationType;
 use App\Constants\Search;
 use App\Models\Award;
 use App\Models\CvEntry;
 use App\Models\Profile;
 use App\Models\Publication;
+use App\Services\PageService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
@@ -35,6 +37,17 @@ class ArabicSiteCoreTest extends TestCase
         // A chapter to show: the home page leaves out a section with nothing in it.
         Award::factory()->published()->create(['year' => 1985]);
         $this->fillHomeSections();
+        // The home page shows only the Arabic an editor entered (no English or built-in copy in its place).
+        $pages = app(PageService::class);
+        $pages->publishBlocks($pages->findByKey(Pages::HOME), [
+            'button_story' => ['label' => 'Read his story', 'route' => 'about'],
+            'button_tribute' => ['label' => 'Leave a tribute', 'route' => 'tributes.create'],
+            'chapters_title' => 'A life in chapters',
+        ], [
+            'button_story' => ['label' => 'اقرأ قصته'],
+            'button_tribute' => ['label' => 'اترك كلمة وفاء'],
+            'chapters_title' => 'حياة في فصول',
+        ]);
         $this->get('/ar')
             ->assertOk()
             ->assertSee('lang="ar" dir="rtl"', false)

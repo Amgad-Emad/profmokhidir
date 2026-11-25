@@ -111,6 +111,13 @@ class PublicSectionsSweepTest extends TestCase
                 continue;
             }
 
+            // About shows only what an editor entered: without a profile it has no placeholder line.
+            if ($key === Sections::ABOUT) {
+                $response->assertDontSee('class="empty-state', false);
+
+                continue;
+            }
+
             $response
                 ->assertSee('class="empty-state', false)
                 ->assertSee('rule-brass-short', false);

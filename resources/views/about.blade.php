@@ -1,22 +1,28 @@
-@inject('pageCopy', 'App\Services\PageContentService')
 <x-layouts.public :title="$section['title']" :description="$description" :schema="$schema" :type="\App\Constants\Seo::OG_TYPE_PROFILE">
     <x-reading-progress target="#about-body" />
 
-    <section id="about-body" class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28" aria-labelledby="section-title">
-        <x-chapter-opening :number="$chapter" :label="$section['label']" :title="$section['title']" level="1" id="section-title">
-            @if ($pageCopy->text('about', 'epigraph') !== '')
-                <x-slot:epigraph>
-                    <x-epigraph>{{ $pageCopy->text('about', 'epigraph') }}</x-epigraph>
-                </x-slot:epigraph>
+    {{-- Only what an editor entered shows: the heading, epigraph and small headings are left out when empty. --}}
+    <section id="about-body" class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28" {!! $copy['title'] !== '' ? 'aria-labelledby="section-title"' : 'aria-label="'.e($section['title']).'"' !!}>
+        @if ($copy['title'] !== '')
+            <x-chapter-opening :number="$chapter" :label="$section['label']" :title="$copy['title']" level="1" id="section-title">
+                @if ($copy['epigraph'] !== '')
+                    <x-slot:epigraph>
+                        <x-epigraph>{{ $copy['epigraph'] }}</x-epigraph>
+                    </x-slot:epigraph>
+                @endif
+            </x-chapter-opening>
+        @else
+            {{-- The page keeps one level-one heading for assistive technology, out of sight. --}}
+            <h1 id="section-title" class="sr-only">{{ $section['title'] }}</h1>
+            @if ($copy['epigraph'] !== '')
+                <x-epigraph>{{ $copy['epigraph'] }}</x-epigraph>
             @endif
-        </x-chapter-opening>
+        @endif
         @if ($profile !== null)
             <x-locale.fallback-note :model="$profile" class="mt-6" />
         @endif
 
-        @if ($profile === null)
-            <x-empty-state class="mt-6" :message="$pageCopy->text('about', 'empty')" />
-        @else
+        @if ($profile !== null)
             <div class="mt-16 grid gap-12 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-16 xl:grid-cols-[minmax(0,1fr)_47rem]">
                 <div class="lg:sticky lg:top-28 lg:self-start" data-rise-group>
                     @if ($portrait)
@@ -43,9 +49,11 @@
                     @endif
 
                     @if ($expertise !== [])
-                        <section aria-labelledby="expertise-title">
-                            <h2 id="expertise-title" class="t-label text-accent-text">{{ $pageCopy->text('about', 'expertise_heading') }}</h2>
-                            <ul @contentLang($profile, 'expertise') class="mt-5 flex flex-wrap gap-3">
+                        <section{!! $copy['expertise'] !== '' ? ' aria-labelledby="expertise-title"' : '' !!}>
+                            @if ($copy['expertise'] !== '')
+                                <h2 id="expertise-title" class="t-label text-accent-text">{{ $copy['expertise'] }}</h2>
+                            @endif
+                            <ul @contentLang($profile, 'expertise') @class(['flex flex-wrap gap-3', 'mt-5' => $copy['expertise'] !== ''])>
                                 @foreach ($expertise as $tag)
                                     <li class="tag t-label rounded-full border border-rule px-4 py-2 text-accent-text">{{ $tag }}</li>
                                 @endforeach
@@ -54,9 +62,11 @@
                     @endif
 
                     @if ($facts !== [])
-                        <section aria-labelledby="facts-title">
-                            <h2 id="facts-title" class="t-label text-accent-text">{{ $pageCopy->text('about', 'facts_heading') }}</h2>
-                            <dl @contentLang($profile, 'key_facts') class="mt-5 grid gap-x-10 gap-y-6 border-t border-rule pt-6 sm:grid-cols-2">
+                        <section{!! $copy['facts'] !== '' ? ' aria-labelledby="facts-title"' : '' !!}>
+                            @if ($copy['facts'] !== '')
+                                <h2 id="facts-title" class="t-label text-accent-text">{{ $copy['facts'] }}</h2>
+                            @endif
+                            <dl @contentLang($profile, 'key_facts') @class(['grid gap-x-10 gap-y-6 border-t border-rule pt-6 sm:grid-cols-2', 'mt-5' => $copy['facts'] !== ''])>
                                 @foreach ($facts as $fact)
                                     <div class="flex flex-col gap-1">
                                         <dt class="t-label text-accent-text">{{ $fact['label'] }}</dt>
@@ -68,9 +78,11 @@
                     @endif
 
                     @if ($contact['email'] || $contact['note'] || $contact['phone'] || $contact['address'])
-                        <section aria-labelledby="contact-title">
-                            <h2 id="contact-title" class="t-label text-accent-text">{{ $pageCopy->text('about', 'contact_heading') }}</h2>
-                            <div class="mt-5 flex flex-col gap-2 border-t border-rule pt-6">
+                        <section{!! $copy['contact'] !== '' ? ' aria-labelledby="contact-title"' : '' !!}>
+                            @if ($copy['contact'] !== '')
+                                <h2 id="contact-title" class="t-label text-accent-text">{{ $copy['contact'] }}</h2>
+                            @endif
+                            <div @class(['flex flex-col gap-2 border-t border-rule pt-6', 'mt-5' => $copy['contact'] !== ''])>
                                 @if ($contact['email'])
                                     <p class="t-body"><a href="mailto:{{ $contact['email'] }}" class="text-ink underline decoration-accent-line underline-offset-4">{{ $contact['email'] }}</a>@if ($contact['note'])<x-sidenote :number="1">@typeset($contact['note'])</x-sidenote>@endif</p>
                                 @endif
@@ -89,14 +101,16 @@
                 </div>
             </div>
 
-            <nav class="mt-20" aria-label="{{ __('Continue reading') }}">
-                <hr class="rule-brass" data-rule>
-                <ul class="section-cards mt-10" data-rise-group>
-                    @foreach ($links as $item)
-                        <li><x-section-card :card="$item" level="2" /></li>
-                    @endforeach
-                </ul>
-            </nav>
+            @if ($links !== [])
+                <nav class="mt-20" aria-label="{{ __('Continue reading') }}">
+                    <hr class="rule-brass" data-rule>
+                    <ul class="section-cards mt-10" data-rise-group>
+                        @foreach ($links as $item)
+                            <li><x-section-card :card="$item" level="2" /></li>
+                        @endforeach
+                    </ul>
+                </nav>
+            @endif
 
             <x-seal />
         @endif
