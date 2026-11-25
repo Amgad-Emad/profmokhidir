@@ -54,8 +54,13 @@ export function collapsible(id, startOpen = true, remember = true, group = null)
         },
 
         // Focus reaching a field inside the body opens the part (not focus on its own heading).
+        // The body must be this part's own: a page-list item sits inside a form section's body,
+        // and focus on the item's toggle (a click focuses it first) must not count as inside the
+        // item, or the click's toggle would fold it again straight away.
         focusIn(event) {
-            if (event.target.closest('[data-collapsible-body]') && this.$el.contains(event.target)) {
+            const body = this.$el.querySelector(':scope > [data-collapsible-body]');
+
+            if (body && body.contains(event.target)) {
                 this.open = true;
             }
         },
