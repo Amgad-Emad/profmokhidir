@@ -9,8 +9,14 @@
 @php
     $published = $page->status === ContentStatus::Published;
     $nav = [];
-    foreach (array_keys($sections) as $title) {
+    // The About page's profile (name, biography, expertise tags, key facts, portrait, contact) sits
+    // after the page's opening, in the order the page shows it.
+    $profileSections = $embedsProfile ? ['identity' => __('Identity'), 'biography' => __('Biography'), 'expertise' => __('Expertise & key facts'), 'portrait' => __('Portrait'), 'contact' => __('Contact')] : [];
+    foreach (array_keys($sections) as $position => $title) {
         $nav[Str::slug($title)] = __($title);
+        if ($position === 0) {
+            $nav += $profileSections;
+        }
     }
     if ($records) {
         $nav['page-records'] = $records['plural'];
@@ -38,6 +44,9 @@
     <div class="page-editor__columns mt-10">
         <x-admin.edit-layout :editor="$editor" :sections="$nav" :autosave="true" :save-only="true" class="page-editor__form">
             @foreach ($sections as $title => $keys)
+                @if ($embedsProfile && $loop->index === 1)
+                    <livewire:admin.profile.edit-profile :embedded="true" wire:key="about-profile" />
+                @endif
                 <x-admin.form-section :id="Str::slug($title)" :title="__($title)" :collapsed="true" wire:key="section-{{ Str::slug($title) }}" @class(['form-section--hidden-on-page' => in_array($title, $hiddenSections, true)])>
                     @if (in_array($title, $hideableSections, true))
                         @php $shown = ! in_array($title, $hiddenSections, true); @endphp
@@ -55,6 +64,9 @@
                     @endforeach
                 </x-admin.form-section>
             @endforeach
+            @if ($embedsProfile && count($sections) < 2)
+                <livewire:admin.profile.edit-profile :embedded="true" wire:key="about-profile" />
+            @endif
 
             @if ($records)
                 @include('livewire.admin.pages.partials.records', ['records' => $records])

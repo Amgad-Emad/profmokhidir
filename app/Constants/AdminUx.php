@@ -56,6 +56,12 @@ final class AdminUx
     /** Browser event asking the edit screen to replace its address after an autosave created the record. */
     public const string EVENT_ADDRESS = 'admin-address';
 
+    /** Livewire event: a page editor was saved, so a form embedded in it (the About page's profile) saves too. */
+    public const string EVENT_PAGE_SAVED = 'page-editor-saved';
+
+    /** Livewire event: a page editor was published, so a form embedded in it publishes too. */
+    public const string EVENT_PAGE_PUBLISHED = 'page-editor-published';
+
     /** Browser event carrying a fresh preview link to open. */
     public const string EVENT_PREVIEW = 'admin-preview';
 

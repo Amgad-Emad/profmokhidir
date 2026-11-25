@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin\Profile;
 
+use App\Constants\AdminUx;
 use App\Constants\ContentStatus;
 use App\Constants\ContentTypes;
 use App\Constants\Locales;
@@ -17,19 +18,82 @@ use App\Services\AbstractContentService;
 use App\Services\ProfileService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
+use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
  * The single profile (About page): created on first save, edited afterwards.
+ *
+ * Embedded, it is part of Admin › Pages › About, so that page's editor holds
+ * everything the About page shows: its sections sit beside the page's own words
+ * and are saved and published by the page's save bar (EVENT_PAGE_SAVED and
+ * EVENT_PAGE_PUBLISHED), with no save bar or history of their own.
  */
 class EditProfile extends ContentForm
 {
     use ManagesImages;
 
-    public function mount(): void
+    #[Locked]
+    public bool $embedded = false;
+
+    public function mount(bool $embedded = false): void
     {
+        $this->embedded = $embedded;
         $this->initialise(app(ProfileService::class)->current());
         $this->loadImages();
+    }
+
+    /**
+     * The About page's editor was saved: save the profile with it (a draft stays
+     * a draft). A profile not yet started is left alone.
+     */
+    #[On(AdminUx::EVENT_PAGE_SAVED)]
+    public function saveWithPage(): void
+    {
+        if ($this->embedded && $this->isStarted()) {
+            $this->save();
+        }
+    }
+
+    /**
+     * The About page's editor was published: publish the profile with it.
+     */
+    #[On(AdminUx::EVENT_PAGE_PUBLISHED)]
+    public function publishWithPage(): void
+    {
+        if ($this->embedded && $this->isStarted()) {
+            $this->publish();
+        }
+    }
+
+    /**
+     * Embedded, the page's save bar keeps its own drafts; the profile is saved by
+     * the page's Save and Publish rather than autosaved on its own.
+     */
+    public function autosave(): void
+    {
+        if (! $this->embedded) {
+            parent::autosave();
+        }
+    }
+
+    /**
+     * Embedded, the page's own toast reports the save: only problems are shown here.
+     */
+    protected function toast(string $message, string $tone = AdminUx::TOAST_SUCCESS, ?array $undo = null): void
+    {
+        if (! $this->embedded || $tone !== AdminUx::TOAST_SUCCESS) {
+            parent::toast($message, $tone, $undo);
+        }
+    }
+
+    /**
+     * Whether there is a profile, or a name has been typed for a new one.
+     */
+    private function isStarted(): bool
+    {
+        return $this->recordId !== null || trim((string) ($this->form['name'] ?? '')) !== '';
     }
 
     protected function type(): string

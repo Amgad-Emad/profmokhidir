@@ -16,10 +16,13 @@ use App\Constants\RevisionKind;
 use App\Constants\Uploads;
 use App\Http\Requests\Admin\PageRequest;
 use App\Livewire\Admin\Concerns\NotifiesEditors;
+use App\Livewire\Admin\Profile\EditProfile;
 use App\Models\Page;
+use App\Models\Profile;
 use App\Services\PageRecordsService;
 use App\Services\PageService;
 use App\Services\PreviewService;
+use App\Services\ProfileService;
 use App\Services\RevisionService;
 use App\Support\PageBlockDefinition;
 use App\Support\PageBlockValue;
@@ -176,6 +179,7 @@ class Edit extends Component
 
         $page = $this->pages()->saveDraft($this->record(), $this->form, $this->arabic);
         $this->afterSave($page, $this->restoredRevision ? RevisionKind::Restore : RevisionKind::Save);
+        $this->saveEmbedded(AdminUx::EVENT_PAGE_SAVED);
         $this->toast($page->isPublished()
             ? __('Draft saved. Visitors still see the published wording until you publish the changes.')
             : __('Draft saved. Visitors see the original wording until the page is published.'));
@@ -193,6 +197,7 @@ class Edit extends Component
         $wasPublished = $record->isPublished();
         $page = $this->pages()->publish($record, $this->form, auth()->user(), $this->arabic);
         $this->afterSave($page, RevisionKind::Publish);
+        $this->saveEmbedded(AdminUx::EVENT_PAGE_PUBLISHED);
         $this->toast($wasPublished ? __('Changes published. They are on the public site now.') : __('Page published. Visitors see these words now.'));
     }
 
@@ -424,7 +429,8 @@ class Edit extends Component
             'hasDraft' => $this->pages()->hasDraft($record),
             'editor' => $this->editorState($record),
             'previewUrls' => $this->previewUrls($record),
-            'records' => app(PageRecordsService::class)->for($this->pageKey),
+            'records' => $this->embedsProfile() ? null : app(PageRecordsService::class)->for($this->pageKey),
+            'embedsProfile' => $this->embedsProfile(),
             'hideableSections' => PageBlocks::hideableSections($this->pageKey),
             'hiddenSections' => $record->hiddenSections(),
             'imageHint' => __(':types, up to :size.', ['types' => implode(', ', array_map('strtoupper', Uploads::IMAGE_EXTENSIONS)), 'size' => Uploads::imageMaxLabel()]),
@@ -620,6 +626,31 @@ class Edit extends Component
         $definition = PageBlocks::get($this->pageKey, $key);
 
         return $definition->type === PageBlockType::List && is_array($this->form[$key] ?? null) ? $definition : null;
+    }
+
+    /**
+     * The About page's editor holds the profile too (its name, biography, expertise tags, key
+     * facts, portrait and contact), as an embedded profile form, when the editor may change it.
+     */
+    private function embedsProfile(): bool
+    {
+        if ($this->pageKey !== Pages::ABOUT) {
+            return false;
+        }
+
+        $profile = app(ProfileService::class)->current();
+
+        return auth()->user()?->can($profile === null ? 'create' : 'update', $profile ?? Profile::class) ?? false;
+    }
+
+    /**
+     * Ask a form embedded in this editor (the About page's profile) to save or publish with the page.
+     */
+    private function saveEmbedded(string $event): void
+    {
+        if ($this->embedsProfile()) {
+            $this->dispatch($event)->to(EditProfile::class);
+        }
     }
 
     private function request(): PageRequest
