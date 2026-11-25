@@ -80,7 +80,7 @@
                             $heading = trim($name.(filled($firstField ? ($item[$firstField] ?? null) : null) ? ' · '.$item[$firstField] : '')).(! empty($item[PageBlockDefinition::HIDDEN]) ? ' · '.__('Hidden') : '');
                         @endphp
                         @php $canRemove = ! $block->fixedItems && $count > ((array) $block->default === [] ? 0 : 1); @endphp
-                        <li class="page-list__item page-list__item--collapsed" wire:key="{{ $key }}-{{ $item['key'] ?? $index }}" x-data="collapsible('item-{{ $key }}-{{ $index }}', false, false, 'list-{{ $key }}')" x-on:focusin="focusIn($event)" x-bind:class="{ 'page-list__item--collapsed': ! open }">
+                        <li class="page-list__item page-list__item--collapsed" wire:key="{{ $key }}-{{ $item['key'] ?? $index }}" x-data="collapsible('item-{{ $key }}-{{ $index }}', false, false, 'list-{{ $key }}')" x-on:focusin="focusIn($event)" x-on:click="openFromClick($event)" x-bind:class="{ 'page-list__item--collapsed': ! open }">
                             @include('livewire.admin.pages.partials.list-item-head', ['name' => $name, 'bodyId' => 'item-'.$key.'-'.$index.'-body', 'idPrefix' => 'head', 'canRemove' => $canRemove])
                             <div id="item-{{ $key }}-{{ $index }}-body" class="fold" x-bind:class="{ 'fold--open': open, 'fold--settled': settled }" x-bind:inert="! open" inert data-collapsible-body><div class="fold__inner page-list__body">
                             @php

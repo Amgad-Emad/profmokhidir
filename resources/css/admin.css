@@ -1936,6 +1936,15 @@ html.admin-html {
         border-bottom: 0;
     }
 
+    /* A folded item opens on a click anywhere on its card. */
+    .page-list__item--collapsed {
+        cursor: pointer;
+    }
+
+    .page-list__item--collapsed :is(input, select, textarea) {
+        cursor: text;
+    }
+
     /* The groups of an item, evenly spaced; "Add milestone" sits between them with room around it. */
     .page-list__groups {
         display: flex;

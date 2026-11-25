@@ -53,6 +53,16 @@ export function collapsible(id, startOpen = true, remember = true, group = null)
             this.open = !this.open;
         },
 
+        // A click anywhere on a folded part opens it, except on its own controls (the toggle,
+        // the fields edited in its heading row, Remove), which keep their own action.
+        openFromClick(event) {
+            if (this.open || event.target.closest('button, a, input, select, textarea, label, [contenteditable]')) {
+                return;
+            }
+
+            this.open = true;
+        },
+
         // Focus reaching a field inside the body opens the part (not focus on its own heading).
         // The body must be this part's own: a page-list item sits inside a form section's body,
         // and focus on the item's toggle (a click focuses it first) must not count as inside the
