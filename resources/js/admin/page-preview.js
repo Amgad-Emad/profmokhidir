@@ -1,7 +1,7 @@
 /*
  | The live preview beside a page editor (Admin › Pages): the real public page,
- | with the editor's draft, in a frame drawn at a real screen size, desktop
- | (1280 × 800) or phone (390 × 844), and scaled as a whole to fit the pane, so
+ | with the editor's draft, in a frame drawn at a real screen width, desktop
+ | (1280, as tall as the pane allows) or phone (390 × 844), and scaled as a whole to fill the pane, so
  | full-height sections (the home hero) look as they do in a browser. It reloads after every save and autosave,
  | so it always shows what is stored. Open/closed and the width are remembered
  | per viewer. The frame is inert (a picture of the page): keyboard and screen
@@ -18,8 +18,12 @@
 import { eventDetail, readSetting, writeSetting } from './storage';
 
 const SCREENS = { desktop: { width: 1280, height: 800 }, phone: { width: 390, height: 844 } };
-// Room the pane leaves for the admin bar, the preview bar and the note (matches the old calc(100vh - 14rem)).
-const CHROME_HEIGHT = 224;
+// The pane is sticky this far from the top of the window (5.5rem), and keeps this much room below.
+const STICKY_TOP = 88;
+const BOTTOM_ROOM = 24;
+// A desktop page is shown as tall as the pane allows, within these heights (in page pixels).
+const DESKTOP_MIN_HEIGHT = 640;
+const DESKTOP_MAX_HEIGHT = 1200;
 const OPEN_KEY = 'admin.pagePreview.open';
 const DEVICE_KEY = 'admin.pagePreview.device';
 const SECTION_ATTRIBUTE = 'data-edit-section';
@@ -44,6 +48,8 @@ export function pagePreview() {
         device: readSetting(DEVICE_KEY, 'desktop'),
         view: null,
         scale: 1,
+        // The framed page's own height: the phone's screen, or as much of a desktop page as fits.
+        frameHeight: SCREENS.desktop.height,
         loading: true,
         // The editor section whose region is outlined (the one last opened), and the one pointed at.
         current: null,
@@ -261,22 +267,36 @@ export function pagePreview() {
             if (win.scrollY !== before) event.preventDefault();
         },
 
-        // The largest scale at which the whole screen fits the pane's width and the window's height.
+        // Fill the pane: a desktop page at the pane's width and as tall as the window allows; a phone
+        // screen whole, as large as fits.
         fit() {
-            const pane = this.$refs.viewport?.parentElement;
-            if (!pane || !pane.clientWidth) return;
-            const room = Math.max(320, window.innerHeight - CHROME_HEIGHT);
-            this.scale = Math.min(1, (pane.clientWidth - 2) / this.screen.width, room / this.screen.height);
+            const stage = this.$refs.viewport?.parentElement;
+            const pane = stage?.closest('[data-page-preview]');
+            if (!stage || !pane || !stage.clientWidth) return;
+
+            const style = getComputedStyle(stage);
+            const width = stage.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight) - 2;
+            const above = stage.getBoundingClientRect().top - pane.getBoundingClientRect().top + parseFloat(style.paddingTop);
+            const below = parseFloat(style.paddingBottom) + (pane.querySelector('.page-preview__help')?.offsetHeight ?? 0) + 12;
+            const room = Math.max(320, window.innerHeight - STICKY_TOP - BOTTOM_ROOM - above - below);
+
+            if (this.device === 'phone') {
+                this.scale = Math.min(1, width / SCREENS.phone.width, room / SCREENS.phone.height);
+                this.frameHeight = SCREENS.phone.height;
+
+                return;
+            }
+
+            this.scale = Math.min(1, width / SCREENS.desktop.width);
+            this.frameHeight = Math.round(Math.min(DESKTOP_MAX_HEIGHT, Math.max(DESKTOP_MIN_HEIGHT, room / this.scale)));
         },
 
         get viewportStyle() {
-            const { width, height } = this.screen;
-            return `width: ${Math.floor(width * this.scale) + 2}px; height: ${Math.floor(height * this.scale) + 2}px;`;
+            return `width: ${Math.floor(this.screen.width * this.scale) + 2}px; height: ${Math.floor(this.frameHeight * this.scale) + 2}px;`;
         },
 
         get frameStyle() {
-            const { width, height } = this.screen;
-            return `width: ${width}px; height: ${height}px; transform: scale(${this.scale});`;
+            return `width: ${this.screen.width}px; height: ${this.frameHeight}px; transform: scale(${this.scale});`;
         },
     };
 }

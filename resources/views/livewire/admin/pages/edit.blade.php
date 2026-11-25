@@ -73,29 +73,52 @@
             @endif
         </x-admin.edit-layout>
 
+        @php
+            $firstPreview = reset($previewUrls);
+            $previewAddress = (parse_url($firstPreview, PHP_URL_HOST) ?? '').(parse_url($firstPreview, PHP_URL_PATH) ?? '/');
+        @endphp
         <aside class="page-preview" x-show="open" x-cloak aria-label="{{ __('Preview of the page') }}" wire:ignore data-page-preview data-preview-urls="{{ json_encode($previewUrls, JSON_UNESCAPED_SLASHES) }}" data-preview-copy="{{ json_encode(['editedIn' => __('Edited in: :section')], JSON_UNESCAPED_UNICODE) }}">
-            <div class="page-preview__bar">
-                <p class="t-label text-accent-text">{{ __('Preview with your draft') }}</p>
-                <div class="page-preview__controls">
-                    @if (count($previewUrls) > 1)
-                        <label class="sr-only" for="preview-view">{{ __('Error page shown') }}</label>
-                        <span class="page-preview__select-wrap"><select id="preview-view" class="page-preview__select" x-on:change="show($event.target.value)">
-                            @foreach ($previewUrls as $view => $url)
-                                <option value="{{ $view }}">{{ __('Error :code', ['code' => $view]) }}</option>
-                            @endforeach
-                        </select><x-icon name="chevron-down" class="page-preview__select-icon size-4" /></span>
-                    @endif
-                    <div class="page-preview__devices" role="group" aria-label="{{ __('Preview width') }}">
-                        <button type="button" class="page-preview__device" x-on:click="device = 'desktop'" x-bind:aria-pressed="(device === 'desktop').toString()">{{ __('Desktop') }}</button>
-                        <button type="button" class="page-preview__device" x-on:click="device = 'phone'" x-bind:aria-pressed="(device === 'phone').toString()">{{ __('Phone') }}</button>
+            {{-- A quiet browser window: the bar (what it shows, which screen, reload), the page's address, then the page itself. --}}
+            <div class="page-preview__window">
+                <div class="page-preview__bar">
+                    <p class="page-preview__title">
+                        <span class="page-preview__pulse" aria-hidden="true"></span>
+                        <span>{{ __('Preview with your draft') }}</span>
+                    </p>
+                    <div class="page-preview__controls">
+                        @if (count($previewUrls) > 1)
+                            <label class="sr-only" for="preview-view">{{ __('Error page shown') }}</label>
+                            <span class="page-preview__select-wrap"><select id="preview-view" class="page-preview__select" x-on:change="show($event.target.value)">
+                                @foreach ($previewUrls as $view => $url)
+                                    <option value="{{ $view }}">{{ __('Error :code', ['code' => $view]) }}</option>
+                                @endforeach
+                            </select><x-icon name="chevron-down" class="page-preview__select-icon size-4" /></span>
+                        @endif
+                        <div class="page-preview__devices" role="group" aria-label="{{ __('Preview width') }}">
+                            <button type="button" class="page-preview__device" x-on:click="device = 'desktop'" x-bind:aria-pressed="(device === 'desktop').toString()"><x-icon name="monitor" class="size-4" /><span>{{ __('Desktop') }}</span></button>
+                            <button type="button" class="page-preview__device" x-on:click="device = 'phone'" x-bind:aria-pressed="(device === 'phone').toString()"><x-icon name="phone" class="size-4" /><span>{{ __('Phone') }}</span></button>
+                        </div>
+                        <button type="button" class="page-preview__reload" x-on:click="reload()" title="{{ __('Reload') }}" x-bind:disabled="loading">
+                            <x-icon name="refresh" class="size-4" /><span class="sr-only">{{ __('Reload') }}</span>
+                        </button>
                     </div>
-                    <button type="button" class="page-preview__device" x-on:click="reload()">{{ __('Reload') }}</button>
+                </div>
+                <div class="page-preview__address" dir="ltr">
+                    <x-icon name="lock" class="size-4" />
+                    <span class="page-preview__url">{{ $previewAddress }}</span>
+                    <span class="page-preview__badge">{{ __('Draft') }}</span>
+                </div>
+                <div class="page-preview__stage" x-ref="stage">
+                    <div class="page-preview__viewport" x-ref="viewport" x-bind:class="{ 'page-preview__viewport--loading': loading, 'page-preview__viewport--phone': device === 'phone' }" x-bind:style="viewportStyle" x-on:mousemove="hover($event)" x-on:mouseleave="leave()" x-on:click="pick($event)">
+                        <iframe x-ref="frame" src="{{ $firstPreview }}" title="{{ __('Preview of :page with the draft', ['page' => __($definition['title'])]) }}" class="page-preview__frame" x-bind:style="frameStyle" x-on:load="loading = false" loading="lazy" inert></iframe>
+                    </div>
                 </div>
             </div>
-            <div class="page-preview__viewport" x-ref="viewport" x-bind:style="viewportStyle" x-on:mousemove="hover($event)" x-on:mouseleave="leave()" x-on:click="pick($event)">
-                <iframe x-ref="frame" src="{{ reset($previewUrls) }}" title="{{ __('Preview of :page with the draft', ['page' => __($definition['title'])]) }}" class="page-preview__frame" x-bind:style="frameStyle" x-on:load="loading = false" loading="lazy" inert></iframe>
-            </div>
-            <p class="page-preview__note">{{ __('The preview shows what is saved. Changes appear here a moment after each autosave. To read or use the page itself, open Preview in the save bar: it opens the same page in a new tab.') }} {{ __('Open or point at a section to see its part of the page outlined here; point at the page to see which section edits it, and click to open that section.') }}</p>
+            <details class="page-preview__help" x-on:toggle="$nextTick(() => fit())">
+                <summary><x-icon name="info" class="size-4" />{{ __('How the preview works') }}</summary>
+                <p>{{ __('The preview shows what is saved. Changes appear here a moment after each autosave. To read or use the page itself, open Preview in the save bar: it opens the same page in a new tab.') }}</p>
+                <p>{{ __('Open or point at a section to see its part of the page outlined here; point at the page to see which section edits it, and click to open that section.') }}</p>
+            </details>
         </aside>
     </div>
 

@@ -10,6 +10,15 @@
     @case('check')
         <path d="M5 12.5l4.5 4.5L19 7.5" />
         @break
+    @case('monitor')
+        <rect x="3.75" y="4.75" width="16.5" height="11" rx="1" /><path d="M9 19.25h6" /><path d="M12 15.75v3.5" />
+        @break
+    @case('phone')
+        <rect x="7.25" y="3.75" width="9.5" height="16.5" rx="1.75" /><path d="M11 17.25h2" />
+        @break
+    @case('refresh')
+        <path d="M19.25 12a7.25 7.25 0 1 1-2.12-5.13" /><path d="M19.25 4.75v4.5h-4.5" />
+        @break
     @case('chart')
         <path d="M4.5 19.5h15" /><path d="M6 15.5l4-4.5 3.5 3L18.5 8" />
         @break
