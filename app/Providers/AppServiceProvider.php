@@ -72,6 +72,10 @@ class AppServiceProvider extends ServiceProvider
         // that changes this region (Preview::EDIT_SECTION_ATTRIBUTE); nothing for visitors.
         Blade::directive('editSection', fn (string $expression): string => '<?php if (app(\\App\\Services\\PreviewService::class)->active()) { echo \' \'.\\App\\Constants\\Preview::EDIT_SECTION_ATTRIBUTE.\'="\'.e('.$expression.').\'"\'; } ?>');
 
+        // @editField('page:title'): on a page previewed beside its editor only, names the field whose text
+        // the element shows (Preview::EDIT_FIELD_ATTRIBUTE), so typing shows at once; nothing for visitors.
+        Blade::directive('editField', fn (string $expression): string => '<?php if (app(\\App\\Services\\PreviewService::class)->active()) { echo \' \'.\\App\\Constants\\Preview::EDIT_FIELD_ATTRIBUTE.\'="\'.e('.$expression.').\'"\'; } ?>');
+
         // Public community signups: a handful per address per hour.
         RateLimiter::for(RateLimits::COMMUNITY_SIGNUP, function (Request $request) {
             return Limit::perHour(RateLimits::COMMUNITY_SIGNUP_PER_HOUR)->by((string) $request->ip());

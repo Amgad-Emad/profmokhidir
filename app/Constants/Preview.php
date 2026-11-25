@@ -31,6 +31,13 @@ final class Preview
      */
     public const string EDIT_SECTION_ATTRIBUTE = 'data-edit-section';
 
+    /**
+     * On a page previewed beside its editor, an element showing one field's text names that field
+     * ("page:<block key>" for the page's own words, "profile:<column>" for the profile), so the
+     * preview can show the words as they are typed, before the draft is saved.
+     */
+    public const string EDIT_FIELD_ATTRIBUTE = 'data-edit-field';
+
     /** Request attribute set while a preview is being rendered. */
     public const string ATTRIBUTE = 'preview.context';
 

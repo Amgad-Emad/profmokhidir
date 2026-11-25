@@ -4,7 +4,7 @@
     An `epigraph` slot (use <x-epigraph>) follows the heading, then an optional intro in the
     default slot. `tone`: "evergreen" on ivory (default) or "ivory" on evergreen surfaces.
 --}}
-@props(['number' => null, 'label' => null, 'title', 'tone' => 'evergreen', 'level' => 2, 'id' => null])
+@props(['number' => null, 'label' => null, 'title', 'tone' => 'evergreen', 'level' => 2, 'id' => null, 'field' => null])
 @inject('typesetter', 'App\Services\TypesetterService')
 @php
     $onDark = $tone === 'ivory';
@@ -24,7 +24,7 @@
         </p>
     @endif
     <hr class="rule-brass chapter-opening__rule" data-rule>
-    <{{ $tag }}{!! $id ? ' id="'.e($id).'"' : '' !!} class="t-heading chapter-opening__title" data-rise>@typeset($title)</{{ $tag }}>
+    <{{ $tag }}{!! $id ? ' id="'.e($id).'"' : '' !!} class="t-heading chapter-opening__title" data-rise{!! $field !== null && app(\App\Services\PreviewService::class)->active() ? ' '.\App\Constants\Preview::EDIT_FIELD_ATTRIBUTE.'="'.e($field).'"' : '' !!}>@typeset($title)</{{ $tag }}>
     @isset($epigraph)
         <div class="chapter-opening__epigraph" data-rise>{{ $epigraph }}</div>
     @endisset

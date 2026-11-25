@@ -37,7 +37,7 @@ class AboutPageService
      *     person: array{name: string, title: string, affiliation: string},
      *     bio: string,
      *     expertise: list<string>,
-     *     facts: list<array{label: string, value: string}>,
+     *     facts: list<array{label: string, value: string, index: int}>,
      *     contact: array{email: string|null, note: string|null, phone: string|null, address: string|null},
      *     links: list<array{key: string, numeral: string, title: string, summary: string, url: string, image: Media|null}>,
      *     description: string|null,
@@ -151,14 +151,14 @@ class AboutPageService
     /**
      * Key facts are stored as [{label, value}]; anything incomplete is dropped.
      *
-     * @return list<array{label: string, value: string}>
+     * @return list<array{label: string, value: string, index: int}>
      */
     private function facts(?Profile $profile): array
     {
         $items = $this->ownList($profile, 'key_facts');
         $facts = [];
 
-        foreach ($items as $item) {
+        foreach ($items as $index => $item) {
             if (! is_array($item)) {
                 continue;
             }
@@ -167,7 +167,8 @@ class AboutPageService
             $value = trim((string) ($item['value'] ?? ''));
 
             if ($label !== '' && $value !== '') {
-                $facts[] = ['label' => $label, 'value' => $this->typesetter->text($value)];
+                // The index is the fact's place in the editor, so the preview can follow its fields.
+                $facts[] = ['label' => $label, 'value' => $this->typesetter->text($value), 'index' => (int) $index];
             }
         }
 

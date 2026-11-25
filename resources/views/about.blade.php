@@ -6,10 +6,10 @@
         {{-- In the editor's preview, each region names the editor section that changes it (@editSection). --}}
         <div @editSection('opening')>
         @if ($copy['title'] !== '')
-            <x-chapter-opening :number="$chapter" :label="$section['label']" :title="$copy['title']" level="1" id="section-title">
+            <x-chapter-opening :number="$chapter" :label="$section['label']" :title="$copy['title']" level="1" id="section-title" field="page:title">
                 @if ($copy['epigraph'] !== '')
                     <x-slot:epigraph>
-                        <x-epigraph>{{ $copy['epigraph'] }}</x-epigraph>
+                        <x-epigraph><span @editField('page:epigraph')>{{ $copy['epigraph'] }}</span></x-epigraph>
                     </x-slot:epigraph>
                 @endif
             </x-chapter-opening>
@@ -17,7 +17,7 @@
             {{-- The page keeps one level-one heading for assistive technology, out of sight. --}}
             <h1 id="section-title" class="sr-only">{{ $section['title'] }}</h1>
             @if ($copy['epigraph'] !== '')
-                <x-epigraph>{{ $copy['epigraph'] }}</x-epigraph>
+                <x-epigraph><span @editField('page:epigraph')>{{ $copy['epigraph'] }}</span></x-epigraph>
             @endif
         @endif
         </div>
@@ -28,15 +28,15 @@
                         <div @editSection('portrait')><x-photo :media="$portrait" sizes="(min-width: 1280px) 22rem, (min-width: 1024px) 36vw, 100vw" loading="eager" :show-caption="true" class="max-w-md" /></div>
                     @endif
                     @if ($person['name'] !== '' || $person['title'] !== '' || $person['affiliation'] !== '')
-                        <div @class(['flex flex-col gap-2', 'mt-8' => $portrait]) @editSection('identity')>
+                        <div @class(['flex flex-col gap-2', 'mt-8' => $portrait])@editSection('identity')>
                             @if ($person['name'] !== '')
-                                <h2 class="font-display text-quote font-light leading-tight text-ink">@typeset($person['name'])</h2>
+                                <h2 class="font-display text-quote font-light leading-tight text-ink"@editField('profile:name')>@typeset($person['name'])</h2>
                             @endif
                             @if ($person['title'] !== '')
-                                <p class="t-body text-ink">@typeset($person['title'])</p>
+                                <p class="t-body text-ink"@editField('profile:title')>@typeset($person['title'])</p>
                             @endif
                             @if ($person['affiliation'] !== '')
-                                <p class="text-base font-normal text-ink-muted">@typeset($person['affiliation'])</p>
+                                <p class="text-base font-normal text-ink-muted"@editField('profile:affiliation')>@typeset($person['affiliation'])</p>
                             @endif
                         </div>
                     @endif
@@ -54,7 +54,7 @@
                     @if ($expertise !== [])
                         <section{!! $copy['expertise'] !== '' ? ' aria-labelledby="expertise-title"' : '' !!} @editSection('expertise')>
                             @if ($copy['expertise'] !== '')
-                                <h2 id="expertise-title" class="t-label text-accent-text" @editSection('around-the-listing')>{{ $copy['expertise'] }}</h2>
+                                <h2 id="expertise-title" class="t-label text-accent-text"@editSection('around-the-listing')@editField('page:expertise_heading')>{{ $copy['expertise'] }}</h2>
                             @endif
                             <ul @class(['flex flex-wrap gap-3', 'mt-5' => $copy['expertise'] !== ''])>
                                 @foreach ($expertise as $tag)
@@ -67,13 +67,13 @@
                     @if ($facts !== [])
                         <section{!! $copy['facts'] !== '' ? ' aria-labelledby="facts-title"' : '' !!} @editSection('expertise')>
                             @if ($copy['facts'] !== '')
-                                <h2 id="facts-title" class="t-label text-accent-text" @editSection('around-the-listing')>{{ $copy['facts'] }}</h2>
+                                <h2 id="facts-title" class="t-label text-accent-text"@editSection('around-the-listing')@editField('page:facts_heading')>{{ $copy['facts'] }}</h2>
                             @endif
                             <dl @class(['grid gap-x-10 gap-y-6 border-t border-rule pt-6 sm:grid-cols-2', 'mt-5' => $copy['facts'] !== ''])>
                                 @foreach ($facts as $fact)
                                     <div class="flex flex-col gap-1">
-                                        <dt class="t-label text-accent-text">{{ $fact['label'] }}</dt>
-                                        <dd class="figures-lining font-display text-[1.75rem] font-light leading-10 text-ink">{{ $fact['value'] }}</dd>
+                                        <dt class="t-label text-accent-text"@editField('profile:key_facts.'.$fact['index'].'.label')>{{ $fact['label'] }}</dt>
+                                        <dd class="figures-lining font-display text-[1.75rem] font-light leading-10 text-ink"@editField('profile:key_facts.'.$fact['index'].'.value')>{{ $fact['value'] }}</dd>
                                     </div>
                                 @endforeach
                             </dl>
@@ -83,20 +83,20 @@
                     @if ($contact['email'] || $contact['note'] || $contact['phone'] || $contact['address'])
                         <section{!! $copy['contact'] !== '' ? ' aria-labelledby="contact-title"' : '' !!} @editSection('contact')>
                             @if ($copy['contact'] !== '')
-                                <h2 id="contact-title" class="t-label text-accent-text" @editSection('around-the-listing')>{{ $copy['contact'] }}</h2>
+                                <h2 id="contact-title" class="t-label text-accent-text"@editSection('around-the-listing')@editField('page:contact_heading')>{{ $copy['contact'] }}</h2>
                             @endif
                             <div @class(['flex flex-col gap-2 border-t border-rule pt-6', 'mt-5' => $copy['contact'] !== ''])>
                                 @if ($contact['email'])
-                                    <p class="t-body"><a href="mailto:{{ $contact['email'] }}" class="text-ink underline decoration-accent-line underline-offset-4">{{ $contact['email'] }}</a>@if ($contact['note'])<x-sidenote :number="1">@typeset($contact['note'])</x-sidenote>@endif</p>
+                                    <p class="t-body"><a href="mailto:{{ $contact['email'] }}" class="text-ink underline decoration-accent-line underline-offset-4"@editField('profile:contact_email_public')>{{ $contact['email'] }}</a>@if ($contact['note'])<x-sidenote :number="1"><span @editField('profile:contact_note')>@typeset($contact['note'])</span></x-sidenote>@endif</p>
                                 @endif
                                 @if ($contact['phone'])
-                                    <a href="tel:{{ preg_replace('/[^0-9+]/', '', $contact['phone']) }}" class="t-body text-ink underline decoration-accent-line underline-offset-4" data-contact-phone>{{ $contact['phone'] }}</a>
+                                    <a href="tel:{{ preg_replace('/[^0-9+]/', '', $contact['phone']) }}" class="t-body text-ink underline decoration-accent-line underline-offset-4" data-contact-phone @editField('profile:contact_phone')>{{ $contact['phone'] }}</a>
                                 @endif
                                 @if ($contact['address'])
-                                    <p class="whitespace-pre-line text-base font-normal text-ink-muted" data-contact-address>{{ $contact['address'] }}</p>
+                                    <p class="whitespace-pre-line text-base font-normal text-ink-muted" data-contact-address @editField('profile:contact_address')>{{ $contact['address'] }}</p>
                                 @endif
                                 @if ($contact['note'] && ! $contact['email'])
-                                    <p class="text-base font-normal text-ink-muted">@typeset($contact['note'])</p>
+                                    <p class="text-base font-normal text-ink-muted"@editField('profile:contact_note')>@typeset($contact['note'])</p>
                                 @endif
                             </div>
                         </section>

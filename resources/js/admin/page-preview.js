@@ -14,6 +14,12 @@
  | Opening a section, or pointing at one, outlines its region in the preview with the section's name
  | (opening also scrolls the preview to it); pointing at the preview names the section under the
  | pointer, and a click there opens that section in the editor.
+ |
+ | Typing shows in the preview at once: elements of the previewed page that show one field's text
+ | carry `data-edit-field` (the @editField directive: "page:<block>" or "profile:<column>"), and the
+ | text typed into that field, in the language the preview shows, is written into them until the next
+ | save reloads the page with what was stored. Words for a part that is not on the page yet appear
+ | once the field is left (the editor autosaves then).
  */
 import { eventDetail, readSetting, writeSetting } from './storage';
 
@@ -27,6 +33,8 @@ const DESKTOP_MAX_HEIGHT = 1200;
 const OPEN_KEY = 'admin.pagePreview.open';
 const DEVICE_KEY = 'admin.pagePreview.device';
 const SECTION_ATTRIBUTE = 'data-edit-section';
+const FIELD_ATTRIBUTE = 'data-edit-field';
+const DEFAULT_LOCALE = 'en';
 const MARK_ID = 'admin-edit-section-mark';
 // Matches collapsible.js: a folding part tells the others it opened.
 const OPENED = 'admin-collapsible-opened';
@@ -38,6 +46,7 @@ export function pagePreview() {
     let onOpened = null;
     let onFrameLoad = null;
     let onEditorPointer = null;
+    let onEditorInput = null;
 
     // Read once from the pane (wire:ignore): x-data stays static, so Livewire's morph never restarts the component.
     let urls = {};
@@ -91,6 +100,9 @@ export function pagePreview() {
             };
             this.$el.addEventListener('mouseover', onEditorPointer);
 
+            onEditorInput = (event) => this.type(event.target);
+            this.$el.addEventListener('input', onEditorInput);
+
             onSaved = (event) => {
                 if (!eventDetail(event).blocked) this.reload();
             };
@@ -123,6 +135,7 @@ export function pagePreview() {
             window.removeEventListener(OPENED, onOpened);
             this.$refs.frame?.removeEventListener('load', onFrameLoad);
             this.$el.removeEventListener('mouseover', onEditorPointer);
+            this.$el.removeEventListener('input', onEditorInput);
         },
 
         // The previewed page's document, when it can be reached (same site, loaded).
@@ -132,6 +145,51 @@ export function pagePreview() {
             } catch (error) {
                 return null;
             }
+        },
+
+        // The field a form control edits, and in which language: the page's own words are form.<block>
+        // (English) and arabic.<block>; the profile's are form.<column> and form.translations.<lang>.<column>.
+        fieldOf(control) {
+            const model = [...(control.attributes ?? [])].find((attribute) => attribute.name.startsWith('wire:model'))?.value;
+            if (!model) return null;
+
+            if (control.closest('[data-profile-embedded]')) {
+                const translated = model.match(/^form\.translations\.([a-z]{2})\.(.+)$/);
+                if (translated) return { field: `profile:${translated[2]}`, locale: translated[1] };
+                const english = model.match(/^form\.(.+)$/);
+
+                return english ? { field: `profile:${english[1]}`, locale: DEFAULT_LOCALE } : null;
+            }
+
+            const arabic = model.match(/^arabic\.(.+)$/);
+            if (arabic) return { field: `page:${arabic[1]}`, locale: 'ar' };
+            const english = model.match(/^form\.(.+)$/);
+
+            return english ? { field: `page:${english[1]}`, locale: DEFAULT_LOCALE } : null;
+        },
+
+        // Show what is being typed in the preview, where the page shows that field in the preview's language.
+        type(control) {
+            if (!control?.matches?.('input, textarea')) return;
+            const target = this.fieldOf(control);
+            const doc = this.frameDocument();
+            if (!target || !doc) return;
+
+            const locale = (doc.documentElement.lang || DEFAULT_LOCALE).slice(0, 2);
+            if (locale !== target.locale) return;
+
+            const elements = doc.querySelectorAll(`[${FIELD_ATTRIBUTE}="${CSS.escape(target.field)}"]`);
+            if (elements.length === 0) return;
+
+            const text = control.value;
+            elements.forEach((element) => {
+                element.textContent = text;
+                element.hidden = text.trim() === '';
+            });
+
+            // Words change the size of their region: keep the outline around it.
+            cancelAnimationFrame(this._remark);
+            this._remark = requestAnimationFrame(() => this.mark(this.pointed ?? this.current, false));
         },
 
         // The editor section's name, as its heading shows it.

@@ -198,13 +198,18 @@ class AboutPageProfileTest extends TestCase
             $preview->assertSee(Preview::EDIT_SECTION_ATTRIBUTE.'="'.$section.'"', false);
         }
 
+        // The words show as they are typed: each text names the field it comes from.
+        foreach (['page:title', 'page:expertise_heading', 'profile:name', 'profile:key_facts.0.label', 'profile:key_facts.0.value', 'profile:contact_email_public', 'profile:contact_note'] as $field) {
+            $preview->assertSee(Preview::EDIT_FIELD_ATTRIBUTE.'="'.$field.'"', false);
+        }
+
         // Each one is a section of the About editor.
         $editor = $this->get(route(Pages::EDIT_ROUTE, [Pages::ROUTE_PARAMETER => Pages::ABOUT]))->assertOk()->assertSee('data-preview-copy', false);
         foreach (['opening', 'portrait', 'identity', 'biography', 'expertise', 'around-the-listing', 'contact'] as $section) {
             $editor->assertSee('id="section-'.$section.'"', false);
         }
 
-        $this->get('/about')->assertOk()->assertDontSee(Preview::EDIT_SECTION_ATTRIBUTE, false);
+        $this->get('/about')->assertOk()->assertDontSee(Preview::EDIT_SECTION_ATTRIBUTE, false)->assertDontSee(Preview::EDIT_FIELD_ATTRIBUTE, false);
     }
 
     #[Test]
