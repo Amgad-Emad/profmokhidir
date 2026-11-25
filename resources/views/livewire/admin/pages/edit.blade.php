@@ -73,7 +73,7 @@
             @endif
         </x-admin.edit-layout>
 
-        <aside class="page-preview" x-show="open" x-cloak aria-label="{{ __('Preview of the page') }}" wire:ignore data-page-preview data-preview-urls="{{ json_encode($previewUrls, JSON_UNESCAPED_SLASHES) }}">
+        <aside class="page-preview" x-show="open" x-cloak aria-label="{{ __('Preview of the page') }}" wire:ignore data-page-preview data-preview-urls="{{ json_encode($previewUrls, JSON_UNESCAPED_SLASHES) }}" data-preview-copy="{{ json_encode(['editedIn' => __('Edited in: :section')], JSON_UNESCAPED_UNICODE) }}">
             <div class="page-preview__bar">
                 <p class="t-label text-accent-text">{{ __('Preview with your draft') }}</p>
                 <div class="page-preview__controls">
@@ -92,10 +92,10 @@
                     <button type="button" class="page-preview__device" x-on:click="reload()">{{ __('Reload') }}</button>
                 </div>
             </div>
-            <div class="page-preview__viewport" x-ref="viewport" x-bind:style="viewportStyle">
+            <div class="page-preview__viewport" x-ref="viewport" x-bind:style="viewportStyle" x-on:mousemove="hover($event)" x-on:mouseleave="leave()" x-on:click="pick($event)">
                 <iframe x-ref="frame" src="{{ reset($previewUrls) }}" title="{{ __('Preview of :page with the draft', ['page' => __($definition['title'])]) }}" class="page-preview__frame" x-bind:style="frameStyle" x-on:load="loading = false" loading="lazy" inert></iframe>
             </div>
-            <p class="page-preview__note">{{ __('The preview shows what is saved. Changes appear here a moment after each autosave. To read or use the page itself, open Preview in the save bar: it opens the same page in a new tab.') }}</p>
+            <p class="page-preview__note">{{ __('The preview shows what is saved. Changes appear here a moment after each autosave. To read or use the page itself, open Preview in the save bar: it opens the same page in a new tab.') }} {{ __('Open or point at a section to see its part of the page outlined here; point at the page to see which section edits it, and click to open that section.') }}</p>
         </aside>
     </div>
 

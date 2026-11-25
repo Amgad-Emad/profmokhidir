@@ -2482,5 +2482,7 @@
     "One line per line of the address.": "One line per line of the address.",
     "public contact phone": "public contact phone",
     "postal address": "postal address",
-    "Portrait photo": "Portrait photo"
+    "Portrait photo": "Portrait photo",
+    "Edited in: :section": "Edited in: :section",
+    "Open or point at a section to see its part of the page outlined here; point at the page to see which section edits it, and click to open that section.": "Open or point at a section to see its part of the page outlined here; point at the page to see which section edits it, and click to open that section."
 }

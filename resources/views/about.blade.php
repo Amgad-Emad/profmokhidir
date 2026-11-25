@@ -3,6 +3,8 @@
 
     {{-- Only what an editor entered shows: the heading, epigraph and small headings are left out when empty. --}}
     <section id="about-body" class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28" {!! $copy['title'] !== '' ? 'aria-labelledby="section-title"' : 'aria-label="'.e($section['title']).'"' !!}>
+        {{-- In the editor's preview, each region names the editor section that changes it (@editSection). --}}
+        <div @editSection('opening')>
         @if ($copy['title'] !== '')
             <x-chapter-opening :number="$chapter" :label="$section['label']" :title="$copy['title']" level="1" id="section-title">
                 @if ($copy['epigraph'] !== '')
@@ -18,14 +20,15 @@
                 <x-epigraph>{{ $copy['epigraph'] }}</x-epigraph>
             @endif
         @endif
+        </div>
         @if ($profile !== null)
             <div class="mt-16 grid gap-12 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-16 xl:grid-cols-[minmax(0,1fr)_47rem]">
                 <div class="lg:sticky lg:top-28 lg:self-start" data-rise-group>
                     @if ($portrait)
-                        <x-photo :media="$portrait" sizes="(min-width: 1280px) 22rem, (min-width: 1024px) 36vw, 100vw" loading="eager" :show-caption="true" class="max-w-md" />
+                        <div @editSection('portrait')><x-photo :media="$portrait" sizes="(min-width: 1280px) 22rem, (min-width: 1024px) 36vw, 100vw" loading="eager" :show-caption="true" class="max-w-md" /></div>
                     @endif
                     @if ($person['name'] !== '' || $person['title'] !== '' || $person['affiliation'] !== '')
-                        <div @class(['flex flex-col gap-2', 'mt-8' => $portrait])>
+                        <div @class(['flex flex-col gap-2', 'mt-8' => $portrait]) @editSection('identity')>
                             @if ($person['name'] !== '')
                                 <h2 class="font-display text-quote font-light leading-tight text-ink">@typeset($person['name'])</h2>
                             @endif
@@ -41,7 +44,7 @@
 
                 <div class="sidenote-host flex flex-col gap-16" data-rise-group>
                     @if ($bio !== '')
-                        <div><x-drop-cap class="prose-bio">{!! $bio !!}</x-drop-cap></div>
+                        <div @editSection('biography')><x-drop-cap class="prose-bio">{!! $bio !!}</x-drop-cap></div>
                     @endif
 
                     @if ($expertise !== [] || $facts !== [])
@@ -49,9 +52,9 @@
                     @endif
 
                     @if ($expertise !== [])
-                        <section{!! $copy['expertise'] !== '' ? ' aria-labelledby="expertise-title"' : '' !!}>
+                        <section{!! $copy['expertise'] !== '' ? ' aria-labelledby="expertise-title"' : '' !!} @editSection('expertise')>
                             @if ($copy['expertise'] !== '')
-                                <h2 id="expertise-title" class="t-label text-accent-text">{{ $copy['expertise'] }}</h2>
+                                <h2 id="expertise-title" class="t-label text-accent-text" @editSection('around-the-listing')>{{ $copy['expertise'] }}</h2>
                             @endif
                             <ul @class(['flex flex-wrap gap-3', 'mt-5' => $copy['expertise'] !== ''])>
                                 @foreach ($expertise as $tag)
@@ -62,9 +65,9 @@
                     @endif
 
                     @if ($facts !== [])
-                        <section{!! $copy['facts'] !== '' ? ' aria-labelledby="facts-title"' : '' !!}>
+                        <section{!! $copy['facts'] !== '' ? ' aria-labelledby="facts-title"' : '' !!} @editSection('expertise')>
                             @if ($copy['facts'] !== '')
-                                <h2 id="facts-title" class="t-label text-accent-text">{{ $copy['facts'] }}</h2>
+                                <h2 id="facts-title" class="t-label text-accent-text" @editSection('around-the-listing')>{{ $copy['facts'] }}</h2>
                             @endif
                             <dl @class(['grid gap-x-10 gap-y-6 border-t border-rule pt-6 sm:grid-cols-2', 'mt-5' => $copy['facts'] !== ''])>
                                 @foreach ($facts as $fact)
@@ -78,9 +81,9 @@
                     @endif
 
                     @if ($contact['email'] || $contact['note'] || $contact['phone'] || $contact['address'])
-                        <section{!! $copy['contact'] !== '' ? ' aria-labelledby="contact-title"' : '' !!}>
+                        <section{!! $copy['contact'] !== '' ? ' aria-labelledby="contact-title"' : '' !!} @editSection('contact')>
                             @if ($copy['contact'] !== '')
-                                <h2 id="contact-title" class="t-label text-accent-text">{{ $copy['contact'] }}</h2>
+                                <h2 id="contact-title" class="t-label text-accent-text" @editSection('around-the-listing')>{{ $copy['contact'] }}</h2>
                             @endif
                             <div @class(['flex flex-col gap-2 border-t border-rule pt-6', 'mt-5' => $copy['contact'] !== ''])>
                                 @if ($contact['email'])

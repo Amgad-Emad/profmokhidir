@@ -68,6 +68,10 @@ class AppServiceProvider extends ServiceProvider
         // setting asks for them (Western digits otherwise, and always for years, citations, DOIs and data).
         Blade::directive('num', fn (string $expression): string => '<?php echo e(app(\\App\\Services\\LocaleService::class)->digits('.$expression.')); ?>');
 
+        // @editSection('identity'): on a page previewed beside its editor only, names the editor section
+        // that changes this region (Preview::EDIT_SECTION_ATTRIBUTE); nothing for visitors.
+        Blade::directive('editSection', fn (string $expression): string => '<?php if (app(\\App\\Services\\PreviewService::class)->active()) { echo \' \'.\\App\\Constants\\Preview::EDIT_SECTION_ATTRIBUTE.\'="\'.e('.$expression.').\'"\'; } ?>');
+
         // Public community signups: a handful per address per hour.
         RateLimiter::for(RateLimits::COMMUNITY_SIGNUP, function (Request $request) {
             return Limit::perHour(RateLimits::COMMUNITY_SIGNUP_PER_HOUR)->by((string) $request->ip());

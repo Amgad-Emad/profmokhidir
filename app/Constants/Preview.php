@@ -25,6 +25,12 @@ final class Preview
     /** How long a preview link works. */
     public const int TTL_MINUTES = 120;
 
+    /**
+     * On a page previewed beside its editor, each region names the editor section that changes
+     * it (the form section's id without "section-"), so the preview can point at it.
+     */
+    public const string EDIT_SECTION_ATTRIBUTE = 'data-edit-section';
+
     /** Request attribute set while a preview is being rendered. */
     public const string ATTRIBUTE = 'preview.context';
 

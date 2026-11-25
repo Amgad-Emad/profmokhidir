@@ -6,10 +6,13 @@ use App\Constants\AdminUx;
 use App\Constants\ContentStatus;
 use App\Constants\Disks;
 use App\Constants\Pages;
+use App\Constants\Preview;
 use App\Livewire\Admin\Pages\Edit;
 use App\Livewire\Admin\Profile\EditProfile;
 use App\Models\Profile;
 use App\Models\User;
+use App\Services\PageService;
+use App\Services\PreviewService;
 use Database\Seeders\PageContentSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
@@ -172,6 +175,36 @@ class AboutPageProfileTest extends TestCase
         $this->assertNotFalse($start);
 
         return substr($html, (int) $start, $end === false ? null : $end - $start);
+    }
+
+    #[Test]
+    public function the_preview_names_the_editor_section_of_each_region_and_visitors_never_see_it(): void
+    {
+        Profile::factory()->published()->withContact()->withPortrait()->create([
+            'name' => 'Mohamed Osman Khidir',
+            'full_bio' => '<p>A biography.</p>',
+            'expertise' => ['Agronomy'],
+            'key_facts' => [['label' => 'Born', 'value' => '1940']],
+        ]);
+        Livewire::actingAs($this->editor)->test(Edit::class, ['page' => Pages::ABOUT])
+            ->set('form.title', 'About him')
+            ->set('form.expertise_heading', 'Expertise')
+            ->call('publish');
+
+        $page = app(PageService::class)->findByKey(Pages::ABOUT);
+        $preview = $this->actingAs($this->editor)->get(app(PreviewService::class)->pageUrl($page))->assertOk();
+
+        foreach (['opening', 'portrait', 'identity', 'biography', 'expertise', 'around-the-listing', 'contact'] as $section) {
+            $preview->assertSee(Preview::EDIT_SECTION_ATTRIBUTE.'="'.$section.'"', false);
+        }
+
+        // Each one is a section of the About editor.
+        $editor = $this->get(route(Pages::EDIT_ROUTE, [Pages::ROUTE_PARAMETER => Pages::ABOUT]))->assertOk()->assertSee('data-preview-copy', false);
+        foreach (['opening', 'portrait', 'identity', 'biography', 'expertise', 'around-the-listing', 'contact'] as $section) {
+            $editor->assertSee('id="section-'.$section.'"', false);
+        }
+
+        $this->get('/about')->assertOk()->assertDontSee(Preview::EDIT_SECTION_ATTRIBUTE, false);
     }
 
     #[Test]

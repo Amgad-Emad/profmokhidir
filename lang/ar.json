@@ -2538,5 +2538,7 @@
     "One line per line of the address.": "سطر لكل سطر من العنوان.",
     "public contact phone": "هاتف التواصل العام",
     "postal address": "العنوان البريدي",
-    "Portrait photo": "الصورة الشخصية"
+    "Portrait photo": "الصورة الشخصية",
+    "Edited in: :section": "يُحرَّر في: :section",
+    "Open or point at a section to see its part of the page outlined here; point at the page to see which section edits it, and click to open that section.": "افتح قسمًا أو مرّر المؤشر عليه لترى جزءه من الصفحة محددًا هنا؛ ومرّر المؤشر على الصفحة لترى القسم الذي يحرّره، وانقر لفتح ذلك القسم."
 }
