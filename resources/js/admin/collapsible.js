@@ -53,14 +53,19 @@ export function collapsible(id, startOpen = true, remember = true, group = null)
             this.open = !this.open;
         },
 
-        // A click anywhere on a folded part opens it, except on its own controls (the toggle,
-        // the fields edited in its heading row, Remove), which keep their own action.
-        openFromClick(event) {
-            if (this.open || event.target.closest('button, a, input, select, textarea, label, [contenteditable]')) {
+        // A click anywhere on the part opens it, and another click anywhere on it folds it again.
+        // Controls keep their own action (the toggle, fields, Remove, links, labels that focus a
+        // field, the image focal-point picker), and a click that ends a text selection is left alone.
+        toggleFromClick(event) {
+            if (event.target.closest('button, a, input, select, textarea, label, [contenteditable], [role="button"], .focus-picker, [data-keep-open]')) {
                 return;
             }
 
-            this.open = true;
+            if (String(window.getSelection?.() ?? '') !== '') {
+                return;
+            }
+
+            this.toggle();
         },
 
         // Focus reaching a field inside the body opens the part (not focus on its own heading).
