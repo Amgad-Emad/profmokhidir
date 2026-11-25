@@ -35,7 +35,7 @@
                 </button>
             </div>
             <div role="tabpanel" id="{{ $tabsId }}-ar-panel" aria-labelledby="{{ $tabsId }}-ar" class="locale-tabs__panel form-grid" data-content-lang="ar" x-show="tab === 'ar'" @if ($startTab !== 'ar') style="display: none" @endif tabindex="0" data-arabic-panel>
-                @include('livewire.admin.pages.partials.block-arabic', ['key' => $key, 'block' => $block, 'value' => $arabicValue, 'english' => $value, 'media' => $media])
+                @include('livewire.admin.pages.partials.block-arabic', ['key' => $key, 'block' => $block, 'value' => $arabicValue, 'english' => $value, 'media' => $media, 'sharedHint' => $hint])
             </div>
             <div role="tabpanel" id="{{ $tabsId }}-en-panel" aria-labelledby="{{ $tabsId }}-en" class="locale-tabs__panel form-grid" data-content-lang="en" x-show="tab === 'en'" @if ($startTab !== 'en') style="display: none" @endif tabindex="0">
     @endif
@@ -88,6 +88,7 @@
                                 // Extra milestones stay out of sight while empty; "Add milestone" shows the next one.
                                 $emptyGroups = array_values(array_diff(array_keys(PageBlockDefinition::emptyAddableGroups($itemGroups, (array) $item)), $addedGroups[$key][$index] ?? []));
                                 $addThing = collect(PageBlockDefinition::emptyAddableGroups($itemGroups, (array) $item))->first();
+                                $addLabel = 'Add '.$addThing; // e.g. "Add milestone" (translated in lang/ar.json)
                                 $lastAddable = collect($itemGroups)->filter(fn ($fields) => collect($fields)->pluck('addable')->filter()->isNotEmpty())->keys()->last();
                             @endphp
                             <div class="page-list__groups">
@@ -125,7 +126,7 @@
                                 @if ($group !== '')</fieldset>@endif
                                 @endunless
                                 @if ($group === $lastAddable && $emptyGroups !== [])
-                                    <x-button variant="secondary" size="sm" type="button" class="page-list__add" wire:click="addGroup('{{ $key }}', {{ $index }}, '{{ $emptyGroups[0] }}')"><x-icon name="plus" class="size-4" />{{ __('Add '.$addThing) }}</x-button>
+                                    <x-button variant="secondary" size="sm" type="button" class="page-list__add" wire:click="addGroup('{{ $key }}', {{ $index }}, '{{ $emptyGroups[0] }}')"><x-icon name="plus" class="size-4" />{{ __($addLabel) }}</x-button>
                                 @endif
                             @endforeach
                             </div>

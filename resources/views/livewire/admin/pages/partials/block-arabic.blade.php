@@ -1,57 +1,71 @@
 {{--
-    The Arabic tab of a page block: its Arabic words, laid out like the English tab. Images, crops,
-    years and numerals are one value for both languages and can be changed from either tab. Every field is optional: left empty, Arabic pages show the original wording
-    in Arabic, or the English words where an editor changed them and has not translated them yet.
-    The placeholders show what Arabic visitors see while the field is empty.
+    The Arabic tab of a page block: the same fields, labels, hints, groups and controls as the English
+    tab (partials/block), in the same order, so the two tabs read alike. Words are this tab's own
+    (right to left); everything that is one value for both languages (years, numerals, switches,
+    images, destinations, item order) is bound to the English form, so it can be changed from either tab.
+    On most pages an empty Arabic field shows the original wording in Arabic (the placeholder shows it);
+    on a page that shows only what was entered (Pages::ENTERED_ONLY) empty is empty, with no placeholder.
 --}}
 @use('App\Constants\PageBlockType')
 @use('App\Support\PageBlockDefinition')
 @php
     $model = 'arabic.'.$key;
-    // A page that shows only what was entered (the home page) has no placeholders: empty is empty.
+    $englishBlock = 'form.'.$key;
     $enteredOnly = \App\Constants\Pages::showsOnlyEntered($pageKey ?? '');
     $shown = $block->localized()->translate($english);
-    $hint = $enteredOnly ? __('Optional. Left empty, nothing shows on Arabic pages.') : __('Optional. Left empty, Arabic pages show the wording in the placeholder.');
+    // The English tab's hint, word for word; elsewhere than an entered-only page, plus what an empty field does.
+    $fallback = $enteredOnly ? null : __('Left empty, Arabic pages show the wording in the placeholder.');
+    $hint = trim(implode(' ', array_filter([$sharedHint ?? null, $fallback]))) ?: null;
+    $optional = $block->required ? false : null;
 @endphp
 @switch($block->type)
     @case(PageBlockType::ShortText)
         @if ($block->max >= \App\Support\PageBlockDefinition::LONG_FIELD)
-            <x-form.textarea :model="$model" :value="$value" :label="__($block->label)" :hint="$hint" :maxlength="$block->max" rows="2" :placeholder="! $enteredOnly && is_string($shown) ? $shown : null" dir="rtl" />
+            <x-form.textarea :model="$model" :value="$value" :label="__($block->label)" :hint="$hint" :maxlength="$block->max" rows="2" :optional="null" :placeholder="! $enteredOnly && is_string($shown) ? $shown : null" dir="rtl" />
         @else
-            <x-form.input :model="$model" :value="$value" :label="__($block->label)" :hint="$hint" :maxlength="$block->max" :counter="true" :placeholder="! $enteredOnly && is_string($shown) ? $shown : null" dir="rtl" />
+            <x-form.input :model="$model" :value="$value" :label="__($block->label)" :hint="$hint" :maxlength="$block->max" :counter="true" :optional="null" :placeholder="! $enteredOnly && is_string($shown) ? $shown : null" dir="rtl" />
         @endif
         @break
 
     @case(PageBlockType::LongText)
-        <x-form.editor :model="$model" :label="__($block->label)" :hint="$enteredOnly ? __('Optional. Up to :max characters. Left empty, nothing shows on Arabic pages.', ['max' => $block->max]) : __('Optional. Up to :max characters. Left empty, Arabic pages show the original wording in Arabic.', ['max' => $block->max])" />
+        <x-form.editor :model="$model" :label="__($block->label)" :hint="trim(($hint ? $hint.' ' : '').($block->inline ? __('Up to :max characters; bold, italic and links only.', ['max' => $block->max]) : __('Up to :max characters.', ['max' => $block->max])))" :optional="null" />
         @break
 
     @case(PageBlockType::Link)
-        <x-form.input :model="$model.'.label'" :value="$value['label'] ?? ''" :label="__($block->label)" :hint="$enteredOnly ? __('The destination is the one chosen in the English tab. Left empty, no button shows on Arabic pages.') : __('The destination is the one chosen in the English tab.')" :maxlength="$block->max" :counter="true" :placeholder="$enteredOnly ? null : ($shown['label'] ?? null)" dir="rtl" />
+        <fieldset class="form-fieldset">
+            <legend class="t-label form-label">{{ __($block->label) }}</legend>
+            @if ($block->hint)<p class="form-hint">{{ __($block->hint) }}</p>@endif
+            <div class="mt-4 form-grid">
+                <div class="form-row">
+                    <x-form.input class="form-col--half" :model="$model.'.label'" :value="$value['label'] ?? ''" :label="__('Label')" :hint="$fallback" :maxlength="$block->max" :counter="true" :optional="null" :placeholder="$enteredOnly ? null : ($shown['label'] ?? null)" dir="rtl" />
+                    <x-form.select class="form-col--half" :model="$englishBlock.'.route'" :id="'ar-'.str_replace('.', '-', $englishBlock).'-route'" :label="__('Goes to')" :options="$linkOptions" :optional="false" />
+                </div>
+                <x-form.input :model="$englishBlock.'.url'" :id="'ar-'.str_replace('.', '-', $englishBlock).'-url'" :label="__('Or a web address')" type="url" :hint="__('Only for a page outside this site, beginning with https://. It replaces the page chosen above.')" dir="ltr" />
+            </div>
+        </fieldset>
         @break
 
     @case(PageBlockType::List)
+        @php $defaults = array_column((array) $block->default, null, 'key'); $count = count((array) $english); @endphp
         <fieldset class="form-fieldset" data-page-list-arabic="{{ $key }}">
             <legend class="t-label form-label">{{ __($block->label) }}</legend>
-            <p class="form-hint">{{ __('The items, their order and destinations follow the English tab. Fill in the Arabic words; an empty field shows the placeholder.') }}</p>
+            @if ($block->hint)<p class="form-hint">{{ __($block->hint) }}</p>@endif
             <ol class="page-list mt-4">
                 @foreach ((array) $english as $index => $item)
                     @php
-                        // Words are asked for in Arabic; years, numerals and switches are the same in both
-                        // languages and edit the English tab's value, so they can be changed from either tab.
-                        $fieldsHere = array_filter($block->editableFields(), fn ($spec) => ! PageBlockDefinition::isInline($spec) && in_array($spec['kind'], [PageBlockDefinition::FIELD_TEXT, PageBlockDefinition::FIELD_PLAIN, PageBlockDefinition::FIELD_TOGGLE, PageBlockDefinition::FIELD_IMAGE], true));
-                        $firstPlain = array_key_first(array_filter($block->editableFields(), fn ($spec) => $spec['kind'] === PageBlockDefinition::FIELD_PLAIN));
-                        $itemName = __($block->itemLabel).' '.($index + 1).(filled($firstPlain ? ($item[$firstPlain] ?? null) : null) ? ' · '.$item[$firstPlain] : '').(! empty($item[PageBlockDefinition::HIDDEN]) ? ' · '.__('Hidden') : '');
-                        $englishModel = 'form.'.$key.'.'.$index.'.';
+                        $name = isset($item['key'], $defaults[$item['key']]) ? __($defaults[$item['key']]['label'] ?? $item['key']) : __($block->itemLabel).' '.($index + 1);
+                        $englishModel = $englishBlock.'.'.$index.'.';
+                        $canRemove = ! $block->fixedItems && $count > ((array) $block->default === [] ? 0 : 1);
                     @endphp
                     <li class="page-list__item page-list__item--collapsed" wire:key="{{ $key }}-ar-{{ $item['key'] ?? $index }}" x-data="collapsible('item-ar-{{ $key }}-{{ $index }}', false, false, 'list-ar-{{ $key }}')" x-on:focusin="focusIn($event)" x-bind:class="{ 'page-list__item--collapsed': ! open }">
-                        @include('livewire.admin.pages.partials.list-item-head', ['name' => __($block->itemLabel).' '.($index + 1), 'bodyId' => 'item-ar-'.$key.'-'.$index.'-body', 'idPrefix' => 'head-ar', 'canRemove' => ! $block->fixedItems && count((array) $english) > ((array) $block->default === [] ? 0 : 1)])
+                        @include('livewire.admin.pages.partials.list-item-head', ['name' => $name, 'bodyId' => 'item-ar-'.$key.'-'.$index.'-body', 'idPrefix' => 'head-ar', 'canRemove' => $canRemove])
                         <div id="item-ar-{{ $key }}-{{ $index }}-body" class="fold" x-bind:class="{ 'fold--open': open, 'fold--settled': settled }" x-bind:inert="! open" inert data-collapsible-body><div class="fold__inner page-list__body">
                         @php
-                            $itemGroups = PageBlockDefinition::grouped($fieldsHere);
+                            $itemGroups = PageBlockDefinition::grouped(array_filter($block->editableFields(), fn ($spec) => ! PageBlockDefinition::isInline($spec)));
                             // Extra milestones stay out of sight while empty; "Add milestone" shows the next one.
                             $emptyGroups = array_values(array_diff(array_keys(PageBlockDefinition::emptyAddableGroups($itemGroups, (array) $item)), $addedGroups[$key][$index] ?? []));
                             $addThing = collect(PageBlockDefinition::emptyAddableGroups($itemGroups, (array) $item))->first();
+                                $addLabel = 'Add '.$addThing; // e.g. "Add milestone" (translated in lang/ar.json)
                             $lastAddable = collect($itemGroups)->filter(fn ($fields) => collect($fields)->pluck('addable')->filter()->isNotEmpty())->keys()->last();
                         @endphp
                         <div class="page-list__groups">
@@ -66,40 +80,50 @@
                             <div class="form-row">
                                 @foreach ($fields as $field => $spec)
                                     @php
+                                        $required = PageBlockDefinition::isRequired($spec);
+                                        $fieldLabel = __($spec['label']).($group === '' ? ' ('.$name.')' : '');
                                         $half = $pairShort && PageBlockDefinition::isShort($spec);
                                         $sharedId = 'ar-'.str_replace('.', '-', $englishModel.$field);
                                     @endphp
-                                    @if ($spec['kind'] === PageBlockDefinition::FIELD_IMAGE)
-                                        {{-- The same photo as the English tab (one image for both languages). --}}
+                                    @if ($spec['kind'] === PageBlockDefinition::FIELD_ROUTE)
+                                        <x-form.select @class(['form-col--half' => $half]) :model="$englishModel.$field" :id="$sharedId" :label="$fieldLabel" :options="$linkOptions" :optional="false" />
+                                    @elseif ($spec['kind'] === PageBlockDefinition::FIELD_IMAGE)
                                         @php $itemMedia = $images[$key.'.'.$index] ?? null; @endphp
                                         <div class="w-full">
-                                            <x-form.upload :model="'uploads.'.$key.'.'.$index" :id="'uploads-'.$key.'-'.$index.'-ar'" :label="__($spec['label'])" :hint="$imageHint" :media="$itemMedia" :href="$itemMedia?->getUrl()" :remove="$itemMedia ? 'removeListImage(\''.$key.'\', '.$index.')' : null" accept="image/jpeg,image/png,image/webp" :image="true" />
+                                            <x-form.upload :model="'uploads.'.$key.'.'.$index" :id="'uploads-'.$key.'-'.$index.'-ar'" :label="$fieldLabel" :hint="$imageHint" :media="$itemMedia" :href="$itemMedia?->getUrl()" :remove="$itemMedia ? 'removeListImage(\''.$key.'\', '.$index.')' : null" accept="image/jpeg,image/png,image/webp" :image="true" />
                                         </div>
                                     @elseif ($spec['kind'] === PageBlockDefinition::FIELD_TOGGLE)
-                                        <x-form.toggle :model="$englishModel.$field" :id="$sharedId" :label="__($spec['label'])" :hint="$field === PageBlockDefinition::HIDDEN ? __('Hidden items stay here and leave the page until you switch this off.') : __('The same in both languages.')" />
+                                        <x-form.toggle :model="$englishModel.$field" :id="$sharedId" :label="$fieldLabel" :hint="$field === PageBlockDefinition::HIDDEN ? __('Hidden items stay here and leave the page until you switch this off.') : null" />
                                     @elseif ($spec['kind'] === PageBlockDefinition::FIELD_PLAIN)
-                                        <x-form.input @class(['form-col--half' => $half]) :model="$englishModel.$field" :id="$sharedId" :value="$item[$field] ?? ''" :label="__($spec['label'])" :hint="__('The same in both languages.')" :maxlength="$spec['max']" :counter="true" :optional="PageBlockDefinition::isRequired($spec) ? false : null" dir="ltr" />
+                                        {{-- Years and figures: one value for both languages. --}}
+                                        <x-form.input @class(['form-col--half' => $half]) :model="$englishModel.$field" :id="$sharedId" :value="$item[$field] ?? ''" :label="$fieldLabel" :maxlength="$spec['max']" :counter="true" :optional="$required ? false : null" dir="ltr" />
+                                    @elseif (PageBlockDefinition::isLong($spec))
+                                        <x-form.textarea :model="$model.'.'.$index.'.'.$field" :value="$value[$index][$field] ?? ''" :label="$fieldLabel" :maxlength="$spec['max']" :counter="true" rows="2" :optional="$required ? false : null" :placeholder="$enteredOnly ? null : ($shown[$index][$field] ?? null)" dir="rtl" />
                                     @else
-                                        @php $englishHint = filled($shown[$index][$field] ?? null) ? __('English: :text', ['text' => $shown[$index][$field]]) : null; @endphp
-                                        @if (PageBlockDefinition::isLong($spec))
-                                            <x-form.textarea :model="$model.'.'.$index.'.'.$field" :value="$value[$index][$field] ?? ''" :label="__($spec['label'])" :hint="$englishHint" :maxlength="$spec['max']" :counter="true" rows="2" :placeholder="$enteredOnly ? null : ($shown[$index][$field] ?? null)" dir="rtl" />
-                                        @else
-                                            <x-form.input @class(['form-col--half' => $half]) :model="$model.'.'.$index.'.'.$field" :value="$value[$index][$field] ?? ''" :label="__($spec['label'])" :hint="$englishHint" :maxlength="$spec['max']" :counter="true" :placeholder="$enteredOnly ? null : ($shown[$index][$field] ?? null)" dir="rtl" />
-                                        @endif
+                                        <x-form.input @class(['form-col--half' => $half]) :model="$model.'.'.$index.'.'.$field" :value="$value[$index][$field] ?? ''" :label="$fieldLabel" :maxlength="$spec['max']" :counter="true" :optional="$required ? false : null" :placeholder="$enteredOnly ? null : ($shown[$index][$field] ?? null)" dir="rtl" />
                                     @endif
                                 @endforeach
                             </div>
                             @if ($group !== '')</fieldset>@endif
                             @endunless
                             @if ($group === $lastAddable && $emptyGroups !== [])
-                                <x-button variant="secondary" size="sm" type="button" class="page-list__add" wire:click="addGroup('{{ $key }}', {{ $index }}, '{{ $emptyGroups[0] }}')"><x-icon name="plus" class="size-4" />{{ __('Add '.$addThing) }}</x-button>
+                                <x-button variant="secondary" size="sm" type="button" class="page-list__add" wire:click="addGroup('{{ $key }}', {{ $index }}, '{{ $emptyGroups[0] }}')"><x-icon name="plus" class="size-4" />{{ __($addLabel) }}</x-button>
                             @endif
                         @endforeach
                         </div>
+                        @if ($block->sortable)
+                            <div class="page-list__actions">
+                                <x-button variant="quiet" size="sm" type="button" wire:click="moveItem('{{ $key }}', {{ $index }}, -1)" :disabled="$index === 0">{{ __('Move up') }}<span class="sr-only"> {{ $name }}</span></x-button>
+                                <x-button variant="quiet" size="sm" type="button" wire:click="moveItem('{{ $key }}', {{ $index }}, 1)" :disabled="$index === $count - 1">{{ __('Move down') }}<span class="sr-only"> {{ $name }}</span></x-button>
+                            </div>
+                        @endif
                         </div></div>
                     </li>
                 @endforeach
             </ol>
+            @if (! $block->fixedItems && $count < ($block->maxItems ?? PHP_INT_MAX))
+                <x-button variant="quiet" size="sm" type="button" class="mt-4" wire:click="addItem('{{ $key }}')"><x-icon name="plus" class="size-4" />{{ __('Add :item', ['item' => \Illuminate\Support\Str::lower(__($block->itemLabel))]) }}</x-button>
+            @endif
         </fieldset>
         @break
 

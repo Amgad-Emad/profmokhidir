@@ -76,6 +76,32 @@ class PagesBilingualTest extends TestCase
     }
 
     #[Test]
+    public function the_arabic_tab_of_a_list_has_the_same_hint_fields_and_controls_as_the_english_tab(): void
+    {
+        // Cards to show: the home sections filled from the records.
+        $this->fillHomeSections();
+        $html = $this->actingAs($this->editor)->get(route(Pages::EDIT_ROUTE, [Pages::ROUTE_PARAMETER => Pages::HOME]))->assertOk()->getContent();
+
+        // Each tab runs from its list's opening to the next tab panel or block.
+        $slice = function (string $marker) use ($html): string {
+            $start = strpos($html, $marker);
+            $this->assertNotFalse($start, $marker);
+            $ends = array_filter([strpos($html, 'role="tabpanel"', $start), strpos($html, 'data-page-block=', $start)]);
+
+            return substr($html, $start, ($ends === [] ? strlen($html) : min($ends)) - $start);
+        };
+
+        foreach ([$slice('data-page-list-arabic="story_cards"'), $slice('data-page-list="story_cards"')] as $tab) {
+            $this->assertStringContainsString(e(__('Each card as it shows on the home page: its title, line, the page it opens and its image.')), $tab);
+            $this->assertStringContainsString(__('Goes to'), $tab);
+            $this->assertStringContainsString(__('Move up'), $tab);
+            $this->assertStringContainsString('wire:click="addItem(\'story_cards\')"', $tab);
+        }
+
+        $this->assertStringNotContainsString(e(__('The items, their order and destinations follow the English tab. Fill in the Arabic words; an empty field shows the placeholder.')), $html);
+    }
+
+    #[Test]
     public function an_empty_arabic_home_field_shows_nothing_and_no_placeholder(): void
     {
         Livewire::actingAs($this->editor)->test(Edit::class, ['page' => Pages::HOME])
@@ -87,7 +113,9 @@ class PagesBilingualTest extends TestCase
             ->assertDontSee('placeholder="'.e(__('In honour of', locale: Locales::AR)).'"', false)
             ->assertDontSee('placeholder="In memory of"', false)
             ->assertDontSee('placeholder="'.e(__('Read his story', locale: Locales::AR)).'"', false)
-            ->assertSee(__('Optional. Left empty, nothing shows on Arabic pages.'));
+            // The Arabic tab reads like the English one: the same hint, with no fallback wording.
+            ->assertDontSee(__('Left empty, Arabic pages show the wording in the placeholder.'))
+            ->assertSee('data-page-list-arabic="chapter_items"', false);
 
         // Neither the English words nor a translation of them stand in for the missing Arabic.
         $this->get('/ar')->assertOk()

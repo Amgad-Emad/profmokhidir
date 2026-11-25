@@ -2531,5 +2531,6 @@
     "Add milestone": "إضافة محطة",
     "Optional. Left empty, nothing shows on Arabic pages.": "اختياري. إذا تُرك فارغًا، لا يظهر شيء في الصفحات العربية.",
     "Optional. Up to :max characters. Left empty, nothing shows on Arabic pages.": "اختياري. حتى :max حرفًا. إذا تُرك فارغًا، لا يظهر شيء في الصفحات العربية.",
-    "The destination is the one chosen in the English tab. Left empty, no button shows on Arabic pages.": "الوجهة هي المختارة في التبويب الإنجليزي. إذا تُرك فارغًا، لا يظهر الزر في الصفحات العربية."
+    "The destination is the one chosen in the English tab. Left empty, no button shows on Arabic pages.": "الوجهة هي المختارة في التبويب الإنجليزي. إذا تُرك فارغًا، لا يظهر الزر في الصفحات العربية.",
+    "Left empty, Arabic pages show the wording in the placeholder.": "إذا تُرك فارغًا، تعرض الصفحات العربية النص الظاهر في الحقل."
 }
