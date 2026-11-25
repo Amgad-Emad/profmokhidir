@@ -7,13 +7,11 @@ use App\Constants\Disks;
 use App\Constants\LaunchChecklist;
 use App\Constants\MediaProperties;
 use App\Constants\Placeholders;
-use App\Constants\SettingKeys;
 use App\Models\Award;
 use App\Models\Profile;
 use App\Models\Publication;
 use App\Services\LaunchReadinessService;
 use App\Services\ProfileService;
-use App\Services\SettingService;
 use App\Support\PlaceholderImage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
@@ -81,9 +79,8 @@ class LaunchReadinessServiceTest extends TestCase
     #[Test]
     public function the_portrait_contact_details_and_published_sections_tick_off(): void
     {
-        $profile = Profile::factory()->published()->create(['contact_email_public' => null]);
+        $profile = Profile::factory()->published()->create(['contact_email_public' => 'family@example.com']);
         $this->app->make(ProfileService::class)->setPortrait($profile, PlaceholderImage::grey(30, 40), [MediaProperties::ALT_TEXT => 'Portrait']);
-        $this->app->make(SettingService::class)->update([SettingKeys::CONTACT_EMAIL => 'family@example.com']);
         Award::factory()->published()->create(['name' => 'Real prize', 'organisation' => 'Royal Society', 'description' => null]);
 
         $checks = $this->checks();

@@ -112,6 +112,69 @@ class AboutPageProfileTest extends TestCase
     }
 
     #[Test]
+    public function what_is_emptied_in_the_about_editor_leaves_the_page_in_that_language(): void
+    {
+        Profile::factory()->published()->create([
+            'name' => ['en' => 'Mohamed Osman Khidir', 'ar' => 'محمد عثمان خضر'],
+            'expertise' => ['en' => ['Agronomy'], 'ar' => ['الزراعة']],
+            'key_facts' => ['en' => [['label' => 'Born', 'value' => '1940']], 'ar' => [['label' => 'الميلاد', 'value' => '1940']]],
+            'contact_address' => ['en' => 'Khartoum', 'ar' => 'الخرطوم'],
+        ]);
+
+        $this->get('/ar/about')->assertOk()->assertSee('الزراعة')->assertSee('الميلاد')->assertSee('الخرطوم');
+
+        Livewire::actingAs($this->editor)->test(EditProfile::class, ['embedded' => true])
+            ->set('form.translations.ar.expertise', [])
+            ->set('form.translations.ar.key_facts', [])
+            ->set('form.translations.ar.contact_address', '')
+            ->dispatch(AdminUx::EVENT_PAGE_SAVED)
+            ->assertHasNoErrors();
+
+        // Nothing in Arabic, and the English is not shown in its place.
+        $body = $this->body('/ar/about');
+
+        foreach (['الزراعة', 'Agronomy', 'الميلاد', 'Born', 'الخرطوم', 'Khartoum', 'data-contact-address'] as $gone) {
+            $this->assertStringNotContainsString($gone, $body);
+        }
+
+        $this->get('/about')->assertOk()->assertSee('Agronomy')->assertSee('Born')->assertSee('Khartoum');
+    }
+
+    #[Test]
+    public function the_about_page_contact_details_come_from_its_editor_only(): void
+    {
+        Profile::factory()->published()->create(['contact_email_public' => null, 'contact_phone' => null, 'contact_address' => null]);
+
+        $this->get('/about')->assertOk()->assertDontSee('data-contact-phone', false)->assertDontSee('data-contact-address', false);
+
+        Livewire::actingAs($this->editor)->test(EditProfile::class, ['embedded' => true])
+            ->set('form.contact_email_public', 'family@example.com')
+            ->set('form.contact_phone', '+249 12 345 6789')
+            ->set('form.contact_address', "Faculty of Agriculture\nKhartoum")
+            ->dispatch(AdminUx::EVENT_PAGE_SAVED)
+            ->assertHasNoErrors();
+
+        $this->get('/about')->assertOk()
+            ->assertSee('mailto:family@example.com', false)
+            ->assertSee('href="tel:+249123456789"', false)
+            ->assertSee('Faculty of Agriculture');
+    }
+
+    /**
+     * The About page's own body, without the site header and footer.
+     */
+    private function body(string $url): string
+    {
+        $html = $this->get($url)->assertOk()->getContent();
+        $start = strpos($html, 'id="about-body"');
+        $end = strpos($html, '<footer', (int) $start);
+
+        $this->assertNotFalse($start);
+
+        return substr($html, (int) $start, $end === false ? null : $end - $start);
+    }
+
+    #[Test]
     public function the_profile_screen_alone_ignores_the_page_events(): void
     {
         $profile = Profile::factory()->draft()->create(['name' => 'Before']);

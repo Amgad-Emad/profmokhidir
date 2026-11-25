@@ -26,7 +26,6 @@ class LaunchReadinessService
 {
     public function __construct(
         private readonly ProfileService $profiles,
-        private readonly SettingService $settings,
     ) {}
 
     /**
@@ -66,9 +65,9 @@ class LaunchReadinessService
      */
     public function contact(): array
     {
+        // The About page shows only the contact details entered with it (Admin › Pages › About).
         $profile = $this->profiles->current();
-        $site = $this->settings->contact();
-        $done = filled($profile?->contact_email_public) || filled($site['email']);
+        $done = filled($profile?->contact_email_public) || filled($profile?->contact_phone);
 
         return $this->check(LaunchChecklist::CONTACT, __('Contact details are set'), $done,
             $done ? __('Visitors have an address to write to.') : __('There is no public contact email yet.'),

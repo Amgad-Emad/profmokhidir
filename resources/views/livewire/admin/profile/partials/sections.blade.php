@@ -73,12 +73,16 @@
     @endif
 </x-admin.form-section>
 
-<x-admin.form-section id="contact" :collapsed="$collapsed" :title="__('Contact')" :intro="__('Shown at the foot of the About page. Leave both empty to use the site\'s contact details from Site settings.')">
-    <x-form.input model="form.contact_email_public" :label="__('Public contact email')" type="email" dir="ltr" :hint="__('An address the family is happy to publish.')" />
-    <x-admin.locale-tabs id="contact-text" :label="__('Contact')" :fields="['contact_note']">
+<x-admin.form-section id="contact" :collapsed="$collapsed" :title="__('Contact')" :intro="__('Shown at the foot of the About page, only what is filled in here. Empty a field to take it off the page.')">
+    <div class="form-row">
+        <x-form.input class="form-col--half" model="form.contact_email_public" :label="__('Public contact email')" type="email" dir="ltr" :hint="__('An address the family is happy to publish.')" />
+        <x-form.input class="form-col--half" model="form.contact_phone" :label="__('Public contact phone')" type="tel" dir="ltr" :hint="__('With the country code, for example +249 …')" />
+    </div>
+    <x-admin.locale-tabs id="contact-text" :label="__('Contact')" :fields="['contact_address', 'contact_note']">
         @foreach (Locales::all() as $locale)
             @php $field = $locale === Locales::DEFAULT ? 'form.' : 'form.translations.'.$locale.'.'; @endphp
             <x-admin.locale-panel tabs="contact-text" :locale="$locale">
+                <x-form.textarea :model="$field.'contact_address'" :label="__('Postal address')" rows="3" :hint="__('One line per line of the address.')" />
                 <x-form.input :model="$field.'contact_note'" :label="__('Contact note')" :hint="__('For example Enquiries are answered by the family.')" />
             </x-admin.locale-panel>
         @endforeach

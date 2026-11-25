@@ -1317,7 +1317,6 @@
     "Show them": "Show them",
     "Show these shortcuts": "Show these shortcuts",
     "Shown as the link in search results and on the browser tab, before the site name.": "Shown as the link in search results and on the browser tab, before the site name.",
-    "Shown at the foot of the About page. Leave both empty to use the site's contact details from Site settings.": "Shown at the foot of the About page. Leave both empty to use the site's contact details from Site settings.",
     "Shown beside his name. Leave empty to use the portrait from About & profile.": "Shown beside his name. Leave empty to use the portrait from About & profile.",
     "Shown in the Contact block of the About page when the profile has no contact email of its own.": "Shown in the Contact block of the About page when the profile has no contact email of its own.",
     "Shown on the item's own page. Not needed when the item links elsewhere.": "Shown on the item's own page. Not needed when the item links elsewhere.",
@@ -2476,5 +2475,11 @@
     "Replace the file": "Replace the file",
     "Award certificates": "Award certificates",
     "Page images": "Page images",
-    "The new file takes this one’s place everywhere it is used. Alt text, caption, place, year and translations are kept.": "The new file takes this one’s place everywhere it is used. Alt text, caption, place, year and translations are kept."
+    "The new file takes this one’s place everywhere it is used. Alt text, caption, place, year and translations are kept.": "The new file takes this one’s place everywhere it is used. Alt text, caption, place, year and translations are kept.",
+    "Shown at the foot of the About page, only what is filled in here. Empty a field to take it off the page.": "Shown at the foot of the About page, only what is filled in here. Empty a field to take it off the page.",
+    "With the country code, for example +249 …": "With the country code, for example +249 …",
+    "Postal address": "Postal address",
+    "One line per line of the address.": "One line per line of the address.",
+    "public contact phone": "public contact phone",
+    "postal address": "postal address"
 }

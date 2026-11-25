@@ -23,7 +23,6 @@ class AboutPageService
         private readonly ProfileService $profiles,
         private readonly NavigationService $navigation,
         private readonly SeoService $seo,
-        private readonly SettingService $settings,
         private readonly TypesetterService $typesetter,
         private readonly SectionCardService $cards,
         private readonly PageContentService $pages,
@@ -35,6 +34,7 @@ class AboutPageService
      *     chapter: int,
      *     profile: Profile|null,
      *     portrait: Media|null,
+     *     person: array{name: string, title: string, affiliation: string},
      *     bio: string,
      *     expertise: list<string>,
      *     facts: list<array{label: string, value: string}>,
@@ -56,7 +56,12 @@ class AboutPageService
             'chapter' => $this->navigation->chapter(Sections::ABOUT),
             'profile' => $profile,
             'portrait' => $portrait,
-            'bio' => $this->typesetter->html(RichText::sanitise($profile?->full_bio)),
+            'person' => [
+                'name' => $this->own($profile, 'name'),
+                'title' => $this->own($profile, 'title'),
+                'affiliation' => $this->own($profile, 'affiliation'),
+            ],
+            'bio' => $this->typesetter->html(RichText::sanitise($this->own($profile, 'full_bio'))),
             'expertise' => $this->expertise($profile),
             'facts' => $this->facts($profile),
             'contact' => $this->contact($profile),
@@ -84,21 +89,50 @@ class AboutPageService
     }
 
     /**
-     * The profile's own contact email and note; without them, the site
-     * contact details from the settings.
+     * The profile's own contact details, as entered with the About page: an
+     * empty field is left off the page (no site-wide fallback).
      *
      * @return array{email: string|null, note: string|null, phone: string|null, address: string|null}
      */
     public function contact(?Profile $profile): array
     {
-        $site = $this->settings->contact();
+        $value = fn (string $column): ?string => ($text = $this->own($profile, $column)) === '' ? null : $text;
 
         return [
-            'email' => filled($profile?->contact_email_public) ? $profile->contact_email_public : $site['email'],
-            'note' => filled($profile?->contact_note) ? $profile->contact_note : null,
-            'phone' => $site['phone'],
-            'address' => $site['address'],
+            'email' => $value('contact_email_public'),
+            'note' => $value('contact_note'),
+            'phone' => $value('contact_phone'),
+            'address' => $value('contact_address'),
         ];
+    }
+
+    /**
+     * A profile value in the page's language only: what an editor entered there,
+     * never the English shown in its place, so emptying a field takes it off.
+     */
+    private function own(?Profile $profile, string $column): string
+    {
+        if ($profile === null) {
+            return '';
+        }
+
+        $value = $profile->isTranslatableAttribute($column)
+            ? $profile->getTranslation($column, app()->getLocale(), false)
+            : $profile->getAttribute($column);
+
+        return is_string($value) ? trim($value) : '';
+    }
+
+    /**
+     * A list column (expertise, key facts) in the page's language only.
+     *
+     * @return array<mixed>
+     */
+    private function ownList(?Profile $profile, string $column): array
+    {
+        $value = $profile?->getTranslation($column, app()->getLocale(), false);
+
+        return is_array($value) ? $value : [];
     }
 
     /**
@@ -106,7 +140,7 @@ class AboutPageService
      */
     private function expertise(?Profile $profile): array
     {
-        $items = is_array($profile?->expertise) ? $profile->expertise : [];
+        $items = $this->ownList($profile, 'expertise');
 
         return array_values(array_filter(
             array_map(fn ($item): string => is_string($item) ? $this->typesetter->text(trim($item)) : '', $items),
@@ -121,7 +155,7 @@ class AboutPageService
      */
     private function facts(?Profile $profile): array
     {
-        $items = is_array($profile?->key_facts) ? $profile->key_facts : [];
+        $items = $this->ownList($profile, 'key_facts');
         $facts = [];
 
         foreach ($items as $item) {

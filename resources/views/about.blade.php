@@ -19,29 +19,29 @@
             @endif
         @endif
         @if ($profile !== null)
-            <x-locale.fallback-note :model="$profile" class="mt-6" />
-        @endif
-
-        @if ($profile !== null)
             <div class="mt-16 grid gap-12 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-16 xl:grid-cols-[minmax(0,1fr)_47rem]">
                 <div class="lg:sticky lg:top-28 lg:self-start" data-rise-group>
                     @if ($portrait)
                         <x-photo :media="$portrait" sizes="(min-width: 1280px) 22rem, (min-width: 1024px) 36vw, 100vw" loading="eager" :show-caption="true" class="max-w-md" />
                     @endif
-                    <div class="mt-8 flex flex-col gap-2">
-                        <h2 @contentLang($profile, 'name') class="font-display text-quote font-light leading-tight text-ink">@typeset($profile->name)</h2>
-                        @if (filled($profile->title))
-                            <p @contentLang($profile, 'title') class="t-body text-ink">@typeset($profile->title)</p>
-                        @endif
-                        @if (filled($profile->affiliation))
-                            <p @contentLang($profile, 'affiliation') class="text-base font-normal text-ink-muted">@typeset($profile->affiliation)</p>
-                        @endif
-                    </div>
+                    @if ($person['name'] !== '' || $person['title'] !== '' || $person['affiliation'] !== '')
+                        <div @class(['flex flex-col gap-2', 'mt-8' => $portrait])>
+                            @if ($person['name'] !== '')
+                                <h2 class="font-display text-quote font-light leading-tight text-ink">@typeset($person['name'])</h2>
+                            @endif
+                            @if ($person['title'] !== '')
+                                <p class="t-body text-ink">@typeset($person['title'])</p>
+                            @endif
+                            @if ($person['affiliation'] !== '')
+                                <p class="text-base font-normal text-ink-muted">@typeset($person['affiliation'])</p>
+                            @endif
+                        </div>
+                    @endif
                 </div>
 
                 <div class="sidenote-host flex flex-col gap-16" data-rise-group>
                     @if ($bio !== '')
-                        <div @contentLang($profile, 'full_bio')><x-drop-cap class="prose-bio">{!! $bio !!}</x-drop-cap></div>
+                        <div><x-drop-cap class="prose-bio">{!! $bio !!}</x-drop-cap></div>
                     @endif
 
                     @if ($expertise !== [] || $facts !== [])
@@ -53,7 +53,7 @@
                             @if ($copy['expertise'] !== '')
                                 <h2 id="expertise-title" class="t-label text-accent-text">{{ $copy['expertise'] }}</h2>
                             @endif
-                            <ul @contentLang($profile, 'expertise') @class(['flex flex-wrap gap-3', 'mt-5' => $copy['expertise'] !== ''])>
+                            <ul @class(['flex flex-wrap gap-3', 'mt-5' => $copy['expertise'] !== ''])>
                                 @foreach ($expertise as $tag)
                                     <li class="tag t-label rounded-full border border-rule px-4 py-2 text-accent-text">{{ $tag }}</li>
                                 @endforeach
@@ -66,7 +66,7 @@
                             @if ($copy['facts'] !== '')
                                 <h2 id="facts-title" class="t-label text-accent-text">{{ $copy['facts'] }}</h2>
                             @endif
-                            <dl @contentLang($profile, 'key_facts') @class(['grid gap-x-10 gap-y-6 border-t border-rule pt-6 sm:grid-cols-2', 'mt-5' => $copy['facts'] !== ''])>
+                            <dl @class(['grid gap-x-10 gap-y-6 border-t border-rule pt-6 sm:grid-cols-2', 'mt-5' => $copy['facts'] !== ''])>
                                 @foreach ($facts as $fact)
                                     <div class="flex flex-col gap-1">
                                         <dt class="t-label text-accent-text">{{ $fact['label'] }}</dt>

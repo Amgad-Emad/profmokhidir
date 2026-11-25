@@ -67,18 +67,26 @@ class ArabicSiteCoreTest extends TestCase
     }
 
     #[Test]
-    public function the_arabic_about_page_notes_english_only_content_and_marks_it_left_to_right(): void
+    public function the_arabic_about_page_shows_only_what_was_entered_in_arabic_never_the_english(): void
     {
-        Profile::factory()->published()->create(['name' => 'Mohamed Osman Khidir', 'full_bio' => '<p>An English biography.</p>']);
+        Profile::factory()->published()->create(['name' => 'Mohamed Osman Khidir', 'full_bio' => '<p>An English biography.</p>', 'expertise' => ['Agronomy'], 'key_facts' => [['label' => 'Born', 'value' => '1940']]]);
 
-        $this->get('/ar/about')
+        $html = $this->get('/ar/about')
             ->assertOk()
             ->assertSee('lang="ar" dir="rtl"', false)
             ->assertSee('عن الأستاذ الدكتور محمد عثمان خضر')
-            ->assertSee('هذا المحتوى متاح بالإنجليزية فقط')
-            ->assertSee('lang="en" dir="ltr"', false)
+            ->assertDontSee('هذا المحتوى متاح بالإنجليزية فقط')
             ->assertSee('تابع القراءة')
-            ->assertSee('href="'.url('/ar/cv').'"', false);
+            ->assertSee('href="'.url('/ar/cv').'"', false)
+            ->getContent();
+
+        // The page's own body shows no English in place of the missing Arabic.
+        $body = substr($html, (int) strpos($html, 'id="about-body"'));
+        $body = substr($body, 0, (int) strpos($body, '<footer'));
+
+        foreach (['An English biography.', 'Agronomy', 'Born', 'Mohamed Osman Khidir'] as $english) {
+            $this->assertStringNotContainsString($english, $body);
+        }
     }
 
     #[Test]

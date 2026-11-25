@@ -1317,7 +1317,6 @@
     "Show them": "عرضها",
     "Show these shortcuts": "عرض هذه الاختصارات",
     "Shown as the link in search results and on the browser tab, before the site name.": "يظهر رابطًا في نتائج البحث وعلى علامة تبويب المتصفح، قبل اسم الموقع.",
-    "Shown at the foot of the About page. Leave both empty to use the site's contact details from Site settings.": "يظهر في أسفل صفحة التعريف. اترك الحقلين فارغين لاستخدام بيانات التواصل من إعدادات الموقع.",
     "Shown beside his name. Leave empty to use the portrait from About & profile.": "تُعرض بجوار اسمه. اتركها فارغة لاستخدام الصورة الشخصية من صفحة «عن الأستاذ والملف الشخصي».",
     "Shown in the Contact block of the About page when the profile has no contact email of its own.": "تظهر في قسم التواصل بصفحة «عن الأستاذ الدكتور محمد عثمان خضر» حين لا يتضمن الملف الشخصي بريدًا خاصًا به.",
     "Shown on the item's own page. Not needed when the item links elsewhere.": "يظهر في صفحة العنصر الخاصة. لا حاجة إليه إن كان العنصر يحيل إلى مكان آخر.",
@@ -2532,5 +2531,11 @@
     "Optional. Left empty, nothing shows on Arabic pages.": "اختياري. إذا تُرك فارغًا، لا يظهر شيء في الصفحات العربية.",
     "Optional. Up to :max characters. Left empty, nothing shows on Arabic pages.": "اختياري. حتى :max حرفًا. إذا تُرك فارغًا، لا يظهر شيء في الصفحات العربية.",
     "The destination is the one chosen in the English tab. Left empty, no button shows on Arabic pages.": "الوجهة هي المختارة في التبويب الإنجليزي. إذا تُرك فارغًا، لا يظهر الزر في الصفحات العربية.",
-    "Left empty, Arabic pages show the wording in the placeholder.": "إذا تُرك فارغًا، تعرض الصفحات العربية النص الظاهر في الحقل."
+    "Left empty, Arabic pages show the wording in the placeholder.": "إذا تُرك فارغًا، تعرض الصفحات العربية النص الظاهر في الحقل.",
+    "Shown at the foot of the About page, only what is filled in here. Empty a field to take it off the page.": "يظهر في أسفل صفحة التعريف، وفقط ما يُملأ هنا. أفرِغ الحقل لإزالته من الصفحة.",
+    "With the country code, for example +249 …": "مع رمز الدولة، مثل ‎+249 …",
+    "Postal address": "العنوان البريدي",
+    "One line per line of the address.": "سطر لكل سطر من العنوان.",
+    "public contact phone": "هاتف التواصل العام",
+    "postal address": "العنوان البريدي"
 }

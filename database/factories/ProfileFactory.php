@@ -35,6 +35,8 @@ class ProfileFactory extends Factory
                 ['label' => 'Field', 'value' => 'Agronomy'],
             ],
             'contact_email_public' => null,
+            'contact_phone' => null,
+            'contact_address' => null,
             'contact_note' => null,
             'sort_order' => 1,
         ];
@@ -44,6 +46,8 @@ class ProfileFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'contact_email_public' => 'office@example.com',
+            'contact_phone' => '+249 000 000 000',
+            'contact_address' => '[Placeholder] Faculty of Agriculture, University of Khartoum, Sudan',
             'contact_note' => '[Placeholder] Correspondence is handled by the family office.',
         ]);
     }

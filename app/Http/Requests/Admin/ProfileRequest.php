@@ -34,6 +34,8 @@ class ProfileRequest extends ContentRequest
             'key_facts.*.value' => ['nullable', 'string', 'max:200'],
             'students_supervised' => ['nullable', 'integer', 'min:1', 'max:'.self::MAX_STUDENTS_SUPERVISED],
             'contact_email_public' => ['nullable', 'string', 'email', 'max:255'],
+            'contact_phone' => ['nullable', 'string', 'max:40', 'regex:/^[0-9+()\-.\s]*$/'],
+            'contact_address' => ['nullable', 'string', 'max:500'],
             'contact_note' => ['nullable', 'string', 'max:500'],
             'status' => self::statusRule(),
         ];
@@ -48,6 +50,8 @@ class ProfileRequest extends ContentRequest
             'short_bio' => __('short biography'),
             'full_bio' => __('full biography'),
             'contact_email_public' => __('public contact email'),
+            'contact_phone' => __('public contact phone'),
+            'contact_address' => __('postal address'),
             'key_facts.*.label' => __('key fact label'),
             'key_facts.*.value' => __('key fact value'),
             'expertise.*' => __('expertise entry'),

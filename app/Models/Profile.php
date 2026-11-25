@@ -20,7 +20,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  */
 #[Fillable([
     'name', 'title', 'affiliation', 'short_bio', 'full_bio', 'expertise', 'key_facts', 'students_supervised',
-    'contact_email_public', 'contact_note', 'status', 'published_at', 'sort_order',
+    'contact_email_public', 'contact_phone', 'contact_address', 'contact_note', 'status', 'published_at', 'sort_order',
 ])]
 class Profile extends Model implements HasMedia
 {
@@ -32,7 +32,7 @@ class Profile extends Model implements HasMedia
      *
      * @var list<string>
      */
-    public array $translatable = ['name', 'title', 'affiliation', 'short_bio', 'full_bio', 'expertise', 'key_facts', 'contact_note'];
+    public array $translatable = ['name', 'title', 'affiliation', 'short_bio', 'full_bio', 'expertise', 'key_facts', 'contact_note', 'contact_address'];
 
     /**
      * @return array<string, string>

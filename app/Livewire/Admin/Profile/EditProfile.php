@@ -123,6 +123,8 @@ class EditProfile extends ContentForm
             'key_facts' => [],
             'students_supervised' => null,
             'contact_email_public' => null,
+            'contact_phone' => null,
+            'contact_address' => null,
             'contact_note' => null,
             'status' => ContentStatus::Draft->value,
         ];

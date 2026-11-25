@@ -87,13 +87,11 @@ class SiteSettingsTest extends TestCase
         $this->assertSame('The Khidir Office', config('mail.from.name'));
         $this->assertSame(['name' => 'The Khidir Office', 'address' => 'noreply@profmokhidir.com'], app(SettingService::class)->mailSender());
 
-        // Contact details reach the About page when the profile has no email of its own.
+        // The About page shows only the contact details entered with it (Pages › About), never the site's.
         Profile::factory()->published()->create(['contact_email_public' => null, 'contact_note' => null]);
         $contact = app(AboutPageService::class)->contact(Profile::query()->first());
-        $this->assertSame('office@example.com', $contact['email']);
-        $this->assertSame('+249 (0)12 345', $contact['phone']);
-        $this->assertSame("Faculty of Agriculture\nKhartoum", $contact['address']);
-        $this->get(route('about'))->assertOk()->assertSee('mailto:office@example.com', false)->assertSee('data-contact-phone', false)->assertSee('Faculty of Agriculture');
+        $this->assertSame(['email' => null, 'note' => null, 'phone' => null, 'address' => null], $contact);
+        $this->get(route('about'))->assertOk()->assertDontSee('mailto:office@example.com', false)->assertDontSee('data-contact-phone', false)->assertDontSee('Faculty of Agriculture');
 
         // The profile's own email still wins.
         Profile::query()->first()->update(['contact_email_public' => 'prof@example.com']);

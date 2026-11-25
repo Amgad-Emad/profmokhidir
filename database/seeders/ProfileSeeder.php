@@ -6,7 +6,6 @@ use App\Constants\ContentStatus;
 use App\Constants\MediaProperties;
 use App\Services\ProfileService;
 use App\Support\PlaceholderImage;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class ProfileSeeder extends Seeder
@@ -38,6 +37,8 @@ class ProfileSeeder extends Seeder
                 ['label' => 'Years teaching', 'value' => '[Placeholder] 40'],
             ],
             'contact_email_public' => null,
+            'contact_phone' => null,
+            'contact_address' => '[Placeholder] Faculty of Agriculture, University of Khartoum, Sudan',
             'contact_note' => '[Placeholder] Enquiries about the archive may be sent through the Scientific Community.',
             'status' => ContentStatus::Published,
             'sort_order' => 1,
